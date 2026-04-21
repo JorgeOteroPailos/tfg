@@ -1,0 +1,20 @@
+{
+  "calendar": "Calendario",
+  "loginScreenDescription": "Esta es la pantalla de inicio de sesión",
+  "login": "Login",
+  "calendarPlaceholder": "Calendar will be shown here",
+  "goToMainScreen": "Go to main screen",
+  "home": "Home",
+  "hellooooo": "Hellooooo",
+  "index": "Index",
+
+  "email": "Email",
+  "password": "Password",
+  "loginError": "Incorrect login credentials",
+  "loginLoading": "Loging in...",
+
+  "register": "Register",
+  "username": "Username",
+  "loading": "Loading...",
+  "registerScreenDescription": "This is the registration screen"
+}

@@ -1,12 +1,25 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet} from "react-native";
+import { Link } from "expo-router";
+import ThemedView from "../components/ThemedView";
+import ThemedText from "../components/ThemedText";
+import { useTranslation } from 'react-i18next';
+
 
 const Home = () => {
+
+    const { t } = useTranslation();
+
     return (
-        <View style={styles.container}>
-            <Text style={styles.title} >Home</Text>
-            <Text>Holaaaaaaaaaaaa</Text>
-        </View>
+        <ThemedView style={styles.container} >
+            <ThemedText title={true} >{t('home')}</ThemedText>
+            <ThemedText>{t('hellooooo')}</ThemedText>
+
+            <Link href="/calendar"><ThemedText>{t('calendar')}</ThemedText></Link>
+            <Link href="/login"><ThemedText>{t('login')}</ThemedText></Link>
+            <Link href="/register"><ThemedText>{t('register')}</ThemedText></Link>
+        </ThemedView>
     )
+
 }
 
 export default Home
@@ -17,8 +30,4 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center'
     },
-    title: {
-        fontWeight: 'bold',
-        fontSize: 18
-    }
 })
