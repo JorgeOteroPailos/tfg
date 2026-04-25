@@ -39,6 +39,7 @@ export async function clearSession() {
   await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
   await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
   await SecureStore.deleteItemAsync(USER_ID_KEY);
+  //TODO cerrar sesión en el servidor
 }
 
 
@@ -74,43 +75,55 @@ export const AuthProvider = ({
   }, []);
 
   const restoreSession = async () => {
-    try {
-      const refreshToken = await getRefreshToken();
+  try {
+    const refreshToken = await getRefreshToken();
+    const storedAccessToken = await getAccessToken();
+    const storedUserId = await getUserId();
 
-      if (!refreshToken) {
-        setIsAuthenticated(false);
-        return;
-      }
+    console.log('restoreSession -> refreshToken:', refreshToken);
+    console.log('restoreSession -> accessToken:', storedAccessToken);
+    console.log('restoreSession -> userId:', storedUserId);
 
-      // Más adelante aquí llamarás a tu backend:
-      // POST /auth/refresh
-      // para validar el refresh token y obtener
-      // un nuevo access token.
-
-      // Por ahora simplemente asumimos que existe
-      // y la sesión sigue siendo válida.
-      setIsAuthenticated(true);
-    } catch (error) {
-      await clearSession();
+    if (!refreshToken) {
       setIsAuthenticated(false);
-    } finally {
-      setIsLoading(false);
+      setAccessToken(null);
+      setUserIdState(null);
+      return;
     }
-  };
+
+    //TODO aquí se debería validar el refresh token con el servidor y obtener un nuevo access token
+
+    setAccessToken(storedAccessToken);
+    setUserIdState(storedUserId);
+    setIsAuthenticated(true);
+  } catch (error) {
+    console.log('restoreSession error:', error);
+    await clearSession();
+    setIsAuthenticated(false);
+    setAccessToken(null);
+    setUserIdState(null);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const login = async (
-    newAccessToken: string,
-    newRefreshToken: string,
-    newUserId: string
-  ) => {
-    await saveAccessToken(newAccessToken);
-    await saveRefreshToken(newRefreshToken);
-    await saveUserId(newUserId);
+  newAccessToken: string,
+  newRefreshToken: string,
+  newUserId: string
+) => {
+  console.log('login -> saving accessToken:', newAccessToken);
+  console.log('login -> saving refreshToken:', newRefreshToken);
+  console.log('login -> saving userId:', newUserId);
 
-    setAccessToken(newAccessToken);
-    setUserIdState(newUserId);
-    setIsAuthenticated(true);
-  };
+  await saveAccessToken(newAccessToken);
+  await saveRefreshToken(newRefreshToken);
+  await saveUserId(newUserId);
+
+  setAccessToken(newAccessToken);
+  setUserIdState(newUserId);
+  setIsAuthenticated(true);
+};
 
   const logout = async () => {
     await clearSession();
@@ -118,6 +131,7 @@ export const AuthProvider = ({
     setAccessToken(null);
     setUserIdState(null);
     setIsAuthenticated(false);
+    //TODO cerrar sesión en el ervidor
   };
 
   return (

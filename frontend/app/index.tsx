@@ -1,33 +1,32 @@
-import { StyleSheet} from "react-native";
-import { Link } from "expo-router";
+import { Redirect } from "expo-router";
+import { ActivityIndicator, StyleSheet } from "react-native";
 import ThemedView from "../components/ThemedView";
-import ThemedText from "../components/ThemedText";
-import { useTranslation } from 'react-i18next';
-
+import { useAuth } from "../src/auth";
 
 const Home = () => {
+  const { isAuthenticated, isLoading } = useAuth();
 
-    const { t } = useTranslation();
-
+  if (isLoading) {
     return (
-        <ThemedView style={styles.container} >
-            <ThemedText title={true} >{t('home')}</ThemedText>
-            <ThemedText>{t('hellooooo')}</ThemedText>
+      <ThemedView style={styles.container}>
+        <ActivityIndicator />
+      </ThemedView>
+    );
+  }
 
-            <Link href="/calendar"><ThemedText>{t('calendar')}</ThemedText></Link>
-            <Link href="/login"><ThemedText>{t('login')}</ThemedText></Link>
-            <Link href="/register"><ThemedText>{t('register')}</ThemedText></Link>
-        </ThemedView>
-    )
+  if (isAuthenticated) {
+    return <Redirect href="/main" />;
+  }
 
-}
+  return <Redirect href="/(auth)/register" />;
+};
 
-export default Home
+export default Home;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-})
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

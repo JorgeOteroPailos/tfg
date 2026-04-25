@@ -1,6 +1,6 @@
 {
-  "calendar": "Calendario",
-  "loginScreenDescription": "Esta es la pantalla de inicio de sesión",
+  "calendar": "Calendar",
+  "loginScreenDescription": "This is the login screen",
   "login": "Login",
   "calendarPlaceholder": "Calendar will be shown here",
   "goToMainScreen": "Go to main screen",
@@ -16,5 +16,19 @@
   "register": "Register",
   "username": "Username",
   "loading": "Loading...",
-  "registerScreenDescription": "This is the registration screen"
+  "registerScreenDescription": "This is the registration screen",
+
+  "profile": "Profile",
+  "logout": "Logout",
+
+  "notAvailable": "Not available",
+
+  "settings": "Settings",
+  "language": "Language",
+  "chooseLanguage": "Select the application language",
+  "theme": "Theme",
+  "chooseTheme": "Select the appearance of the application",
+  "light": "Light",
+  "dark": "Dark",
+  "system": "System"
 }

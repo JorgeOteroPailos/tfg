@@ -1,4 +1,4 @@
-const BASE_URL = 'http://192.168.1.41:8082';
+const BASE_URL = 'http://172.25.73.49:8082';
 
 export type LoginRequest = {
   email: string;
@@ -23,7 +23,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
   }
 
   return response.json() as Promise<T>;
-}
+} //TODO nada de esto usa eutenticación, y hay q gestionar lo del refresco tmbn
 
 export async function loginRequest(
   data: LoginRequest

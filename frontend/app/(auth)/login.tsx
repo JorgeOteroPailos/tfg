@@ -1,5 +1,6 @@
 import { StyleSheet, Alert } from 'react-native';
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
 import ThemedView from '../../components/ThemedView';
 import ThemedText from '../../components/ThemedText';
 import ThemedButton from '../../components/ThemedButton';
@@ -12,6 +13,7 @@ import { useAuth } from '../../src/auth';
 const Login = () => {
   const { t } = useTranslation();
   const { login } = useAuth();
+  const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,6 +40,7 @@ const Login = () => {
       );
 
       Alert.alert('OK', 'Sesión iniciada correctamente');
+      router.replace('/main');
     } catch (error) {
       const message =
         error instanceof Error

@@ -16,5 +16,19 @@
   "register": "Registrarse",
   "username": "Nombre de usuario",
   "loading": "Cargando...",
-  "registerScreenDescription": "Esta es la pantalla de registro"
+  "registerScreenDescription": "Esta es la pantalla de registro",
+
+  "profile": "Perfil",
+  "logout": "Cerrar sesión",
+
+  "notAvailable": "No disponible",
+
+  "settings": "Ajustes",
+  "language": "Idioma",
+  "chooseLanguage": "Selecciona el idioma de la aplicación",
+  "theme": "Tema",
+  "chooseTheme": "Selecciona el tema de la aplicación",
+  "light": "Claro",
+  "dark": "Oscuro",
+  "system": "Sistema"
 }

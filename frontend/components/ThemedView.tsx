@@ -1,10 +1,12 @@
 import React from 'react'
 import { View, useColorScheme, type ViewProps } from 'react-native'
 import { Colors } from '../constants/Colors'
+import { useAppTheme } from '../src/theme';
 
 const ThemedView = ({ style, ...props }: ViewProps) =>  {
-  const colorScheme = useColorScheme() ?? "light"
-  const theme = Colors[colorScheme] ?? Colors.light
+  const { themeName } = useAppTheme();
+  const theme = Colors[themeName] ?? Colors.light;
+  
 
   return (
     <View

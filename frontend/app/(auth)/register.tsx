@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 import { registerRequest } from '../../src/communication';
 import { useAuth } from '../../src/auth';
+import { Link, Redirect } from 'expo-router';
 
 const Register = () => {
   const { t } = useTranslation();
@@ -40,6 +41,8 @@ const Register = () => {
       );
 
       Alert.alert('OK', 'Usuario registrado correctamente');
+      return <Redirect href="/login" />;
+
     } catch (error) {
       const message =
         error instanceof Error
@@ -88,6 +91,13 @@ const Register = () => {
           {isLoading ? t('loading') : t('register')}
         </ThemedText>
       </ThemedButton>
+
+      <Link href="/(auth)/login">
+        <ThemedText >
+          {t('alreadyHaveAccount')}
+        </ThemedText>
+      </Link>
+
     </ThemedView>
   );
 };
