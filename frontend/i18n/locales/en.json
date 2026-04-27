@@ -1,4 +1,7 @@
 {
+  "error": "Error",
+  "success": "Success",
+  
   "calendar": "Calendar",
   "loginScreenDescription": "This is the login screen",
   "login": "Login",
@@ -9,8 +12,11 @@
 
   "email": "Email",
   "password": "Password",
-  "loginError": "Incorrect login credentials",
-  "loginLoading": "Loging in...",
+  "wrongCredentials": "Incorrect login credentials",
+  "loginLoading": "Logging in...",
+  "mustIntroduceEmailAndPassword": "You must introduce email and password",
+  "loginSuccessful": "Login successful",
+  "loginError": "Error logging in",
 
   "register": "Register",
   "username": "Username",

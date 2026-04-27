@@ -1,7 +1,7 @@
 import { StyleSheet} from "react-native";
 import { Link} from "expo-router";
-import ThemedView from "../components/ThemedView";
-import ThemedText from "../components/ThemedText";
+import ThemedView from "../../components/ThemedView";
+import ThemedText from "../../components/ThemedText";
 import { useTranslation } from "react-i18next";
 
 
@@ -13,7 +13,6 @@ const Main = () => {
     return (
         <ThemedView style={styles.container} >
             <ThemedText title={true} >{t('home')}</ThemedText>
-            <ThemedText>{t('hellooooo')}</ThemedText>
 
             <Link href="/calendar"><ThemedText>{t('calendar')}</ThemedText></Link>
             <Link href="/profile"><ThemedText>{t('profile')}</ThemedText></Link>

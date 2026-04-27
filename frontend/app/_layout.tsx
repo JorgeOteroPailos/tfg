@@ -10,7 +10,7 @@ import { ThemeProvider, useAppTheme } from '../src/theme';
 import { applySavedLanguage } from '../src/preferences';
 
 const RootNavigator = () => {
-  const { t, ready } = useTranslation();
+  const { ready } = useTranslation();
   const { themeName, isLoading } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
 
@@ -35,27 +35,20 @@ const RootNavigator = () => {
 
   return (
     <AuthProvider>
-      <View style={{ flex: 1, backgroundColor: theme.background }}>
       <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: theme.navBackground },
-          headerTintColor: theme.title,
-          contentStyle: { backgroundColor: theme.background },
-          animation: 'slide_from_right', // o 'slide_from_right' — prueba cuál va mejor
-          animationDuration: 200,
-          presentation: 'card',
-          freezeOnBlur: false, // que no congele la pantalla al perder foco
-        }}
-      >
-        <Stack.Screen name="index" options={{ title: t('home') }} />
-        <Stack.Screen name="main" options={{ title: t('home') }} />
-        <Stack.Screen name="calendar" options={{ title: t('calendar') }} />
-        <Stack.Screen name="profile" options={{ title: t('profile') }} />
-        <Stack.Screen name="settings" options={{ title: t('settings') }} />
-        <Stack.Screen name="(auth)/login" options={{ title: t('login') }} />
-        <Stack.Screen name="(auth)/register" options={{ title: t('register') }} />
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.navBackground },
+        headerTintColor: theme.title,
+        contentStyle: { backgroundColor: theme.background },
+        animation: 'slide_from_right',
+        animationDuration: 200,
+        presentation: 'card',
+        freezeOnBlur: false,
+        headerShown: false,
+      }}>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(main)" options={{ headerShown: false }} />
       </Stack>
-      </View>
     </AuthProvider>
   );
 };

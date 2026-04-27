@@ -20,7 +20,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Debes introducir email y contraseña');
+      Alert.alert(t('error'), t('mustIntroduceEmailAndPassword'));
       return;
     }
 
@@ -38,15 +38,15 @@ const Login = () => {
         email.trim()
       );
 
-      Alert.alert('OK', 'Sesión iniciada correctamente');
+      Alert.alert(t('success'), t('loginSuccessful'));
       router.replace('/main');
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : 'Error al iniciar sesión';
+          : t('loginError');
 
-      Alert.alert('Error', message);
+      Alert.alert(t('error'), message);
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +86,7 @@ const Login = () => {
 
       <Link href="/(auth)/register">
         <ThemedText >
-          {t('iDontHaveAccount')}
+          {t('iDontHaveAccount')} {t('register')}
         </ThemedText>
       </Link>
       

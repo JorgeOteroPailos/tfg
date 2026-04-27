@@ -2,17 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Pressable, Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import ThemedView from '../components/ThemedView';
-import ThemedText from '../components/ThemedText';
+import ThemedView from '../../components/ThemedView';
+import ThemedText from '../../components/ThemedText';
 
 import {
   saveLanguage,
   getSavedLanguage,
   type AppLanguage,
   type AppTheme,
-} from '../src/preferences';
-import { useAppTheme } from '../src/theme';
-import { Colors } from '../constants/Colors';
+} from '../../src/preferences';
+import { useAppTheme } from '../../src/theme';
+import { Colors } from '../../constants/Colors';
 
 const Settings = () => {
   const { t, i18n } = useTranslation();

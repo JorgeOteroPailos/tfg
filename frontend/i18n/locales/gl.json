@@ -1,4 +1,7 @@
 {
+  "error": "Error",
+  "success": "Success",
+  
   "calendar": "Calendario",
   "login": "Iniciar sesión",
   "loginScreenDescription": "Esta é a pantalla de inicio de sesión",
@@ -9,8 +12,11 @@
 
   "email": "Correo electrónico",
   "password": "Contrasinal",
-  "loginError": "Correo ou contrasinal incorrectos",
+  "wrongCredentials": "Correo ou contrasinal incorrectos",
   "loginLoading": "Iniciando sesión...",
+  "mustIntroduceEmailAndPassword": "Debes introducir email e contrasinal",
+  "loginSuccessful": "Sesión iniciada correctamente",
+  "loginError": "Error ao iniciar sesión",
 
   "register": "Rexistrarse",
   "username": "Nome de usuario",

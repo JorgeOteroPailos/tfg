@@ -1,7 +1,7 @@
 import { Link } from 'expo-router';
 import { StyleSheet } from 'react-native';
-import ThemedView from '../components/ThemedView';
-import ThemedText from '../components/ThemedText';
+import ThemedView from '../../components/ThemedView';
+import ThemedText from '../../components/ThemedText';
 import { useTranslation } from 'react-i18next';
 
 const Calendar = () => {

@@ -1,18 +1,18 @@
 import { StyleSheet } from 'react-native';
-import ThemedView from '../components/ThemedView';
-import ThemedText from '../components/ThemedText';
-import ThemedButton from '../components/ThemedButton';
+import ThemedView from '../../components/ThemedView';
+import ThemedText from '../../components/ThemedText';
+import ThemedButton from '../../components/ThemedButton';
 
-import { useAuth } from '../src/auth';
+import { useAuth } from '../../src/auth';
 import { t } from 'i18next';
-import { Redirect } from 'expo-router';
+import { router } from 'expo-router';
 
 const Profile = () => {
   const { userEmail, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
-    return <Redirect href="/login" />;
+    router.replace('/login');
   };
 
   return (
