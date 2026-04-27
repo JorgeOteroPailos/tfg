@@ -18,8 +18,6 @@ public class User {
 
     public String getEmail() {return email;}
 
-    public String getUsername() {return username;}
-
     public User() {
 
     }
@@ -31,9 +29,9 @@ public class User {
     }
 
     public User(RegisterRequest registerRequest) {
-        this.username= registerRequest.username();
-        this.email= registerRequest.email();
-        this.password= registerRequest.password();
+        this.username = registerRequest.getUsername();
+        this.email = registerRequest.getEmail();
+        this.password = registerRequest.getPassword();
     }
 
 }

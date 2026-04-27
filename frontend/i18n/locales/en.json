@@ -5,7 +5,6 @@
   "calendarPlaceholder": "Calendar will be shown here",
   "goToMainScreen": "Go to main screen",
   "home": "Home",
-  "hellooooo": "Hellooooo",
   "index": "Index",
 
   "email": "Email",
@@ -17,6 +16,8 @@
   "username": "Username",
   "loading": "Loading...",
   "registerScreenDescription": "This is the registration screen",
+  "alreadyHaveAccount": "Already have an account? ",
+  "iDontHaveAccount": "I don't have an account",
 
   "profile": "Profile",
   "logout": "Logout",

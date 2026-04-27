@@ -1,14 +1,13 @@
 import { StyleSheet, Alert } from 'react-native';
 import { useState } from 'react';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import ThemedView from '../../components/ThemedView';
 import ThemedText from '../../components/ThemedText';
 import ThemedButton from '../../components/ThemedButton';
 import ThemedInput from '../../components/ThemedInput';
 import { useTranslation } from 'react-i18next';
 
-import { loginRequest } from '../../src/communication';
-import { useAuth } from '../../src/auth';
+import { loginRequest, useAuth } from '../../src/auth';
 
 const Login = () => {
   const { t } = useTranslation();
@@ -84,6 +83,13 @@ const Login = () => {
           {isLoading ? 'Cargando...' : t('login')}
         </ThemedText>
       </ThemedButton>
+
+      <Link href="/(auth)/register">
+        <ThemedText >
+          {t('iDontHaveAccount')}
+        </ThemedText>
+      </Link>
+      
     </ThemedView>
   );
 };

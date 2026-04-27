@@ -12,6 +12,7 @@ import {
   type AppTheme,
 } from '../src/preferences';
 import { useAppTheme } from '../src/theme';
+import { Colors } from '../constants/Colors';
 
 const Settings = () => {
   const { t, i18n } = useTranslation();
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   optionButtonSelected: {
-    borderColor: '#4f8cff',
+    borderColor: Colors.primary,
     borderWidth: 2,
   },
   optionTextSelected: {

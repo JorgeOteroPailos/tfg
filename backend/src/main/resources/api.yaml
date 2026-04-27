@@ -1,0 +1,164 @@
+openapi: 3.0.3
+info:
+  title: Telaria Backend API
+  version: 1.0.0
+  description: API de autenticación y gestión de usuarios de Telaria
+
+servers:
+  - url: http://localhost:8082
+    description: Servidor local de desarrollo
+
+paths:
+
+  /auth/signin:
+    post:
+      summary: Registro de nuevo usuario
+      operationId: registerUser
+      tags:
+        - Autenticación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              username: juanperez
+              email: juan@example.com
+              password: secreto123
+      responses:
+        '201':
+          description: Usuario registrado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Datos de registro inválidos
+
+  /auth/login:
+    post:
+      summary: Inicio de sesión
+      operationId: login
+      tags:
+        - Autenticación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: juan@example.com
+              password: secreto123
+      responses:
+        '200':
+          description: Login correcto, devuelve tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Credenciales incorrectas
+
+  /auth/logout:
+    post:
+      summary: Cierre de sesión
+      operationId: logout
+      tags:
+        - Autenticación
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Sesión cerrada correctamente
+        '401':
+          description: No autenticado
+
+  /users:
+    get:
+      summary: Obtener todos los usuarios
+      operationId: getAllUsers
+      tags:
+        - Usuarios
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          example: juanperez
+        email:
+          type: string
+          format: email
+          example: juan@example.com
+        password:
+          type: string
+          format: password
+          example: secreto123
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: juan@example.com
+        password:
+          type: string
+          format: password
+          example: secreto123
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT de acceso
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refreshToken:
+          type: string
+          description: Token de refresco
+          example: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...
+
+    User:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: juan@example.com
+        username:
+          type: string
+          example: juanperez

@@ -2,6 +2,8 @@ plugins {
     java
     id("org.springframework.boot") version "4.0.2"
     id("io.spring.dependency-management") version "1.1.7"
+    jacoco
+    id("org.openapi.generator") version "7.12.0"
 }
 
 group = "gal.usc"
@@ -10,7 +12,25 @@ description = "tripi-backend"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.13"
+}
+
+tasks.test {
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
     }
 }
 
@@ -35,15 +55,46 @@ dependencies {
     // Validación (DTO validation)
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
-    // Seguridad (si vas a usar login / JWT)
+    // Seguridad
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server")
     implementation("org.springframework.security:spring-security-oauth2-jose")
 
-    //jwt
+    // JWT
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
+
+    // OpenAPI / Swagger UI
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
+    //TODO ver este warning
+}
+
+openApiGenerate {
+    generatorName.set("spring")
+    inputSpec.set("$rootDir/src/main/resources/api.yaml")
+    outputDir.set(layout.buildDirectory.dir("generated").get().asFile.absolutePath)
+    apiPackage.set("gal.usc.telariabackend.Controllers")
+    modelPackage.set("gal.usc.telariabackend.Model.DTO")
+    configOptions.set(mapOf(
+        "interfaceOnly" to "true",
+        "useSpringBoot3" to "true",
+        "useJakartaEe" to "true",
+        "openApiNullable" to "false",
+        "generateModels" to "true"
+    ))
+}
+
+tasks.compileJava {
+    dependsOn(tasks.openApiGenerate)
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir(layout.buildDirectory.dir("generated/src/main/java"))
+        }
+    }
 }
 
 tasks.withType<Test> {

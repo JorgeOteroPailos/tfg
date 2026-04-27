@@ -7,6 +7,7 @@ import gal.usc.telariabackend.Model.User;
 import gal.usc.telariabackend.Services.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,6 +30,12 @@ public class AuthenticationController {
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         LoginResponse loginResponse=authService.login(loginRequest);
         return ResponseEntity.ok(loginResponse);
+    }
+
+    @PostMapping("logout")
+    public ResponseEntity<Void> logout(Authentication auth) {
+        authService.logout(auth.getName());
+        return ResponseEntity.noContent().build();
     }
 
 

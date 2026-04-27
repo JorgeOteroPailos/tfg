@@ -35,11 +35,16 @@ const RootNavigator = () => {
 
   return (
     <AuthProvider>
+      <View style={{ flex: 1, backgroundColor: theme.background }}>
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: theme.navBackground },
           headerTintColor: theme.title,
           contentStyle: { backgroundColor: theme.background },
+          animation: 'slide_from_right', // o 'slide_from_right' — prueba cuál va mejor
+          animationDuration: 200,
+          presentation: 'card',
+          freezeOnBlur: false, // que no congele la pantalla al perder foco
         }}
       >
         <Stack.Screen name="index" options={{ title: t('home') }} />
@@ -50,6 +55,7 @@ const RootNavigator = () => {
         <Stack.Screen name="(auth)/login" options={{ title: t('login') }} />
         <Stack.Screen name="(auth)/register" options={{ title: t('register') }} />
       </Stack>
+      </View>
     </AuthProvider>
   );
 };

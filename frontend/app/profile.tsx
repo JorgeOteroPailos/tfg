@@ -5,12 +5,14 @@ import ThemedButton from '../components/ThemedButton';
 
 import { useAuth } from '../src/auth';
 import { t } from 'i18next';
+import { Redirect } from 'expo-router';
 
 const Profile = () => {
-  const { userId, logout } = useAuth();
+  const { userEmail, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
+    return <Redirect href="/login" />;
   };
 
   return (
@@ -21,11 +23,11 @@ const Profile = () => {
 
       <ThemedView style={styles.infoContainer}>
         <ThemedText>
-          {t('username')}: {userId ?? t('notAvailable')}
+          {t('username')}: {userEmail ?? t('notAvailable')}
         </ThemedText>
 
         <ThemedText>
-          {t('email')}: {userId ?? t('notAvailable')}
+          {t('email')}: {userEmail ?? t('notAvailable')}
         </ThemedText>
       </ThemedView>
 

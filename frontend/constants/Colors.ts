@@ -1,6 +1,7 @@
 interface ColorsType {
   primary: string;
   warning: string;
+  secondary: string;
   dark: {
     text: string;
     title: string;
@@ -25,6 +26,7 @@ interface ColorsType {
 export const Colors: ColorsType = {
   primary: "#6849a7",
   warning: "#cc475a",
+  secondary: "#EA8A00",
 
   dark: {
     text: "#d4d4d4",
@@ -37,7 +39,7 @@ export const Colors: ColorsType = {
   },
 
   light: {
-    text: "#625f72",
+    text: "#201e2b",
     title: "#201e2b",
     background: "#e0dfe8",
     navBackground: "#e8e7ef",

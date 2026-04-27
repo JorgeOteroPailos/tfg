@@ -16,7 +16,7 @@ const ThemedText = ({ style, title=false, ...props}: ThemedTextProps) => {
 
     return (
         <Text
-            style={[{ color: textColor},
+            style={[{ color: textColor, fontWeight: title ? "700" : "600"},
                 style]}
             {...props}
         />

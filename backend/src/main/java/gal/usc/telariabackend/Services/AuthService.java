@@ -2,16 +2,18 @@ package gal.usc.telariabackend.Services;
 
 import gal.usc.telariabackend.Model.DTO.LoginRequest;
 import gal.usc.telariabackend.Model.DTO.LoginResponse;
+import gal.usc.telariabackend.Model.Exceptions.AlreadyExistingUserException;
 import gal.usc.telariabackend.Model.RefreshToken;
 import gal.usc.telariabackend.Model.User;
 import gal.usc.telariabackend.Repository.RefreshTokenRepository;
 import gal.usc.telariabackend.Repository.UserRepository;
 import io.jsonwebtoken.Jwts;
 import java.security.KeyPair;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,6 +36,8 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
 
+    private final SecureRandom secureRandom = new SecureRandom();
+
     @Value("${auth.jwt.ttl:PT30M}")
     private Duration accessTokenTTL;
 
@@ -41,11 +45,11 @@ public class AuthService {
     private Duration refreshTokenTTL;
 
     public AuthService(
-        UserRepository userRepository,
-        RefreshTokenRepository refreshTokenRepository,
-        PasswordEncoder passwordEncoder,
-        AuthenticationManager authenticationManager,
-        KeyPair keyPair
+            UserRepository userRepository,
+            RefreshTokenRepository refreshTokenRepository,
+            PasswordEncoder passwordEncoder,
+            AuthenticationManager authenticationManager,
+            KeyPair keyPair
     ) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
@@ -54,60 +58,78 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public LoginResponse registerUser(User u) {
+    @Transactional
+    public LoginResponse registerUser(User u)
+            throws AlreadyExistingUserException {
         if (!userRepository.existsById(u.getEmail())) {
             String unencodedPassword = u.password;
             u.password = passwordEncoder.encode(u.password);
             userRepository.save(u);
 
             LoginRequest loginRequest = new LoginRequest(
-                u.getEmail(),
-                unencodedPassword
+                    u.getEmail(),
+                    unencodedPassword
             );
             return login(loginRequest);
         } else {
-            //TODO dar error o algo yoqse
-            return null;
+            throw new AlreadyExistingUserException(u.getEmail());
         }
     }
 
     @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
         Authentication authRequest =
-            UsernamePasswordAuthenticationToken.unauthenticated(
-                loginRequest.email(),
-                loginRequest.password()
-            );
+                UsernamePasswordAuthenticationToken.unauthenticated(
+                        loginRequest.getEmail(),
+                        loginRequest.getPassword()
+                );
 
         Authentication authResult = authenticationManager.authenticate(
-            authRequest
+                authRequest
         );
 
-        UserDetails userDetails = (UserDetails) authResult.getPrincipal();
+        Object principal = authResult.getPrincipal();
+
+        if (!(principal instanceof UserDetails userDetails)) {
+            throw new IllegalStateException(
+                    "Authentication principal is not a valid UserDetails"
+            );
+        }
 
         Instant now = Instant.now();
 
-        //TODO if getUsername==null dar error? Me sale ese warning en el IDE pero ns cómo debe tratarse
+        String username = userDetails.getUsername();
 
         String accessToken = Jwts.builder()
-            .subject(userDetails.getUsername())
-            .issuedAt(Date.from(now))
-            .notBefore(Date.from(now))
-            .expiration(Date.from(now.plus(accessTokenTTL)))
-            .signWith(keyPair.getPrivate())
-            .compact();
+                .subject(username)
+                .issuedAt(Date.from(now))
+                .notBefore(Date.from(now))
+                .expiration(Date.from(now.plus(accessTokenTTL)))
+                .signWith(keyPair.getPrivate())
+                .compact();
 
-        String refreshTokenString = UUID.randomUUID().toString();
+        String refreshTokenString = generateRefreshTokenString();
 
         RefreshToken refreshToken = new RefreshToken(
-            refreshTokenString,
-            userDetails.getUsername(),
-            refreshTokenTTL.toSeconds()
+                refreshTokenString,
+                userDetails.getUsername()
         );
 
         refreshTokenRepository.deleteAllByUseremail(userDetails.getUsername());
         refreshTokenRepository.save(refreshToken);
 
-        return new LoginResponse(accessToken, refreshToken.getToken());
+        return new LoginResponse().accessToken(accessToken).refreshToken(refreshToken.getToken());
+    }
+
+    @Transactional
+    public void logout(String email) {
+        refreshTokenRepository.deleteAllByUseremail(email);
+    }
+
+    //HELPERS
+    private String generateRefreshTokenString() {
+        byte[] bytes = new byte[32];
+        secureRandom.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 }

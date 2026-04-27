@@ -1,4 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
+import { BASE_URL } from '../constants/constants';
 
 import React, {
   createContext,
@@ -9,7 +10,7 @@ import React, {
 
 const REFRESH_TOKEN_KEY = 'refreshToken';
 const ACCESS_TOKEN_KEY = 'accessToken';
-const USER_ID_KEY = 'userId';
+const USER_EMAIL_KEY = 'userEmail';
 
 export async function saveRefreshToken(token: string) {
   await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, token);
@@ -27,18 +28,19 @@ export async function getAccessToken() {
   return await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
 }
 
-export async function saveUserId(userId: string) {
-  await SecureStore.setItemAsync(USER_ID_KEY, userId);
+export async function saveUserEmail(userEmail: string) {
+  await SecureStore.setItemAsync(USER_EMAIL_KEY, userEmail);
 }
 
-export async function getUserId() {
-  return await SecureStore.getItemAsync(USER_ID_KEY);
+export async function getUserEmail() {
+  return await SecureStore.getItemAsync(USER_EMAIL_KEY);
 }
+//TODO  guardar algunas de estas en asyncStorage
 
 export async function clearSession() {
   await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
   await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-  await SecureStore.deleteItemAsync(USER_ID_KEY);
+  await SecureStore.deleteItemAsync(USER_EMAIL_KEY);
   //TODO cerrar sesión en el servidor
 }
 
@@ -47,12 +49,12 @@ type AuthContextType = {
   isAuthenticated: boolean;
   isLoading: boolean;
   accessToken: string | null;
-  userId: string | null;
+  userEmail: string | null;
 
   login: (
     accessToken: string,
     refreshToken: string,
-    userId: string
+    userEmail: string
   ) => Promise<void>;
 
   logout: () => Promise<void>;
@@ -68,7 +70,7 @@ export const AuthProvider = ({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [userId, setUserIdState] = useState<string | null>(null);
+  const [userEmail, setUserEmailState] = useState<string | null>(null);
 
   useEffect(() => {
     restoreSession();
@@ -78,60 +80,60 @@ export const AuthProvider = ({
   try {
     const refreshToken = await getRefreshToken();
     const storedAccessToken = await getAccessToken();
-    const storedUserId = await getUserId();
+    const storedUserEmail = await getUserEmail();
 
     console.log('restoreSession -> refreshToken:', refreshToken);
     console.log('restoreSession -> accessToken:', storedAccessToken);
-    console.log('restoreSession -> userId:', storedUserId);
+    console.log('restoreSession -> userEmail:', storedUserEmail);
 
     if (!refreshToken) {
       setIsAuthenticated(false);
       setAccessToken(null);
-      setUserIdState(null);
+      setUserEmailState(null);
       return;
     }
 
     //TODO aquí se debería validar el refresh token con el servidor y obtener un nuevo access token
 
     setAccessToken(storedAccessToken);
-    setUserIdState(storedUserId);
+    setUserEmailState(storedUserEmail);
     setIsAuthenticated(true);
   } catch (error) {
     console.log('restoreSession error:', error);
     await clearSession();
     setIsAuthenticated(false);
     setAccessToken(null);
-    setUserIdState(null);
+    setUserEmailState(null);
   } finally {
     setIsLoading(false);
   }
 };
 
   const login = async (
-  newAccessToken: string,
-  newRefreshToken: string,
-  newUserId: string
-) => {
-  console.log('login -> saving accessToken:', newAccessToken);
-  console.log('login -> saving refreshToken:', newRefreshToken);
-  console.log('login -> saving userId:', newUserId);
+    newAccessToken: string,
+    newRefreshToken: string,
+    newUserEmail: string
+  ) => {
+    console.log('login -> saving accessToken:', newAccessToken);
+    console.log('login -> saving refreshToken:', newRefreshToken);
+    console.log('login -> saving userEmail:', newUserEmail);
 
-  await saveAccessToken(newAccessToken);
-  await saveRefreshToken(newRefreshToken);
-  await saveUserId(newUserId);
+    await saveAccessToken(newAccessToken);
+    await saveRefreshToken(newRefreshToken);
+    await saveUserEmail(newUserEmail);
 
-  setAccessToken(newAccessToken);
-  setUserIdState(newUserId);
-  setIsAuthenticated(true);
-};
+    setAccessToken(newAccessToken);
+    setUserEmailState(newUserEmail);
+    setIsAuthenticated(true);
+  };
 
   const logout = async () => {
     await clearSession();
 
     setAccessToken(null);
-    setUserIdState(null);
+    setUserEmailState(null);
     setIsAuthenticated(false);
-    //TODO cerrar sesión en el ervidor
+    //TODO cerrar sesión en el servidor
   };
 
   return (
@@ -140,7 +142,7 @@ export const AuthProvider = ({
         isAuthenticated,
         isLoading,
         accessToken,
-        userId,
+        userEmail,
         login,
         logout,
       }}
@@ -159,3 +161,58 @@ export const useAuth = () => {
 
   return context;
 };
+
+
+
+export type LoginRequest = {
+  email: string;
+  password: string;
+};
+
+export type RegisterRequest = {
+  username: string;
+  email: string;
+  password: string;
+};
+
+export type LoginResponse = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+async function handleResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Error en la petición');
+  }
+
+  return response.json() as Promise<T>;
+} //TODO nada de esto usa eutenticación, y hay q gestionar lo del refresco tmbn
+
+export async function loginRequest(
+  data: LoginRequest
+): Promise<LoginResponse> {
+  const response = await fetch(`${BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  return handleResponse<LoginResponse>(response);
+}
+
+export async function registerRequest(
+  data: RegisterRequest
+): Promise<LoginResponse> {
+  const response = await fetch(`${BASE_URL}/auth/signin`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  return handleResponse<LoginResponse>(response);
+}

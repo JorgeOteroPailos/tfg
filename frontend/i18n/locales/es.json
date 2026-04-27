@@ -5,7 +5,6 @@
   "calendarPlaceholder": "Aquí se mostrará el calendario",
   "goToMainScreen": "Ir a la pantalla principal",
   "home": "Inicio",
-  "hellooooo": "Holaaaaaa",
   "index": "Índice",
 
   "email": "Correo electrónico",
@@ -17,6 +16,8 @@
   "username": "Nombre de usuario",
   "loading": "Cargando...",
   "registerScreenDescription": "Esta es la pantalla de registro",
+  "alreadyHaveAccount": "¿Ya tienes una cuenta? ",
+  "iDontHaveAccount": "No tengo una cuenta",
 
   "profile": "Perfil",
   "logout": "Cerrar sesión",

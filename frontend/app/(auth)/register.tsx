@@ -6,8 +6,7 @@ import ThemedButton from '../../components/ThemedButton';
 import ThemedInput from '../../components/ThemedInput';
 import { useTranslation } from 'react-i18next';
 
-import { registerRequest } from '../../src/communication';
-import { useAuth } from '../../src/auth';
+import { useAuth, registerRequest } from '../../src/auth';
 import { Link, Redirect } from 'expo-router';
 
 const Register = () => {

@@ -16,10 +16,7 @@ const Main = () => {
             <ThemedText>{t('hellooooo')}</ThemedText>
 
             <Link href="/calendar"><ThemedText>{t('calendar')}</ThemedText></Link>
-            <Link href="/login"><ThemedText>{t('login')}</ThemedText></Link>
-            <Link href="/register"><ThemedText>{t('register')}</ThemedText></Link>
             <Link href="/profile"><ThemedText>{t('profile')}</ThemedText></Link>
-            <Link href="/logout"><ThemedText>{t('logout')}</ThemedText></Link>
             <Link href="/settings"><ThemedText>{t('settings')}</ThemedText></Link>
 
         </ThemedView>
