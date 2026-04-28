@@ -1,4 +1,7 @@
 {
+  "error": "Error",
+  "success": "Success",
+  
   "calendar": "Calendario",
   "login": "Iniciar sesión",
   "loginScreenDescription": "Esta es la pantalla de inicio de sesión",
@@ -9,8 +12,11 @@
 
   "email": "Correo electrónico",
   "password": "Contraseña",
-  "loginError": "Correo o contraseña incorrectos",
+  "wrongCredentials": "Correo o contraseña incorrectos",
   "loginLoading": "Iniciando sesión...",
+  "mustIntroduceEmailAndPassword": "Debes introducir email y contraseña",
+  "loginSuccessful": "Sesión iniciada correctamente",
+  "loginError": "Error al iniciar sesión",
 
   "register": "Registrarse",
   "username": "Nombre de usuario",
@@ -18,6 +24,10 @@
   "registerScreenDescription": "Esta es la pantalla de registro",
   "alreadyHaveAccount": "¿Ya tienes una cuenta? ",
   "iDontHaveAccount": "No tengo una cuenta",
+  "allFieldsRequired": "Se requieren todos los campos",
+  "userRegisteredSuccessfully": "Usuario registrado correctamente",
+  "registrationError": "Error al registrar usuario",
+  "errorSavingSession": "Error al guardar la sesión",
 
   "profile": "Perfil",
   "logout": "Cerrar sesión",

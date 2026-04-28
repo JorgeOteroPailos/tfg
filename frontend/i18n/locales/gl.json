@@ -1,5 +1,5 @@
 {
-  "error": "Error",
+  "error": "Erro",
   "success": "Success",
   
   "calendar": "Calendario",
@@ -16,7 +16,7 @@
   "loginLoading": "Iniciando sesión...",
   "mustIntroduceEmailAndPassword": "Debes introducir email e contrasinal",
   "loginSuccessful": "Sesión iniciada correctamente",
-  "loginError": "Error ao iniciar sesión",
+  "loginError": "Erro ao iniciar sesión",
 
   "register": "Rexistrarse",
   "username": "Nome de usuario",
@@ -24,6 +24,10 @@
   "registerScreenDescription": "Esta é a pantalla de rexistro",
   "alreadyHaveAccount": "¿Xa tes unha conta? ",
   "iDontHaveAccount": "Non teño unha conta",
+  "allFieldsRequired": "Requírense todos os campos",
+  "userRegisteredSuccessfully": "Usuario rexistrado correctamente",
+  "registrationError": "Erro ao rexistrar usuario",
+  "errorSavingSession": "Erro ao gardar a sesión",
 
   "profile": "Perfil",
   "logout": "Pechar sesión",

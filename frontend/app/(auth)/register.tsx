@@ -7,20 +7,28 @@ import ThemedInput from '../../components/ThemedInput';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth, registerRequest } from '../../src/auth';
-import { Link, Redirect } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
+import { AppError, ErrorCode } from '../../src/AppError';
 
 const Register = () => {
   const { t } = useTranslation();
   const { login } = useAuth();
+  const router = useRouter();
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const ERROR_MESSAGES: Partial<Record<ErrorCode, string>> = {
+    [ErrorCode.BAD_REQUEST]: t('invalidRegisterData'),
+    [ErrorCode.SESSION_SAVE_ERROR]: t('errorSavingSession'),
+    [ErrorCode.SERVER_ERROR]: t('serverError'),
+  };
+
   const handleRegister = async () => {
     if (!username.trim() || !email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Debes rellenar todos los campos');
+      Alert.alert(t('error'), t('allFieldsRequired'));
       return;
     }
 
@@ -33,22 +41,14 @@ const Register = () => {
         password,
       });
 
-      await login(
-        response.accessToken,
-        response.refreshToken,
-        email.trim()
-      );
+      //await login(response.accessToken, response.refreshToken, email.trim());
+      //TODO IMPORTANTE
 
-      Alert.alert('OK', 'Usuario registrado correctamente');
-      return <Redirect href="/login" />;
-
+      router.replace('/main');
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Error al registrarse';
-
-      Alert.alert('Error', message);
+      const code = error instanceof AppError ? error.code : ErrorCode.SERVER_ERROR;
+      const message = ERROR_MESSAGES[code] ?? t('registrationError');
+      Alert.alert(t('error'), message);
     } finally {
       setIsLoading(false);
     }
@@ -92,7 +92,7 @@ const Register = () => {
       </ThemedButton>
 
       <Link href="/(auth)/login">
-        <ThemedText >
+        <ThemedText>
           {t('alreadyHaveAccount')}
         </ThemedText>
       </Link>

@@ -24,6 +24,10 @@
   "registerScreenDescription": "This is the registration screen",
   "alreadyHaveAccount": "Already have an account? ",
   "iDontHaveAccount": "I don't have an account",
+  "allFieldsRequired": "All fields are required",
+  "userRegisteredSuccessfully": "User registered successfully",
+  "registrationError": "Error registering user",
+  "errorSavingSession": "Error saving session",
 
   "profile": "Profile",
   "logout": "Logout",

@@ -7,7 +7,8 @@ import ThemedButton from '../../components/ThemedButton';
 import ThemedInput from '../../components/ThemedInput';
 import { useTranslation } from 'react-i18next';
 
-import { loginRequest, useAuth } from '../../src/auth';
+import { useAuth } from '../../src/auth';
+import { AppError, ErrorCode } from '../../src/AppError';
 
 const Login = () => {
   const { t } = useTranslation();
@@ -18,6 +19,12 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const ERROR_MESSAGES: Partial<Record<ErrorCode, string>> = {
+    [ErrorCode.UNAUTHORIZED]: t('wrongCredentials'),
+    [ErrorCode.SESSION_SAVE_ERROR]: t('errorSavingSession'),
+    [ErrorCode.SERVER_ERROR]: t('serverError'),
+  };
+
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
       Alert.alert(t('error'), t('mustIntroduceEmailAndPassword'));
@@ -26,26 +33,11 @@ const Login = () => {
 
     try {
       setIsLoading(true);
-
-      const response = await loginRequest({
-        email: email.trim(),
-        password,
-      });
-
-      await login(
-        response.accessToken,
-        response.refreshToken,
-        email.trim()
-      );
-
-      Alert.alert(t('success'), t('loginSuccessful'));
+      await login(email.trim(), password);
       router.replace('/main');
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : t('loginError');
-
+      const code = error instanceof AppError ? error.code : ErrorCode.SERVER_ERROR;
+      const message = ERROR_MESSAGES[code] ?? t('loginError');
       Alert.alert(t('error'), message);
     } finally {
       setIsLoading(false);
@@ -80,16 +72,15 @@ const Login = () => {
         disabled={isLoading}
       >
         <ThemedText>
-          {isLoading ? 'Cargando...' : t('login')}
+          {isLoading ? t('loading') : t('login')}
         </ThemedText>
       </ThemedButton>
 
       <Link href="/(auth)/register">
-        <ThemedText >
+        <ThemedText>
           {t('iDontHaveAccount')} {t('register')}
         </ThemedText>
       </Link>
-      
     </ThemedView>
   );
 };

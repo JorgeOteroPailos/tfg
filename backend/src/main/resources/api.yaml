@@ -10,7 +10,7 @@ servers:
 
 paths:
 
-  /auth/signin:
+  /auth/register:
     post:
       summary: Registro de nuevo usuario
       operationId: registerUser
@@ -141,11 +141,14 @@ components:
         password:
           type: string
           format: password
-          minLength: 1
+          minLength: 1 #todo ver de canbiar
           example: secreto123
 
     LoginResponse:
       type: object
+      required:
+        - accessToken
+        - refreshToken
       properties:
         accessToken:
           type: string
