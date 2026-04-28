@@ -5,6 +5,7 @@ import gal.usc.telariabackend.Model.DTO.LoginResponse;
 import gal.usc.telariabackend.Model.DTO.RegisterRequest;
 import gal.usc.telariabackend.Model.User;
 import gal.usc.telariabackend.Services.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,7 +21,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("signin")
-    public ResponseEntity<LoginResponse> registerUser(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<LoginResponse> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         User u = new User(registerRequest);
         LoginResponse loginResponse = authService.registerUser(u);
         return ResponseEntity.status(HttpStatus.CREATED).body(loginResponse);
