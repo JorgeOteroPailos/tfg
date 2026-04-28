@@ -41,7 +41,6 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // JPA
@@ -68,6 +67,12 @@ dependencies {
     // OpenAPI / Swagger UI
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
     //TODO ver este warning
+
+    // Tests
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    // Lo ponemos x2 x si lo quito del normal //TODO revisar
+    testImplementation("com.h2database:h2")
+    testImplementation("org.springframework.security:spring-security-test")
 }
 
 openApiGenerate {
@@ -77,11 +82,12 @@ openApiGenerate {
     apiPackage.set("gal.usc.telariabackend.Controllers")
     modelPackage.set("gal.usc.telariabackend.Model.DTO")
     configOptions.set(mapOf(
-        "interfaceOnly" to "true",
-        "useSpringBoot3" to "true",
-        "useJakartaEe" to "true",
-        "openApiNullable" to "false",
-        "generateModels" to "true"
+        "interfaceOnly"      to "true",
+        "useSpringBoot3"     to "true",
+        "useJakartaEe"       to "true",
+        "openApiNullable"    to "false",
+        "generateModels"     to "true",
+        "useBeanValidation"  to "true"
     ))
 }
 
