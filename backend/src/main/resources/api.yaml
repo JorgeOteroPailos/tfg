@@ -115,6 +115,7 @@ components:
       properties:
         username:
           type: string
+          minLength: 1
           example: juanperez
         email:
           type: string
@@ -122,6 +123,7 @@ components:
           example: juan@example.com
         password:
           type: string
+          minLength: 1 #TODO ver si pongo más
           format: password
           example: secreto123
 
@@ -134,10 +136,12 @@ components:
         email:
           type: string
           format: email
+          minLength: 1
           example: juan@example.com
         password:
           type: string
           format: password
+          minLength: 1
           example: secreto123
 
     LoginResponse:
