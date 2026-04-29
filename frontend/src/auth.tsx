@@ -1,6 +1,8 @@
 import * as SecureStore from 'expo-secure-store';
 import { BASE_URL } from '../constants/constants';
 import { AppError, ErrorCode } from './AppError';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 import React, {
   createContext,
@@ -8,11 +10,11 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { t } from 'i18next';
 
 const REFRESH_TOKEN_KEY = 'refreshToken';
 const ACCESS_TOKEN_KEY = 'accessToken';
 const USER_EMAIL_KEY = 'userEmail';
+const USER_NAME_KEY = 'userName';
 
 async function saveRefreshToken(token: string) {
   await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, token);
@@ -31,18 +33,27 @@ async function getAccessToken() {
 }
 
 async function saveUserEmail(userEmail: string) {
-  await SecureStore.setItemAsync(USER_EMAIL_KEY, userEmail);
+  await AsyncStorage.setItem(USER_EMAIL_KEY, userEmail);
 }
 
 async function getUserEmail() {
-  return await SecureStore.getItemAsync(USER_EMAIL_KEY);
+  return await AsyncStorage.getItem(USER_EMAIL_KEY);
 }
-//TODO  guardar algunas de estas en asyncStorage
+
+async function saveUserName(userName: string) {
+  await AsyncStorage.setItem(USER_NAME_KEY, userName);
+}
+
+async function getUserName() {
+  return await AsyncStorage.getItem(USER_NAME_KEY);
+}
+
 
 export async function clearSession() {
   await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
   await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-  await SecureStore.deleteItemAsync(USER_EMAIL_KEY);
+  await AsyncStorage.removeItem(USER_EMAIL_KEY);
+  await AsyncStorage.removeItem(USER_NAME_KEY);
   //TODO cerrar sesión en el servidor
 }
 
@@ -52,8 +63,10 @@ type AuthContextType = {
   isLoading: boolean;
   accessToken: string | null;
   userEmail: string | null;
-  login: (email: string, password: string) => Promise<void>; // ← antes tenía 3 parámetros
+  userName: string | null;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  register: (username: string, email: string, password: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -67,6 +80,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
     const [isLoading, setIsLoading] = useState(true);
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [userEmail, setUserEmailState] = useState<string | null>(null);
+    const [userName, setUserNameState] = useState<string | null>(null);
 
     useEffect(() => {
       restoreSession();
@@ -77,15 +91,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
         const refreshToken = await getRefreshToken();
         const storedAccessToken = await getAccessToken();
         const storedUserEmail = await getUserEmail();
-
+        const storedUserName = await getUserName();
+        
         console.log('restoreSession -> refreshToken:', refreshToken);
         console.log('restoreSession -> accessToken:', storedAccessToken);
         console.log('restoreSession -> userEmail:', storedUserEmail);
+        console.log('restoreSession -> userName:', storedUserName);
 
         if (!refreshToken) {
           setIsAuthenticated(false);
           setAccessToken(null);
           setUserEmailState(null);
+          setUserNameState(null);
           return;
         }
 
@@ -93,6 +110,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
         setAccessToken(storedAccessToken);
         setUserEmailState(storedUserEmail);
+        setUserNameState(storedUserName);
         setIsAuthenticated(true);
       } catch (error) {
         console.log('restoreSession error:', error);
@@ -100,6 +118,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
         setIsAuthenticated(false);
         setAccessToken(null);
         setUserEmailState(null);
+        setUserNameState(null);
       } finally {
         setIsLoading(false);
       }
@@ -128,6 +147,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
       setAccessToken(accessToken);
       setUserEmailState(email);
+      //TODO obtener el username del servidor en lugar de guardarlo en el registro
       setIsAuthenticated(true);
     };
 
@@ -140,6 +160,34 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
       //TODO cerrar sesión en el servidor
     };
 
+    const register = async (username: string, email: string, password: string) => {
+      let accessToken: string;
+      let refreshToken: string;
+
+      try {
+        ({ accessToken, refreshToken } = await registerRequest({ username, email, password }));
+      } catch (error) {
+        if (error instanceof AppError) throw error;
+        throw new AppError(ErrorCode.SERVER_ERROR); 
+      }
+
+      try {
+        await Promise.all([
+          saveAccessToken(accessToken),
+          saveRefreshToken(refreshToken),
+          saveUserEmail(email),
+          saveUserName(username),
+        ]);
+      } catch {
+        throw new AppError(ErrorCode.SESSION_SAVE_ERROR);
+      }
+
+      setAccessToken(accessToken);
+      setUserEmailState(email);
+      setUserNameState(username);
+      setIsAuthenticated(true);
+    }
+
     return (
       <AuthContext.Provider
         value={{
@@ -147,8 +195,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
           isLoading,
           accessToken,
           userEmail,
+          userName,
           login,
           logout,
+          register
         }}
       >
         {children}
@@ -170,6 +220,7 @@ export const useAuth = () => {
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const errorText = await response.text();
+    console.log('handleResponse error -> status:', response.status, 'body:', errorText);
     throw new Error(errorText || 'Error en la petición');
   }
 
@@ -190,10 +241,10 @@ async function loginRequest(
   return handleResponse<LoginResponse>(response);
 }
 
-export async function registerRequest(
+async function registerRequest(
   data: RegisterRequest
 ): Promise<LoginResponse> {
-  const response = await fetch(`${BASE_URL}/auth/signin`, {
+  const response = await fetch(`${BASE_URL}/auth/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

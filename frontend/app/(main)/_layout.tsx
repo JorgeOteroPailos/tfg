@@ -19,10 +19,22 @@ export default function MainLayout() {
         presentation: 'card',
         freezeOnBlur: false,
       }}>
-      <Stack.Screen name={t('home')} />
-      <Stack.Screen name={t('calendar')} />
-      <Stack.Screen name={t('profile')} />
-      <Stack.Screen name={t('settings')} />
+      <Stack.Screen 
+        name="main" 
+        options={{ title: t('home') }} 
+      />
+      <Stack.Screen 
+        name="calendar" 
+        options={{ title: t('calendar') }} 
+      />
+      <Stack.Screen 
+        name="profile" 
+        options={{ title: t('profile') }} 
+      />
+      <Stack.Screen 
+        name="settings" 
+        options={{ title: t('settings') }} 
+      />
     </Stack>
   );
 }

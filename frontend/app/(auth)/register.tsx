@@ -6,13 +6,13 @@ import ThemedButton from '../../components/ThemedButton';
 import ThemedInput from '../../components/ThemedInput';
 import { useTranslation } from 'react-i18next';
 
-import { useAuth, registerRequest } from '../../src/auth';
+import { useAuth } from '../../src/auth';
 import { Link, useRouter } from 'expo-router';
 import { AppError, ErrorCode } from '../../src/AppError';
 
 const Register = () => {
   const { t } = useTranslation();
-  const { login } = useAuth();
+  const { register } = useAuth();
   const router = useRouter();
 
   const [username, setUsername] = useState('');
@@ -24,6 +24,7 @@ const Register = () => {
     [ErrorCode.BAD_REQUEST]: t('invalidRegisterData'),
     [ErrorCode.SESSION_SAVE_ERROR]: t('errorSavingSession'),
     [ErrorCode.SERVER_ERROR]: t('serverError'),
+    [ErrorCode.CONFLICT]: t('emailAlreadyInUse'),
   };
 
   const handleRegister = async () => {
@@ -35,14 +36,7 @@ const Register = () => {
     try {
       setIsLoading(true);
 
-      const response = await registerRequest({
-        username: username.trim(),
-        email: email.trim(),
-        password,
-      });
-
-      //await login(response.accessToken, response.refreshToken, email.trim());
-      //TODO IMPORTANTE
+      await register(username.trim(), email.trim(), password);
 
       router.replace('/main');
     } catch (error) {

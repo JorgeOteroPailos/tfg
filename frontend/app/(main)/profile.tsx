@@ -8,7 +8,7 @@ import { t } from 'i18next';
 import { router } from 'expo-router';
 
 const Profile = () => {
-  const { userEmail, logout } = useAuth();
+  const { userEmail, userName, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
@@ -23,7 +23,7 @@ const Profile = () => {
 
       <ThemedView style={styles.infoContainer}>
         <ThemedText>
-          {t('username')}: {userEmail ?? t('notAvailable')}
+          {t('username')}: {userName ?? t('notAvailable')}
         </ThemedText>
 
         <ThemedText>

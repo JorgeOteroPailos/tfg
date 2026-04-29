@@ -4,6 +4,7 @@ export enum ErrorCode {
   UNAUTHORIZED = 401,
   FORBIDDEN = 403,
   SERVER_ERROR = 500,
+  CONFLICT = 409,
 
   // App (errores propios)
   SESSION_SAVE_ERROR = 600,

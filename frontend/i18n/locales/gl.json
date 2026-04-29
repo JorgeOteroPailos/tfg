@@ -10,6 +10,8 @@
   "home": "Inicio",
   "index": "Índice",
 
+  "serverError": "Erro do servidor",
+
   "email": "Correo electrónico",
   "password": "Contrasinal",
   "wrongCredentials": "Correo ou contrasinal incorrectos",
@@ -28,6 +30,8 @@
   "userRegisteredSuccessfully": "Usuario rexistrado correctamente",
   "registrationError": "Erro ao rexistrar usuario",
   "errorSavingSession": "Erro ao gardar a sesión",
+  "emailAlreadyInUse": "Este correo electrónico xa está en uso",
+  "invalidRegisterData": "Datos de rexistro non válidos",
 
   "profile": "Perfil",
   "logout": "Pechar sesión",

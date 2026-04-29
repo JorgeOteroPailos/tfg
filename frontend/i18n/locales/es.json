@@ -10,6 +10,8 @@
   "home": "Inicio",
   "index": "Índice",
 
+  "serverError": "Error del servidor",
+
   "email": "Correo electrónico",
   "password": "Contraseña",
   "wrongCredentials": "Correo o contraseña incorrectos",
@@ -28,6 +30,8 @@
   "userRegisteredSuccessfully": "Usuario registrado correctamente",
   "registrationError": "Error al registrar usuario",
   "errorSavingSession": "Error al guardar la sesión",
+  "emailAlreadyInUse": "Este correo electrónico ya está en uso",
+  "invalidRegisterData": "Datos de registro no válidos",
 
   "profile": "Perfil",
   "logout": "Cerrar sesión",
