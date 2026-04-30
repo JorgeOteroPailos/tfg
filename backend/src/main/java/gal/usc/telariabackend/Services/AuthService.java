@@ -2,7 +2,9 @@ package gal.usc.telariabackend.Services;
 
 import gal.usc.telariabackend.Model.DTO.LoginRequest;
 import gal.usc.telariabackend.Model.DTO.LoginResponse;
+import gal.usc.telariabackend.Model.DTO.RefreshResponse;
 import gal.usc.telariabackend.Model.Exceptions.AlreadyExistingUserException;
+import gal.usc.telariabackend.Model.Exceptions.InvalidRefreshTokenException;
 import gal.usc.telariabackend.Model.RefreshToken;
 import gal.usc.telariabackend.Model.User;
 import gal.usc.telariabackend.Repository.RefreshTokenRepository;
@@ -40,9 +42,6 @@ public class AuthService {
 
     @Value("${auth.jwt.ttl:PT30M}")
     private Duration accessTokenTTL;
-
-    @Value("${auth.opaque.ttl:P7D}")
-    private Duration refreshTokenTTL;
 
     public AuthService(
             UserRepository userRepository,
@@ -108,14 +107,13 @@ public class AuthService {
                 .signWith(keyPair.getPrivate())
                 .compact();
 
-        String refreshTokenString = generateRefreshTokenString();
+        String refreshTokenString = generateUniqueRefreshTokenString();
 
         RefreshToken refreshToken = new RefreshToken(
                 refreshTokenString,
                 userDetails.getUsername()
         );
 
-        refreshTokenRepository.deleteAllByUseremail(userDetails.getUsername());
         refreshTokenRepository.save(refreshToken);
 
         return new LoginResponse().accessToken(accessToken).refreshToken(refreshToken.getToken());
@@ -126,7 +124,43 @@ public class AuthService {
         refreshTokenRepository.deleteAllByUseremail(email);
     }
 
+    @Transactional
+    public RefreshResponse refresh(String refreshTokenString) {
+        // 1. Buscar el token en BD, no por email
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenString).orElseThrow(
+                () -> new InvalidRefreshTokenException("Invalid Refresh Token"));
+
+        // 3. Invalidar el token usado (rotation)
+        refreshTokenRepository.delete(refreshToken);
+
+        // 4. Generar par nuevo
+        String email = refreshToken.getUseremail();
+        Instant now = Instant.now();
+
+        String accessToken = Jwts.builder()
+                .subject(email)
+                .issuedAt(Date.from(now))
+                .notBefore(Date.from(now))
+                .expiration(Date.from(now.plus(accessTokenTTL)))
+                .signWith(keyPair.getPrivate())
+                .compact();
+
+        RefreshToken newRefreshToken = new RefreshToken(generateUniqueRefreshTokenString(), email);
+        refreshTokenRepository.save(newRefreshToken);
+
+        return new RefreshResponse(accessToken, newRefreshToken.getToken());
+
+    }
+
     //HELPERS
+    private String generateUniqueRefreshTokenString() {
+        String token;
+        do {
+            token = generateRefreshTokenString();
+        } while (refreshTokenRepository.existsById(token));
+        return token;
+    }
+
     private String generateRefreshTokenString() {
         byte[] bytes = new byte[32];
         secureRandom.nextBytes(bytes);

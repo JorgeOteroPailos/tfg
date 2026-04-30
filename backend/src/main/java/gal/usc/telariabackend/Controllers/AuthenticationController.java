@@ -1,8 +1,6 @@
 package gal.usc.telariabackend.Controllers;
 
-import gal.usc.telariabackend.Model.DTO.LoginRequest;
-import gal.usc.telariabackend.Model.DTO.LoginResponse;
-import gal.usc.telariabackend.Model.DTO.RegisterRequest;
+import gal.usc.telariabackend.Model.DTO.*;
 import gal.usc.telariabackend.Model.User;
 import gal.usc.telariabackend.Services.AuthService;
 import jakarta.validation.Valid;
@@ -13,14 +11,14 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("auth")
-public class AuthenticationController {
+public class AuthenticationController implements AuthApi {
     private final AuthService authService;
 
     public AuthenticationController(AuthService authService) {
         this.authService = authService;
     }
 
-    @PostMapping("signin")
+    @PostMapping("register")
     public ResponseEntity<LoginResponse> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         User u = new User(registerRequest);
         LoginResponse loginResponse = authService.registerUser(u);
@@ -39,6 +37,10 @@ public class AuthenticationController {
         return ResponseEntity.noContent().build();
     }
 
-
+    @PostMapping("refresh")
+    public ResponseEntity<RefreshResponse> refreshTokens(@RequestBody RefreshRequest refreshRequest) {
+        RefreshResponse response = authService.refresh(refreshRequest.getRefreshToken());
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
 }

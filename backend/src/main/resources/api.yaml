@@ -97,6 +97,32 @@ paths:
         '403':
           description: Sin permisos
 
+  /auth/refresh:
+    post:
+      summary: Renovar tokens de acceso
+      operationId: refreshTokens
+      tags:
+        - Autenticación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+            example:
+              refreshToken: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...
+      responses:
+        '200':
+          description: Tokens renovados correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+        '401':
+          description: Refresh token inválido, expirado o ya invalidado
+        '403':
+          description: Refresh token mal formado
+
 components:
   securitySchemes:
     bearerAuth:
@@ -169,3 +195,28 @@ components:
         username:
           type: string
           example: juanperez
+
+    RefreshResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+      properties:
+        accessToken:
+          type: string
+          description: JWT de acceso
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refreshToken:
+          type: string
+          description: Token de refresco
+          example: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...
+
+    RefreshRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: Token de refresco obtenido en login o registro
+          example: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...
