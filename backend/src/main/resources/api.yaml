@@ -2,20 +2,20 @@ openapi: 3.0.3
 info:
   title: Telaria Backend API
   version: 1.0.0
-  description: API de autenticación y gestión de usuarios de Telaria
+  description: Authentication and user management API for Telaria backend
 
 servers:
   - url: http://localhost:8082
-    description: Servidor local de desarrollo
+    description: Local development server
 
 paths:
 
   /auth/register:
     post:
-      summary: Registro de nuevo usuario
+      summary: Register new user
       operationId: registerUser
       tags:
-        - Autenticación
+        - Authentication
       requestBody:
         required: true
         content:
@@ -28,20 +28,22 @@ paths:
               password: secreto123
       responses:
         '201':
-          description: Usuario registrado correctamente
+          description: User registered successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
+        '409':
+          description: User email already in use
         '400':
-          description: Datos de registro inválidos
+          description: Invalid registration data
 
   /auth/login:
     post:
-      summary: Inicio de sesión
+      summary: Login
       operationId: login
       tags:
-        - Autenticación
+        - Authentication
       requestBody:
         required: true
         content:
@@ -53,39 +55,39 @@ paths:
               password: secreto123
       responses:
         '200':
-          description: Login correcto, devuelve tokens
+          description: Login successful, returns tokens
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
         '401':
-          description: Credenciales incorrectas
+          description: Incorrect credentials
 
   /auth/logout:
     post:
-      summary: Cierre de sesión
+      summary: Logout
       operationId: logout
       tags:
-        - Autenticación
+        - Authentication
       security:
         - bearerAuth: []
       responses:
         '204':
-          description: Sesión cerrada correctamente
+          description: Session closed successfully
         '401':
-          description: No autenticado
+          description: Not authenticated
 
   /users:
     get:
-      summary: Obtener todos los usuarios
+      summary: Get all users
       operationId: getAllUsers
       tags:
-        - Usuarios
+        - Users
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Lista de usuarios
+          description: List of users
           content:
             application/json:
               schema:
@@ -93,9 +95,9 @@ paths:
                 items:
                   $ref: '#/components/schemas/User'
         '401':
-          description: No autenticado
+          description: Not authenticated
         '403':
-          description: Sin permisos
+          description: Forbidden
 
 components:
   securitySchemes:
@@ -152,11 +154,11 @@ components:
       properties:
         accessToken:
           type: string
-          description: JWT de acceso
+          description: Access token (JWT)
           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         refreshToken:
           type: string
-          description: Token de refresco
+          description: Opaque refresh token
           example: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...
 
     User:

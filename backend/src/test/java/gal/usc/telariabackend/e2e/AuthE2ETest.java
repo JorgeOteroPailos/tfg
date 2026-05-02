@@ -54,7 +54,7 @@ class AuthE2ETest {
                 "password", password
         );
 
-        MvcResult result = mockMvc.perform(post("/auth/signin")
+        MvcResult result = mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated())
@@ -64,7 +64,7 @@ class AuthE2ETest {
         return (String) response.get("accessToken");
     }
 
-    // ─── Registro (/auth/signin) ─────────────────────────────────────────────
+    // ─── Registro (/auth/register) ─────────────────────────────────────────────
 
     @Test
     @DisplayName("Registro: usuario nuevo devuelve 201 y tokens")
@@ -75,7 +75,7 @@ class AuthE2ETest {
                 "password", "pass1234"
         );
 
-        mockMvc.perform(post("/auth/signin")
+        mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated())
@@ -94,7 +94,7 @@ class AuthE2ETest {
                 "password", "otrapass"
         );
 
-        mockMvc.perform(post("/auth/signin")
+        mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isConflict());
@@ -103,7 +103,7 @@ class AuthE2ETest {
     @Test
     @DisplayName("Registro: body vacío devuelve 400")
     void registro_bodyVacio_devuelve400() throws Exception {
-        mockMvc.perform(post("/auth/signin")
+        mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest());
@@ -118,7 +118,7 @@ class AuthE2ETest {
                 "password", "pass1234"
         );
 
-        mockMvc.perform(post("/auth/signin")
+        mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isBadRequest());

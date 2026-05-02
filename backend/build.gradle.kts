@@ -87,7 +87,8 @@ openApiGenerate {
         "useJakartaEe"       to "true",
         "openApiNullable"    to "false",
         "generateModels"     to "true",
-        "useBeanValidation"  to "true"
+        "useBeanValidation"  to "true",
+        "performBeanValidation" to "true"
     ))
 }
 
