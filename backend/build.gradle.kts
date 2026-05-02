@@ -96,6 +96,12 @@ tasks.compileJava {
     dependsOn(tasks.openApiGenerate)
 }
 
+tasks.named("openApiGenerate") {
+    doFirst {
+        System.setProperty("file.encoding", "UTF-8")
+    }
+}
+
 sourceSets {
     main {
         java {

@@ -2,7 +2,9 @@ package gal.usc.telariabackend.Services;
 
 import gal.usc.telariabackend.Model.DTO.LoginRequest;
 import gal.usc.telariabackend.Model.DTO.LoginResponse;
+import gal.usc.telariabackend.Model.DTO.RefreshResponse;
 import gal.usc.telariabackend.Model.Exceptions.AlreadyExistingUserException;
+import gal.usc.telariabackend.Model.Exceptions.InvalidRefreshTokenException;
 import gal.usc.telariabackend.Model.RefreshToken;
 import gal.usc.telariabackend.Model.User;
 import gal.usc.telariabackend.Repository.RefreshTokenRepository;
@@ -14,6 +16,8 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.time.Duration;
 import java.util.Date;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,7 +73,6 @@ class AuthServiceTest {
         );
 
         setPrivateField(authService, "accessTokenTTL", Duration.ofMinutes(30));
-        setPrivateField(authService, "refreshTokenTTL", Duration.ofDays(7));
     }
 
     private void setPrivateField(Object target, String fieldName, Object value) throws Exception {
@@ -174,7 +177,7 @@ class AuthServiceTest {
         assertFalse(result.getRefreshToken().isBlank());
 
         verify(authenticationManager).authenticate(any(Authentication.class));
-        verify(refreshTokenRepository).deleteAllByUseremail("test@test.com");
+        verify(refreshTokenRepository, never()).deleteAllByUseremail("test@test.com");
         verify(refreshTokenRepository).save(any(RefreshToken.class));
     }
 
@@ -241,7 +244,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void login_ShouldDeletePreviousRefreshTokensBeforeSavingNewOne() {
+    void login_ShouldNotDeletePreviousRefreshTokensBeforeSavingNewOne() {
         LoginRequest loginRequest = new LoginRequest(
                 "test@test.com",
                 "plain-password"
@@ -260,7 +263,7 @@ class AuthServiceTest {
 
         var inOrder = inOrder(refreshTokenRepository);
 
-        inOrder.verify(refreshTokenRepository).deleteAllByUseremail("test@test.com");
+        inOrder.verify(refreshTokenRepository, never()).deleteAllByUseremail("test@test.com");
         inOrder.verify(refreshTokenRepository).save(any(RefreshToken.class));
     }
 
@@ -321,5 +324,106 @@ class AuthServiceTest {
 
         verify(refreshTokenRepository)
                 .deleteAllByUseremail(email);
+    }
+
+    //###################/REFRESH##############
+    @Test
+    void refresh_WhenTokenIsValid_ShouldInvalidateOldTokenAndReturnNewPair() {
+        String oldTokenString = "old-refresh-token";
+        RefreshToken oldToken = new RefreshToken(oldTokenString, "test@test.com");
+
+        when(refreshTokenRepository.findByToken(oldTokenString))
+                .thenReturn(Optional.of(oldToken));
+
+        RefreshResponse result = authService.refresh(oldTokenString);
+
+        assertNotNull(result);
+        assertNotNull(result.getAccessToken());
+        assertFalse(result.getAccessToken().isBlank());
+        assertNotNull(result.getRefreshToken());
+        assertFalse(result.getRefreshToken().isBlank());
+        assertNotEquals(oldTokenString, result.getRefreshToken());
+
+        Claims claims = Jwts.parser()
+                .verifyWith(keyPair.getPublic())
+                .build()
+                .parseSignedClaims(result.getAccessToken())
+                .getPayload();
+
+        assertEquals("test@test.com", claims.getSubject());
+        assertNotNull(claims.getIssuedAt());
+        assertNotNull(claims.getExpiration());
+        assertTrue(claims.getExpiration().after(new Date()));
+
+        ArgumentCaptor<RefreshToken> refreshTokenCaptor =
+                ArgumentCaptor.forClass(RefreshToken.class);
+        verify(refreshTokenRepository).delete(oldToken);
+        verify(refreshTokenRepository).save(refreshTokenCaptor.capture());
+
+        RefreshToken savedToken = refreshTokenCaptor.getValue();
+        assertEquals("test@test.com", savedToken.getUseremail());
+        assertNotEquals(oldTokenString, savedToken.getToken());
+    }
+
+    @Test
+    void refresh_WhenTokenDoesNotExist_ShouldThrowExceptionAndNotTouchDB() {
+        when(refreshTokenRepository.findByToken("token-inventado"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                InvalidRefreshTokenException.class,
+                () -> authService.refresh("token-inventado")
+        );
+
+        verify(refreshTokenRepository, never()).save(any(RefreshToken.class));
+        verify(refreshTokenRepository, never()).delete(any(RefreshToken.class));
+    }
+
+    @Test
+    void refresh_WhenCalledTwiceWithRotation_BothResponsesShouldBeValid() {
+        String firstTokenString = "first-refresh-token";
+        String secondTokenString = "second-refresh-token";
+
+        RefreshToken firstToken = new RefreshToken(firstTokenString, "test@test.com");
+        RefreshToken secondToken = new RefreshToken(secondTokenString, "test@test.com");
+
+        when(refreshTokenRepository.findByToken(firstTokenString))
+                .thenReturn(Optional.of(firstToken));
+        when(refreshTokenRepository.findByToken(secondTokenString))
+                .thenReturn(Optional.of(secondToken));
+
+        RefreshResponse firstResult = authService.refresh(firstTokenString);
+
+        assertNotNull(firstResult.getAccessToken());
+        assertFalse(firstResult.getAccessToken().isBlank());
+        assertNotNull(firstResult.getRefreshToken());
+        assertNotEquals(firstTokenString, firstResult.getRefreshToken());
+
+        Claims firstClaims = Jwts.parser()
+                .verifyWith(keyPair.getPublic())
+                .build()
+                .parseSignedClaims(firstResult.getAccessToken())
+                .getPayload();
+        assertEquals("test@test.com", firstClaims.getSubject());
+        assertTrue(firstClaims.getExpiration().after(new Date()));
+
+        RefreshResponse secondResult = authService.refresh(secondTokenString);
+
+        assertNotNull(secondResult.getAccessToken());
+        assertFalse(secondResult.getAccessToken().isBlank());
+        assertNotNull(secondResult.getRefreshToken());
+        assertNotEquals(secondTokenString, secondResult.getRefreshToken());
+
+        Claims secondClaims = Jwts.parser()
+                .verifyWith(keyPair.getPublic())
+                .build()
+                .parseSignedClaims(secondResult.getAccessToken())
+                .getPayload();
+        assertEquals("test@test.com", secondClaims.getSubject());
+        assertTrue(secondClaims.getExpiration().after(new Date()));
+
+        verify(refreshTokenRepository).delete(firstToken);
+        verify(refreshTokenRepository).delete(secondToken);
+        verify(refreshTokenRepository, times(2)).save(any(RefreshToken.class));
     }
 }

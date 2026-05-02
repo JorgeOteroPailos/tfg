@@ -8,9 +8,9 @@ import jakarta.persistence.Table;
 @Table(name = "refreshtokens")
 public class RefreshToken {
 
+    @Id
     private String token;
 
-    @Id
     private String useremail;
 
     public RefreshToken() {}
