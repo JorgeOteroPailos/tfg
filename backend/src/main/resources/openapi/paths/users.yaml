@@ -1,0 +1,22 @@
+paths:
+  /users:
+    get:
+      summary: Get all users
+      operationId: getAllUsers
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../schemas.yaml#/schemas/User'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden

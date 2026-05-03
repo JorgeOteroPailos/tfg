@@ -101,7 +101,7 @@ class AuthServiceTest {
         assertEquals("fake-access-token", result.getAccessToken());
         assertEquals("fake-refresh-token", result.getRefreshToken());
 
-        assertEquals("encoded-password", user.password);
+        assertEquals("encoded-password", user.getPassword());
 
         verify(userRepository).existsById("test@test.com");
         verify(passwordEncoder).encode("plain-password");
@@ -119,6 +119,7 @@ class AuthServiceTest {
 
         when(userRepository.existsById("test@test.com")).thenReturn(false);
         when(passwordEncoder.encode("plain-password")).thenReturn("encoded-password");
+
 
         AuthService spyService = spy(authService);
         doReturn(expectedResponse).when(spyService).login(any(LoginRequest.class));
@@ -152,7 +153,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void login_WhenCredentialsAreCorrect_ShouldReturnAccessTokenAndRefreshToken() {
+    void login_WhenCredentialsAreCorrect_ShouldReturnAccessTokenAndRefreshToken_andUsername() {
         LoginRequest loginRequest = new LoginRequest(
                 "test@test.com",
                 "plain-password"
@@ -167,6 +168,9 @@ class AuthServiceTest {
         when(userDetails.getUsername())
                 .thenReturn("test@test.com");
 
+        when(userRepository.findByEmail("test@test.com"))
+                .thenReturn(Optional.of(new User("userName", "test@test.com", "encoded-password")));
+
         LoginResponse result = authService.login(loginRequest);
 
         assertNotNull(result);
@@ -175,6 +179,10 @@ class AuthServiceTest {
 
         assertNotNull(result.getRefreshToken());
         assertFalse(result.getRefreshToken().isBlank());
+
+        assertNotNull(result.getUsername());
+        assertFalse(result.getUsername().isBlank());
+        assertEquals("userName", result.getUsername());
 
         verify(authenticationManager).authenticate(any(Authentication.class));
         verify(refreshTokenRepository, never()).deleteAllByUseremail("test@test.com");
@@ -196,6 +204,9 @@ class AuthServiceTest {
 
         when(userDetails.getUsername())
                 .thenReturn("test@test.com");
+
+        when(userRepository.findByEmail("test@test.com"))
+                .thenReturn(Optional.of(new User("userName", "test@test.com", "encoded-password")));
 
         authService.login(loginRequest);
 
@@ -226,6 +237,9 @@ class AuthServiceTest {
 
         when(userDetails.getUsername())
                 .thenReturn("test@test.com");
+
+        when(userRepository.findByEmail("test@test.com"))
+                .thenReturn(Optional.of(new User("userName", "test@test.com", "encoded-password")));
 
         LoginResponse result = authService.login(loginRequest);
 
@@ -259,6 +273,9 @@ class AuthServiceTest {
         when(userDetails.getUsername())
                 .thenReturn("test@test.com");
 
+        when(userRepository.findByEmail("test@test.com"))
+                .thenReturn(Optional.of(new User("userName", "test@test.com", "encoded-password")));
+
         authService.login(loginRequest);
 
         var inOrder = inOrder(refreshTokenRepository);
@@ -282,6 +299,9 @@ class AuthServiceTest {
 
         when(userDetails.getUsername())
                 .thenReturn("test@test.com");
+
+        when(userRepository.findByEmail("test@test.com"))
+                .thenReturn(Optional.of(new User("userName", "test@test.com", "encoded-password")));
 
         LoginResponse result = authService.login(loginRequest);
 

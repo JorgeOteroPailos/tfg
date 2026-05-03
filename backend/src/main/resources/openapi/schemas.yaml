@@ -1,0 +1,94 @@
+schemas:
+  RegisterRequest:
+    type: object
+    required:
+      - username
+      - email
+      - password
+    properties:
+      username:
+        type: string
+        minLength: 1
+        example: juanperez
+      email:
+        type: string
+        format: email
+        example: juan@example.com
+      password:
+        type: string
+        minLength: 1
+        format: password
+        example: secreto123
+
+  LoginRequest:
+    type: object
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+        format: email
+        minLength: 1
+        example: juan@example.com
+      password:
+        type: string
+        format: password
+        minLength: 1
+        example: secreto123
+
+  LoginResponse:
+    type: object
+    required:
+      - accessToken
+      - refreshToken
+      - username
+    properties:
+      accessToken:
+        type: string
+        description: Access token (JWT)
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      refreshToken:
+        type: string
+        description: Opaque refresh token
+        example: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...
+      username:
+        type: string
+        description: User's username
+        example: juan otero
+
+  RefreshRequest:
+    type: object
+    required:
+      - refreshToken
+    properties:
+      refreshToken:
+        type: string
+        description: Refresh Token obtained throuh login or register
+        example: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...
+
+  RefreshResponse:
+    type: object
+    required:
+      - accessToken
+      - refreshToken
+    properties:
+      accessToken:
+        type: string
+        description: Access JWT token
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      refreshToken:
+        type: string
+        description: Opaque refresh Token
+        example: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...
+
+  User:
+    type: object
+    properties:
+      email:
+        type: string
+        format: email
+        example: juan@example.com
+      username:
+        type: string
+        example: juanperez

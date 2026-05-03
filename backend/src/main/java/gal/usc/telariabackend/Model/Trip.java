@@ -1,22 +1,39 @@
 package gal.usc.telariabackend.Model;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+@Entity
+@Table(name = "trips")
 public class Trip {
-    private Set<User> members = new HashSet<>();
-    private final User owner;
-    private Set<User> viewers= new HashSet<>();
-    private List<Event> events=  new ArrayList<>();
 
-    private LocalDate startDate;
-    private LocalDate endDate;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-    public Trip(User owner){
+    private String name;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
+
+    @ManyToMany
+    @JoinTable(
+            name = "trip_members",
+            joinColumns = @JoinColumn(name = "trip_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private final Set<User> members = new HashSet<>();
+
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Event> events = new ArrayList<>();
+
+    protected Trip() {} // requerido por JPA
+
+    public Trip(User owner) {
         this.owner = owner;
-        members.add(owner);
+        this.members.add(owner);
     }
 }

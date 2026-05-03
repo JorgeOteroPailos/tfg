@@ -19,6 +19,7 @@
   "mustIntroduceEmailAndPassword": "Debes introducir email y contraseña",
   "loginSuccessful": "Sesión iniciada correctamente",
   "loginError": "Error al iniciar sesión",
+  "invalidLoginRequest": "Solicitud de inicio de sesión no válida",
 
   "register": "Registrarse",
   "username": "Nombre de usuario",

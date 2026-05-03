@@ -43,10 +43,10 @@ class AuthE2ETest {
     }
 
     /**
-     * Registra un usuario y devuelve el accessToken.
-     * Reutilizable en los tests que necesitan un usuario ya autenticado.
+     * Registers a user and returns the access token from the registration response.
+     * Reusable in the tests that need an authenticated user.
      */
-    private String registrarYObtenerToken(String username, String email, String password) throws Exception {
+    private String registerAndObtainToken(String username, String email, String password) throws Exception {
         Map<String, String> body = Map.of(
                 "username", username,
                 "email", email,
@@ -63,11 +63,11 @@ class AuthE2ETest {
         return (String) response.get("accessToken");
     }
 
-    // ─── Registro (/auth/register) ─────────────────────────────────────────────
+    // ─── Register (/auth/register) ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("Registro: usuario nuevo devuelve 201 y tokens")
-    void registro_usuarioNuevo_devuelveTokens() throws Exception {
+    @DisplayName("Register: new user returns 201 and tokens")
+    void register_newUser_returnsTokens() throws Exception {
         Map<String, String> body = Map.of(
                 "username", "alice",
                 "email", "alice@test.com",
@@ -83,9 +83,9 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("Registro: email duplicado devuelve 409")
-    void registro_emailDuplicado_devuelve409() throws Exception {
-        registrarYObtenerToken("alice", "alice@test.com", "pass1234");
+    @DisplayName("Register: duplicate email returns 409")
+    void register_duplicateEmail_returns409() throws Exception {
+        registerAndObtainToken("alice", "alice@test.com", "pass1234");
 
         Map<String, String> body = Map.of(
                 "username", "alice2",
@@ -100,8 +100,8 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("Registro: body vacío devuelve 400")
-    void registro_bodyVacio_devuelve400() throws Exception {
+    @DisplayName("Register: empty body returns 400")
+    void register_emptyBody_returns400() throws Exception {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -109,8 +109,8 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("Registro: email inválido devuelve 400")
-    void registro_emailInvalido_devuelve400() throws Exception {
+    @DisplayName("Register: invalid email returns 400")
+    void register_invalidEmail_returns400() throws Exception {
         Map<String, String> body = Map.of(
                 "username", "bob",
                 "email", "esto-no-es-un-email",
@@ -126,10 +126,9 @@ class AuthE2ETest {
     // ─── Login (/auth/login) ─────────────────────────────────────────────────
 
     @Test
-    @DisplayName("Login: credenciales correctas devuelven 200 y tokens")
-    void login_credencialesCorrectas_devuelveTokens() throws Exception {
-        // Registrar dentro del mismo test (misma transacción → disponible para el login)
-        registrarYObtenerToken("carol", "carol@test.com", "mypassword");
+    @DisplayName("Login: correct credentials return 200 and tokens")
+    void login_correctCredentials_returnsTokens() throws Exception {
+        registerAndObtainToken("carol", "carol@test.com", "mypassword");
 
         Map<String, String> body = Map.of(
                 "email", "carol@test.com",
@@ -145,9 +144,9 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("Login: contraseña incorrecta devuelve 401")
-    void login_passwordIncorrecta_devuelve401() throws Exception {
-        registrarYObtenerToken("dave", "dave@test.com", "correcta");
+    @DisplayName("Login: incorrect password returns 401")
+    void login_incorrectPassword_returns401() throws Exception {
+        registerAndObtainToken("dave", "dave@test.com", "correcta");
 
         Map<String, String> body = Map.of(
                 "email", "dave@test.com",
@@ -161,8 +160,8 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("Login: usuario inexistente devuelve 401")
-    void login_usuarioInexistente_devuelve401() throws Exception {
+    @DisplayName("Login: non-existent user returns 401")
+    void login_nonExistentUser_returns401() throws Exception {
         Map<String, String> body = Map.of(
                 "email", "fantasma@test.com",
                 "password", "daigual"
@@ -175,8 +174,8 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("login: body vacío devuelve 400")
-    void login_bodyVacio_devuelve400() throws Exception {
+    @DisplayName("Login: empty body returns 400")
+    void login_emptyBody_returns400() throws Exception {
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -184,8 +183,8 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("login: email inválido devuelve 400")
-    void login_emailInvalido_devuelve400() throws Exception {
+    @DisplayName("Login: invalid email returns 400")
+    void login_invalidEmail_returns400() throws Exception {
         Map<String, String> body = Map.of(
                 "username", "bob",
                 "email", "esto-no-es-un-email",
@@ -201,9 +200,9 @@ class AuthE2ETest {
     // ─── Logout (/auth/logout) ───────────────────────────────────────────────
 
     @Test
-    @DisplayName("Logout: con token válido devuelve 204")
-    void logout_tokenValido_devuelve204() throws Exception {
-        String token = registrarYObtenerToken("eve", "eve@test.com", "pass1234");
+    @DisplayName("Logout: with valid token returns 204")
+    void logout_validToken_returns204() throws Exception {
+        String token = registerAndObtainToken("eve", "eve@test.com", "pass1234");
 
         mockMvc.perform(post("/auth/logout")
                         .header("Authorization", "Bearer " + token))
@@ -211,27 +210,27 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("Logout: sin token devuelve 401")
-    void logout_sinToken_devuelve401() throws Exception {
+    @DisplayName("Logout: without token returns 401")
+    void logout_withoutToken_returns401() throws Exception {
         mockMvc.perform(post("/auth/logout"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("Logout: token inválido/expirado devuelve 401")
-    void logout_tokenInvalido_devuelve401() throws Exception {
+    @DisplayName("Logout: invalid/expired token returns 401")
+    void logout_invalidToken_returns401() throws Exception {
         mockMvc.perform(post("/auth/logout")
                         .header("Authorization", "Bearer token.inventado.invalido"))
                 .andExpect(status().isUnauthorized());
     }
 
-    // ─── Usuarios (/users) ───────────────────────────────────────────────────
+    // ─── Users (/users) ───────────────────────────────────────────────────
     //TODO cambiar de controlador o algo??
 
     @Test
-    @DisplayName("GET /users: con token válido devuelve 200 y lista")
-    void getUsers_tokenValido_devuelveLista() throws Exception {
-        String token = registrarYObtenerToken("frank", "frank@test.com", "pass1234");
+    @DisplayName("GET /users: with valid token returns 200 and list")
+    void getUsers_validToken_returnsList() throws Exception {
+        String token = registerAndObtainToken("frank", "frank@test.com", "pass1234");
 
         mockMvc.perform(get("/users")
                         .header("Authorization", "Bearer " + token))
@@ -242,15 +241,15 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("GET /users: sin token devuelve 401")
-    void getUsers_sinToken_devuelve401() throws Exception {
+    @DisplayName("GET /users: without token returns 401")
+    void getUsers_withoutToken_returns401() throws Exception {
         mockMvc.perform(get("/users"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("GET /users: token inválido devuelve 401")
-    void getUsers_tokenInvalido_devuelve401() throws Exception {
+    @DisplayName("GET /users: invalid token returns 401")
+    void getUsers_invalidToken_returns401() throws Exception {
         mockMvc.perform(get("/users")
                         .header("Authorization", "Bearer token.inventado.invalido"))
                 .andExpect(status().isUnauthorized());
@@ -258,7 +257,7 @@ class AuthE2ETest {
 
     // ─── Refresh (/auth/refresh) ─────────────────────────────────────────────────
 
-    private String[] registrarYObtenerTokens(String username, String email, String password) throws Exception {
+    private String[] registerAndObtainTokens(String username, String email, String password) throws Exception {
         Map<String, String> body = Map.of(
                 "username", username,
                 "email", email,
@@ -279,9 +278,9 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("Refresh: token válido devuelve 200 y par de tokens nuevos")
-    void refresh_tokenValido_devuelveTokensNuevos() throws Exception {
-        String[] tokens = registrarYObtenerTokens("hugo", "hugo@test.com", "pass1234");
+    @DisplayName("Refresh: valid token returns 200 and new pair of tokens")
+    void refresh_validToken_returnsNewTokens() throws Exception {
+        String[] tokens = registerAndObtainTokens("hugo", "hugo@test.com", "pass1234");
         String refreshToken = tokens[1];
 
         Map<String, String> body = Map.of("refreshToken", refreshToken);
@@ -296,8 +295,8 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("Refresh: token inválido devuelve 401")
-    void refresh_tokenInvalido_devuelve401() throws Exception {
+    @DisplayName("Refresh: invalid token returns 401")
+    void refresh_invalidToken_returns401() throws Exception {
         Map<String, String> body = Map.of("refreshToken", "token-inventado");
 
         mockMvc.perform(post("/auth/refresh")
@@ -307,8 +306,8 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("Refresh: body vacío devuelve 400")
-    void refresh_bodyVacio_devuelve400() throws Exception {
+    @DisplayName("Refresh: empty body returns 400")
+    void refresh_emptyBody_returns400() throws Exception {
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -316,20 +315,20 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("Refresh: reutilizar token ya usado devuelve 401")
-    void refresh_tokenYaUsado_devuelve401() throws Exception {
-        String[] tokens = registrarYObtenerTokens("irene", "irene@test.com", "pass1234");
+    @DisplayName("Refresh: reusing already used token returns 401")
+    void refresh_alreadyUsedToken_returns401() throws Exception {
+        String[] tokens = registerAndObtainTokens("irene", "irene@test.com", "pass1234");
         String refreshToken = tokens[1];
 
         Map<String, String> body = Map.of("refreshToken", refreshToken);
 
-        // Primera vez — válido
+        // First use — should work
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isOk());
 
-        // Segunda vez con el mismo token — ya invalidado
+        // SSecond use — should fail
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
@@ -337,9 +336,9 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("Refresh: el nuevo accessToken es válido para rutas protegidas")
-    void refresh_nuevoAccessToken_funcionaEnRutasProtegidas() throws Exception {
-        String[] tokens = registrarYObtenerTokens("julia", "julia@test.com", "pass1234");
+    @DisplayName("Refresh: the new accessToken is valid for protected routes")
+    void refresh_newAccessToken_worksInProtectedRoutes() throws Exception {
+        String[] tokens = registerAndObtainTokens("julia", "julia@test.com", "pass1234");
 
         Map<String, String> body = Map.of("refreshToken", tokens[1]);
 
@@ -358,16 +357,16 @@ class AuthE2ETest {
                 .andExpect(status().isOk());
     }
 
-    // ─── Flujo E2E completo ──────────────────────────────────────────────────
+    // ─── Complete e2e flow ──────────────────────────────────────────────────
 
     @Test
-    @DisplayName("Flujo completo: registro → login → refresh → consulta usuarios → logout")
-    void flujoCompleto_registroLoginUsersLogout() throws Exception {
-        // 1. Registro
-        String[] tokensRegistro = registrarYObtenerTokens("grace", "grace@test.com", "pass1234");
+    @DisplayName("Complete flow: register → login → refresh → get users → logout")
+    void flujoCompleto_auth() throws Exception {
+        // 1. Register
+        String[] tokensRegistro = registerAndObtainTokens("grace", "grace@test.com", "pass1234");
         String refreshTokenRegistro = tokensRegistro[1];
 
-        // 2. Login con las mismas credenciales (comprueba que el usuario quedó guardado)
+        // 2. Login with the registered credentials (verifies that the user is saved)
         Map<String, String> loginBody = Map.of(
                 "email", "grace@test.com",
                 "password", "pass1234"
@@ -384,13 +383,13 @@ class AuthE2ETest {
         String accessTokenLogin = (String) loginResponse.get("accessToken");
         String refreshTokenLogin = (String) loginResponse.get("refreshToken");
 
-        // 3. Consultar usuarios con el token del login
+        // 3. Get users with access token from login
         mockMvc.perform(get("/users")
                         .header("Authorization", "Bearer " + accessTokenLogin))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].email", hasItem("grace@test.com")));
 
-        // 4. Refresh — obtener nuevo par de tokens
+        // 4. Refresh — get a new pair of tokens
         MvcResult refreshResult = mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("refreshToken", refreshTokenLogin))))
@@ -403,13 +402,13 @@ class AuthE2ETest {
         String nuevoAccessToken = (String) refreshResponse.get("accessToken");
         String nuevoRefreshToken = (String) refreshResponse.get("refreshToken");
 
-        // 5. Comprobar que el refresh token viejo ya no sirve
+        // 5. Check old refresh token no longer works (token rotation)
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("refreshToken", refreshTokenLogin))))
                 .andExpect(status().isUnauthorized());
 
-        // 6. Consultar usuarios con el nuevo access token
+        // 6. Get users with the new access token
         mockMvc.perform(get("/users")
                         .header("Authorization", "Bearer " + nuevoAccessToken))
                 .andExpect(status().isOk())
@@ -420,7 +419,7 @@ class AuthE2ETest {
                         .header("Authorization", "Bearer " + nuevoAccessToken))
                 .andExpect(status().isNoContent());
 
-        // 8. Verificar que tras logout el nuevo refresh token ya no sirve
+        // 8. Verify that the refresh token obtained in step 4 is invalidated after logout
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("refreshToken", nuevoRefreshToken))))

@@ -14,9 +14,14 @@ public class User {
     @Id
     private String email;
 
-    public String password;
+    private String password;
 
     public String getEmail() {return email;}
+
+    public String getUsername() {return username;}
+
+    public String getPassword() { return password; }
+    public void setPassword(String encoded) { this.password = encoded; }
 
     public User() {
 

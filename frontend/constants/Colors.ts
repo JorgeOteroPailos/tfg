@@ -1,27 +1,23 @@
+interface ThemeColors {
+  text: string;
+  title: string;
+  background: string;
+  navBackground: string;
+  iconColor: string;
+  iconColorFocused: string;
+  tabBackground: string;
+  tabIconDefault: string;
+  tint: string;
+  border: string;
+}
+
 interface ColorsType {
   primary: string;
   warning: string;
   secondary: string;
-  dark: {
-    text: string;
-    title: string;
-    background: string;
-    navBackground: string;
-    iconColor: string;
-    iconColorFocused: string;
-    uiBackground: string;
-  };
-  light: {
-    text: string;
-    title: string;
-    background: string;
-    navBackground: string;
-    iconColor: string;
-    iconColorFocused: string;
-    uiBackground: string;
-  };
+  dark: ThemeColors;
+  light: ThemeColors;
 }
-
 
 export const Colors: ColorsType = {
   primary: "#6849a7",
@@ -35,7 +31,10 @@ export const Colors: ColorsType = {
     navBackground: "#201e2b",
     iconColor: "#9591a5",
     iconColorFocused: "#fff",
-    uiBackground: "#2f2b3d",
+    tabBackground: "#2f2b3d",
+    tabIconDefault: "#9591a5",
+    tint: "#6849a7",
+    border: "#3d3850",
   },
 
   light: {
@@ -45,6 +44,9 @@ export const Colors: ColorsType = {
     navBackground: "#e8e7ef",
     iconColor: "#686477",
     iconColorFocused: "#201e2b",
-    uiBackground: "#d6d5e1",
+    tabBackground: "#d6d5e1",
+    tabIconDefault: "#686477",
+    tint: "#6849a7",
+    border: "#c9c8d4",
   },
 };

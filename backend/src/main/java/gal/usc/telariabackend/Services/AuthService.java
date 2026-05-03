@@ -61,8 +61,8 @@ public class AuthService {
     public LoginResponse registerUser(User u)
             throws AlreadyExistingUserException {
         if (!userRepository.existsById(u.getEmail())) {
-            String unencodedPassword = u.password;
-            u.password = passwordEncoder.encode(u.password);
+            String unencodedPassword = u.getPassword();
+            u.setPassword(passwordEncoder.encode(unencodedPassword));
             userRepository.save(u);
 
             LoginRequest loginRequest = new LoginRequest(
@@ -97,10 +97,11 @@ public class AuthService {
 
         Instant now = Instant.now();
 
-        String username = userDetails.getUsername();
+        String email = userDetails.getUsername();
+        String username = userRepository.findByEmail(email).orElseThrow().getUsername();
 
         String accessToken = Jwts.builder()
-                .subject(username)
+                .subject(email)
                 .issuedAt(Date.from(now))
                 .notBefore(Date.from(now))
                 .expiration(Date.from(now.plus(accessTokenTTL)))
@@ -116,7 +117,7 @@ public class AuthService {
 
         refreshTokenRepository.save(refreshToken);
 
-        return new LoginResponse().accessToken(accessToken).refreshToken(refreshToken.getToken());
+        return new LoginResponse().accessToken(accessToken).refreshToken(refreshToken.getToken()).username(username);
     }
 
     @Transactional

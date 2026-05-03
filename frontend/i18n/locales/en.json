@@ -19,6 +19,7 @@
   "mustIntroduceEmailAndPassword": "You must introduce email and password",
   "loginSuccessful": "Login successful",
   "loginError": "Error logging in",
+  "invalidLoginRequest": "Invalid login request",
 
   "register": "Register",
   "username": "Username",

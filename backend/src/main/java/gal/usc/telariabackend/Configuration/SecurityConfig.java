@@ -113,7 +113,7 @@ public class SecurityConfig {
             return org.springframework.security.core.userdetails.User.withUsername(
                 u.getEmail()
             )
-                .password(u.password)
+                .password(u.getPassword())
                 .build();
         };
     }

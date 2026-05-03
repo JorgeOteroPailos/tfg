@@ -1,0 +1,93 @@
+paths:
+  /auth/register:
+    post:
+      summary: Register new user
+      operationId: registerUser
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/RegisterRequest'
+            example:
+              username: juanperez
+              email: juan@example.com
+              password: secreto123
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas.yaml#/schemas/LoginResponse'
+        '409':
+          description: User email already in use
+        '400':
+          description: Invalid registration data
+
+  /auth/login:
+    post:
+      summary: Login
+      operationId: login
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/LoginRequest'
+            example:
+              email: juan@example.com
+              password: secreto123
+      responses:
+        '200':
+          description: Login successful, returns tokens
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas.yaml#/schemas/LoginResponse'
+        '401':
+          description: Incorrect credentials
+
+  /auth/logout:
+    post:
+      summary: Logout
+      operationId: logout
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Session closed successfully
+        '401':
+          description: Not authenticated
+
+  /auth/refresh:
+    post:
+      summary: Renew access and refreshToken
+      operationId: refreshTokens
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/RefreshRequest'
+            example:
+              refreshToken: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...
+      responses:
+        '200':
+          description: Tokens renewed correctly
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas.yaml#/schemas/RefreshResponse'
+        '401':
+          description: Invalid refresh Token
+        '403':
+          description: Malformed refresh Token

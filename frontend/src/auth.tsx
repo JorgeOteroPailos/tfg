@@ -14,7 +14,7 @@ import React, {
 const REFRESH_TOKEN_KEY = 'refreshToken';
 const ACCESS_TOKEN_KEY = 'accessToken';
 const USER_EMAIL_KEY = 'userEmail';
-const USER_NAME_KEY = 'userName';
+const USER_NAME_KEY = 'username';
 
 async function saveRefreshToken(token: string) {
   await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, token);
@@ -40,8 +40,8 @@ async function getUserEmail() {
   return await AsyncStorage.getItem(USER_EMAIL_KEY);
 }
 
-async function saveUserName(userName: string) {
-  await AsyncStorage.setItem(USER_NAME_KEY, userName);
+async function saveUserName(username: string) {
+  await AsyncStorage.setItem(USER_NAME_KEY, username);
 }
 
 async function getUserName() {
@@ -63,7 +63,7 @@ type AuthContextType = {
   isLoading: boolean;
   accessToken: string | null;
   userEmail: string | null;
-  userName: string | null;
+  username: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
@@ -80,7 +80,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
     const [isLoading, setIsLoading] = useState(true);
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [userEmail, setUserEmailState] = useState<string | null>(null);
-    const [userName, setUserNameState] = useState<string | null>(null);
+    const [username, setUserNameState] = useState<string | null>(null);
 
     useEffect(() => {
       restoreSession();
@@ -96,7 +96,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
         console.log('restoreSession -> refreshToken:', refreshToken);
         console.log('restoreSession -> accessToken:', storedAccessToken);
         console.log('restoreSession -> userEmail:', storedUserEmail);
-        console.log('restoreSession -> userName:', storedUserName);
+        console.log('restoreSession -> username:', storedUserName);
 
         if (!refreshToken) {
           setIsAuthenticated(false);
@@ -127,48 +127,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
     const login = async (email: string, password: string) => {
       let accessToken: string;
       let refreshToken: string;
+      let username: string;
 
       try {
-        ({ accessToken, refreshToken } = await loginRequest({ email, password }));
+        ({ accessToken, refreshToken, username } = await loginRequest({ email, password }));
       } catch (error) {
-        if (error instanceof AppError) throw error;
-        throw new AppError(ErrorCode.SERVER_ERROR); 
-      }
+        console.log('login error:', error);
 
-      try {
-        await Promise.all([
-          saveAccessToken(accessToken),
-          saveRefreshToken(refreshToken),
-          saveUserEmail(email),
-        ]);
-      } catch {
-        throw new AppError(ErrorCode.SESSION_SAVE_ERROR);
-      }
+        if (error instanceof AppError) {
+          throw error;
+        }
 
-      setAccessToken(accessToken);
-      setUserEmailState(email);
-      //TODO obtener el username del servidor en lugar de guardarlo en el registro
-      setIsAuthenticated(true);
-    };
-
-    const logout = async () => {
-      await clearSession();
-
-      setAccessToken(null);
-      setUserEmailState(null);
-      setIsAuthenticated(false);
-      //TODO cerrar sesión en el servidor
-    };
-
-    const register = async (username: string, email: string, password: string) => {
-      let accessToken: string;
-      let refreshToken: string;
-
-      try {
-        ({ accessToken, refreshToken } = await registerRequest({ username, email, password }));
-      } catch (error) {
-        if (error instanceof AppError) throw error;
-        throw new AppError(ErrorCode.SERVER_ERROR); 
+        throw new AppError(ErrorCode.UNKNOWN_ERROR);
       }
 
       try {
@@ -186,7 +156,51 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
       setUserEmailState(email);
       setUserNameState(username);
       setIsAuthenticated(true);
-    }
+    };
+
+    const register = async (username: string, email: string, password: string) => {
+      let accessToken: string;
+      let refreshToken: string;
+
+      try {
+        ({ accessToken, refreshToken, username } = await registerRequest({ username, email, password }));
+      } catch (error) {
+        console.log('register error:', error);
+
+        if (error instanceof AppError) {
+          throw error;
+        }
+
+        throw new AppError(ErrorCode.UNKNOWN_ERROR);
+      }
+
+      try {
+        await Promise.all([
+          saveAccessToken(accessToken),
+          saveRefreshToken(refreshToken),
+          saveUserEmail(email),
+          saveUserName(username),
+        ]);
+      } catch {
+        throw new AppError(ErrorCode.SESSION_SAVE_ERROR);
+      }
+
+      setAccessToken(accessToken);
+      setUserEmailState(email);
+      setUserNameState(username);
+      setIsAuthenticated(true);
+    };
+
+    const logout = async () => {
+      await clearSession();
+
+      setAccessToken(null);
+      setUserEmailState(null);
+      setUserNameState(null);
+      setIsAuthenticated(false);
+
+      //TODO cerrar sesión en el servidor
+    };
 
     return (
       <AuthContext.Provider
@@ -195,7 +209,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
           isLoading,
           accessToken,
           userEmail,
-          userName,
+          username,
           login,
           logout,
           register
@@ -216,43 +230,54 @@ export const useAuth = () => {
   return context;
 };
 
+//TODO nada de esto usa eutenticación, y hay q gestionar lo del refresco tmbn
 
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.log('handleResponse error -> status:', response.status, 'body:', errorText);
-    throw new Error(errorText || 'Error en la petición');
-  }
-
-  return response.json() as Promise<T>;
-} //TODO nada de esto usa eutenticación, y hay q gestionar lo del refresco tmbn
-
-async function loginRequest(
-  data: LoginRequest
-): Promise<LoginResponse> {
+async function loginRequest(data: LoginRequest): Promise<LoginResponse> {
   const response = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 
-  return handleResponse<LoginResponse>(response);
+  console.log('Login response status:', response.status);
+
+  if (!response.ok) {
+    try {
+      const errorData = await response.json();
+      console.log('Error from backend:', errorData);
+      
+      throw new AppError(response.status as ErrorCode);
+    } catch (err) {
+      if (err instanceof AppError) throw err;
+      throw new AppError(ErrorCode.SERVER_ERROR);
+    }
+  }
+
+  return response.json();
 }
 
-async function registerRequest(
-  data: RegisterRequest
-): Promise<LoginResponse> {
+async function registerRequest(data: RegisterRequest): Promise<LoginResponse> {
   const response = await fetch(`${BASE_URL}/auth/register`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 
-  return handleResponse<LoginResponse>(response);
+  console.log('Register response status:', response.status);
+
+  if (!response.ok) {
+    try {
+      const errorData = await response.json();
+      console.log('Error from backend:', errorData);
+      
+      throw new AppError(response.status as ErrorCode);
+    } catch (err) {
+      if (err instanceof AppError) throw err;
+      throw new AppError(ErrorCode.SERVER_ERROR);
+    }
+  }
+
+  return response.json();
 }
 
 export type LoginRequest = {
@@ -269,4 +294,5 @@ export type RegisterRequest = {
 export type LoginResponse = {
   accessToken: string;
   refreshToken: string;
+  username: string;
 };

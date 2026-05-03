@@ -962,3 +962,83 @@ Caused by: org.h2.mvstore.MVStoreException: The file is locked: /home/jorge/Docu
 	at org.h2.mvstore.SingleFileStore.open(SingleFileStore.java:81)
 	at org.h2.mvstore.MVStore.<init>(MVStore.java:291)
 	... 157 more
+2026-05-03 02:09:11.873908+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE refresh_token"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE refresh_token"; SQL statement:
+SHOW CREATE TABLE refresh_token [42000-240]
+2026-05-03 02:09:27.151446+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:27.911507+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:28.102079+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:28.275546+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:28.446588+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:28.631108+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:28.809241+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:28.975032+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:35.161346+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:35.741606+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:35.918859+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:36.081817+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:36.248509+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:36.436447+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:36.582502+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SHOW [*]CREATE TABLE REFRESHTOKENS"
+Syntax error in SQL statement "SHOW [*]CREATE TABLE REFRESHTOKENS"; SQL statement:
+SHOW CREATE TABLE REFRESHTOKENS [42000-240]
+2026-05-03 02:09:52.564549+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Tabla "CONSTRAINTS" no encontrada
+Table "CONSTRAINTS" not found; SQL statement:
+SELECT * FROM INFORMATION_SCHEMA.CONSTRAINTS WHERE TABLE_NAME = 'REFRESHTOKENS' [42102-240]
+2026-05-03 02:09:53.249041+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Tabla "CONSTRAINTS" no encontrada
+Table "CONSTRAINTS" not found; SQL statement:
+SELECT * FROM INFORMATION_SCHEMA.CONSTRAINTS WHERE TABLE_NAME = 'REFRESHTOKENS' [42102-240]
+2026-05-03 02:09:53.440025+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Tabla "CONSTRAINTS" no encontrada
+Table "CONSTRAINTS" not found; SQL statement:
+SELECT * FROM INFORMATION_SCHEMA.CONSTRAINTS WHERE TABLE_NAME = 'REFRESHTOKENS' [42102-240]
+2026-05-03 02:09:53.653692+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Tabla "CONSTRAINTS" no encontrada
+Table "CONSTRAINTS" not found; SQL statement:
+SELECT * FROM INFORMATION_SCHEMA.CONSTRAINTS WHERE TABLE_NAME = 'REFRESHTOKENS' [42102-240]

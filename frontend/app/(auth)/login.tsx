@@ -23,6 +23,7 @@ const Login = () => {
     [ErrorCode.UNAUTHORIZED]: t('wrongCredentials'),
     [ErrorCode.SESSION_SAVE_ERROR]: t('errorSavingSession'),
     [ErrorCode.SERVER_ERROR]: t('serverError'),
+    [ErrorCode.BAD_REQUEST]: t('invalidLoginRequest'),
   };
 
   const handleLogin = async () => {

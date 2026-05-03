@@ -1,0 +1,43 @@
+openapi: 3.0.3
+info:
+  title: Telaria Backend API
+  version: 1.0.0
+  description: API for Telaria backend
+
+servers:
+  - url: http://localhost:8082
+    description: Local development server
+
+paths:
+  /auth/register:
+    $ref: './paths/auth.yaml#/paths/~1auth~1register'
+  /auth/login:
+    $ref: './paths/auth.yaml#/paths/~1auth~1login'
+  /auth/logout:
+    $ref: './paths/auth.yaml#/paths/~1auth~1logout'
+  /auth/refresh:
+    $ref: './paths/auth.yaml#/paths/~1auth~1refresh'
+  /users:
+    $ref: './paths/users.yaml#/paths/~1users'
+  /trips:
+    $ref: './paths/trips.yaml#/paths/~1trips'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    RegisterRequest:
+      $ref: './schemas.yaml#/schemas/RegisterRequest'
+    LoginRequest:
+      $ref: './schemas.yaml#/schemas/LoginRequest'
+    LoginResponse:
+      $ref: './schemas.yaml#/schemas/LoginResponse'
+    RefreshRequest:
+      $ref: './schemas.yaml#/schemas/RefreshRequest'
+    RefreshResponse:
+      $ref: './schemas.yaml#/schemas/RefreshResponse'
+    User:
+      $ref: './schemas.yaml#/schemas/User'
