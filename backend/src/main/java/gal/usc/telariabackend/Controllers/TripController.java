@@ -22,7 +22,7 @@ public class TripController implements TripsApi{
 
     @Override
     public ResponseEntity<CreateTrip201Response> createTrip(CreateTripRequest createTripRequest) {
-        UUID id = tripService.createTrip(createTripRequest.getName(), securityHelper.getEmail());
+        UUID id = tripService.createTrip(createTripRequest.getName(), securityHelper.getUserId());
         CreateTrip201Response response = new CreateTrip201Response().id(id);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

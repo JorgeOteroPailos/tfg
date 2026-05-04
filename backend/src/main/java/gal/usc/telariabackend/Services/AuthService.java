@@ -14,11 +14,12 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.stereotype.Service;
@@ -59,7 +60,7 @@ public class AuthService {
     @Transactional
     public LoginResponse registerUser(User u)
             throws AlreadyExistingUserException {
-        if (!userRepository.existsById(u.getEmail())) {
+        if (!userRepository.existsByEmail(u.getEmail())) {
             String unencodedPassword = u.getPassword();
             u.setPassword(passwordEncoder.encode(unencodedPassword));
             userRepository.save(u);
@@ -82,28 +83,20 @@ public class AuthService {
                         loginRequest.getPassword()
                 );
 
-        Authentication authResult = authenticationManager.authenticate(
-                authRequest
-        );
-
-        Object principal = authResult.getPrincipal();
-
-        if (!(principal instanceof UserDetails userDetails)) {
-            throw new IllegalStateException(
-                    "Authentication principal is not a valid UserDetails"
-            );
-        }
+        authenticationManager.authenticate(authRequest);
 
         Instant now = Instant.now();
 
-        String email = userDetails.getUsername();
-        String username = userRepository.findByEmail(email).orElseThrow().getUsername();
+        String email = loginRequest.getEmail();
+        User u = userRepository.findByEmail(email).orElseThrow();
+        String username = u.getUsername();
+        UUID id = u.getId();
 
         org.springframework.security.oauth2.jwt.JwtClaimsSet claims = org.springframework.security.oauth2.jwt.JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
                 .expiresAt(now.plus(accessTokenTTL))
-                .subject(email)
+                .subject(String.valueOf(id))
                 .build();
 
         String accessToken = jwtEncoder.encode(org.springframework.security.oauth2.jwt.JwtEncoderParameters.from(claims)).getTokenValue();
@@ -112,7 +105,7 @@ public class AuthService {
 
         RefreshToken refreshToken = new RefreshToken(
                 refreshTokenString,
-                userDetails.getUsername()
+                id
         );
 
         refreshTokenRepository.save(refreshToken);
@@ -121,9 +114,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(String email) {
-        refreshTokenRepository.deleteAllByUseremail(email);
-    }
+    public void logout(UUID id) {refreshTokenRepository.deleteAllByUserId(id);}
 
     @Transactional
     public RefreshResponse refresh(String refreshTokenString) {
@@ -132,20 +123,20 @@ public class AuthService {
 
         refreshTokenRepository.delete(refreshToken);
 
-        String email = refreshToken.getUseremail();
+        UUID userId = refreshToken.getUserId();
         Instant now = Instant.now();
 
         org.springframework.security.oauth2.jwt.JwtClaimsSet claims = org.springframework.security.oauth2.jwt.JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
                 .expiresAt(now.plus(accessTokenTTL))
-                .subject(email)
+                .subject(userId.toString())
                 .build();
 
         String accessToken = jwtEncoder.encode(org.springframework.security.oauth2.jwt.JwtEncoderParameters.from(claims)).getTokenValue();
 
 
-        RefreshToken newRefreshToken = new RefreshToken(generateUniqueRefreshTokenString(), email);
+        RefreshToken newRefreshToken = new RefreshToken(generateUniqueRefreshTokenString(), userId);
         refreshTokenRepository.save(newRefreshToken);
 
         return new RefreshResponse(accessToken, newRefreshToken.getToken());

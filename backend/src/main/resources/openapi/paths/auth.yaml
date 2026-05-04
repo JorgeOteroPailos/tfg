@@ -54,7 +54,7 @@ paths:
 
   /auth/logout:
     post:
-      summary: Logout
+      summary: Logout from the current device
       operationId: logout
       tags:
         - Authentication

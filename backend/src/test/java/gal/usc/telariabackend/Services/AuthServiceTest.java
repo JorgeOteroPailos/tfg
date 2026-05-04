@@ -15,6 +15,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 
@@ -49,9 +49,6 @@ class AuthServiceTest {
 
     @Mock
     private Authentication authentication;
-
-    @Mock
-    private UserDetails userDetails;
 
     private KeyPair keyPair;
 
@@ -98,7 +95,7 @@ class AuthServiceTest {
                 .accessToken("fake-access-token")
                 .refreshToken("fake-refresh-token");
 
-        when(userRepository.existsById("test@test.com")).thenReturn(false);
+        when(userRepository.existsByEmail("test@test.com")).thenReturn(false);
         when(passwordEncoder.encode("plain-password")).thenReturn("encoded-password");
 
         AuthService spyService = spy(authService);
@@ -112,7 +109,7 @@ class AuthServiceTest {
 
         assertEquals("encoded-password", user.getPassword());
 
-        verify(userRepository).existsById("test@test.com");
+        verify(userRepository).existsByEmail("test@test.com");
         verify(passwordEncoder).encode("plain-password");
         verify(userRepository).save(user);
         verify(spyService).login(any(LoginRequest.class));
@@ -126,7 +123,7 @@ class AuthServiceTest {
                 .accessToken("fake-access-token")
                 .refreshToken("fake-refresh-token");
 
-        when(userRepository.existsById("test@test.com")).thenReturn(false);
+        when(userRepository.existsByEmail("test@test.com")).thenReturn(false);
         when(passwordEncoder.encode("plain-password")).thenReturn("encoded-password");
 
 
@@ -150,11 +147,11 @@ class AuthServiceTest {
     void registerUser_WhenUserAlreadyExists_ShouldThrowExceptionAndNotSaveUser() {
         User user = new User("userName", "test@test.com", "plain-password");
 
-        when(userRepository.existsById("test@test.com")).thenReturn(true);
+        when(userRepository.existsByEmail("test@test.com")).thenReturn(true);
 
         assertThrows(AlreadyExistingUserException.class, () -> authService.registerUser(user));
 
-        verify(userRepository).existsById("test@test.com");
+        verify(userRepository).existsByEmail("test@test.com");
         verify(userRepository, never()).save(any(User.class));
         verify(passwordEncoder, never()).encode(anyString());
         verifyNoInteractions(authenticationManager);
@@ -167,18 +164,13 @@ class AuthServiceTest {
                 "test@test.com",
                 "plain-password"
         );
+        UUID userId= UUID.randomUUID();
 
         when(authenticationManager.authenticate(any(Authentication.class)))
                 .thenReturn(authentication);
 
-        when(authentication.getPrincipal())
-                .thenReturn(userDetails);
-
-        when(userDetails.getUsername())
-                .thenReturn("test@test.com");
-
         when(userRepository.findByEmail("test@test.com"))
-                .thenReturn(Optional.of(new User("userName", "test@test.com", "encoded-password")));
+                .thenReturn(Optional.of(new User("userName", "test@test.com", "encoded-password",userId)));
 
         LoginResponse result = authService.login(loginRequest);
 
@@ -194,7 +186,7 @@ class AuthServiceTest {
         assertEquals("userName", result.getUsername());
 
         verify(authenticationManager).authenticate(any(Authentication.class));
-        verify(refreshTokenRepository, never()).deleteAllByUseremail("test@test.com");
+        verify(refreshTokenRepository, never()).deleteAllByUserId(userId);
         verify(refreshTokenRepository).save(any(RefreshToken.class));
     }
 
@@ -207,12 +199,6 @@ class AuthServiceTest {
 
         when(authenticationManager.authenticate(any(Authentication.class)))
                 .thenReturn(authentication);
-
-        when(authentication.getPrincipal())
-                .thenReturn(userDetails);
-
-        when(userDetails.getUsername())
-                .thenReturn("test@test.com");
 
         when(userRepository.findByEmail("test@test.com"))
                 .thenReturn(Optional.of(new User("userName", "test@test.com", "encoded-password")));
@@ -238,17 +224,13 @@ class AuthServiceTest {
                 "plain-password"
         );
 
+        UUID userId= UUID.randomUUID();
+
         when(authenticationManager.authenticate(any(Authentication.class)))
                 .thenReturn(authentication);
 
-        when(authentication.getPrincipal())
-                .thenReturn(userDetails);
-
-        when(userDetails.getUsername())
-                .thenReturn("test@test.com");
-
         when(userRepository.findByEmail("test@test.com"))
-                .thenReturn(Optional.of(new User("userName", "test@test.com", "encoded-password")));
+                .thenReturn(Optional.of(new User("userName", "test@test.com", "encoded-password", userId)));
 
         LoginResponse result = authService.login(loginRequest);
 
@@ -258,7 +240,7 @@ class AuthServiceTest {
 
         org.springframework.security.oauth2.jwt.Jwt jwt = decoder.decode(result.getAccessToken());
 
-        assertEquals("test@test.com", jwt.getSubject());
+        assertEquals(userId.toString(), jwt.getSubject());
         assertNotNull(jwt.getIssuedAt());
         assertNotNull(jwt.getExpiresAt());
 
@@ -271,24 +253,19 @@ class AuthServiceTest {
                 "test@test.com",
                 "plain-password"
         );
+        UUID userId= UUID.randomUUID();
 
         when(authenticationManager.authenticate(any(Authentication.class)))
                 .thenReturn(authentication);
 
-        when(authentication.getPrincipal())
-                .thenReturn(userDetails);
-
-        when(userDetails.getUsername())
-                .thenReturn("test@test.com");
-
         when(userRepository.findByEmail("test@test.com"))
-                .thenReturn(Optional.of(new User("userName", "test@test.com", "encoded-password")));
+                .thenReturn(Optional.of(new User("userName", "test@test.com", "encoded-password",userId)));
 
         authService.login(loginRequest);
 
         var inOrder = inOrder(refreshTokenRepository);
 
-        inOrder.verify(refreshTokenRepository, never()).deleteAllByUseremail("test@test.com");
+        inOrder.verify(refreshTokenRepository, never()).deleteAllByUserId(userId);
         inOrder.verify(refreshTokenRepository).save(any(RefreshToken.class));
     }
 
@@ -298,18 +275,13 @@ class AuthServiceTest {
                 "test@test.com",
                 "plain-password"
         );
+        UUID id=UUID.randomUUID();
 
         when(authenticationManager.authenticate(any(Authentication.class)))
                 .thenReturn(authentication);
 
-        when(authentication.getPrincipal())
-                .thenReturn(userDetails);
-
-        when(userDetails.getUsername())
-                .thenReturn("test@test.com");
-
         when(userRepository.findByEmail("test@test.com"))
-                .thenReturn(Optional.of(new User("userName", "test@test.com", "encoded-password")));
+                .thenReturn(Optional.of(new User("userName", "test@test.com", "encoded-password",id)));
 
         LoginResponse result = authService.login(loginRequest);
 
@@ -322,7 +294,7 @@ class AuthServiceTest {
 
         assertNotNull(savedRefreshToken);
         assertEquals(result.getRefreshToken(), savedRefreshToken.getToken());
-        assertEquals("test@test.com", savedRefreshToken.getUseremail());
+        assertEquals(id, savedRefreshToken.getUserId());
     }
 
     @Test
@@ -346,19 +318,20 @@ class AuthServiceTest {
 
     @Test
     void logoutShouldDeleteRefreshTokens() {
-        String email = "test@test.com";
+        UUID userId = UUID.randomUUID();
 
-        authService.logout(email);
+        authService.logout(userId);
 
         verify(refreshTokenRepository)
-                .deleteAllByUseremail(email);
+                .deleteAllByUserId(userId);
     }
 
     //###################/REFRESH##############
     @Test
     void refresh_WhenTokenIsValid_ShouldInvalidateOldTokenAndReturnNewPair() {
+        UUID id =  UUID.randomUUID();
         String oldTokenString = "old-refresh-token";
-        RefreshToken oldToken = new RefreshToken(oldTokenString, "test@test.com");
+        RefreshToken oldToken = new RefreshToken(oldTokenString, id);
 
         when(refreshTokenRepository.findByToken(oldTokenString))
                 .thenReturn(Optional.of(oldToken));
@@ -378,7 +351,7 @@ class AuthServiceTest {
 
         org.springframework.security.oauth2.jwt.Jwt jwt = decoder.decode(result.getAccessToken());
 
-        assertEquals("test@test.com", jwt.getSubject());
+        assertEquals(id.toString(), jwt.getSubject());
         assertNotNull(jwt.getIssuedAt());
         assertNotNull(jwt.getExpiresAt());
 
@@ -390,7 +363,7 @@ class AuthServiceTest {
         verify(refreshTokenRepository).save(refreshTokenCaptor.capture());
 
         RefreshToken savedToken = refreshTokenCaptor.getValue();
-        assertEquals("test@test.com", savedToken.getUseremail());
+        assertEquals(id, savedToken.getUserId());
         assertNotEquals(oldTokenString, savedToken.getToken());
     }
 
@@ -412,9 +385,10 @@ class AuthServiceTest {
     void refresh_WhenCalledTwiceWithRotation_BothResponsesShouldBeValid() {
         String firstTokenString = "first-refresh-token";
         String secondTokenString = "second-refresh-token";
+        UUID userId =  UUID.randomUUID();
 
-        RefreshToken firstToken = new RefreshToken(firstTokenString, "test@test.com");
-        RefreshToken secondToken = new RefreshToken(secondTokenString, "test@test.com");
+        RefreshToken firstToken = new RefreshToken(firstTokenString, userId);
+        RefreshToken secondToken = new RefreshToken(secondTokenString, userId);
 
         when(refreshTokenRepository.findByToken(firstTokenString))
                 .thenReturn(Optional.of(firstToken));
@@ -433,7 +407,7 @@ class AuthServiceTest {
         assertNotEquals(firstTokenString, firstResult.getRefreshToken());
 
         org.springframework.security.oauth2.jwt.Jwt firstJwt = decoder.decode(firstResult.getAccessToken());
-        assertEquals("test@test.com", firstJwt.getSubject());
+        assertEquals(userId.toString(), firstJwt.getSubject());
         assertNotNull(firstJwt.getExpiresAt());
         assertTrue(firstJwt.getExpiresAt().isAfter(java.time.Instant.now()));
 
@@ -444,9 +418,8 @@ class AuthServiceTest {
         assertNotNull(secondResult.getRefreshToken());
         assertNotEquals(secondTokenString, secondResult.getRefreshToken());
 
-        // Validar segundo Access Token con Nimbus
         org.springframework.security.oauth2.jwt.Jwt secondJwt = decoder.decode(secondResult.getAccessToken());
-        assertEquals("test@test.com", secondJwt.getSubject());
+        assertEquals(userId.toString(), secondJwt.getSubject());
         assertNotNull(secondJwt.getExpiresAt());
         assertTrue(secondJwt.getExpiresAt().isAfter(java.time.Instant.now()));
 

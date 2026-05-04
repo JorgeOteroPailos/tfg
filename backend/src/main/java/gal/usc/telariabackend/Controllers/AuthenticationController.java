@@ -45,7 +45,7 @@ public class AuthenticationController implements AuthApi {
     public ResponseEntity<Void> logout() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         log.debug("Logout user {}", auth);
-        authService.logout(securityHelper.getEmail());
+        authService.logout(securityHelper.getUserId());
         return ResponseEntity.noContent().build();
     }
 

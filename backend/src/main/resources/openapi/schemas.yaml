@@ -43,6 +43,7 @@ schemas:
       - accessToken
       - refreshToken
       - username
+      - userId
     properties:
       accessToken:
         type: string
@@ -56,6 +57,10 @@ schemas:
         type: string
         description: User's username
         example: juan otero
+      userId:
+        type: string
+        description: User's unique internal ID
+        example: 2103982104
 
   RefreshRequest:
     type: object

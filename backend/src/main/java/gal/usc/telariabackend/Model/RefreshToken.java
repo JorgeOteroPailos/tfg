@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "refreshtokens")
 public class RefreshToken {
@@ -11,20 +13,18 @@ public class RefreshToken {
     @Id
     private String token;
 
-    private String useremail;
+    private UUID userId;
 
     public RefreshToken() {}
 
-    public RefreshToken(String token, String useremail) {
+    public RefreshToken(String token, UUID userId) {
         this.token = token;
-        this.useremail = useremail;
+        this.userId = userId;
     }
 
     public String getToken() {
         return token;
     }
 
-    public String getUseremail() {
-        return useremail;
-    }
+    public UUID getUserId() {return userId;}
 }

@@ -21,8 +21,8 @@ public class TripService {
     }
 
 
-    public UUID createTrip(@NotNull String tripname, String ownerEmail) {
-        User owner = userRepo.findByEmail(ownerEmail).orElseThrow();
+    public UUID createTrip(@NotNull String tripname, UUID userId) {
+        User owner = userRepo.findById(userId).orElseThrow();
         Trip trip = new Trip(owner);
         tripRepo.save(trip);
         return UUID.randomUUID(); //TODO
