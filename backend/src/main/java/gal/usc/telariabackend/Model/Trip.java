@@ -1,6 +1,7 @@
 package gal.usc.telariabackend.Model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -30,10 +31,13 @@ public class Trip {
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Event> events = new ArrayList<>();
 
-    protected Trip() {} // requerido por JPA
+    public UUID getId(){return id;}
 
-    public Trip(User owner) {
+    protected Trip(){}
+
+    public Trip(@NotNull String tripname, User owner) {
         this.owner = owner;
         this.members.add(owner);
+        this.name=tripname;
     }
 }

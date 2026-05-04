@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, useColorScheme, type ViewProps } from 'react-native'
+import { View, type ViewProps } from 'react-native'
 import { Colors } from '../constants/Colors'
 import { useAppTheme } from '../src/theme';
 

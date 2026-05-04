@@ -1,8 +1,10 @@
 package gal.usc.telariabackend.Controllers;
 
-import gal.usc.telariabackend.Model.DTO.*;
+import gal.usc.telariabackend.model.DTO.*;
 import gal.usc.telariabackend.Model.User;
 import gal.usc.telariabackend.Services.AuthService;
+import gal.usc.telariabackend.controllers.AuthApi;
+import gal.usc.telariabackend.model.DTO.*;
 import gal.usc.telariabackend.utils.SecurityHelper;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;

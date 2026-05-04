@@ -3,6 +3,7 @@ interface ThemeColors {
   title: string;
   background: string;
   navBackground: string;
+  uiBackground: string;
   iconColor: string;
   iconColorFocused: string;
   tabBackground: string;
@@ -29,6 +30,7 @@ export const Colors: ColorsType = {
     title: "#fff",
     background: "#252231",
     navBackground: "#201e2b",
+    uibackground: "#2f2b3d",
     iconColor: "#9591a5",
     iconColorFocused: "#fff",
     tabBackground: "#2f2b3d",
@@ -42,6 +44,7 @@ export const Colors: ColorsType = {
     title: "#201e2b",
     background: "#e0dfe8",
     navBackground: "#e8e7ef",
+    uibackground: "#2f2b3d",
     iconColor: "#686477",
     iconColorFocused: "#201e2b",
     tabBackground: "#d6d5e1",

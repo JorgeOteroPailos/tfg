@@ -1,4 +1,4 @@
-import { type TextProps, Text, useColorScheme } from "react-native"
+import { type TextProps, Text } from "react-native"
 import { Colors } from "../constants/Colors"
 import { useAppTheme } from "../src/theme"
 

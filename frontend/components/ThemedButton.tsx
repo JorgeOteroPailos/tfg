@@ -1,11 +1,7 @@
 import { Pressable, PressableProps, StyleSheet } from "react-native"
 import { Colors } from "../constants/Colors"
-import { useAppTheme } from "../src/theme";
 
 const ThemedButton = ({style, ...props}: PressableProps) => {
-  
-  const { themeName } = useAppTheme();
-  const theme = Colors[themeName] ?? Colors.light;
 
   return (
     <Pressable

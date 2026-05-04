@@ -1,8 +1,8 @@
 package gal.usc.telariabackend.Services;
 
-import gal.usc.telariabackend.Model.DTO.LoginRequest;
-import gal.usc.telariabackend.Model.DTO.LoginResponse;
-import gal.usc.telariabackend.Model.DTO.RefreshResponse;
+import gal.usc.telariabackend.model.DTO.LoginRequest;
+import gal.usc.telariabackend.model.DTO.LoginResponse;
+import gal.usc.telariabackend.model.DTO.RefreshResponse;
 import gal.usc.telariabackend.Model.Exceptions.AlreadyExistingUserException;
 import gal.usc.telariabackend.Model.Exceptions.InvalidRefreshTokenException;
 import gal.usc.telariabackend.Model.RefreshToken;

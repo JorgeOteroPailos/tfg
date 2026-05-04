@@ -74,8 +74,8 @@ openApiGenerate {
     generatorName.set("spring")
     inputSpec.set("$rootDir/src/main/resources/openapi/api.yaml")
     outputDir.set(layout.buildDirectory.dir("generated").get().asFile.absolutePath)
-    apiPackage.set("gal.usc.telariabackend.Controllers")
-    modelPackage.set("gal.usc.telariabackend.Model.DTO")
+    apiPackage.set("gal.usc.telariabackend.controllers")
+    modelPackage.set("gal.usc.telariabackend.model.DTO")
     configOptions.set(mapOf(
         "interfaceOnly"      to "true",
         "useSpringBoot3"     to "true",

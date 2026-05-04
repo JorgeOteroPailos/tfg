@@ -1,7 +1,7 @@
 package gal.usc.telariabackend.Services;
 
 
-import gal.usc.telariabackend.Model.DTO.User;
+import gal.usc.telariabackend.model.DTO.User;
 import gal.usc.telariabackend.Repository.UserRepository;
 import org.springframework.stereotype.Service;
 

@@ -21,6 +21,8 @@ paths:
     $ref: './paths/users.yaml#/paths/~1users'
   /trips:
     $ref: './paths/trips.yaml#/paths/~1trips'
+  /trips/{id}:
+    $ref: './paths/trips.yaml#/paths/~1trips~1{id}'
 
 components:
   securitySchemes:
@@ -41,3 +43,7 @@ components:
       $ref: './schemas.yaml#/schemas/RefreshResponse'
     User:
       $ref: './schemas.yaml#/schemas/User'
+    TripSummary:
+      $ref: './schemas.yaml#/schemas/TripSummary'
+    TripDetail:
+      $ref: './schemas.yaml#/schemas/TripDetail'

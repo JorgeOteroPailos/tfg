@@ -97,3 +97,26 @@ schemas:
       username:
         type: string
         example: juanperez
+
+  TripSummary:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        example: Viaje a Roma
+
+  TripDetail:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        example: Viaje a Roma
+      polla:
+        type: string
+        example: la polla gorda que se come este plugin de los cojones #TODO CAMBIAR

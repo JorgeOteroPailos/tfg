@@ -23,8 +23,8 @@ public class TripService {
 
     public UUID createTrip(@NotNull String tripname, UUID userId) {
         User owner = userRepo.findById(userId).orElseThrow();
-        Trip trip = new Trip(owner);
+        Trip trip = new Trip(tripname, owner);
         tripRepo.save(trip);
-        return UUID.randomUUID(); //TODO
+        return trip.getId();
     }
 }

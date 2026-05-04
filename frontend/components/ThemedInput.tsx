@@ -9,7 +9,6 @@ const ThemedInput = ({ style, ...props }: ThemedInputProps) => {
     const { themeName } = useAppTheme();
     const theme = Colors[themeName] ?? Colors.light;
     
-
     return (
         <TextInput
             style={[
