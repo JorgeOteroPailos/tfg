@@ -1,0 +1,17 @@
+# Java / Gradle
+**/build/
+**/.gradle/
+**/out/
+
+# IntelliJ
+**/.idea/
+*.iml
+*.iws
+*.ipr
+
+# Base de datos H2 (Los archivos que hacen petar el remoto)
+*.mv.db
+*.trace.db
+
+# Otros
+.DS_Store
