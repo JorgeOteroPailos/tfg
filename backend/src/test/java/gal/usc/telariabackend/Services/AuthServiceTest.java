@@ -9,13 +9,11 @@ import gal.usc.telariabackend.Model.RefreshToken;
 import gal.usc.telariabackend.Model.User;
 import gal.usc.telariabackend.Repository.RefreshTokenRepository;
 import gal.usc.telariabackend.Repository.UserRepository;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+
 import java.lang.reflect.Field;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.time.Duration;
-import java.util.Date;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +27,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -58,25 +57,35 @@ class AuthServiceTest {
 
     private AuthService authService;
 
+
     @BeforeEach
     void setUp() throws Exception {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
         keyPair = keyPairGenerator.generateKeyPair();
 
+        com.nimbusds.jose.jwk.JWK jwk = new com.nimbusds.jose.jwk.RSAKey.Builder((java.security.interfaces.RSAPublicKey) keyPair.getPublic())
+                .privateKey(keyPair.getPrivate())
+                .keyID(java.util.UUID.randomUUID().toString())
+                .build();
+        com.nimbusds.jose.jwk.source.JWKSource<com.nimbusds.jose.proc.SecurityContext> jwks =
+                new com.nimbusds.jose.jwk.source.ImmutableJWKSet<>(new com.nimbusds.jose.jwk.JWKSet(jwk));
+
+        JwtEncoder jwtEncoder = new org.springframework.security.oauth2.jwt.NimbusJwtEncoder(jwks);
+
         authService = new AuthService(
                 userRepository,
                 refreshTokenRepository,
                 passwordEncoder,
                 authenticationManager,
-                keyPair
+                jwtEncoder
         );
 
-        setPrivateField(authService, "accessTokenTTL", Duration.ofMinutes(30));
+        setPrivateField(authService, Duration.ofMinutes(30));
     }
 
-    private void setPrivateField(Object target, String fieldName, Object value) throws Exception {
-        Field field = target.getClass().getDeclaredField(fieldName);
+    private void setPrivateField(Object target, Object value) throws Exception {
+        Field field = target.getClass().getDeclaredField("accessTokenTTL");
         field.setAccessible(true);
         field.set(target, value);
     }
@@ -243,18 +252,17 @@ class AuthServiceTest {
 
         LoginResponse result = authService.login(loginRequest);
 
-        Claims claims = Jwts.parser()
-                .verifyWith(keyPair.getPublic())
-                .build()
-                .parseSignedClaims(result.getAccessToken())
-                .getPayload();
+        var decoder = org.springframework.security.oauth2.jwt.NimbusJwtDecoder
+                .withPublicKey((java.security.interfaces.RSAPublicKey) keyPair.getPublic())
+                .build();
 
-        assertEquals("test@test.com", claims.getSubject());
-        assertNotNull(claims.getIssuedAt());
-        assertNotNull(claims.getNotBefore());
-        assertNotNull(claims.getExpiration());
+        org.springframework.security.oauth2.jwt.Jwt jwt = decoder.decode(result.getAccessToken());
 
-        assertTrue(claims.getExpiration().after(new Date()));
+        assertEquals("test@test.com", jwt.getSubject());
+        assertNotNull(jwt.getIssuedAt());
+        assertNotNull(jwt.getExpiresAt());
+
+        assertTrue(jwt.getExpiresAt().isAfter(java.time.Instant.now()));
     }
 
     @Test
@@ -364,16 +372,17 @@ class AuthServiceTest {
         assertFalse(result.getRefreshToken().isBlank());
         assertNotEquals(oldTokenString, result.getRefreshToken());
 
-        Claims claims = Jwts.parser()
-                .verifyWith(keyPair.getPublic())
-                .build()
-                .parseSignedClaims(result.getAccessToken())
-                .getPayload();
+        var decoder = org.springframework.security.oauth2.jwt.NimbusJwtDecoder
+                .withPublicKey((java.security.interfaces.RSAPublicKey) keyPair.getPublic())
+                .build();
 
-        assertEquals("test@test.com", claims.getSubject());
-        assertNotNull(claims.getIssuedAt());
-        assertNotNull(claims.getExpiration());
-        assertTrue(claims.getExpiration().after(new Date()));
+        org.springframework.security.oauth2.jwt.Jwt jwt = decoder.decode(result.getAccessToken());
+
+        assertEquals("test@test.com", jwt.getSubject());
+        assertNotNull(jwt.getIssuedAt());
+        assertNotNull(jwt.getExpiresAt());
+
+        assertTrue(jwt.getExpiresAt().isAfter(java.time.Instant.now()));
 
         ArgumentCaptor<RefreshToken> refreshTokenCaptor =
                 ArgumentCaptor.forClass(RefreshToken.class);
@@ -412,6 +421,10 @@ class AuthServiceTest {
         when(refreshTokenRepository.findByToken(secondTokenString))
                 .thenReturn(Optional.of(secondToken));
 
+        var decoder = org.springframework.security.oauth2.jwt.NimbusJwtDecoder
+                .withPublicKey((java.security.interfaces.RSAPublicKey) keyPair.getPublic())
+                .build();
+
         RefreshResponse firstResult = authService.refresh(firstTokenString);
 
         assertNotNull(firstResult.getAccessToken());
@@ -419,13 +432,10 @@ class AuthServiceTest {
         assertNotNull(firstResult.getRefreshToken());
         assertNotEquals(firstTokenString, firstResult.getRefreshToken());
 
-        Claims firstClaims = Jwts.parser()
-                .verifyWith(keyPair.getPublic())
-                .build()
-                .parseSignedClaims(firstResult.getAccessToken())
-                .getPayload();
-        assertEquals("test@test.com", firstClaims.getSubject());
-        assertTrue(firstClaims.getExpiration().after(new Date()));
+        org.springframework.security.oauth2.jwt.Jwt firstJwt = decoder.decode(firstResult.getAccessToken());
+        assertEquals("test@test.com", firstJwt.getSubject());
+        assertNotNull(firstJwt.getExpiresAt());
+        assertTrue(firstJwt.getExpiresAt().isAfter(java.time.Instant.now()));
 
         RefreshResponse secondResult = authService.refresh(secondTokenString);
 
@@ -434,13 +444,11 @@ class AuthServiceTest {
         assertNotNull(secondResult.getRefreshToken());
         assertNotEquals(secondTokenString, secondResult.getRefreshToken());
 
-        Claims secondClaims = Jwts.parser()
-                .verifyWith(keyPair.getPublic())
-                .build()
-                .parseSignedClaims(secondResult.getAccessToken())
-                .getPayload();
-        assertEquals("test@test.com", secondClaims.getSubject());
-        assertTrue(secondClaims.getExpiration().after(new Date()));
+        // Validar segundo Access Token con Nimbus
+        org.springframework.security.oauth2.jwt.Jwt secondJwt = decoder.decode(secondResult.getAccessToken());
+        assertEquals("test@test.com", secondJwt.getSubject());
+        assertNotNull(secondJwt.getExpiresAt());
+        assertTrue(secondJwt.getExpiresAt().isAfter(java.time.Instant.now()));
 
         verify(refreshTokenRepository).delete(firstToken);
         verify(refreshTokenRepository).delete(secondToken);

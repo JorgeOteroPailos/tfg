@@ -257,11 +257,11 @@ class AuthE2ETest {
 
     // ─── Refresh (/auth/refresh) ─────────────────────────────────────────────────
 
-    private String[] registerAndObtainTokens(String username, String email, String password) throws Exception {
+    private String[] registerAndObtainTokens(String username, String email) throws Exception {
         Map<String, String> body = Map.of(
                 "username", username,
                 "email", email,
-                "password", password
+                "password", "pass1234"
         );
 
         MvcResult result = mockMvc.perform(post("/auth/register")
@@ -280,7 +280,7 @@ class AuthE2ETest {
     @Test
     @DisplayName("Refresh: valid token returns 200 and new pair of tokens")
     void refresh_validToken_returnsNewTokens() throws Exception {
-        String[] tokens = registerAndObtainTokens("hugo", "hugo@test.com", "pass1234");
+        String[] tokens = registerAndObtainTokens("hugo", "hugo@test.com");
         String refreshToken = tokens[1];
 
         Map<String, String> body = Map.of("refreshToken", refreshToken);
@@ -317,7 +317,7 @@ class AuthE2ETest {
     @Test
     @DisplayName("Refresh: reusing already used token returns 401")
     void refresh_alreadyUsedToken_returns401() throws Exception {
-        String[] tokens = registerAndObtainTokens("irene", "irene@test.com", "pass1234");
+        String[] tokens = registerAndObtainTokens("irene", "irene@test.com");
         String refreshToken = tokens[1];
 
         Map<String, String> body = Map.of("refreshToken", refreshToken);
@@ -338,7 +338,7 @@ class AuthE2ETest {
     @Test
     @DisplayName("Refresh: the new accessToken is valid for protected routes")
     void refresh_newAccessToken_worksInProtectedRoutes() throws Exception {
-        String[] tokens = registerAndObtainTokens("julia", "julia@test.com", "pass1234");
+        String[] tokens = registerAndObtainTokens("julia", "julia@test.com");
 
         Map<String, String> body = Map.of("refreshToken", tokens[1]);
 
@@ -363,8 +363,7 @@ class AuthE2ETest {
     @DisplayName("Complete flow: register → login → refresh → get users → logout")
     void flujoCompleto_auth() throws Exception {
         // 1. Register
-        String[] tokensRegistro = registerAndObtainTokens("grace", "grace@test.com", "pass1234");
-        String refreshTokenRegistro = tokensRegistro[1];
+        registerAndObtainTokens("grace", "grace@test.com");
 
         // 2. Login with the registered credentials (verifies that the user is saved)
         Map<String, String> loginBody = Map.of(
@@ -376,8 +375,6 @@ class AuthE2ETest {
                         .content(objectMapper.writeValueAsString(loginBody)))
                 .andExpect(status().isOk())
                 .andReturn();
-
-        //TODO ver pq hay un avariable sin usar
 
         Map<?, ?> loginResponse = objectMapper.readValue(loginResult.getResponse().getContentAsString(), Map.class);
         String accessTokenLogin = (String) loginResponse.get("accessToken");

@@ -6,9 +6,11 @@ import gal.usc.telariabackend.Model.User;
 import gal.usc.telariabackend.Repository.TripRepository;
 import gal.usc.telariabackend.Repository.UserRepository;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+@Service
 public class TripService {
     private final TripRepository tripRepo;
     private final UserRepository userRepo;
