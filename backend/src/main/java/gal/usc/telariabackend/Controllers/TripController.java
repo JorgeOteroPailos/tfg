@@ -33,8 +33,9 @@ public class TripController implements TripsApi {
 
     @Override
     public ResponseEntity<List<TripSummary>> listTrips() {
-        return null; //todo
+        return ResponseEntity.status(HttpStatus.OK).body(tripService.listTrips(securityHelper.getUserId()));
     }
+
 
     @Override
     public ResponseEntity<TripDetail>  getTrip(UUID id) {

@@ -1,5 +1,6 @@
 package gal.usc.telariabackend.Model;
 
+import gal.usc.telariabackend.model.DTO.TripSummary;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
@@ -39,5 +40,9 @@ public class Trip {
         this.owner = owner;
         this.members.add(owner);
         this.name=tripname;
+    }
+
+    public TripSummary toTripSummary() {
+        return new TripSummary().id(this.id).name(this.name);
     }
 }

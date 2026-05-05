@@ -1,21 +1,19 @@
 package gal.usc.telariabackend.Services;
 
-import gal.usc.telariabackend.model.DTO.LoginRequest;
-import gal.usc.telariabackend.model.DTO.LoginResponse;
-import gal.usc.telariabackend.model.DTO.RefreshResponse;
 import gal.usc.telariabackend.Model.Exceptions.AlreadyExistingUserException;
 import gal.usc.telariabackend.Model.Exceptions.InvalidRefreshTokenException;
 import gal.usc.telariabackend.Model.RefreshToken;
 import gal.usc.telariabackend.Model.User;
 import gal.usc.telariabackend.Repository.RefreshTokenRepository;
 import gal.usc.telariabackend.Repository.UserRepository;
-
+import gal.usc.telariabackend.model.DTO.LoginRequest;
+import gal.usc.telariabackend.model.DTO.LoginResponse;
+import gal.usc.telariabackend.model.DTO.RefreshResponse;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -44,11 +42,11 @@ public class AuthService {
     private Duration accessTokenTTL;
 
     public AuthService(
-            UserRepository userRepository,
-            RefreshTokenRepository refreshTokenRepository,
-            PasswordEncoder passwordEncoder,
-            AuthenticationManager authenticationManager,
-            JwtEncoder jwtEncoder
+        UserRepository userRepository,
+        RefreshTokenRepository refreshTokenRepository,
+        PasswordEncoder passwordEncoder,
+        AuthenticationManager authenticationManager,
+        JwtEncoder jwtEncoder
     ) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
@@ -59,15 +57,15 @@ public class AuthService {
 
     @Transactional
     public LoginResponse registerUser(User u)
-            throws AlreadyExistingUserException {
+        throws AlreadyExistingUserException {
         if (!userRepository.existsByEmail(u.getEmail())) {
             String unencodedPassword = u.getPassword();
             u.setPassword(passwordEncoder.encode(unencodedPassword));
             userRepository.save(u);
 
             LoginRequest loginRequest = new LoginRequest(
-                    u.getEmail(),
-                    unencodedPassword
+                u.getEmail(),
+                unencodedPassword
             );
             return login(loginRequest);
         } else {
@@ -78,10 +76,10 @@ public class AuthService {
     @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
         Authentication authRequest =
-                UsernamePasswordAuthenticationToken.unauthenticated(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                );
+            UsernamePasswordAuthenticationToken.unauthenticated(
+                loginRequest.getEmail(),
+                loginRequest.getPassword()
+            );
 
         authenticationManager.authenticate(authRequest);
 
@@ -91,56 +89,78 @@ public class AuthService {
         User u = userRepository.findByEmail(email).orElseThrow();
         String username = u.getUsername();
         UUID id = u.getId();
+        System.out.println("Id del usuario: " + id);
 
-        org.springframework.security.oauth2.jwt.JwtClaimsSet claims = org.springframework.security.oauth2.jwt.JwtClaimsSet.builder()
+        org.springframework.security.oauth2.jwt.JwtClaimsSet claims =
+            org.springframework.security.oauth2.jwt.JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
                 .expiresAt(now.plus(accessTokenTTL))
                 .subject(String.valueOf(id))
                 .build();
 
-        String accessToken = jwtEncoder.encode(org.springframework.security.oauth2.jwt.JwtEncoderParameters.from(claims)).getTokenValue();
+        String accessToken = jwtEncoder
+            .encode(
+                org.springframework.security.oauth2.jwt.JwtEncoderParameters.from(
+                    claims
+                )
+            )
+            .getTokenValue();
 
         String refreshTokenString = generateUniqueRefreshTokenString();
 
-        RefreshToken refreshToken = new RefreshToken(
-                refreshTokenString,
-                id
-        );
+        RefreshToken refreshToken = new RefreshToken(refreshTokenString, id);
 
         refreshTokenRepository.save(refreshToken);
 
-        return new LoginResponse().accessToken(accessToken).refreshToken(refreshToken.getToken()).username(username);
+        return new LoginResponse()
+            .accessToken(accessToken)
+            .refreshToken(refreshToken.getToken())
+            .username(username)
+            .userId(id.toString());
     }
 
     @Transactional
-    public void logout(UUID id) {refreshTokenRepository.deleteAllByUserId(id);}
+    public void logout(UUID id) {
+        refreshTokenRepository.deleteAllByUserId(id);
+    }
 
     @Transactional
     public RefreshResponse refresh(String refreshTokenString) {
-        RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenString).orElseThrow(
-                () -> new InvalidRefreshTokenException("Invalid Refresh Token"));
+        RefreshToken refreshToken = refreshTokenRepository
+            .findByToken(refreshTokenString)
+            .orElseThrow(() ->
+                new InvalidRefreshTokenException("Invalid Refresh Token")
+            );
 
         refreshTokenRepository.delete(refreshToken);
 
         UUID userId = refreshToken.getUserId();
         Instant now = Instant.now();
 
-        org.springframework.security.oauth2.jwt.JwtClaimsSet claims = org.springframework.security.oauth2.jwt.JwtClaimsSet.builder()
+        org.springframework.security.oauth2.jwt.JwtClaimsSet claims =
+            org.springframework.security.oauth2.jwt.JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
                 .expiresAt(now.plus(accessTokenTTL))
                 .subject(userId.toString())
                 .build();
 
-        String accessToken = jwtEncoder.encode(org.springframework.security.oauth2.jwt.JwtEncoderParameters.from(claims)).getTokenValue();
+        String accessToken = jwtEncoder
+            .encode(
+                org.springframework.security.oauth2.jwt.JwtEncoderParameters.from(
+                    claims
+                )
+            )
+            .getTokenValue();
 
-
-        RefreshToken newRefreshToken = new RefreshToken(generateUniqueRefreshTokenString(), userId);
+        RefreshToken newRefreshToken = new RefreshToken(
+            generateUniqueRefreshTokenString(),
+            userId
+        );
         refreshTokenRepository.save(newRefreshToken);
 
         return new RefreshResponse(accessToken, newRefreshToken.getToken());
-
     }
 
     //HELPERS
