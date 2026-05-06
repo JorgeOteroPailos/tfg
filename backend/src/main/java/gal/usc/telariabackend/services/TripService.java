@@ -3,10 +3,12 @@ package gal.usc.telariabackend.services;
 
 import gal.usc.telariabackend.model.Trip;
 import gal.usc.telariabackend.model.User;
+import gal.usc.telariabackend.model.dto.TripDetail;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
 import gal.usc.telariabackend.model.dto.TripSummary;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,5 +36,12 @@ public class TripService {
         User u = userRepo.findById(userId).orElseThrow();
         List<Trip> list = tripRepo.findAllByMembersContaining(u);
         return list.stream().map(Trip::toTripSummary).toList();
+    }
+
+    public TripDetail getTripDetails(UUID tripId, UUID userId) {
+        User user = userRepo.findById(userId).orElseThrow();
+        return tripRepo.findByIdAndMembersContaining(tripId, user)
+                .map(Trip::toTripDetails)
+                .orElseThrow(() -> new AccessDeniedException("User is not a member of this trip"));
     }
 }
