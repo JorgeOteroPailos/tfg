@@ -1,7 +1,7 @@
-package gal.usc.telariabackend.Controllers;
+package gal.usc.telariabackend.controllers;
 
-import gal.usc.telariabackend.Model.Exceptions.AlreadyExistingUserException;
-import gal.usc.telariabackend.Model.Exceptions.InvalidRefreshTokenException;
+import gal.usc.telariabackend.model.exceptions.AlreadyExistingUserException;
+import gal.usc.telariabackend.model.exceptions.InvalidRefreshTokenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.BadCredentialsException;

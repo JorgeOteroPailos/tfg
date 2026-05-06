@@ -1,8 +1,7 @@
-package gal.usc.telariabackend.Controllers;
+package gal.usc.telariabackend.controllers;
 
-import gal.usc.telariabackend.controllers.UsersApi;
-import gal.usc.telariabackend.model.DTO.User;
-import gal.usc.telariabackend.Services.UserService;
+import gal.usc.telariabackend.model.dto.User;
+import gal.usc.telariabackend.services.UserService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

@@ -1,11 +1,11 @@
-package gal.usc.telariabackend.Services;
+package gal.usc.telariabackend.services;
 
 
-import gal.usc.telariabackend.Model.Trip;
-import gal.usc.telariabackend.Model.User;
-import gal.usc.telariabackend.Repository.TripRepository;
-import gal.usc.telariabackend.Repository.UserRepository;
-import gal.usc.telariabackend.model.DTO.TripSummary;
+import gal.usc.telariabackend.model.Trip;
+import gal.usc.telariabackend.model.User;
+import gal.usc.telariabackend.repository.TripRepository;
+import gal.usc.telariabackend.repository.UserRepository;
+import gal.usc.telariabackend.model.dto.TripSummary;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 

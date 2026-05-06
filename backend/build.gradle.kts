@@ -75,7 +75,7 @@ openApiGenerate {
     inputSpec.set("$rootDir/src/main/resources/openapi/api.yaml")
     outputDir.set(layout.buildDirectory.dir("generated").get().asFile.absolutePath)
     apiPackage.set("gal.usc.telariabackend.controllers")
-    modelPackage.set("gal.usc.telariabackend.model.DTO")
+    modelPackage.set("gal.usc.telariabackend.model.dto")
     configOptions.set(mapOf(
         "interfaceOnly"      to "true",
         "useSpringBoot3"     to "true",
@@ -87,7 +87,7 @@ openApiGenerate {
     ))
 }
 
-tasks.compileJava {
+tasks.withType<JavaCompile> {
     dependsOn(tasks.openApiGenerate)
 }
 

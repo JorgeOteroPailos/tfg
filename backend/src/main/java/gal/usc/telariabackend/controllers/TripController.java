@@ -1,11 +1,10 @@
-package gal.usc.telariabackend.Controllers;
+package gal.usc.telariabackend.controllers;
 
-import gal.usc.telariabackend.model.DTO.CreateTrip201Response;
-import gal.usc.telariabackend.model.DTO.CreateTripRequest;
-import gal.usc.telariabackend.model.DTO.TripDetail;
-import gal.usc.telariabackend.model.DTO.TripSummary;
-import gal.usc.telariabackend.Services.TripService;
-import gal.usc.telariabackend.controllers.TripsApi;
+import gal.usc.telariabackend.model.dto.CreateTrip201Response;
+import gal.usc.telariabackend.model.dto.CreateTripRequest;
+import gal.usc.telariabackend.model.dto.TripDetail;
+import gal.usc.telariabackend.model.dto.TripSummary;
+import gal.usc.telariabackend.services.TripService;
 import gal.usc.telariabackend.utils.SecurityHelper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

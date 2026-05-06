@@ -1,6 +1,6 @@
-package gal.usc.telariabackend.Model;
+package gal.usc.telariabackend.model;
 
-import gal.usc.telariabackend.model.DTO.RegisterRequest;
+import gal.usc.telariabackend.model.dto.RegisterRequest;
 import jakarta.persistence.*;
 
 import java.util.UUID;

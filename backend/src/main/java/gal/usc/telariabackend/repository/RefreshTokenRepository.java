@@ -1,6 +1,6 @@
-package gal.usc.telariabackend.Repository;
+package gal.usc.telariabackend.repository;
 
-import gal.usc.telariabackend.Model.RefreshToken;
+import gal.usc.telariabackend.model.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

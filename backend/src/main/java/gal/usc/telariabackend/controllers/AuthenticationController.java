@@ -1,10 +1,8 @@
-package gal.usc.telariabackend.Controllers;
+package gal.usc.telariabackend.controllers;
 
-import gal.usc.telariabackend.model.DTO.*;
-import gal.usc.telariabackend.Model.User;
-import gal.usc.telariabackend.Services.AuthService;
-import gal.usc.telariabackend.controllers.AuthApi;
-import gal.usc.telariabackend.model.DTO.*;
+import gal.usc.telariabackend.model.dto.*;
+import gal.usc.telariabackend.model.User;
+import gal.usc.telariabackend.services.AuthService;
 import gal.usc.telariabackend.utils.SecurityHelper;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;

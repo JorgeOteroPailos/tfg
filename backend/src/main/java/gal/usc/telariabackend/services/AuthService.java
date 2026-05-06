@@ -1,14 +1,14 @@
-package gal.usc.telariabackend.Services;
+package gal.usc.telariabackend.services;
 
-import gal.usc.telariabackend.Model.Exceptions.AlreadyExistingUserException;
-import gal.usc.telariabackend.Model.Exceptions.InvalidRefreshTokenException;
-import gal.usc.telariabackend.Model.RefreshToken;
-import gal.usc.telariabackend.Model.User;
-import gal.usc.telariabackend.Repository.RefreshTokenRepository;
-import gal.usc.telariabackend.Repository.UserRepository;
-import gal.usc.telariabackend.model.DTO.LoginRequest;
-import gal.usc.telariabackend.model.DTO.LoginResponse;
-import gal.usc.telariabackend.model.DTO.RefreshResponse;
+import gal.usc.telariabackend.model.exceptions.AlreadyExistingUserException;
+import gal.usc.telariabackend.model.exceptions.InvalidRefreshTokenException;
+import gal.usc.telariabackend.model.RefreshToken;
+import gal.usc.telariabackend.model.User;
+import gal.usc.telariabackend.repository.RefreshTokenRepository;
+import gal.usc.telariabackend.repository.UserRepository;
+import gal.usc.telariabackend.model.dto.LoginRequest;
+import gal.usc.telariabackend.model.dto.LoginResponse;
+import gal.usc.telariabackend.model.dto.RefreshResponse;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
@@ -116,8 +116,7 @@ public class AuthService {
         return new LoginResponse()
             .accessToken(accessToken)
             .refreshToken(refreshToken.getToken())
-            .username(username)
-            .userId(id.toString());
+            .username(username);
     }
 
     @Transactional

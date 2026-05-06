@@ -1,4 +1,4 @@
-package gal.usc.telariabackend.Model;
+package gal.usc.telariabackend.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

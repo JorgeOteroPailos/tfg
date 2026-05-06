@@ -1,11 +1,11 @@
-package gal.usc.telariabackend.Configuration;
+package gal.usc.telariabackend.configuration;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import gal.usc.telariabackend.Repository.UserRepository;
+import gal.usc.telariabackend.repository.UserRepository;
 import java.io.InputStream;
 import java.security.KeyPair;
 import java.security.KeyStore;

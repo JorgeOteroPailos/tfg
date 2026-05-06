@@ -1,4 +1,4 @@
-package gal.usc.telariabackend.Model.Exceptions;
+package gal.usc.telariabackend.model.exceptions;
 
 public class AlreadyExistingUserException extends RuntimeException{
     public final String email;

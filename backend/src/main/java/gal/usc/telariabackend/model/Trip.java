@@ -1,10 +1,9 @@
-package gal.usc.telariabackend.Model;
+package gal.usc.telariabackend.model;
 
-import gal.usc.telariabackend.model.DTO.TripSummary;
+import gal.usc.telariabackend.model.dto.TripSummary;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Entity

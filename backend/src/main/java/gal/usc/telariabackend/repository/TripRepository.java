@@ -1,7 +1,7 @@
-package gal.usc.telariabackend.Repository;
+package gal.usc.telariabackend.repository;
 
-import gal.usc.telariabackend.Model.Trip;
-import gal.usc.telariabackend.Model.User;
+import gal.usc.telariabackend.model.Trip;
+import gal.usc.telariabackend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
