@@ -2,6 +2,7 @@ package gal.usc.telariabackend.services;
 
 import gal.usc.telariabackend.model.Trip;
 import gal.usc.telariabackend.model.User;
+import gal.usc.telariabackend.model.dto.TripDetail;
 import gal.usc.telariabackend.model.dto.TripSummary;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -34,11 +36,13 @@ class TripServiceTest {
 
     private UUID userId;
     private User user;
+    private UUID tripId;
 
     @BeforeEach
     void setUp() {
         tripService = new TripService(tripRepo, userRepo);
         userId = UUID.randomUUID();
+        tripId = UUID.randomUUID();
         user = new User("testUser", "test@test.com", "encoded-password", userId);
     }
 
@@ -124,5 +128,44 @@ class TripServiceTest {
         assertThrows(NoSuchElementException.class, () -> tripService.listTrips(userId));
 
         verifyNoInteractions(tripRepo);
+    }
+
+    @Test
+    void getTripDetails_WhenUserIsMember_ShouldReturnTripDetails() {
+        Trip trip = mock(Trip.class);
+        TripDetail detail = mock(TripDetail.class);
+
+        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
+        when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.of(trip));
+        when(trip.toTripDetails()).thenReturn(detail);
+
+        TripDetail result = tripService.getTripDetails(tripId, userId);
+
+        assertSame(detail, result);
+    }
+
+    @Test
+    void getTripDetails_WhenUserIsNotMember_ShouldThrowAccessDenied() {
+        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
+        when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.empty());
+
+        assertThrows(AccessDeniedException.class, () -> tripService.getTripDetails(tripId, userId));
+    }
+
+    @Test
+    void getTripDetails_WhenUserDoesNotExist_ShouldThrowAndNotQueryTrips() {
+        when(userRepo.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> tripService.getTripDetails(tripId, userId));
+
+        verifyNoInteractions(tripRepo);
+    }
+
+    @Test
+    void getTripDetails_WhenTripDoesNotExist_ShouldThrowAccessDenied() {
+        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
+        when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.empty());
+
+        assertThrows(AccessDeniedException.class, () -> tripService.getTripDetails(tripId, userId));
     }
 }

@@ -23,6 +23,12 @@ paths:
     $ref: './paths/trips.yaml#/paths/~1trips'
   /trips/{id}:
     $ref: './paths/trips.yaml#/paths/~1trips~1{id}'
+  /trips/{id}/expenses:
+    $ref: './paths/expenses.yaml#/paths/~1trips~1{id}~1expenses'
+  /trips/{id}/expenses/{expenseId}:
+    $ref: './paths/expenses.yaml#/paths/~1trips~1{id}~1expenses~1{expenseId}'
+  /trips/{id}/balances:
+    $ref: './paths/expenses.yaml#/paths/~1trips~1{id}~1balances'
 
 components:
   securitySchemes:
@@ -47,3 +53,9 @@ components:
       $ref: './schemas.yaml#/schemas/TripSummary'
     TripDetail:
       $ref: './schemas.yaml#/schemas/TripDetail'
+    CreateExpenseRequest:
+      $ref: './schemas.yaml#/schemas/CreateExpenseRequest'
+    ExpenseSummary:
+      $ref: './schemas.yaml#/schemas/ExpenseSummary'
+    Settlement:
+      $ref: './schemas.yaml#/schemas/Settlement'

@@ -30,6 +30,9 @@ public class Trip {
     private final Set<User> members = new HashSet<>();
 
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Expense> expenses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Event> events = new ArrayList<>();
 
     public UUID getId(){return id;}

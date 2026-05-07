@@ -115,3 +115,63 @@ schemas:
       polla:
         type: string
         example: la polla gorda que se come este plugin de los cojones #TODO CAMBIAR
+
+  CreateExpenseRequest:
+    type: object
+    required:
+      - description
+      - amount
+      - date
+      - beneficiaryIds
+    properties:
+      description:
+        type: string
+        example: Cena en trattoria
+      amount:
+        type: number
+        format: double
+        example: 90.00
+      date:
+        type: string
+        format: date
+        example: '2025-06-15'
+      beneficiaryIds:
+        type: array
+        items:
+          type: string
+          format: uuid
+
+  ExpenseSummary:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      description:
+        type: string
+        example: Mocho en el Sham
+      amount:
+        type: number
+        format: double
+        example: 90.00
+      date:
+        type: string
+        format: date
+        example: '2025-06-15'
+      payerId:
+        type: string
+        format: uuid
+
+  Settlement:
+    type: object
+    properties:
+      fromId:
+        type: string
+        format: uuid
+      toId:
+        type: string
+        format: uuid
+      amount:
+        type: number
+        format: double
+        example: 25.00

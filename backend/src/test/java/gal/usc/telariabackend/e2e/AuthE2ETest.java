@@ -1,6 +1,7 @@
 package gal.usc.telariabackend.e2e;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gal.usc.telariabackend.model.dto.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,13 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-
-import java.util.Map;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.hamcrest.Matchers.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -32,8 +30,6 @@ class AuthE2ETest {
     @Autowired
     private WebApplicationContext context;
 
-    // ─── Helpers ────────────────────────────────────────────────────────────────
-
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders
@@ -42,16 +38,11 @@ class AuthE2ETest {
                 .build();
     }
 
-    /**
-     * Registers a user and returns the access token from the registration response.
-     * Reusable in the tests that need an authenticated user.
-     */
-    private String registerAndObtainToken(String username, String email, String password) throws Exception {
-        Map<String, String> body = Map.of(
-                "username", username,
-                "email", email,
-                "password", password
-        );
+    private LoginResponse registerAndObtainTokens(String username, String email, String password) throws Exception {
+        RegisterRequest body = new RegisterRequest()
+                .username(username)
+                .email(email)
+                .password(password);
 
         MvcResult result = mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -59,39 +50,46 @@ class AuthE2ETest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        Map<?, ?> response = objectMapper.readValue(result.getResponse().getContentAsString(), Map.class);
-        return (String) response.get("accessToken");
+        return objectMapper.readValue(result.getResponse().getContentAsString(), LoginResponse.class);
     }
 
-    // ─── Register (/auth/register) ─────────────────────────────────────────────
+    private String registerAndObtainToken(String username, String email, String password) throws Exception {
+        return registerAndObtainTokens(username, email, password).getAccessToken();
+    }
+
+    // Register
 
     @Test
     @DisplayName("Register: new user returns 201 and tokens")
     void register_newUser_returnsTokens() throws Exception {
-        Map<String, String> body = Map.of(
-                "username", "alice",
-                "email", "alice@test.com",
-                "password", "pass1234"
-        );
+        RegisterRequest body = new RegisterRequest()
+                .username("pepe")
+                .email("pepe@example.com")
+                .password("pass1234");
 
-        mockMvc.perform(post("/auth/register")
+        MvcResult result = mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.accessToken").isNotEmpty())
-                .andExpect(jsonPath("$.refreshToken").isNotEmpty());
+                .andReturn();
+
+        LoginResponse response = objectMapper.readValue(result.getResponse().getContentAsString(), LoginResponse.class);
+
+        assertNotNull(response.getAccessToken());
+        assertFalse(response.getAccessToken().isBlank());
+        assertNotNull(response.getRefreshToken());
+        assertFalse(response.getRefreshToken().isBlank());
     }
 
     @Test
     @DisplayName("Register: duplicate email returns 409")
     void register_duplicateEmail_returns409() throws Exception {
-        registerAndObtainToken("alice", "alice@test.com", "pass1234");
+        registerAndObtainToken("pepe", "pepe@example.com", "pass1234");
 
-        Map<String, String> body = Map.of(
-                "username", "alice2",
-                "email", "alice@test.com",
-                "password", "otrapass"
-        );
+        RegisterRequest body = new RegisterRequest()
+                .username("pepe2")
+                .email("pepe@example.com")
+                .password("otrapass");
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -104,18 +102,17 @@ class AuthE2ETest {
     void register_emptyBody_returns400() throws Exception {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                        .content(objectMapper.writeValueAsString(new RegisterRequest())))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     @DisplayName("Register: invalid email returns 400")
     void register_invalidEmail_returns400() throws Exception {
-        Map<String, String> body = Map.of(
-                "username", "bob",
-                "email", "esto-no-es-un-email",
-                "password", "pass1234"
-        );
+        RegisterRequest body = new RegisterRequest()
+                .username("lola")
+                .email("esto-no-es-un-email")
+                .password("pass1234");
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -123,35 +120,39 @@ class AuthE2ETest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ─── Login (/auth/login) ─────────────────────────────────────────────────
+    // Login
 
     @Test
     @DisplayName("Login: correct credentials return 200 and tokens")
     void login_correctCredentials_returnsTokens() throws Exception {
-        registerAndObtainToken("carol", "carol@test.com", "mypassword");
+        registerAndObtainToken("manolo", "manolo@hotmail.com", "pass1234");
 
-        Map<String, String> body = Map.of(
-                "email", "carol@test.com",
-                "password", "mypassword"
-        );
+        LoginRequest body = new LoginRequest()
+                .email("manolo@hotmail.com")
+                .password("pass1234");
 
-        mockMvc.perform(post("/auth/login")
+        MvcResult result = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").isNotEmpty())
-                .andExpect(jsonPath("$.refreshToken").isNotEmpty());
+                .andReturn();
+
+        LoginResponse response = objectMapper.readValue(result.getResponse().getContentAsString(), LoginResponse.class);
+
+        assertNotNull(response.getAccessToken());
+        assertFalse(response.getAccessToken().isBlank());
+        assertNotNull(response.getRefreshToken());
+        assertFalse(response.getRefreshToken().isBlank());
     }
 
     @Test
     @DisplayName("Login: incorrect password returns 401")
     void login_incorrectPassword_returns401() throws Exception {
-        registerAndObtainToken("dave", "dave@test.com", "correcta");
+        registerAndObtainToken("fran", "fran@gmail.com", "correcta");
 
-        Map<String, String> body = Map.of(
-                "email", "dave@test.com",
-                "password", "incorrecta"
-        );
+        LoginRequest body = new LoginRequest()
+                .email("fran@gmail.com")
+                .password("incorrecta");
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -162,10 +163,9 @@ class AuthE2ETest {
     @Test
     @DisplayName("Login: non-existent user returns 401")
     void login_nonExistentUser_returns401() throws Exception {
-        Map<String, String> body = Map.of(
-                "email", "fantasma@test.com",
-                "password", "daigual"
-        );
+        LoginRequest body = new LoginRequest()
+                .email("fantasma@example.com")
+                .password("daigual");
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -178,18 +178,16 @@ class AuthE2ETest {
     void login_emptyBody_returns400() throws Exception {
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                        .content(objectMapper.writeValueAsString(new LoginRequest())))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     @DisplayName("Login: invalid email returns 400")
     void login_invalidEmail_returns400() throws Exception {
-        Map<String, String> body = Map.of(
-                "username", "bob",
-                "email", "esto-no-es-un-email",
-                "password", "pass1234"
-        );
+        LoginRequest body = new LoginRequest()
+                .email("esto-no-es-un-email")
+                .password("pass1234");
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -197,12 +195,12 @@ class AuthE2ETest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ─── Logout (/auth/logout) ───────────────────────────────────────────────
+    // Logout
 
     @Test
     @DisplayName("Logout: with valid token returns 204")
     void logout_validToken_returns204() throws Exception {
-        String token = registerAndObtainToken("eve", "eve@test.com", "pass1234");
+        String token = registerAndObtainToken("mari", "mari@yahoo.es", "pass1234");
 
         mockMvc.perform(post("/auth/logout")
                         .header("Authorization", "Bearer " + token))
@@ -217,27 +215,36 @@ class AuthE2ETest {
     }
 
     @Test
-    @DisplayName("Logout: invalid/expired token returns 401")
+    @DisplayName("Logout: invalid token returns 401")
     void logout_invalidToken_returns401() throws Exception {
         mockMvc.perform(post("/auth/logout")
                         .header("Authorization", "Bearer token.inventado.invalido"))
                 .andExpect(status().isUnauthorized());
     }
 
-    // ─── Users (/users) ───────────────────────────────────────────────────
-    //TODO cambiar de controlador o algo??
+    // Users
 
     @Test
-    @DisplayName("GET /users: with valid token returns 200 and list")
+    @DisplayName("GET /users: with valid token returns 200 and list containing registered user")
     void getUsers_validToken_returnsList() throws Exception {
-        String token = registerAndObtainToken("frank", "frank@test.com", "pass1234");
+        String token = registerAndObtainToken("curro", "curro@outlook.com", "pass1234");
 
-        mockMvc.perform(get("/users")
+        MvcResult result = mockMvc.perform(get("/users")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                // Al menos frank está en la BD (misma transacción)
-                .andExpect(jsonPath("$[*].email", hasItem("frank@test.com")));
+                .andReturn();
+
+        User[] users = objectMapper.readValue(result.getResponse().getContentAsString(), User[].class);
+
+        assertTrue(users.length > 0);
+        boolean found = false;
+        for (User u : users) {
+            if ("curro@outlook.com".equals(u.getEmail())) {
+                found = true;
+                break;
+            }
+        }
+        assertTrue(found);
     }
 
     @Test
@@ -255,49 +262,33 @@ class AuthE2ETest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ─── Refresh (/auth/refresh) ─────────────────────────────────────────────────
-
-    private String[] registerAndObtainTokens(String username, String email) throws Exception {
-        Map<String, String> body = Map.of(
-                "username", username,
-                "email", email,
-                "password", "pass1234"
-        );
-
-        MvcResult result = mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(body)))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        Map<?, ?> response = objectMapper.readValue(result.getResponse().getContentAsString(), Map.class);
-        return new String[]{
-                (String) response.get("accessToken"),
-                (String) response.get("refreshToken")
-        };
-    }
+    // Refresh
 
     @Test
     @DisplayName("Refresh: valid token returns 200 and new pair of tokens")
     void refresh_validToken_returnsNewTokens() throws Exception {
-        String[] tokens = registerAndObtainTokens("hugo", "hugo@test.com");
-        String refreshToken = tokens[1];
+        LoginResponse tokens = registerAndObtainTokens("paqui", "paqui@example.com", "pass1234");
 
-        Map<String, String> body = Map.of("refreshToken", refreshToken);
+        RefreshRequest body = new RefreshRequest().refreshToken(tokens.getRefreshToken());
 
-        mockMvc.perform(post("/auth/refresh")
+        MvcResult result = mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").isNotEmpty())
-                .andExpect(jsonPath("$.refreshToken").isNotEmpty())
-                .andExpect(jsonPath("$.refreshToken").value(not(refreshToken))); // token rotado
+                .andReturn();
+
+        RefreshResponse response = objectMapper.readValue(result.getResponse().getContentAsString(), RefreshResponse.class);
+
+        assertNotNull(response.getAccessToken());
+        assertFalse(response.getAccessToken().isBlank());
+        assertNotNull(response.getRefreshToken());
+        assertNotEquals(tokens.getRefreshToken(), response.getRefreshToken());
     }
 
     @Test
     @DisplayName("Refresh: invalid token returns 401")
     void refresh_invalidToken_returns401() throws Exception {
-        Map<String, String> body = Map.of("refreshToken", "token-inventado");
+        RefreshRequest body = new RefreshRequest().refreshToken("token-inventado");
 
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -310,25 +301,21 @@ class AuthE2ETest {
     void refresh_emptyBody_returns400() throws Exception {
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                        .content(objectMapper.writeValueAsString(new RefreshRequest())))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     @DisplayName("Refresh: reusing already used token returns 401")
     void refresh_alreadyUsedToken_returns401() throws Exception {
-        String[] tokens = registerAndObtainTokens("irene", "irene@test.com");
-        String refreshToken = tokens[1];
+        LoginResponse tokens = registerAndObtainTokens("rober", "rober@empresa.es", "pass1234");
+        RefreshRequest body = new RefreshRequest().refreshToken(tokens.getRefreshToken());
 
-        Map<String, String> body = Map.of("refreshToken", refreshToken);
-
-        // First use — should work
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isOk());
 
-        // SSecond use — should fail
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
@@ -338,9 +325,9 @@ class AuthE2ETest {
     @Test
     @DisplayName("Refresh: the new accessToken is valid for protected routes")
     void refresh_newAccessToken_worksInProtectedRoutes() throws Exception {
-        String[] tokens = registerAndObtainTokens("julia", "julia@test.com");
+        LoginResponse tokens = registerAndObtainTokens("sole", "sole@correo.com", "pass1234");
 
-        Map<String, String> body = Map.of("refreshToken", tokens[1]);
+        RefreshRequest body = new RefreshRequest().refreshToken(tokens.getRefreshToken());
 
         MvcResult refreshResult = mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -348,78 +335,64 @@ class AuthE2ETest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String nuevoAccessToken = (String) objectMapper
-                .readValue(refreshResult.getResponse().getContentAsString(), Map.class)
-                .get("accessToken");
+        RefreshResponse response = objectMapper.readValue(refreshResult.getResponse().getContentAsString(), RefreshResponse.class);
 
         mockMvc.perform(get("/users")
-                        .header("Authorization", "Bearer " + nuevoAccessToken))
+                        .header("Authorization", "Bearer " + response.getAccessToken()))
                 .andExpect(status().isOk());
     }
 
-    // ─── Complete e2e flow ──────────────────────────────────────────────────
+    // Flujo completo
 
     @Test
     @DisplayName("Complete flow: register → login → refresh → get users → logout")
     void flujoCompleto_auth() throws Exception {
-        // 1. Register
-        registerAndObtainTokens("grace", "grace@test.com");
+        registerAndObtainTokens("kiko", "kiko@example.com", "pass1234");
 
-        // 2. Login with the registered credentials (verifies that the user is saved)
-        Map<String, String> loginBody = Map.of(
-                "email", "grace@test.com",
-                "password", "pass1234"
-        );
+        LoginRequest loginBody = new LoginRequest()
+                .email("kiko@example.com")
+                .password("pass1234");
+
         MvcResult loginResult = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginBody)))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Map<?, ?> loginResponse = objectMapper.readValue(loginResult.getResponse().getContentAsString(), Map.class);
-        String accessTokenLogin = (String) loginResponse.get("accessToken");
-        String refreshTokenLogin = (String) loginResponse.get("refreshToken");
+        LoginResponse loginResponse = objectMapper.readValue(loginResult.getResponse().getContentAsString(), LoginResponse.class);
 
-        // 3. Get users with access token from login
-        mockMvc.perform(get("/users")
-                        .header("Authorization", "Bearer " + accessTokenLogin))
+        MvcResult usersResult = mockMvc.perform(get("/users")
+                        .header("Authorization", "Bearer " + loginResponse.getAccessToken()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].email", hasItem("grace@test.com")));
-
-        // 4. Refresh — get a new pair of tokens
-        MvcResult refreshResult = mockMvc.perform(post("/auth/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("refreshToken", refreshTokenLogin))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").isNotEmpty())
-                .andExpect(jsonPath("$.refreshToken").isNotEmpty())
                 .andReturn();
 
-        Map<?, ?> refreshResponse = objectMapper.readValue(refreshResult.getResponse().getContentAsString(), Map.class);
-        String nuevoAccessToken = (String) refreshResponse.get("accessToken");
-        String nuevoRefreshToken = (String) refreshResponse.get("refreshToken");
+        User[] users = objectMapper.readValue(usersResult.getResponse().getContentAsString(), User[].class);
+        assertTrue(java.util.Arrays.stream(users).anyMatch(u -> "kiko@example.com".equals(u.getEmail())));
 
-        // 5. Check old refresh token no longer works (token rotation)
+        MvcResult refreshResult = mockMvc.perform(post("/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RefreshRequest().refreshToken(loginResponse.getRefreshToken()))))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        RefreshResponse refreshResponse = objectMapper.readValue(refreshResult.getResponse().getContentAsString(), RefreshResponse.class);
+
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("refreshToken", refreshTokenLogin))))
+                        .content(objectMapper.writeValueAsString(new RefreshRequest().refreshToken(loginResponse.getRefreshToken()))))
                 .andExpect(status().isUnauthorized());
 
-        // 6. Get users with the new access token
         mockMvc.perform(get("/users")
-                        .header("Authorization", "Bearer " + nuevoAccessToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].email", hasItem("grace@test.com")));
+                        .header("Authorization", "Bearer " + refreshResponse.getAccessToken()))
+                .andExpect(status().isOk());
 
-        // 7. Logout
         mockMvc.perform(post("/auth/logout")
-                        .header("Authorization", "Bearer " + nuevoAccessToken))
+                        .header("Authorization", "Bearer " + refreshResponse.getAccessToken()))
                 .andExpect(status().isNoContent());
 
-        // 8. Verify that the refresh token obtained in step 4 is invalidated after logout
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("refreshToken", nuevoRefreshToken))))
+                        .content(objectMapper.writeValueAsString(new RefreshRequest().refreshToken(refreshResponse.getRefreshToken()))))
                 .andExpect(status().isUnauthorized());
     }
 }

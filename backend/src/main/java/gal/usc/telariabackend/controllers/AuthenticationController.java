@@ -14,7 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class AuthenticationController implements AuthApi {
+public class AuthenticationController implements AuthenticationApi {
     private final AuthService authService;
 
     private final SecurityHelper securityHelper;

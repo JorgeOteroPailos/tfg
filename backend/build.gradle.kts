@@ -84,6 +84,7 @@ openApiGenerate {
         "generateModels"     to "true",
         "useBeanValidation"  to "true",
         "performBeanValidation" to "true",
+        "useTags" to "true"
     ))
 }
 
