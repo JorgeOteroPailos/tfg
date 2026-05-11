@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, FlatList } from 'react-native';
 import { Link, router } from 'expo-router';
 import ThemedView from '../../components/ThemedView';
@@ -7,12 +7,13 @@ import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../src/theme';
 import { Colors } from '../../constants/Colors';
 import { useAuth } from '../../src/auth';
+import { useTrips } from '../../src/trips';
+import { components } from '../../src/generated/types';
+import { Modal, TextInput, ActivityIndicator } from 'react-native';
 
-interface Trip {
-  id: string;
-  name: string;
-  icon: string;
-}
+type TripSummary = components['schemas']['TripSummary'];
+
+
 
 const Main = () => {
   const { t } = useTranslation();
@@ -21,16 +22,46 @@ const Main = () => {
   const { logout } = useAuth();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [trips, setTrips] = useState<Trip[]>([
-    { id: '1', name: 'España', icon: '🗺️' },
-    { id: '2', name: 'Playa', icon: '🏖️' },
-    { id: '3', name: 'Montaña', icon: '🏔️' },
-  ]);
 
-  const handleCreateTrip = () => {
-    // TODO: Abrir modal para crear nuevo viaje
+  const { listTrips, createTrip } = useTrips();
+  const [trips, setTrips] = useState<TripSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await listTrips();
+        setTrips(data);
+      } catch (e) {
+        router.replace('/login');
+        setError('Error cargando viajes');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, []);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newTripName, setNewTripName] = useState('');
+  const [creating, setCreating] = useState(false);
+
+  const handleCreateTrip = async () => {
+    if (!newTripName.trim()) return;
+    try {
+      setCreating(true);
+      const { id } = await createTrip({ name: newTripName.trim() });
+      setTrips(prev => [...prev, { id, name: newTripName.trim() }]);
+      setNewTripName('');
+      setModalVisible(false);
+    } catch (e) {
+      console.error('Error creando viaje:', e);
+    } finally {
+      setCreating(false);
+    }
   };
-
   const handleLogout = async () => {
     try {
       await logout();
@@ -94,7 +125,7 @@ const Main = () => {
             }}
           >
             <ThemedText style={[styles.sidebarItemText, { color: '#cc475a' }]}>
-              🚪 Cerrar sesión
+              🚪 {t('logout')}
             </ThemedText>
           </TouchableOpacity>
         </View>
@@ -105,7 +136,7 @@ const Main = () => {
         {/* New Trip Card */}
         <TouchableOpacity
           style={[styles.tripCard, styles.newTripCard, { backgroundColor: theme.tint }]}
-          onPress={handleCreateTrip}
+          onPress={() => setModalVisible(true)}
         >
           <ThemedText style={styles.newTripTitle}>Nuevo viaje</ThemedText>
           <View style={styles.newTripButton}>
@@ -116,7 +147,7 @@ const Main = () => {
         {/* Trips List */}
         <FlatList
           data={trips}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item.id ?? ''}
           scrollEnabled={true}
           contentContainerStyle={styles.tripsList}
           renderItem={({ item }) => (
@@ -127,7 +158,6 @@ const Main = () => {
               }}
             >
               <View style={styles.tripContent}>
-                <ThemedText style={styles.tripIcon}>{item.icon}</ThemedText>
                 <ThemedText style={styles.tripName}>{item.name}</ThemedText>
               </View>
               <ThemedText style={styles.tripArrow}>→</ThemedText>
@@ -144,6 +174,53 @@ const Main = () => {
           onPress={() => setSidebarOpen(false)}
         />
       )}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setModalVisible(false)}
+        >
+          <TouchableOpacity activeOpacity={1} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
+            <ThemedText style={styles.modalTitle}>{t('newTrip')}</ThemedText>
+
+            <TextInput
+              style={[styles.modalInput, { color: theme.text, borderColor: theme.tint }]}
+              placeholder={t('tripName')}
+              placeholderTextColor={theme.icon}
+              value={newTripName}
+              onChangeText={setNewTripName}
+              autoFocus
+              onSubmitEditing={handleCreateTrip}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => { setModalVisible(false); setNewTripName(''); }}
+              >
+                <ThemedText>Cancelar</ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: theme.tint }]}
+                onPress={handleCreateTrip}
+                disabled={creating || !newTripName.trim()}
+              >
+                {creating
+                  ? <ActivityIndicator color="white" />
+                  : <ThemedText style={{ color: 'white', fontWeight: '600' }}>Crear</ThemedText>
+                }
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
     </ThemedView>
   );
 };
@@ -272,5 +349,41 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: 12,
     opacity: 0.6,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBox: {
+    width: '80%',
+    borderRadius: 16,
+    padding: 24,
+    gap: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  modalInput: {
+    borderWidth: 1.5,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+  },
+  modalButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  cancelButton: {
+    backgroundColor: 'transparent',
   },
 });

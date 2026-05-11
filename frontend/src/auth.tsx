@@ -67,6 +67,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
+  callAuthenticated: (url: string, options?: RequestInit) => Promise<Response>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -202,6 +203,63 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
       //TODO cerrar sesión en el servidor
     };
 
+    const callAuthenticated = async (path: string, options?: RequestInit): Promise<Response> => {
+      const currentToken = await getAccessToken();
+      const url = `${BASE_URL}${path}`;
+
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...options?.headers,
+          'Authorization': `Bearer ${currentToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status !== 401) {
+
+        console.log('llama exitosa  a ', url);
+        return response;
+      }
+
+      console.log('Token expirado, intentando refresh...');
+
+      // Token expirado — intentar refresh
+      const refreshToken = await getRefreshToken();
+      if (!refreshToken) {
+        await clearSession();
+        setIsAuthenticated(false);
+        throw new AppError(ErrorCode.UNKNOWN_ERROR);
+      }
+
+      const refreshResponse = await fetch(`${BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!refreshResponse.ok) {
+        await clearSession();
+        setIsAuthenticated(false);
+        throw new AppError(ErrorCode.UNKNOWN_ERROR);
+      }
+
+      const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await refreshResponse.json();
+      await saveAccessToken(newAccessToken);
+      await saveRefreshToken(newRefreshToken);
+      setAccessToken(newAccessToken);
+
+      // Reintentar llamada original con nuevo token
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...options?.headers,
+          'Authorization': `Bearer ${newAccessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+    };
+
     return (
       <AuthContext.Provider
         value={{
@@ -212,7 +270,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
           username,
           login,
           logout,
-          register
+          register,
+          callAuthenticated
         }}
       >
         {children}

@@ -10,6 +10,7 @@ interface ThemeColors {
   tabIconDefault: string;
   tint: string;
   border: string;
+  icon: string;
 }
 
 interface ColorsType {
@@ -30,13 +31,14 @@ export const Colors: ColorsType = {
     title: "#fff",
     background: "#252231",
     navBackground: "#201e2b",
-    uibackground: "#2f2b3d",
+    uiBackground: "#2f2b3d",
     iconColor: "#9591a5",
     iconColorFocused: "#fff",
     tabBackground: "#2f2b3d",
     tabIconDefault: "#9591a5",
     tint: "#6849a7",
     border: "#3d3850",
+    icon: "#9591a5",
   },
 
   light: {
@@ -44,12 +46,13 @@ export const Colors: ColorsType = {
     title: "#201e2b",
     background: "#e0dfe8",
     navBackground: "#e8e7ef",
-    uibackground: "#2f2b3d",
+    uiBackground: "#2f2b3d",
     iconColor: "#686477",
     iconColorFocused: "#201e2b",
     tabBackground: "#d6d5e1",
     tabIconDefault: "#686477",
     tint: "#6849a7",
     border: "#c9c8d4",
+    icon: "#686477",
   },
 };

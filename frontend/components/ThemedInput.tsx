@@ -1,4 +1,4 @@
-import { TextInput, type TextInputProps, useColorScheme, StyleSheet } from "react-native"
+import { TextInput, type TextInputProps, StyleSheet } from "react-native"
 import { Colors } from "../constants/Colors"
 import { useAppTheme } from "../src/theme";
 
