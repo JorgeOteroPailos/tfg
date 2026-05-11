@@ -165,7 +165,7 @@ class TripE2ETest {
     // GET /trips/{id}
 
     @Test
-    @DisplayName("GET /trips/{id}: owner gets trip details")
+    @DisplayName("GET /trips/{tripId}: owner gets trip details")
     void getTrip_owner_returns200WithDetails() throws Exception {
         String token = registerAndObtainToken("mari", "mari@yahoo.es");
         UUID tripId = createTripAndObtainId(token, "Viaje a París");
@@ -182,7 +182,7 @@ class TripE2ETest {
     }
 
     @Test
-    @DisplayName("GET /trips/{id}: non-member gets 403")
+    @DisplayName("GET /trips/{tripId}: non-member gets 403")
     void getTrip_nonMember_returns403() throws Exception {
         String pepe = registerAndObtainToken("pepe", "pepe@example.com");
         String manolo = registerAndObtainToken("manolo", "manolo@hotmail.com");
@@ -194,7 +194,7 @@ class TripE2ETest {
     }
 
     @Test
-    @DisplayName("GET /trips/{id}: non-existent trip returns 403")
+    @DisplayName("GET /trips/{tripId}: non-existent trip returns 403")
     void getTrip_nonExistentTrip_returns403() throws Exception {
         String token = registerAndObtainToken("curro", "curro@outlook.com");
 
@@ -204,16 +204,16 @@ class TripE2ETest {
     }
 
     @Test
-    @DisplayName("GET /trips/{id}: without token returns 401")
+    @DisplayName("GET /trips/{tripId}: without token returns 401")
     void getTrip_withoutToken_returns401() throws Exception {
         mockMvc.perform(get("/trips/" + UUID.randomUUID()))
                 .andExpect(status().isUnauthorized());
     }
 
-    // Flujo completo
+    // Complete flow
 
     @Test
-    @DisplayName("Complete flow: create trip → list → get details")
+    @DisplayName("Complete flow: create trip -> list -> get details")
     void flujoCompleto_trips() throws Exception {
         String token = registerAndObtainToken("paqui", "paqui@example.com");
         UUID tripId = createTripAndObtainId(token, "Viaje a Tokyo");

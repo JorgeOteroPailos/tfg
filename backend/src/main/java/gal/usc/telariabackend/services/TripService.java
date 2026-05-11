@@ -4,6 +4,7 @@ package gal.usc.telariabackend.services;
 import gal.usc.telariabackend.model.Trip;
 import gal.usc.telariabackend.model.User;
 import gal.usc.telariabackend.model.dto.TripDetail;
+import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
 import gal.usc.telariabackend.model.dto.TripSummary;
@@ -40,8 +41,9 @@ public class TripService {
 
     public TripDetail getTripDetails(UUID tripId, UUID userId) {
         User user = userRepo.findById(userId).orElseThrow();
-        return tripRepo.findByIdAndMembersContaining(tripId, user)
-                .map(Trip::toTripDetails)
-                .orElseThrow(() -> new AccessDeniedException("User is not a member of this trip"));
+        return tripRepo.findByIdAndMembersContaining(tripId, user).map(Trip::toTripDetails)
+                .orElseThrow(() -> new NotATripMemberException("User is not a member of this trip"));
     }
+
+
 }

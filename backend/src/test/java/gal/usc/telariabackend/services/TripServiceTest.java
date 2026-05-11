@@ -4,6 +4,7 @@ import gal.usc.telariabackend.model.Trip;
 import gal.usc.telariabackend.model.User;
 import gal.usc.telariabackend.model.dto.TripDetail;
 import gal.usc.telariabackend.model.dto.TripSummary;
+import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
 
@@ -149,7 +150,7 @@ class TripServiceTest {
         when(userRepo.findById(userId)).thenReturn(Optional.of(user));
         when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.empty());
 
-        assertThrows(AccessDeniedException.class, () -> tripService.getTripDetails(tripId, userId));
+        assertThrows(NotATripMemberException.class, () -> tripService.getTripDetails(tripId, userId));
     }
 
     @Test
@@ -166,6 +167,6 @@ class TripServiceTest {
         when(userRepo.findById(userId)).thenReturn(Optional.of(user));
         when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.empty());
 
-        assertThrows(AccessDeniedException.class, () -> tripService.getTripDetails(tripId, userId));
+        assertThrows(NotATripMemberException.class, () -> tripService.getTripDetails(tripId, userId));
     }
 }

@@ -2,7 +2,9 @@ package gal.usc.telariabackend.controllers;
 
 import gal.usc.telariabackend.model.exceptions.AlreadyExistingUserException;
 import gal.usc.telariabackend.model.exceptions.InvalidRefreshTokenException;
+import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import gal.usc.telariabackend.model.exceptions.TripNotFoundException;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -55,12 +57,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error;
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ProblemDetail handleAccessDeniedException(AccessDeniedException e) {
+
+    @ExceptionHandler(NotATripMemberException.class)
+    public ProblemDetail handleAccessDeniedException(NotATripMemberException e) {
         ProblemDetail error = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
-        error.setTitle("USer doesn't belong to this trip");
+        error.setTitle("User doesn't belong to this trip");
         error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
-                .pathSegment("error", "doesnt-have-permission").build().toUri());
+                .pathSegment("error", "doesnt-belong-to-trip").build().toUri());
         error.setDetail(e.getMessage());
         return error;
     }

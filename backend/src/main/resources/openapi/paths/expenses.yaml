@@ -1,5 +1,5 @@
 paths:
-  /trips/{id}/expenses:
+  /trips/{tripId}/expenses:
     post:
       summary: Add an expense to a trip
       operationId: createExpense
@@ -8,7 +8,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: tripId
           in: path
           required: true
           schema:
@@ -46,7 +46,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: tripId
           in: path
           required: true
           schema:
@@ -66,7 +66,7 @@ paths:
         '403':
           description: Not a member of this trip
 
-  /trips/{id}/expenses/{expenseId}:
+  /trips/{tripId}/expenses/{expenseId}:
     delete:
       summary: Delete an expense
       operationId: deleteExpense
@@ -75,7 +75,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: tripId
           in: path
           required: true
           schema:
@@ -95,7 +95,7 @@ paths:
         '403':
           description: Not a member of this trip or not the payer
 
-  /trips/{id}/balances:
+  /trips/{tripId}/balances:
     get:
       summary: Get balances for a trip
       operationId: getBalances
@@ -104,7 +104,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: tripId
           in: path
           required: true
           schema:

@@ -106,6 +106,18 @@ sourceSets {
     }
 }
 
+tasks.named("build") {
+    dependsOn("generateFrontendTypes")
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.register("generateFrontendTypes", Exec::class) {
+    inputs.files(fileTree("src/main/resources").include("**/*.yaml"))
+    outputs.file("../frontend/src/generated/types.ts")
+
+    workingDir("../frontend")
+    commandLine("npm", "run", "generate:types")
 }

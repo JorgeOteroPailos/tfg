@@ -21,14 +21,14 @@ paths:
     $ref: './paths/users.yaml#/paths/~1users'
   /trips:
     $ref: './paths/trips.yaml#/paths/~1trips'
-  /trips/{id}:
-    $ref: './paths/trips.yaml#/paths/~1trips~1{id}'
-  /trips/{id}/expenses:
-    $ref: './paths/expenses.yaml#/paths/~1trips~1{id}~1expenses'
-  /trips/{id}/expenses/{expenseId}:
-    $ref: './paths/expenses.yaml#/paths/~1trips~1{id}~1expenses~1{expenseId}'
-  /trips/{id}/balances:
-    $ref: './paths/expenses.yaml#/paths/~1trips~1{id}~1balances'
+  /trips/{tripId}:
+    $ref: './paths/trips.yaml#/paths/~1trips~1{tripId}'
+  /trips/{tripId}/expenses:
+    $ref: './paths/expenses.yaml#/paths/~1trips~1{tripId}~1expenses'
+  /trips/{tripId}/expenses/{expenseId}:
+    $ref: './paths/expenses.yaml#/paths/~1trips~1{tripId}~1expenses~1{expenseId}'
+  /trips/{tripId}/balances:
+    $ref: './paths/expenses.yaml#/paths/~1trips~1{tripId}~1balances'
 
 components:
   securitySchemes:

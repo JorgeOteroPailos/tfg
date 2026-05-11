@@ -24,14 +24,14 @@ public class ExpenseController implements ExpensesApi{
     }
 
     @Override
-    public ResponseEntity<CreateTrip201Response> createExpense(UUID id, CreateExpenseRequest createExpenseRequest) {
-        //UUID id=ExpenseService.createExpense
-        return ExpensesApi.super.createExpense(id, createExpenseRequest);
+    public ResponseEntity<CreateTrip201Response> createExpense(UUID tripId, CreateExpenseRequest createExpenseRequest) {
+        UUID expenseId=expenseService.createExpense(tripId, securityHelper.getUserId(), createExpenseRequest);
+        return ExpensesApi.super.createExpense(tripId, createExpenseRequest);
     }
 
     @Override
-    public ResponseEntity<Void> deleteExpense(UUID id, UUID expenseId) {
-        return ExpensesApi.super.deleteExpense(id, expenseId);
+    public ResponseEntity<Void> deleteExpense(UUID tripId, UUID expenseId) {
+        return ExpensesApi.super.deleteExpense(tripId, expenseId);
     }
 
     @Override

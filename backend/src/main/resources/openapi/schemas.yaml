@@ -112,9 +112,9 @@ schemas:
       name:
         type: string
         example: Viaje a Roma
-      polla:
+      hola:
         type: string
-        example: la polla gorda que se come este plugin de los cojones #TODO CAMBIAR
+        example: campo de ejemplo qtengo q cambiar #TODO CAMBIAR
 
   CreateExpenseRequest:
     type: object
@@ -123,6 +123,7 @@ schemas:
       - amount
       - date
       - beneficiaryIds
+      - payerId
     properties:
       description:
         type: string
@@ -140,6 +141,9 @@ schemas:
         items:
           type: string
           format: uuid
+      payerId:
+        type: string
+        format: uuid
 
   ExpenseSummary:
     type: object
