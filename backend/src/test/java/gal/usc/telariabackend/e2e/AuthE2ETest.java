@@ -225,39 +225,26 @@ class AuthE2ETest {
     // Users
 
     @Test
-    @DisplayName("GET /users: with valid token returns 200 and list containing registered user")
-    void getUsers_validToken_returnsList() throws Exception {
+    @DisplayName("GET /trips: with valid token returns 200")
+    void getTrips_validToken_returns200() throws Exception {
         String token = registerAndObtainToken("curro", "curro@outlook.com", "pass1234");
 
-        MvcResult result = mockMvc.perform(get("/users")
+        mockMvc.perform(get("/trips")
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        User[] users = objectMapper.readValue(result.getResponse().getContentAsString(), User[].class);
-
-        assertTrue(users.length > 0);
-        boolean found = false;
-        for (User u : users) {
-            if ("curro@outlook.com".equals(u.getEmail())) {
-                found = true;
-                break;
-            }
-        }
-        assertTrue(found);
+                .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("GET /users: without token returns 401")
-    void getUsers_withoutToken_returns401() throws Exception {
-        mockMvc.perform(get("/users"))
+    @DisplayName("GET /trips: without token returns 401")
+    void getTrips_withoutToken_returns401() throws Exception {
+        mockMvc.perform(get("/trips"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("GET /users: invalid token returns 401")
-    void getUsers_invalidToken_returns401() throws Exception {
-        mockMvc.perform(get("/users")
+    @DisplayName("GET /trips: invalid token returns 401")
+    void getTrips_invalidToken_returns401() throws Exception {
+        mockMvc.perform(get("/trips")
                         .header("Authorization", "Bearer token.inventado.invalido"))
                 .andExpect(status().isUnauthorized());
     }
@@ -337,15 +324,13 @@ class AuthE2ETest {
 
         RefreshResponse response = objectMapper.readValue(refreshResult.getResponse().getContentAsString(), RefreshResponse.class);
 
-        mockMvc.perform(get("/users")
+        mockMvc.perform(get("/trips")
                         .header("Authorization", "Bearer " + response.getAccessToken()))
                 .andExpect(status().isOk());
     }
 
-    // Flujo completo
-
     @Test
-    @DisplayName("Complete flow: register → login → refresh → get users → logout")
+    @DisplayName("Complete flow: register -> login -> refresh -> get trips -> logout")
     void flujoCompleto_auth() throws Exception {
         registerAndObtainTokens("kiko", "kiko@example.com", "pass1234");
 
@@ -361,13 +346,9 @@ class AuthE2ETest {
 
         LoginResponse loginResponse = objectMapper.readValue(loginResult.getResponse().getContentAsString(), LoginResponse.class);
 
-        MvcResult usersResult = mockMvc.perform(get("/users")
+        mockMvc.perform(get("/trips")
                         .header("Authorization", "Bearer " + loginResponse.getAccessToken()))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        User[] users = objectMapper.readValue(usersResult.getResponse().getContentAsString(), User[].class);
-        assertTrue(java.util.Arrays.stream(users).anyMatch(u -> "kiko@example.com".equals(u.getEmail())));
+                .andExpect(status().isOk());
 
         MvcResult refreshResult = mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -382,7 +363,7 @@ class AuthE2ETest {
                         .content(objectMapper.writeValueAsString(new RefreshRequest().refreshToken(loginResponse.getRefreshToken()))))
                 .andExpect(status().isUnauthorized());
 
-        mockMvc.perform(get("/users")
+        mockMvc.perform(get("/trips")
                         .header("Authorization", "Bearer " + refreshResponse.getAccessToken()))
                 .andExpect(status().isOk());
 

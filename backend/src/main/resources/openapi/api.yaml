@@ -17,8 +17,6 @@ paths:
     $ref: './paths/auth.yaml#/paths/~1auth~1logout'
   /auth/refresh:
     $ref: './paths/auth.yaml#/paths/~1auth~1refresh'
-  /users:
-    $ref: './paths/users.yaml#/paths/~1users'
   /trips:
     $ref: './paths/trips.yaml#/paths/~1trips'
   /trips/{tripId}:
@@ -29,6 +27,18 @@ paths:
     $ref: './paths/expenses.yaml#/paths/~1trips~1{tripId}~1expenses~1{expenseId}'
   /trips/{tripId}/balances:
     $ref: './paths/expenses.yaml#/paths/~1trips~1{tripId}~1balances'
+  /trips/{tripId}/join-requests:
+    $ref: './paths/membership.yaml#/paths/~1trips~1{tripId}~1join-requests'
+  /trips/{tripId}/join-requests/{requestId}:
+    $ref: './paths/membership.yaml#/paths/~1trips~1{tripId}~1join-requests~1{requestId}'
+  /users/{userId}/invitations:
+    $ref: './paths/membership.yaml#/paths/~1users~1{userId}~1invitations'
+  /trips/{tripId}/members/me:
+    $ref: './paths/membership.yaml#/paths/~1trips~1{tripId}~1members~1me'
+  /users/me/invitations:
+    $ref: './paths/membership.yaml#/paths/~1users~1me~1invitations'
+  /users/me/invitations/{invitationId}:
+    $ref: './paths/membership.yaml#/paths/~1users~1me~1invitations~1{invitationId}'
 
 components:
   securitySchemes:
@@ -36,26 +46,3 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-  schemas:
-    RegisterRequest:
-      $ref: './schemas.yaml#/schemas/RegisterRequest'
-    LoginRequest:
-      $ref: './schemas.yaml#/schemas/LoginRequest'
-    LoginResponse:
-      $ref: './schemas.yaml#/schemas/LoginResponse'
-    RefreshRequest:
-      $ref: './schemas.yaml#/schemas/RefreshRequest'
-    RefreshResponse:
-      $ref: './schemas.yaml#/schemas/RefreshResponse'
-    User:
-      $ref: './schemas.yaml#/schemas/User'
-    TripSummary:
-      $ref: './schemas.yaml#/schemas/TripSummary'
-    TripDetail:
-      $ref: './schemas.yaml#/schemas/TripDetail'
-    CreateExpenseRequest:
-      $ref: './schemas.yaml#/schemas/CreateExpenseRequest'
-    ExpenseSummary:
-      $ref: './schemas.yaml#/schemas/ExpenseSummary'
-    Settlement:
-      $ref: './schemas.yaml#/schemas/Settlement'

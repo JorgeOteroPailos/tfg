@@ -1,6 +1,6 @@
 package gal.usc.telariabackend.services;
 
-import gal.usc.telariabackend.model.exceptions.AlreadyExistingUserException;
+import gal.usc.telariabackend.model.exceptions.AlreadyDoneException;
 import gal.usc.telariabackend.model.exceptions.InvalidRefreshTokenException;
 import gal.usc.telariabackend.model.RefreshToken;
 import gal.usc.telariabackend.model.User;
@@ -57,7 +57,7 @@ public class AuthService {
 
     @Transactional
     public LoginResponse registerUser(User u)
-        throws AlreadyExistingUserException {
+        throws AlreadyDoneException {
         if (!userRepository.existsByEmail(u.getEmail())) {
             String unencodedPassword = u.getPassword();
             u.setPassword(passwordEncoder.encode(unencodedPassword));
@@ -69,7 +69,7 @@ public class AuthService {
             );
             return login(loginRequest);
         } else {
-            throw new AlreadyExistingUserException(u.getEmail());
+            throw new AlreadyDoneException("There is already a registered user with email "+u.getEmail());
         }
     }
 
@@ -89,7 +89,6 @@ public class AuthService {
         User u = userRepository.findByEmail(email).orElseThrow();
         String username = u.getUsername();
         UUID id = u.getId();
-        System.out.println("Id del usuario: " + id);
 
         org.springframework.security.oauth2.jwt.JwtClaimsSet claims =
             org.springframework.security.oauth2.jwt.JwtClaimsSet.builder()

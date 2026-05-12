@@ -58,7 +58,6 @@ class TripServiceTest {
 
         Trip savedTrip = tripCaptor.getValue();
         assertEquals("Mi Viaje", savedTrip.getName());
-        assertEquals(user, savedTrip.getOwner());
     }
 
     @Test

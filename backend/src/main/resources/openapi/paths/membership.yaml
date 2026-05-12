@@ -1,0 +1,171 @@
+paths:
+  /trips/{tripId}/join-requests:
+    post:
+      summary: Submit a join request to the selected trip
+      operationId: createJoinRequest
+      tags:
+        - Membership
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Join request created successfully
+        '401':
+          description: Not authenticated
+        '403':
+          description: Trip not found
+        '409':
+          description: Already a member or request already pending
+
+  /trips/{tripId}/join-requests/{requestId}:
+    delete:
+      summary: Accept or reject a join request
+      operationId: resolveJoinRequest
+      tags:
+        - Membership
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/ResolveJoinRequest'
+      responses:
+        '204':
+          description: Request resolved successfully
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip
+
+  /users/{userId}/invitations:
+    post:
+      summary: Invite a user to a trip
+      operationId: createInvitation
+      tags:
+        - Membership
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CreateInvitationRequest'
+      responses:
+        '201':
+          description: Invitation created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip
+        '409':
+          description: User is already a member or invitation already pending
+
+  /users/me/invitations:
+    get:
+      summary: Get my pending invitations
+      operationId: getMyInvitations
+      tags:
+        - Membership
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of pending invitations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../schemas.yaml#/schemas/InvitationSummary'
+        '401':
+          description: Not authenticated
+
+  /users/me/invitations/{invitationId}:
+    delete:
+      summary: Accept or reject an invitation
+      operationId: resolveInvitation
+      tags:
+        - Membership
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: invitationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/ResolveJoinRequest'
+      responses:
+        '204':
+          description: Invitation resolved successfully
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not your invitation
+
+  /trips/{tripId}/members/me:
+    delete:
+      summary: Leave a trip
+      operationId: leaveTrip
+      tags:
+        - Membership
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Left the trip successfully
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip

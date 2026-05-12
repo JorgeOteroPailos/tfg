@@ -68,6 +68,12 @@ dependencies {
     // Lo ponemos x2 x si lo quito del normal //TODO revisar
     testImplementation("com.h2database:h2")
     testImplementation("org.springframework.security:spring-security-test")
+
+    //Lombok
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+    testCompileOnly("org.projectlombok:lombok")
+    testAnnotationProcessor("org.projectlombok:lombok")
 }
 
 openApiGenerate {

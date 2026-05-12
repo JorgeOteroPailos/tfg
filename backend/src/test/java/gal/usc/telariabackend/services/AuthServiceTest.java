@@ -3,7 +3,7 @@ package gal.usc.telariabackend.services;
 import gal.usc.telariabackend.model.dto.LoginRequest;
 import gal.usc.telariabackend.model.dto.LoginResponse;
 import gal.usc.telariabackend.model.dto.RefreshResponse;
-import gal.usc.telariabackend.model.exceptions.AlreadyExistingUserException;
+import gal.usc.telariabackend.model.exceptions.AlreadyDoneException;
 import gal.usc.telariabackend.model.exceptions.InvalidRefreshTokenException;
 import gal.usc.telariabackend.model.RefreshToken;
 import gal.usc.telariabackend.model.User;
@@ -149,7 +149,7 @@ class AuthServiceTest {
 
         when(userRepository.existsByEmail("test@test.com")).thenReturn(true);
 
-        assertThrows(AlreadyExistingUserException.class, () -> authService.registerUser(user));
+        assertThrows(AlreadyDoneException.class, () -> authService.registerUser(user));
 
         verify(userRepository).existsByEmail("test@test.com");
         verify(userRepository, never()).save(any(User.class));

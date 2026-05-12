@@ -179,3 +179,33 @@ schemas:
         type: number
         format: double
         example: 25.00
+
+  ResolveJoinRequest:
+    type: object
+    required:
+      - accepted
+    properties:
+      accepted:
+        type: boolean
+
+  CreateInvitationRequest:
+    type: object
+    required:
+      - userId
+    properties:
+      userId:
+        type: string
+        format: uuid
+
+  InvitationSummary:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      tripId:
+        type: string
+        format: uuid
+      tripName:
+        type: string
+        example: Viaje a Roma

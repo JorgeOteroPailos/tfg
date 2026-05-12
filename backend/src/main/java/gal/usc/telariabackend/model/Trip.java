@@ -18,10 +18,6 @@ public class Trip {
 
     private String name;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
-
     @ManyToMany
     @JoinTable(
             name = "trip_members",
@@ -41,7 +37,6 @@ public class Trip {
     protected Trip(){}
 
     public Trip(@NotNull String tripname, User owner) {
-        this.owner = owner;
         this.members.add(owner);
         this.name=tripname;
     }
@@ -52,10 +47,6 @@ public class Trip {
 
     public String getName() {
         return  name;
-    }
-
-    public User getOwner() {
-        return  owner;
     }
 
     public Set<User> getMembers() {
