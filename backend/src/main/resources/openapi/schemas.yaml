@@ -191,9 +191,9 @@ schemas:
   CreateInvitationRequest:
     type: object
     required:
-      - userId
+      - tripId
     properties:
-      userId:
+      tripId:
         type: string
         format: uuid
 

@@ -9,4 +9,11 @@ import lombok.Setter;
 @Table(name="joinrequest")
 @Getter
 @Setter
-public class JoinRequest extends PendingMembership { }
+public class JoinRequest extends PendingMembership {
+    public JoinRequest(Trip trip, User user) {
+        super(trip, user);
+    }
+
+    public JoinRequest() {
+    }
+}

@@ -42,7 +42,7 @@ public class TripService {
     public TripDetail getTripDetails(UUID tripId, UUID userId) {
         User user = userRepo.findById(userId).orElseThrow();
         return tripRepo.findByIdAndMembersContaining(tripId, user).map(Trip::toTripDetails)
-                .orElseThrow(() -> new NotATripMemberException("User is not a member of this trip"));
+                .orElseThrow(() -> new NotATripMemberException());
     }
 
 

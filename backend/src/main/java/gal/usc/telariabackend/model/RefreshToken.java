@@ -3,14 +3,19 @@ package gal.usc.telariabackend.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.util.UUID;
 
+@Getter
 @Entity
 @Table(name = "refreshtokens")
-public class RefreshToken {
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class RefreshToken{
 
     @Id
+    @EqualsAndHashCode.Include
     private String token;
 
     private UUID userId;
@@ -22,9 +27,4 @@ public class RefreshToken {
         this.userId = userId;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public UUID getUserId() {return userId;}
 }

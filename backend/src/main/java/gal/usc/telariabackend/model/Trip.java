@@ -2,22 +2,30 @@ package gal.usc.telariabackend.model;
 
 import gal.usc.telariabackend.model.dto.TripDetail;
 import gal.usc.telariabackend.model.dto.TripSummary;
+import gal.usc.telariabackend.model.exceptions.AlreadyDoneException;
 import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.util.*;
 
 @Entity
 @Table(name = "trips")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Trip {
 
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
     private UUID id;
 
+    @Getter
     private String name;
 
+    @Getter
     @ManyToMany
     @JoinTable(
             name = "trip_members",
@@ -32,8 +40,6 @@ public class Trip {
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Event> events = new ArrayList<>();
 
-    public UUID getId(){return id;}
-
     protected Trip(){}
 
     public Trip(@NotNull String tripname, User owner) {
@@ -43,14 +49,6 @@ public class Trip {
 
     public TripSummary toTripSummary() {
         return new TripSummary().id(this.id).name(this.name);
-    }
-
-    public String getName() {
-        return  name;
-    }
-
-    public Set<User> getMembers() {
-        return members;
     }
 
     public TripDetail toTripDetails(){return new TripDetail().id(this.id).name(this.name).hola("TODO");}//TODO
@@ -69,6 +67,18 @@ public class Trip {
 
         if (!isMember) {
             throw new NotATripMemberException("User " + u.getId() + " is not a member of trip " + this.id);
+        }
+    }
+
+    public void assertIsNotMember(UUID userId) {
+        if (members.stream().anyMatch(u -> u.getId().equals(userId))) {
+            throw new AlreadyDoneException("User " + userId + " is already a member of trip " + this.id);
+        }
+    }
+
+    public void assertIsNotMember(User u) {
+        if (members.contains(u)) {
+            throw new AlreadyDoneException("User " + u.getId()+ " is already a member of trip " + this.id);
         }
     }
 }

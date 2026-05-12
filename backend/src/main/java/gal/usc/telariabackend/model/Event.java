@@ -1,15 +1,18 @@
 package gal.usc.telariabackend.model;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "events")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @ManyToOne

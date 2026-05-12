@@ -6,12 +6,15 @@ import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import gal.usc.telariabackend.model.exceptions.TripNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -61,6 +64,26 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         error.setTitle("User doesn't belong to this trip");
         error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
                 .pathSegment("error", "doesnt-belong-to-trip").build().toUri());
+        error.setDetail(e.getMessage());
+        return error;
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ProblemDetail handleNoSuchElementException(NoSuchElementException e) {
+        ProblemDetail error = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        error.setTitle("Element not found");
+        error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
+                .pathSegment("error", "element-not-found").build().toUri());
+        error.setDetail(e.getMessage());
+        return error;
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ProblemDetail handleAccessDenied(AccessDeniedException e) {
+        ProblemDetail error = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+        error.setTitle("Access denied");
+        error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
+                .pathSegment("error", "access-denied").build().toUri());
         error.setDetail(e.getMessage());
         return error;
     }

@@ -2,32 +2,30 @@ package gal.usc.telariabackend.model;
 
 import gal.usc.telariabackend.model.dto.RegisterRequest;
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
+@Getter
 @Entity
 @Table(name="users")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
 
     private String username;
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @Column(unique=true)
     private String email;
 
+    @Setter
     private String password;
-
-    public String getEmail() {return email;}
-
-    public String getUsername() {return username;}
-
-    public String getPassword() { return password; }
-    public void setPassword(String encoded) { this.password = encoded; }
-
-    public UUID getId() {return id;}
 
     public User() {
 
