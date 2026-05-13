@@ -1,7 +1,6 @@
 package gal.usc.telariabackend.repository;
 
 import gal.usc.telariabackend.model.Invitation;
-import gal.usc.telariabackend.model.dto.InvitationSummary;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

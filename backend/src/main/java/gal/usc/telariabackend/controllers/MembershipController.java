@@ -16,12 +16,13 @@ import java.util.UUID;
 @RestController
 public class MembershipController implements MembershipApi{
 
-    private MembershipService membershipService;
+    private final MembershipService membershipService;
 
     private final SecurityHelper securityHelper;
 
-    public MembershipController(SecurityHelper securityHelper) {
+    public MembershipController(SecurityHelper securityHelper, MembershipService membershipService) {
         this.securityHelper = securityHelper;
+        this.membershipService = membershipService;
     }
 
     @Override

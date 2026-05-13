@@ -44,7 +44,7 @@ public class MembershipService {
     public void createJoinRequest(UUID userId, UUID tripId){
         Trip trip=tripRepo.findById(tripId).orElseThrow(TripNotFoundException::new);
         User user =userRepo.findById(userId).orElseThrow(IllegalStateException::new);
-        trip.assertIsMember(user);
+        trip.assertIsNotMember(user);
         joinRequestRepo.save(new JoinRequest(trip, user));
     }
 
@@ -56,8 +56,8 @@ public class MembershipService {
     public void leaveTrip(UUID userId, UUID tripId){
         Trip trip=tripRepo.findById(tripId).orElseThrow(TripNotFoundException::new);
         User user=userRepo.findById(userId).orElseThrow(IllegalStateException::new);
-        trip.assertIsNotMember(user);
-        trip.getMembers().add(user);
+        trip.assertIsMember(user);
+        trip.getMembers().remove(user);
         tripRepo.save(trip);
     }
 
@@ -83,7 +83,7 @@ public class MembershipService {
         User invitedUser=request.getUser();
         trip.assertIsNotMember(invitedUser);
         if(accepted){
-            trip.getMembers().add(user);
+            trip.getMembers().add(invitedUser);
         }
         joinRequestRepo.delete(request);
     }

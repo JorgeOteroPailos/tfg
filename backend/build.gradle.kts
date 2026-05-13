@@ -65,7 +65,6 @@ dependencies {
 
     // Tests
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    // Lo ponemos x2 x si lo quito del normal //TODO revisar
     testImplementation("com.h2database:h2")
     testImplementation("org.springframework.security:spring-security-test")
 

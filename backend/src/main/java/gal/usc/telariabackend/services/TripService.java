@@ -9,7 +9,6 @@ import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
 import gal.usc.telariabackend.model.dto.TripSummary;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,8 +41,6 @@ public class TripService {
     public TripDetail getTripDetails(UUID tripId, UUID userId) {
         User user = userRepo.findById(userId).orElseThrow();
         return tripRepo.findByIdAndMembersContaining(tripId, user).map(Trip::toTripDetails)
-                .orElseThrow(() -> new NotATripMemberException());
+                .orElseThrow(NotATripMemberException::new);
     }
-
-
 }
