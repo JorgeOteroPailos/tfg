@@ -1,10 +1,14 @@
 package gal.usc.telariabackend.services;
 
 
+import gal.usc.telariabackend.model.JoinRequest;
 import gal.usc.telariabackend.model.Trip;
 import gal.usc.telariabackend.model.User;
+import gal.usc.telariabackend.model.dto.JoinRequestSummary;
 import gal.usc.telariabackend.model.dto.TripDetail;
+import gal.usc.telariabackend.model.dto.UserProfile;
 import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
+import gal.usc.telariabackend.repository.JoinRequestRepository;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
 import gal.usc.telariabackend.model.dto.TripSummary;
@@ -18,10 +22,12 @@ import java.util.UUID;
 public class TripService {
     private final TripRepository tripRepo;
     private final UserRepository userRepo;
+    private final JoinRequestRepository joinRequestRepo;
 
-    public TripService(TripRepository tripRepository,  UserRepository userRepo) {
+    public TripService(TripRepository tripRepository,  UserRepository userRepo, JoinRequestRepository joinRequestRepo) {
         this.tripRepo = tripRepository;
         this.userRepo = userRepo;
+        this.joinRequestRepo = joinRequestRepo;
     }
 
 
@@ -40,7 +46,23 @@ public class TripService {
 
     public TripDetail getTripDetails(UUID tripId, UUID userId) {
         User user = userRepo.findById(userId).orElseThrow();
-        return tripRepo.findByIdAndMembersContaining(tripId, user).map(Trip::toTripDetails)
+        Trip trip = tripRepo.findByIdAndMembersContaining(tripId, user)
                 .orElseThrow(NotATripMemberException::new);
+
+        List<JoinRequestSummary> pendingRequests = joinRequestRepo.findAllByTrip(trip)
+                .stream()
+                .map(JoinRequest::toJoinRequestSummary)
+                .toList();
+
+        List<UserProfile> members = trip.getMembers()
+                .stream()
+                .map(User::toUserProfile)
+                .toList();
+
+        return new TripDetail()
+                .id(trip.getId())
+                .name(trip.getName())
+                .members(members)
+                .pendingRequests(pendingRequests);
     }
 }

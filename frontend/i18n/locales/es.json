@@ -46,5 +46,10 @@
   "chooseTheme": "Selecciona el tema de la aplicación",
   "light": "Claro",
   "dark": "Oscuro",
-  "system": "Sistema"
+  "system": "Sistema",
+
+  "create": "Crear",
+  "newTrip": "Nuevo Viaje",
+  "tripName": "Nombre del Viaje",
+  "cancel": "Cancelar"
 }

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, FlatList } from 'react-native';
 import { Link, router } from 'expo-router';
-import ThemedView from '../../components/ThemedView';
 import ThemedText from '../../components/ThemedText';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../src/theme';
@@ -10,6 +9,7 @@ import { useAuth } from '../../src/auth';
 import { useTrips } from '../../src/trips';
 import { components } from '../../src/generated/types';
 import { Modal, TextInput, ActivityIndicator } from 'react-native';
+import ThemedInput from '../../components/ThemedInput';
 
 type TripSummary = components['schemas']['TripSummary'];
 
@@ -72,7 +72,7 @@ const Main = () => {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.navBackground }]}>
         <TouchableOpacity
@@ -138,7 +138,7 @@ const Main = () => {
           style={[styles.tripCard, styles.newTripCard, { backgroundColor: theme.tint }]}
           onPress={() => setModalVisible(true)}
         >
-          <ThemedText style={styles.newTripTitle}>Nuevo viaje</ThemedText>
+          <ThemedText style={styles.newTripTitle}>{t('newTrip')}</ThemedText>
           <View style={styles.newTripButton}>
             <ThemedText style={styles.newTripButtonText}>+</ThemedText>
           </View>
@@ -166,7 +166,7 @@ const Main = () => {
         />
       </View>
 
-      {/* Overlay para cerrar sidebar al clickear fuera */}
+      {/* Overlay to close the sidebar when clicking outside */}
       {sidebarOpen && (
         <TouchableOpacity
           style={styles.overlay}
@@ -188,7 +188,7 @@ const Main = () => {
           <TouchableOpacity activeOpacity={1} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
             <ThemedText style={styles.modalTitle}>{t('newTrip')}</ThemedText>
 
-            <TextInput
+            <ThemedInput
               style={[styles.modalInput, { color: theme.text, borderColor: theme.tint }]}
               placeholder={t('tripName')}
               placeholderTextColor={theme.icon}
@@ -203,7 +203,7 @@ const Main = () => {
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => { setModalVisible(false); setNewTripName(''); }}
               >
-                <ThemedText>Cancelar</ThemedText>
+                <ThemedText>{t('cancel')}</ThemedText>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -213,7 +213,7 @@ const Main = () => {
               >
                 {creating
                   ? <ActivityIndicator color="white" />
-                  : <ThemedText style={{ color: 'white', fontWeight: '600' }}>Crear</ThemedText>
+                  : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('create')}</ThemedText>
                 }
               </TouchableOpacity>
             </View>
@@ -221,7 +221,7 @@ const Main = () => {
         </TouchableOpacity>
       </Modal>
 
-    </ThemedView>
+    </View>
   );
 };
 

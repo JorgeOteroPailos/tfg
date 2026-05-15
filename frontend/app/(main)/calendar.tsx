@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, FlatList, Alert } from 'react-native';
-import ThemedView from '../../components/ThemedView';
 import ThemedText from '../../components/ThemedText';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../src/theme';
@@ -83,7 +82,7 @@ const CalendarScreen = () => {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.tabIconDefault }]}>
         <ThemedText style={styles.title}>{t('calendar')}</ThemedText>
@@ -230,7 +229,7 @@ const CalendarScreen = () => {
           />
         )}
       </View>
-    </ThemedView>
+    </View>
   );
 };
 

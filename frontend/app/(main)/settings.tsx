@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Pressable, Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import ThemedView from '../../components/ThemedView';
 import ThemedText from '../../components/ThemedText';
 
 import {
@@ -66,14 +65,14 @@ const Settings = () => {
 
   if (isLoading) {
     return (
-      <ThemedView style={styles.container}>
+      <View style={styles.container}>
         <ThemedText>{t('loading')}</ThemedText>
-      </ThemedView>
+      </View>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <ThemedText title={true} style={styles.title}>
         {t('settings')}
       </ThemedText>
@@ -131,7 +130,7 @@ const Settings = () => {
           />
         </View>
       </View>
-    </ThemedView>
+    </View>
   );
 };
 

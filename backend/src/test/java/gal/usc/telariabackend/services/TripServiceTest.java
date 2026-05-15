@@ -1,10 +1,13 @@
 package gal.usc.telariabackend.services;
 
+import gal.usc.telariabackend.model.JoinRequest;
 import gal.usc.telariabackend.model.Trip;
 import gal.usc.telariabackend.model.User;
+import gal.usc.telariabackend.model.dto.JoinRequestSummary;
 import gal.usc.telariabackend.model.dto.TripDetail;
 import gal.usc.telariabackend.model.dto.TripSummary;
 import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
+import gal.usc.telariabackend.repository.JoinRequestRepository;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
 
@@ -16,10 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -33,19 +33,25 @@ class TripServiceTest {
     @Mock
     private UserRepository userRepo;
 
+    @Mock
+    private JoinRequestRepository joinRequestRepo;
+
     private TripService tripService;
 
     private UUID userId;
     private User user;
     private UUID tripId;
+    private Trip trip;
 
     @BeforeEach
     void setUp() {
-        tripService = new TripService(tripRepo, userRepo);
+        tripService = new TripService(tripRepo, userRepo, joinRequestRepo);
         userId = UUID.randomUUID();
         tripId = UUID.randomUUID();
         user = new User("testUser", "test@test.com", "encoded-password", userId);
+        trip = mock(Trip.class);
     }
+
 
     @Test
     void createTrip_WhenUserExists_ShouldSaveTripAndReturnItsId() {
@@ -131,17 +137,40 @@ class TripServiceTest {
     }
 
     @Test
-    void getTripDetails_WhenUserIsMember_ShouldReturnTripDetails() {
-        Trip trip = mock(Trip.class);
-        TripDetail detail = mock(TripDetail.class);
+    void getTripDetails_WhenUserIsMember_ShouldReturnDetailsWithMembersAndPendingRequests() {
+        User member = new User("manolo", "manolo@hotmail.com", "encoded", UUID.randomUUID());
+        Set<User> members = new HashSet<>(Set.of(user, member));
+        JoinRequest joinRequest = mock(JoinRequest.class);
+        JoinRequestSummary summary = mock(JoinRequestSummary.class);
+        Trip realTrip = mock(Trip.class);
 
         when(userRepo.findById(userId)).thenReturn(Optional.of(user));
-        when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.of(trip));
-        when(trip.toTripDetails()).thenReturn(detail);
+        when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.of(realTrip));
+        when(realTrip.getId()).thenReturn(tripId);
+        when(realTrip.getName()).thenReturn("Viaje a Roma");
+        when(realTrip.getMembers()).thenReturn(members);
+        when(joinRequestRepo.findAllByTrip(realTrip)).thenReturn(List.of(joinRequest));
+        when(joinRequest.toJoinRequestSummary()).thenReturn(summary);
 
         TripDetail result = tripService.getTripDetails(tripId, userId);
 
-        assertSame(detail, result);
+        assertEquals(tripId, result.getId());
+        assertEquals("Viaje a Roma", result.getName());
+        assertEquals(2, result.getMembers().size());
+        assertEquals(1, result.getPendingRequests().size());
+        assertSame(summary, result.getPendingRequests().get(0));
+    }
+
+    @Test
+    void getTripDetails_WhenNoPendingRequests_ShouldReturnEmptyPendingRequests() {
+        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
+        when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.of(trip));
+        when(trip.getMembers()).thenReturn(Set.of(user));
+        when(joinRequestRepo.findAllByTrip(trip)).thenReturn(List.of());
+
+        TripDetail result = tripService.getTripDetails(tripId, userId);
+
+        assertTrue(result.getPendingRequests().isEmpty());
     }
 
     @Test

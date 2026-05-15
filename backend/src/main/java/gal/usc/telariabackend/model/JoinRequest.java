@@ -1,5 +1,6 @@
 package gal.usc.telariabackend.model;
 
+import gal.usc.telariabackend.model.dto.JoinRequestSummary;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -15,5 +16,11 @@ public class JoinRequest extends PendingMembership {
     }
 
     public JoinRequest() {
+    }
+
+    public JoinRequestSummary toJoinRequestSummary() {
+        return new JoinRequestSummary()
+                .id(this.getId())
+                .requester(this.getUser().toUserProfile());
     }
 }

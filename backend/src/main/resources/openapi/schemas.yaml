@@ -103,6 +103,24 @@ schemas:
         type: string
         example: Viaje a Roma
 
+  UserProfile:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      username:
+        type: string
+
+  JoinRequestSummary:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      requester:
+        $ref: '#/schemas/UserProfile'
+
   TripDetail:
     type: object
     properties:
@@ -111,10 +129,14 @@ schemas:
         format: uuid
       name:
         type: string
-        example: Viaje a Roma
-      hola:
-        type: string
-        example: campo de ejemplo qtengo q cambiar #TODO CAMBIAR
+      members:
+        type: array
+        items:
+          $ref: '#/schemas/UserProfile'
+      pendingRequests:
+        type: array
+        items:
+          $ref: '#/schemas/JoinRequestSummary'
 
   CreateExpenseRequest:
     type: object

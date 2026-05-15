@@ -1,6 +1,7 @@
 package gal.usc.telariabackend.model;
 
 import gal.usc.telariabackend.model.dto.RegisterRequest;
+import gal.usc.telariabackend.model.dto.UserProfile;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -48,6 +49,10 @@ public class User {
         this.username = registerRequest.getUsername();
         this.email = registerRequest.getEmail();
         this.password = registerRequest.getPassword();
+    }
+
+    public UserProfile toUserProfile() {
+        return new UserProfile().id(this.id).username(this.username);
     }
 
 }

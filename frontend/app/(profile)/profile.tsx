@@ -1,14 +1,12 @@
-import { StyleSheet } from 'react-native';
-import ThemedView from '../../components/ThemedView';
+import { StyleSheet, View } from 'react-native';
 import ThemedText from '../../components/ThemedText';
 import ThemedButton from '../../components/ThemedButton';
-
 import { useAuth } from '../../src/auth';
 import { t } from 'i18next';
 import { router } from 'expo-router';
 
 const Profile = () => {
-  const { userEmail, userName, logout } = useAuth();
+  const { userEmail, username, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
@@ -16,27 +14,32 @@ const Profile = () => {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <ThemedText title={true}>
         {t('profile')}
       </ThemedText>
 
-      <ThemedView style={styles.infoContainer}>
+      <View style={styles.infoContainer}>
         <ThemedText>
-          {t('username')}: {userName ?? t('notAvailable')}
+          {t('username')}: {username ?? t('notAvailable')}
         </ThemedText>
 
         <ThemedText>
           {t('email')}: {userEmail ?? t('notAvailable')}
         </ThemedText>
-      </ThemedView>
+      </View>
+
+      <ThemedButton onPress={() => router.push('/(profile)/qr')}>
+        <ThemedText>{t('showQR')}</ThemedText>
+      </ThemedButton>
 
       <ThemedButton onPress={handleLogout}>
-        <ThemedText>
-          {t('logout')}
-        </ThemedText>
+        <ThemedText>{t('logout')}</ThemedText>
       </ThemedButton>
-    </ThemedView>
+
+    </View>
+
+    
   );
 };
 

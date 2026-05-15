@@ -1,7 +1,6 @@
-import { StyleSheet, Alert } from 'react-native';
+import { StyleSheet, Alert, Text, View } from 'react-native';
 import { useState } from 'react';
 import { Link, useRouter } from 'expo-router';
-import ThemedView from '../../components/ThemedView';
 import ThemedText from '../../components/ThemedText';
 import ThemedButton from '../../components/ThemedButton';
 import ThemedInput from '../../components/ThemedInput';
@@ -9,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../../src/auth';
 import { AppError, ErrorCode } from '../../src/AppError';
+import { Colors } from '../../constants/Colors';
 
 const Login = () => {
   const { t } = useTranslation();
@@ -46,7 +46,7 @@ const Login = () => {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <ThemedText title={true}>
         {t('loginScreenDescription')}
       </ThemedText>
@@ -72,17 +72,17 @@ const Login = () => {
         onPress={handleLogin}
         disabled={isLoading}
       >
-        <ThemedText>
+        <Text style={{ color: Colors.dark.title }}>
           {isLoading ? t('loading') : t('login')}
-        </ThemedText>
+        </Text>
       </ThemedButton>
 
       <Link href="/(auth)/register">
         <ThemedText>
-          {t('iDontHaveAccount')} {t('register')}
+          {t('iDontHaveAccount')} - {t('register')}
         </ThemedText>
       </Link>
-    </ThemedView>
+    </View>
   );
 };
 

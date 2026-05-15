@@ -46,7 +46,7 @@ export const Colors: ColorsType = {
     title: "#201e2b",
     background: "#e0dfe8",
     navBackground: "#e8e7ef",
-    uiBackground: "#2f2b3d",
+    uiBackground: "#d3d3d3",
     iconColor: "#686477",
     iconColorFocused: "#201e2b",
     tabBackground: "#d6d5e1",

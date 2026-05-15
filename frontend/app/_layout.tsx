@@ -5,20 +5,22 @@ import { useTranslation } from 'react-i18next';
 import '../i18n';
 
 import { Colors } from '../constants/Colors';
-import { AuthProvider } from '../src/auth';
+import { AuthProvider, useAuth } from '../src/auth';
 import { ThemeProvider, useAppTheme } from '../src/theme';
 import { applySavedLanguage } from '../src/preferences';
 
 const RootNavigator = () => {
   const { ready } = useTranslation();
-  const { themeName, isLoading } = useAppTheme();
+  const { themeName, isLoading: themeLoading } = useAppTheme();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+
   const theme = Colors[themeName] ?? Colors.light;
 
   useEffect(() => {
     applySavedLanguage();
   }, []);
 
-  if (!ready || isLoading) {
+  if (!ready || themeLoading || authLoading) {
     return (
       <View
         style={{
@@ -34,29 +36,27 @@ const RootNavigator = () => {
   }
 
   return (
-    <AuthProvider>
-      <Stack
+    <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: theme.navBackground },
-        headerTintColor: theme.title,
-        contentStyle: { backgroundColor: theme.background },
-        animation: 'slide_from_right',
-        animationDuration: 200,
-        presentation: 'card',
-        freezeOnBlur: false,
         headerShown: false,
-      }}>
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(main)" options={{ headerShown: false }} />
-      </Stack>
-    </AuthProvider>
+        contentStyle: { backgroundColor: theme.background },
+      }}
+    >
+      {isAuthenticated ? (
+        <Stack.Screen name="(main)" />
+      ) : (
+        <Stack.Screen name="(auth)" />
+      )}
+    </Stack>
   );
 };
 
 const RootLayout = () => {
   return (
     <ThemeProvider>
-      <RootNavigator />
+      <AuthProvider>
+        <RootNavigator />
+      </AuthProvider>
     </ThemeProvider>
   );
 };

@@ -51,8 +51,6 @@ public class Trip {
         return new TripSummary().id(this.id).name(this.name);
     }
 
-    public TripDetail toTripDetails(){return new TripDetail().id(this.id).name(this.name).hola("TODO");}//TODO
-
     public void assertIsMember(UUID userId) {
         boolean isMember = members.stream()
                 .anyMatch(u -> u.getId().equals(userId));

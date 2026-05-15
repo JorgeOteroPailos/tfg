@@ -46,5 +46,10 @@
   "chooseTheme": "Select the appearance of the application",
   "light": "Light",
   "dark": "Dark",
-  "system": "System"
+  "system": "System",
+
+  "create": "Create",
+  "newTrip": "New Trip",
+  "tripName": "Trip Name",
+  "cancel": "Cancel"
 }
