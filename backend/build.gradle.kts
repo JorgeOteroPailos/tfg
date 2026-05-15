@@ -46,15 +46,15 @@ dependencies {
     // JPA
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
-    // Base de datos H2
+    // H2 database
     runtimeOnly("com.h2database:h2")
     developmentOnly("org.springframework.boot:spring-boot-h2console")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-    // Validación (DTO validation)
+    // Validation (DTO validation)
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
-    // Seguridad
+    // Security
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server")
     implementation("org.springframework.security:spring-security-oauth2-jose")

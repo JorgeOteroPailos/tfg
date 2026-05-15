@@ -26,11 +26,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    format: uuid
+                $ref: '../schemas.yaml#/schemas/IdResponse'
         '400':
           description: Invalid request body
         '401':

@@ -15,7 +15,7 @@ paths:
             type: string
             format: uuid
       responses:
-        '201':
+        '204':
           description: Join request created successfully
         '401':
           description: Not authenticated

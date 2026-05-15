@@ -1,6 +1,7 @@
 package gal.usc.telariabackend.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "expenses")
 public class Expense {
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -50,5 +52,4 @@ public class Expense {
         this.beneficiaries = beneficiaries;
     }
 
-    public UUID getId(){return id;}
 }

@@ -1,11 +1,10 @@
 package gal.usc.telariabackend.controllers;
 
 import gal.usc.telariabackend.model.dto.CreateExpenseRequest;
-import gal.usc.telariabackend.model.dto.CreateTrip201Response;
+import gal.usc.telariabackend.model.dto.IdResponse;
 import gal.usc.telariabackend.model.dto.ExpenseSummary;
 import gal.usc.telariabackend.model.dto.Settlement;
 import gal.usc.telariabackend.services.ExpenseService;
-import gal.usc.telariabackend.services.TripService;
 import gal.usc.telariabackend.utils.SecurityHelper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +23,7 @@ public class ExpenseController implements ExpensesApi{
     }
 
     @Override
-    public ResponseEntity<CreateTrip201Response> createExpense(UUID tripId, CreateExpenseRequest createExpenseRequest) {
+    public ResponseEntity<IdResponse> createExpense(UUID tripId, CreateExpenseRequest createExpenseRequest) {
         UUID expenseId=expenseService.createExpense(tripId, securityHelper.getUserId(), createExpenseRequest);
         return ExpensesApi.super.createExpense(tripId, createExpenseRequest);
     }

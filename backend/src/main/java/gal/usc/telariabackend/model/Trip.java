@@ -1,6 +1,5 @@
 package gal.usc.telariabackend.model;
 
-import gal.usc.telariabackend.model.dto.TripDetail;
 import gal.usc.telariabackend.model.dto.TripSummary;
 import gal.usc.telariabackend.model.exceptions.AlreadyDoneException;
 import gal.usc.telariabackend.model.exceptions.NotATripMemberException;

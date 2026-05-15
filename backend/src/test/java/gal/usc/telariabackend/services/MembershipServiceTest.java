@@ -122,7 +122,7 @@ class MembershipServiceTest {
     void createJoinRequest_WhenTripDoesNotExist_ShouldThrowAndNotSaveRequest() {
         when(tripRepo.findById(tripId)).thenReturn(Optional.empty());
 
-        assertThrows(TripNotFoundException.class,
+        assertThrows(NotATripMemberException.class,
                 () -> membershipService.createJoinRequest(userId, tripId));
 
         verifyNoInteractions(joinRequestRepo);

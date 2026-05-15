@@ -5,6 +5,7 @@ import gal.usc.telariabackend.model.JoinRequest;
 import gal.usc.telariabackend.model.Trip;
 import gal.usc.telariabackend.model.User;
 import gal.usc.telariabackend.model.dto.InvitationSummary;
+import gal.usc.telariabackend.model.exceptions.AlreadyDoneException;
 import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import gal.usc.telariabackend.model.exceptions.TripNotFoundException;
 import gal.usc.telariabackend.repository.InvitationRepository;
@@ -37,14 +38,17 @@ public class MembershipService {
         User creator=userRepo.findById(creatorId).orElseThrow(IllegalStateException::new);
         Trip trip=tripRepo.findByIdAndMembersContaining(tripId, creator).orElseThrow(NotATripMemberException::new);
         trip.assertIsNotMember(invitedUserId);
-        Invitation invitation=new Invitation(trip, userRepo.findById(invitedUserId).orElseThrow(IllegalStateException::new));
+        User user= userRepo.findById(invitedUserId).orElseThrow(IllegalStateException::new);
+        Invitation invitation=new Invitation(trip, user);
+        if(invitationRepo.existsByTripAndUser(trip, user)){throw new AlreadyDoneException("Already invited this user to the trip");}
         invitationRepo.save(invitation);
     }
 
     public void createJoinRequest(UUID userId, UUID tripId){
-        Trip trip=tripRepo.findById(tripId).orElseThrow(TripNotFoundException::new);
+        Trip trip=tripRepo.findById(tripId).orElseThrow(NotATripMemberException::new);
         User user =userRepo.findById(userId).orElseThrow(IllegalStateException::new);
         trip.assertIsNotMember(user);
+        if(joinRequestRepo.existsByTripAndUser(trip, user)){throw new AlreadyDoneException("Already requested to join this trip");}
         joinRequestRepo.save(new JoinRequest(trip, user));
     }
 

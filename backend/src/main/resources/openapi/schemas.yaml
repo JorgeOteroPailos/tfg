@@ -1,4 +1,13 @@
 schemas:
+  IdResponse:
+    type: object
+    required:
+      -id
+    properties:
+      id:
+        type: string
+        format: uuid
+
   RegisterRequest:
     type: object
     required:
@@ -81,17 +90,6 @@ schemas:
         type: string
         description: Opaque refresh Token
         example: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...
-
-  User:
-    type: object
-    properties:
-      email:
-        type: string
-        format: email
-        example: juan@example.com
-      username:
-        type: string
-        example: juanperez
 
   TripSummary:
     type: object

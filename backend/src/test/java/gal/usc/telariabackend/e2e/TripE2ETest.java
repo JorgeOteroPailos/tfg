@@ -66,7 +66,7 @@ class TripE2ETest {
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated())
                 .andReturn();
-        return objectMapper.readValue(result.getResponse().getContentAsString(), CreateTrip201Response.class)
+        return objectMapper.readValue(result.getResponse().getContentAsString(), IdResponse.class)
                 .getId();
     }
 
@@ -85,8 +85,8 @@ class TripE2ETest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        CreateTrip201Response response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), CreateTrip201Response.class);
+        IdResponse response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), IdResponse.class);
 
         assertNotNull(response.getId());
     }
