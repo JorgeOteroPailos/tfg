@@ -21,15 +21,15 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const ERROR_MESSAGES: Partial<Record<ErrorCode, string>> = {
-    [ErrorCode.BAD_REQUEST]: t('invalidRegisterData'),
-    [ErrorCode.SESSION_SAVE_ERROR]: t('errorSavingSession'),
-    [ErrorCode.SERVER_ERROR]: t('serverError'),
-    [ErrorCode.CONFLICT]: t('emailAlreadyInUse'),
+    [ErrorCode.BAD_REQUEST]: t('auth.register.errors.invalidData'),
+    [ErrorCode.SESSION_SAVE_ERROR]: t('errors.session'),
+    [ErrorCode.SERVER_ERROR]: t('errors.server'),
+    [ErrorCode.CONFLICT]: t('auth.register.errors.emailAlreadyInUse'),
   };
 
   const handleRegister = async () => {
     if (!username.trim() || !email.trim() || !password.trim()) {
-      Alert.alert(t('error'), t('allFieldsRequired'));
+      Alert.alert(t('common.error'), t('auth.register.errors.allFieldsRequired'));
       return;
     }
 
@@ -41,8 +41,8 @@ const Register = () => {
       router.replace('/main');
     } catch (error) {
       const code = error instanceof AppError ? error.code : ErrorCode.SERVER_ERROR;
-      const message = ERROR_MESSAGES[code] ?? t('registrationError');
-      Alert.alert(t('error'), message);
+      const message = ERROR_MESSAGES[code] ?? t('auth.register.errors.registration');
+      Alert.alert(t('common.error'), message);
     } finally {
       setIsLoading(false);
     }
@@ -51,12 +51,12 @@ const Register = () => {
   return (
     <View style={styles.container}>
       <ThemedText title={true}>
-        {t('registerScreenDescription')}
+        {t('auth.register.description')}
       </ThemedText>
 
       <ThemedInput
         style={styles.input}
-        placeholder={t('username')}
+        placeholder={t('auth.register.username')}
         value={username}
         onChangeText={setUsername}
         autoCapitalize="none"
@@ -64,7 +64,7 @@ const Register = () => {
 
       <ThemedInput
         style={styles.input}
-        placeholder={t('email')}
+        placeholder={t('auth.register.email')}
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -73,7 +73,7 @@ const Register = () => {
 
       <ThemedInput
         style={styles.input}
-        placeholder={t('password')}
+        placeholder={t('auth.register.password')}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -81,13 +81,13 @@ const Register = () => {
 
       <ThemedButton onPress={handleRegister} disabled={isLoading}>
         <Text style={{ color: Colors.dark.title }}>
-          {isLoading ? t('loading') : t('register')}
+          {isLoading ? t('common.loading') : t('auth.register.button')}
         </Text>
       </ThemedButton>
 
       <Link href="/(auth)/login">
         <ThemedText>
-          {t('alreadyHaveAccount')}
+          {t('auth.register.alreadyHaveAccount')}
         </ThemedText>
       </Link>
 

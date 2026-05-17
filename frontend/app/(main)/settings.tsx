@@ -66,7 +66,7 @@ const Settings = () => {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <ThemedText>{t('loading')}</ThemedText>
+        <ThemedText>{t('common.loading')}</ThemedText>
       </View>
     );
   }
@@ -74,15 +74,15 @@ const Settings = () => {
   return (
     <View style={styles.container}>
       <ThemedText title={true} style={styles.title}>
-        {t('settings')}
+        {t('settings.title')}
       </ThemedText>
 
       <View style={styles.card}>
         <ThemedText title={true} style={styles.sectionTitle}>
-          {t('language')}
+          {t('settings.language')}
         </ThemedText>
         <ThemedText style={styles.description}>
-          {t('chooseLanguage')}
+          {t('settings.chooseLanguage')}
         </ThemedText>
 
         <View style={styles.optionsRow}>
@@ -106,25 +106,25 @@ const Settings = () => {
 
       <View style={styles.card}>
         <ThemedText title={true} style={styles.sectionTitle}>
-          {t('theme')}
+          {t('settings.theme')}
         </ThemedText>
         <ThemedText style={styles.description}>
-          {t('chooseTheme')}
+          {t('settings.chooseTheme')}
         </ThemedText>
 
         <View style={styles.optionsRow}>
           <OptionButton
-            label={t('light')}
+            label={t('settings.light')}
             selected={selectedTheme === 'light'}
             onPress={() => handleThemeChange('light')}
           />
           <OptionButton
-            label={t('dark')}
+            label={t('settings.dark')}
             selected={selectedTheme === 'dark'}
             onPress={() => handleThemeChange('dark')}
           />
           <OptionButton
-            label={t('system')}
+            label={t('settings.system')}
             selected={selectedTheme === 'system'}
             onPress={() => handleThemeChange('system')}
           />

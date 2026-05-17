@@ -85,7 +85,7 @@ const CalendarScreen = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.tabIconDefault }]}>
-        <ThemedText style={styles.title}>{t('calendar')}</ThemedText>
+        <ThemedText style={styles.title}>{t('calendar.title')}</ThemedText>
       </View>
 
       {/* Date picker simple */}

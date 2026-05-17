@@ -1,55 +1,90 @@
 {
-  "error": "Error",
-  "success": "Success",
-  
-  "calendar": "Calendar",
-  "loginScreenDescription": "This is the login screen",
-  "login": "Login",
-  "calendarPlaceholder": "Calendar will be shown here",
-  "goToMainScreen": "Go to main screen",
-  "home": "Home",
-  "index": "Index",
-
-  "serverError": "Server error",
-
-  "email": "Email",
-  "password": "Password",
-  "wrongCredentials": "Incorrect login credentials",
-  "loginLoading": "Logging in...",
-  "mustIntroduceEmailAndPassword": "You must introduce email and password",
-  "loginSuccessful": "Login successful",
-  "loginError": "Error logging in",
-  "invalidLoginRequest": "Invalid login request",
-
-  "register": "Register",
-  "username": "Username",
-  "loading": "Loading...",
-  "registerScreenDescription": "This is the registration screen",
-  "alreadyHaveAccount": "Already have an account? ",
-  "iDontHaveAccount": "I don't have an account",
-  "allFieldsRequired": "All fields are required",
-  "userRegisteredSuccessfully": "User registered successfully",
-  "registrationError": "Error registering user",
-  "errorSavingSession": "Error saving session",
-  "emailAlreadyInUse": "Email is already in use",
-  "invalidRegisterData": "Invalid registration data",
-
-  "profile": "Profile",
-  "logout": "Logout",
-
-  "notAvailable": "Not available",
-
-  "settings": "Settings",
-  "language": "Language",
-  "chooseLanguage": "Select the application language",
-  "theme": "Theme",
-  "chooseTheme": "Select the appearance of the application",
-  "light": "Light",
-  "dark": "Dark",
-  "system": "System",
-
-  "create": "Create",
-  "newTrip": "New Trip",
-  "tripName": "Trip Name",
-  "cancel": "Cancel"
+  "common": {
+    "error": "Error",
+    "success": "Success",
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "create": "Create",
+    "notAvailable": "Not available"
+  },
+  "nav": {
+    "home": "Home",
+    "calendar": "Calendar",
+    "settings": "Settings",
+    "profile": "Profile",
+    "yourQR": "Your QR",
+    "tripDetail": "Trip Details",
+    "members": "Members"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "description": "This is the login screen",
+      "email": "Email",
+      "password": "Password",
+      "button": "Login",
+      "dontHaveAccount": "I don't have an account",
+      "errors": {
+        "wrongCredentials": "Incorrect login credentials",
+        "mustIntroduceEmailAndPassword": "You must introduce email and password",
+        "invalidRequest": "Invalid login request",
+        "loading": "Logging in...",
+        "error": "Error logging in"
+      }
+    },
+    "register": {
+      "title": "Register",
+      "description": "This is the registration screen",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "button": "Register",
+      "alreadyHaveAccount": "Already have an account? ",
+      "errors": {
+        "allFieldsRequired": "All fields are required",
+        "emailAlreadyInUse": "Email is already in use",
+        "invalidData": "Invalid registration data",
+        "registration": "Error registering user",
+        "savingSession": "Error saving session"
+      }
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "username": "Username",
+    "email": "Email",
+    "logout": "Logout",
+    "showQR": "Show QR Code",
+    "qrTitle": "Your QR Code",
+    "qrHint": "Share this QR code to invite others to your trips"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "chooseLanguage": "Select the application language",
+    "theme": "Theme",
+    "chooseTheme": "Select the appearance of the application",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "trip": {
+    "new": "New Trip",
+    "tripName": "Trip Name",
+    "tripDetail": "Trip Details",
+    "members": "Members",
+    "requests": "Join Requests",
+    "invite": "Invite Members",
+    "expenses": "Expenses",
+    "events": "Events",
+    "chat": "Chat"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "placeholder": "Calendar will be shown here"
+  },
+  "errors": {
+    "server": "Server error",
+    "session": "Error saving session"
+  }
 }

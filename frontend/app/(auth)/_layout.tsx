@@ -1,4 +1,3 @@
-// app/(auth)/_layout.tsx
 import { Stack } from 'expo-router';
 import { Colors } from '../../constants/Colors';
 import { useAppTheme } from '../../src/theme';
@@ -20,8 +19,8 @@ export default function AuthLayout() {
         presentation: 'card',
         freezeOnBlur: false,
       }}>
-      <Stack.Screen name="login" options={{ gestureEnabled: false, title: t('login') }} />
-      <Stack.Screen name="register" options={{ gestureEnabled: false, title: t('register') }} />
+      <Stack.Screen name="login" options={{ gestureEnabled: false, title: t('auth.login.title') }} />
+      <Stack.Screen name="register" options={{ gestureEnabled: false, title: t('auth.register.title') }} />
     </Stack>
   );
 }

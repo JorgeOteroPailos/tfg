@@ -2,14 +2,18 @@ import * as SecureStore from 'expo-secure-store';
 import { BASE_URL } from '../constants/constants';
 import { AppError, ErrorCode } from './AppError';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
+import type { components } from '../src/generated/types';
 import React, {
   createContext,
   useContext,
   useEffect,
   useState,
 } from 'react';
+
+type LoginRequest = components["schemas"]["LoginRequest"];
+type RegisterRequest = components["schemas"]["RegisterRequest"];
+type LoginResponse = components["schemas"]["LoginResponse"];
+
 
 const REFRESH_TOKEN_KEY = 'refreshToken';
 const ACCESS_TOKEN_KEY = 'accessToken';
@@ -107,7 +111,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
           return;
         }
 
-        //TODO aquí se debería validar el refresh token con el servidor y obtener un nuevo access token
+        //TODO refresh aquí
 
         setAccessToken(storedAccessToken);
         setUserEmailState(storedUserEmail);
@@ -218,7 +222,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
       if (response.status !== 401) {
 
-        console.log('llama exitosa  a ', url);
+        //console.log('llama exitosa  a ', url);
         return response;
       }
 
@@ -338,20 +342,3 @@ async function registerRequest(data: RegisterRequest): Promise<LoginResponse> {
 
   return response.json();
 }
-
-export type LoginRequest = {
-  email: string;
-  password: string;
-};
-
-export type RegisterRequest = {
-  username: string;
-  email: string;
-  password: string;
-};
-
-export type LoginResponse = {
-  accessToken: string;
-  refreshToken: string;
-  username: string;
-};

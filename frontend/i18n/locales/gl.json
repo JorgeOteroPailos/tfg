@@ -1,55 +1,90 @@
 {
-  "error": "Erro",
-  "success": "Success",
-  
-  "calendar": "Calendario",
-  "login": "Iniciar sesión",
-  "loginScreenDescription": "Esta é a pantalla de inicio de sesión",
-  "calendarPlaceholder": "Aquí amosarase o calendario",
-  "goToMainScreen": "Ir á pantalla principal",
-  "home": "Inicio",
-  "index": "Índice",
-
-  "serverError": "Erro do servidor",
-
-  "email": "Correo electrónico",
-  "password": "Contrasinal",
-  "wrongCredentials": "Correo ou contrasinal incorrectos",
-  "loginLoading": "Iniciando sesión...",
-  "mustIntroduceEmailAndPassword": "Debes introducir email e contrasinal",
-  "loginSuccessful": "Sesión iniciada correctamente",
-  "loginError": "Erro ao iniciar sesión",
-  "invalidLoginRequest": "Solicitude de inicio de sesión non válida",
-
-  "register": "Rexistrarse",
-  "username": "Nome de usuario",
-  "loading": "Cargando...",
-  "registerScreenDescription": "Esta é a pantalla de rexistro",
-  "alreadyHaveAccount": "¿Xa tes unha conta? ",
-  "iDontHaveAccount": "Non teño unha conta",
-  "allFieldsRequired": "Requírense todos os campos",
-  "userRegisteredSuccessfully": "Usuario rexistrado correctamente",
-  "registrationError": "Erro ao rexistrar usuario",
-  "errorSavingSession": "Erro ao gardar a sesión",
-  "emailAlreadyInUse": "Este correo electrónico xa está en uso",
-  "invalidRegisterData": "Datos de rexistro non válidos",
-
-  "profile": "Perfil",
-  "logout": "Pechar sesión",
-
-  "notAvailable": "Non dispoñible",
-
-  "settings": "Axustes",
-  "language": "Lingua",
-  "chooseLanguage": "Selecciona a lingua da aplicación",
-  "theme": "Tema",
-  "chooseTheme": "Selecciona o tema da aplicación",
-  "light": "Claro",
-  "dark": "Escuro",
-  "system": "Sistema",
-
-  "create": "Crear",
-  "newTrip": "Nova viaxe",
-  "tripName": "Nome da Viaxe",
-  "cancel": "Cancelar"
+  "common": {
+    "error": "Erro",
+    "success": "Éxito",
+    "loading": "Cargando...",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "notAvailable": "Non dispoñible"
+  },
+  "nav": {
+    "home": "Inicio",
+    "calendar": "Calendario",
+    "settings": "Axustes",
+    "profile": "Perfil",
+    "yourQR": "O teu QR",
+    "tripDetail": "Detalles da Viaxe",
+    "members": "Membros"
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar sesión",
+      "description": "Esta é a pantalla de inicio de sesión",
+      "email": "Correo electrónico",
+      "password": "Contrasinal",
+      "button": "Iniciar sesión",
+      "dontHaveAccount": "Non teño unha conta",
+      "errors": {
+        "wrongCredentials": "Correo ou contrasinal incorrectos",
+        "mustIntroduceEmailAndPassword": "Debes introducir email e contrasinal",
+        "invalidRequest": "Solicitude de inicio de sesión non válida",
+        "loading": "Iniciando sesión...",
+        "error": "Erro ao iniciar sesión"
+      }
+    },
+    "register": {
+      "title": "Rexistrarse",
+      "description": "Esta é a pantalla de rexistro",
+      "username": "Nome de usuario",
+      "email": "Correo electrónico",
+      "password": "Contrasinal",
+      "button": "Rexistrarse",
+      "alreadyHaveAccount": "¿Xa tes unha conta? ",
+      "errors": {
+        "allFieldsRequired": "Requírense todos os campos",
+        "emailAlreadyInUse": "Este correo electrónico xa está en uso",
+        "invalidData": "Datos de rexistro non válidos",
+        "registration": "Erro ao rexistrar usuario",
+        "savingSession": "Erro ao gardar a sesión"
+      }
+    }
+  },
+  "profile": {
+    "title": "Perfil",
+    "username": "Nome de usuario",
+    "email": "Correo electrónico",
+    "logout": "Pechar sesión",
+    "showQR": "Mostrar Código QR",
+    "qrTitle": "O teu Código QR",
+    "qrHint": "Comparte este código QR para invitar a outros aos teus viaxes"
+  },
+  "settings": {
+    "title": "Axustes",
+    "language": "Lingua",
+    "chooseLanguage": "Selecciona a lingua da aplicación",
+    "theme": "Tema",
+    "chooseTheme": "Selecciona o tema da aplicación",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema"
+  },
+  "trip": {
+    "new": "Nova viaxe",
+    "tripName": "Nome da Viaxe",
+    "tripDetail": "Detalles da Viaxe",
+    "members": "Membros",
+    "requests": "Solicitudes de Unión",
+    "invite": "Invitar Membros",
+    "expenses": "Gastos",
+    "events": "Eventos",
+    "chat": "Chat"
+  },
+  "calendar": {
+    "title": "Calendario",
+    "placeholder": "Aquí amosarase o calendario"
+  },
+  "errors": {
+    "server": "Erro do servidor",
+    "session": "Erro ao gardar a sesión"
+  }
 }

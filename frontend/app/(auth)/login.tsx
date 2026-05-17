@@ -20,15 +20,15 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const ERROR_MESSAGES: Partial<Record<ErrorCode, string>> = {
-    [ErrorCode.UNAUTHORIZED]: t('wrongCredentials'),
-    [ErrorCode.SESSION_SAVE_ERROR]: t('errorSavingSession'),
-    [ErrorCode.SERVER_ERROR]: t('serverError'),
-    [ErrorCode.BAD_REQUEST]: t('invalidLoginRequest'),
+    [ErrorCode.UNAUTHORIZED]: t('auth.login.errors.wrongCredentials'),
+    [ErrorCode.SESSION_SAVE_ERROR]: t('errors.session'),
+    [ErrorCode.SERVER_ERROR]: t('errors.server'),
+    [ErrorCode.BAD_REQUEST]: t('auth.login.errors.invalidRequest'),
   };
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert(t('error'), t('mustIntroduceEmailAndPassword'));
+      Alert.alert(t('common.error'), t('auth.login.errors.mustIntroduceEmailAndPassword'));
       return;
     }
 
@@ -38,8 +38,8 @@ const Login = () => {
       router.replace('/main');
     } catch (error) {
       const code = error instanceof AppError ? error.code : ErrorCode.SERVER_ERROR;
-      const message = ERROR_MESSAGES[code] ?? t('loginError');
-      Alert.alert(t('error'), message);
+      const message = ERROR_MESSAGES[code] ?? t('auth.login.errors.error');
+      Alert.alert(t('common.error'), message);
     } finally {
       setIsLoading(false);
     }
@@ -48,12 +48,12 @@ const Login = () => {
   return (
     <View style={styles.container}>
       <ThemedText title={true}>
-        {t('loginScreenDescription')}
+        {t('auth.login.description')}
       </ThemedText>
 
       <ThemedInput
         style={styles.input}
-        placeholder={t('email')}
+        placeholder={t('auth.login.email')}
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -62,7 +62,7 @@ const Login = () => {
 
       <ThemedInput
         style={styles.input}
-        placeholder={t('password')}
+        placeholder={t('auth.login.password')}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -73,13 +73,13 @@ const Login = () => {
         disabled={isLoading}
       >
         <Text style={{ color: Colors.dark.title }}>
-          {isLoading ? t('loading') : t('login')}
+          {isLoading ? t('common.loading') : t('auth.login.button')}
         </Text>
       </ThemedButton>
 
       <Link href="/(auth)/register">
         <ThemedText>
-          {t('iDontHaveAccount')} - {t('register')}
+          {t('auth.login.dontHaveAccount')} - {t('auth.register.title')}
         </ThemedText>
       </Link>
     </View>

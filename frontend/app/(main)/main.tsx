@@ -62,6 +62,7 @@ const Main = () => {
       setCreating(false);
     }
   };
+  //TODO  ver pq no se usa
   const handleLogout = async () => {
     try {
       await logout();
@@ -73,64 +74,6 @@ const Main = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: theme.navBackground }]}>
-        <TouchableOpacity
-          style={styles.menuButton}
-          onPress={() => setSidebarOpen(!sidebarOpen)}
-        >
-          <ThemedText style={styles.menuIcon}>☰</ThemedText>
-        </TouchableOpacity>
-
-        <ThemedText style={styles.headerTitle}>{t('home')}</ThemedText>
-
-        <View style={styles.headerSpacer} />
-      </View>
-
-      {/* Sidebar */}
-      {sidebarOpen && (
-        <View style={[styles.sidebar, { backgroundColor: theme.tabBackground }]}>
-          <Link href="/profile" asChild>
-            <TouchableOpacity
-              style={styles.sidebarItem}
-              onPress={() => setSidebarOpen(false)}
-            >
-              <ThemedText style={styles.sidebarItemText}>👤 {t('profile')}</ThemedText>
-            </TouchableOpacity>
-          </Link>
-
-          <Link href="/settings" asChild>
-            <TouchableOpacity
-              style={styles.sidebarItem}
-              onPress={() => setSidebarOpen(false)}
-            >
-              <ThemedText style={styles.sidebarItemText}>⚙️ {t('settings')}</ThemedText>
-            </TouchableOpacity>
-          </Link>
-
-          <Link href="/calendar" asChild>
-            <TouchableOpacity
-              style={styles.sidebarItem}
-              onPress={() => setSidebarOpen(false)}
-            >
-              <ThemedText style={styles.sidebarItemText}>📅 {t('calendar')}</ThemedText>
-            </TouchableOpacity>
-          </Link>
-
-          <TouchableOpacity
-            style={[styles.sidebarItem, styles.logoutItem]}
-            onPress={() => {
-              setSidebarOpen(false);
-              handleLogout();
-            }}
-          >
-            <ThemedText style={[styles.sidebarItemText, { color: '#cc475a' }]}>
-              🚪 {t('logout')}
-            </ThemedText>
-          </TouchableOpacity>
-        </View>
-      )}
-
       {/* Main Content */}
       <View style={styles.content}>
         {/* New Trip Card */}
@@ -138,7 +81,7 @@ const Main = () => {
           style={[styles.tripCard, styles.newTripCard, { backgroundColor: theme.tint }]}
           onPress={() => setModalVisible(true)}
         >
-          <ThemedText style={styles.newTripTitle}>{t('newTrip')}</ThemedText>
+          <ThemedText style={styles.newTripTitle}>{t('trip.new')}</ThemedText>
           <View style={styles.newTripButton}>
             <ThemedText style={styles.newTripButtonText}>+</ThemedText>
           </View>
@@ -154,7 +97,7 @@ const Main = () => {
             <TouchableOpacity
               style={[styles.tripCard, { backgroundColor: theme.tabBackground }]}
               onPress={() => {
-                // TODO: Navegar a detalles del viaje
+                router.push(`${item.id}`);
               }}
             >
               <View style={styles.tripContent}>
@@ -186,11 +129,11 @@ const Main = () => {
           onPress={() => setModalVisible(false)}
         >
           <TouchableOpacity activeOpacity={1} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
-            <ThemedText style={styles.modalTitle}>{t('newTrip')}</ThemedText>
+            <ThemedText style={styles.modalTitle}>{t('trip.new')}</ThemedText>
 
             <ThemedInput
               style={[styles.modalInput, { color: theme.text, borderColor: theme.tint }]}
-              placeholder={t('tripName')}
+              placeholder={t('trip.tripName')}
               placeholderTextColor={theme.icon}
               value={newTripName}
               onChangeText={setNewTripName}
@@ -203,7 +146,7 @@ const Main = () => {
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => { setModalVisible(false); setNewTripName(''); }}
               >
-                <ThemedText>{t('cancel')}</ThemedText>
+                <ThemedText>{t('common.cancel')}</ThemedText>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -213,7 +156,7 @@ const Main = () => {
               >
                 {creating
                   ? <ActivityIndicator color="white" />
-                  : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('create')}</ThemedText>
+                  : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.create')}</ThemedText>
                 }
               </TouchableOpacity>
             </View>

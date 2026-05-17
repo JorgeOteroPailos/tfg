@@ -1,55 +1,90 @@
 {
-  "error": "Error",
-  "success": "Success",
-  
-  "calendar": "Calendario",
-  "login": "Iniciar sesión",
-  "loginScreenDescription": "Esta es la pantalla de inicio de sesión",
-  "calendarPlaceholder": "Aquí se mostrará el calendario",
-  "goToMainScreen": "Ir a la pantalla principal",
-  "home": "Inicio",
-  "index": "Índice",
-
-  "serverError": "Error del servidor",
-
-  "email": "Correo electrónico",
-  "password": "Contraseña",
-  "wrongCredentials": "Correo o contraseña incorrectos",
-  "loginLoading": "Iniciando sesión...",
-  "mustIntroduceEmailAndPassword": "Debes introducir email y contraseña",
-  "loginSuccessful": "Sesión iniciada correctamente",
-  "loginError": "Error al iniciar sesión",
-  "invalidLoginRequest": "Solicitud de inicio de sesión no válida",
-
-  "register": "Registrarse",
-  "username": "Nombre de usuario",
-  "loading": "Cargando...",
-  "registerScreenDescription": "Esta es la pantalla de registro",
-  "alreadyHaveAccount": "¿Ya tienes una cuenta? ",
-  "iDontHaveAccount": "No tengo una cuenta",
-  "allFieldsRequired": "Se requieren todos los campos",
-  "userRegisteredSuccessfully": "Usuario registrado correctamente",
-  "registrationError": "Error al registrar usuario",
-  "errorSavingSession": "Error al guardar la sesión",
-  "emailAlreadyInUse": "Este correo electrónico ya está en uso",
-  "invalidRegisterData": "Datos de registro no válidos",
-
-  "profile": "Perfil",
-  "logout": "Cerrar sesión",
-
-  "notAvailable": "No disponible",
-
-  "settings": "Ajustes",
-  "language": "Idioma",
-  "chooseLanguage": "Selecciona el idioma de la aplicación",
-  "theme": "Tema",
-  "chooseTheme": "Selecciona el tema de la aplicación",
-  "light": "Claro",
-  "dark": "Oscuro",
-  "system": "Sistema",
-
-  "create": "Crear",
-  "newTrip": "Nuevo Viaje",
-  "tripName": "Nombre del Viaje",
-  "cancel": "Cancelar"
+  "common": {
+    "error": "Error",
+    "success": "Éxito",
+    "loading": "Cargando...",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "notAvailable": "No disponible"
+  },
+  "nav": {
+    "home": "Inicio",
+    "calendar": "Calendario",
+    "settings": "Ajustes",
+    "profile": "Perfil",
+    "yourQR": "Tu QR",
+    "tripDetail": "Detalles del Viaje",
+    "members": "Miembros"
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar sesión",
+      "description": "Esta es la pantalla de inicio de sesión",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "button": "Iniciar sesión",
+      "dontHaveAccount": "No tengo una cuenta",
+      "errors": {
+        "wrongCredentials": "Correo o contraseña incorrectos",
+        "mustIntroduceEmailAndPassword": "Debes introducir email y contraseña",
+        "invalidRequest": "Solicitud de inicio de sesión no válida",
+        "loading": "Iniciando sesión...",
+        "error": "Error al iniciar sesión"
+      }
+    },
+    "register": {
+      "title": "Registrarse",
+      "description": "Esta es la pantalla de registro",
+      "username": "Nombre de usuario",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "button": "Registrarse",
+      "alreadyHaveAccount": "¿Ya tienes una cuenta? ",
+      "errors": {
+        "allFieldsRequired": "Se requieren todos los campos",
+        "emailAlreadyInUse": "Este correo electrónico ya está en uso",
+        "invalidData": "Datos de registro no válidos",
+        "registration": "Error al registrar usuario",
+        "savingSession": "Error al guardar la sesión"
+      }
+    }
+  },
+  "profile": {
+    "title": "Perfil",
+    "username": "Nombre de usuario",
+    "email": "Correo electrónico",
+    "logout": "Cerrar sesión",
+    "showQR": "Mostrar Código QR",
+    "qrTitle": "Tu Código QR",
+    "qrHint": "Comparte este código QR para invitar a otros a tus viajes"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "language": "Idioma",
+    "chooseLanguage": "Selecciona el idioma de la aplicación",
+    "theme": "Tema",
+    "chooseTheme": "Selecciona el tema de la aplicación",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "trip": {
+    "new": "Nuevo Viaje",
+    "tripName": "Nombre del Viaje",
+    "tripDetail": "Detalles del Viaje",
+    "members": "Miembros",
+    "requests": "Solicitudes de Unirse",
+    "invite": "Invitar Miembros",
+    "expenses": "Gastos",
+    "events": "Eventos",
+    "chat": "Chat"
+  },
+  "calendar": {
+    "title": "Calendario",
+    "placeholder": "Aquí se mostrará el calendario"
+  },
+  "errors": {
+    "server": "Error del servidor",
+    "session": "Error al guardar la sesión"
+  }
 }

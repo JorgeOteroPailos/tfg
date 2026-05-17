@@ -8,6 +8,7 @@ import { Colors } from '../constants/Colors';
 import { AuthProvider, useAuth } from '../src/auth';
 import { ThemeProvider, useAppTheme } from '../src/theme';
 import { applySavedLanguage } from '../src/preferences';
+import { SidebarProvider } from '../src/sidebar';
 
 const RootNavigator = () => {
   const { ready } = useTranslation();
@@ -55,7 +56,9 @@ const RootLayout = () => {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <RootNavigator />
+        <SidebarProvider>
+          <RootNavigator />
+        </SidebarProvider>
       </AuthProvider>
     </ThemeProvider>
   );

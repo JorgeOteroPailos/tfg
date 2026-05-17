@@ -1,7 +1,7 @@
 import { Alert, StyleSheet, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import ThemedText from '../../components/ThemedText';
-import { useAuth } from '../../src/auth';
+import ThemedText from '../../../components/ThemedText';
+import { useAuth } from '../../../src/auth';
 import { t } from 'i18next';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
@@ -17,20 +17,20 @@ const QRScreen = () => {
   const { accessToken } = useAuth();
   useEffect(() => {
     if (!accessToken) {
-        Alert.alert(t('error'), 'Error inesperado: No se encontró el token de acceso. Por favor, inicia sesión nuevamente.');
+        Alert.alert(t('common.error'), 'Error inesperado: No se encontró el token de acceso. Por favor, inicia sesión nuevamente.');
         router.replace('/main');
     }
   }, [accessToken]);
 
 if (!accessToken) return null;
 
-  const userId = decodeJWT(accessToken).sub; // o el campo que use tu back
+  const userId = decodeJWT(accessToken).sub;
 
   return (
     <View style={styles.container}>
-      <ThemedText title={true}>{t('yourQR')}</ThemedText>
+      <ThemedText title={true}>{t('profile.qrTitle')}</ThemedText>
       <QRCode value={userId} size={220} />
-      <ThemedText>{t('qrHint')}</ThemedText>
+      <ThemedText>{t('profile.qrHint')}</ThemedText>
     </View>
   );
 };
