@@ -200,6 +200,28 @@ schemas:
         format: double
         example: 25.00
 
+  UserBalance:
+    type: object
+    properties:
+      userId:
+        type: string
+        format: uuid
+      amount:
+        type: number
+        format: double
+
+  BalancesInfo:
+    type: object
+    properties:
+      settlements:
+        type: array
+        items:
+          $ref: '#/schemas/Settlement'
+      balances:
+        type: array
+        items:
+          $ref: '#/schemas/UserBalance'
+
   ResolveJoinRequest:
     type: object
     required:

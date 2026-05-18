@@ -108,13 +108,11 @@ paths:
             format: uuid
       responses:
         '200':
-          description: List of settlements to balance the trip
+          description: Balances and settlements for the trip
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '../schemas.yaml#/schemas/Settlement'
+                $ref: '../schemas.yaml#/schemas/BalancesInfo'
         '401':
           description: Not authenticated
         '403':

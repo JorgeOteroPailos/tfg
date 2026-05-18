@@ -148,7 +148,7 @@ class MembershipServiceTest {
 
         membershipService.leaveTrip(userId, tripId);
 
-        verify(trip).getMembers();
+        verify(trip, atLeastOnce()).getMembers();
         verify(tripRepo).save(trip);
     }
 

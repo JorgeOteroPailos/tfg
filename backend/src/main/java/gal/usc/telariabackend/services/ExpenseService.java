@@ -3,9 +3,7 @@ package gal.usc.telariabackend.services;
 import gal.usc.telariabackend.model.Expense;
 import gal.usc.telariabackend.model.Trip;
 import gal.usc.telariabackend.model.User;
-import gal.usc.telariabackend.model.dto.CreateExpenseRequest;
-import gal.usc.telariabackend.model.dto.ExpenseSummary;
-import gal.usc.telariabackend.model.dto.Settlement;
+import gal.usc.telariabackend.model.dto.*;
 import gal.usc.telariabackend.model.exceptions.ExpenseNotFoundException;
 import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import gal.usc.telariabackend.repository.ExpenseRepository;
@@ -40,8 +38,10 @@ public class ExpenseService {
                 .map(User::getId)
                 .collect(Collectors.toSet());
 
-        User payer= userRepo.findById(request.getPayerId()).orElseThrow(() -> new NotATripMemberException("Payer is not a member of this trip"));
-        t.assertIsMember(payer);
+        if (!memberIds.contains(request.getPayerId())) {
+            throw new NotATripMemberException("Payer is not a member of this trip");
+        }
+        User payer = userRepo.getReferenceById(request.getPayerId());
 
         if (!memberIds.containsAll(request.getBeneficiaryIds())) {
             throw new NotATripMemberException("Some beneficiarie is not a trip member");
@@ -72,10 +72,10 @@ public class ExpenseService {
         expenseRepo.deleteById(expenseId);
     }
 
-    public List<Settlement> getBalances(UUID tripId, UUID userId){
-        List<Expense> expenses=tripRepo.findByIdAndMembersId(tripId, userId)
-                .orElseThrow(NotATripMemberException::new).getExpenses();
-        return null; //TODO
+    public BalancesInfo getBalances(UUID tripId, UUID userId){
+        Trip t=tripRepo.findByIdAndMembersId(tripId, userId)
+                .orElseThrow(NotATripMemberException::new);
+        return calculateBalances(t);
     }
 
     public List<ExpenseSummary> listExpenses(UUID tripId, UUID userId) {
@@ -84,7 +84,7 @@ public class ExpenseService {
         return t.getExpenses().stream().map(Expense::toExpenseSummary).toList();
     }
 
-    private List<Settlement> balancesCalculatorHelper(Trip t){
+    private BalancesInfo calculateBalances(Trip t){
         Map<UUID, BigDecimal> balances = new HashMap<>();
         List <Settlement> settlements=new ArrayList<>();
 
@@ -92,7 +92,7 @@ public class ExpenseService {
             BigDecimal total = e.getAmount();
             int n = e.getBeneficiaries().size();
             BigDecimal distributed = BigDecimal.ZERO;
-            List<User> beneficiaries = new ArrayList<>(e.getBeneficiaries()); //TODO ver si hacerle un shuffle
+            List<User> beneficiaries = new ArrayList<>(e.getBeneficiaries());
 
             for (int i = 0; i < n; i++) {
                 User beneficiary = beneficiaries.get(i);
@@ -103,37 +103,56 @@ public class ExpenseService {
                 distributed = distributed.add(share);
 
                 if (!beneficiary.getId().equals(e.getPayer().getId())) {
+                    System.out.println("Processing beneficiary: " + beneficiary.getId() + " share: " + share);
                     balances.merge(beneficiary.getId(), share.negate(), BigDecimal::add);
                     balances.merge(e.getPayer().getId(), share, BigDecimal::add);
                 }
             }
         }
+        Map<UUID, BigDecimal> originalBalances = new HashMap<>(balances);
 
         boolean done=false;
         while(!done){
-            BigDecimal max = BigDecimal.ZERO;
-            BigDecimal min = BigDecimal.valueOf(Integer.MAX_VALUE);
-            UUID maxDebtor=null;
-            UUID minDebtor=null;
-            for(Map.Entry<UUID, BigDecimal> entry : balances.entrySet()){
-                BigDecimal b= entry.getValue();
-                if(b.compareTo(min)<0){
-                    min=b;
-                    maxDebtor=entry.getKey();
-                }else{
-                    max=b;
-                    minDebtor=entry.getKey();
-                }
+            UUID maxId = null, minId = null;
+            BigDecimal max = null, min = null;
+
+            for (Map.Entry<UUID, BigDecimal> entry : balances.entrySet()) {
+                BigDecimal b = entry.getValue();
+                if (max == null || b.compareTo(max) > 0) { max = b; maxId = entry.getKey(); }
+                if (min == null || b.compareTo(min) < 0) { min = b; minId = entry.getKey(); }
             }
+            if (max == null) { done = true; continue; }
             if(max.compareTo(BigDecimal.ZERO)>0 && min.compareTo(BigDecimal.ZERO)<0){
-                if(max.abs().compareTo(min)>0){
-                    max=max.subtract(min.abs());
-                    //balances.
+                if(max.abs().compareTo(min.abs())>0){
+                    BigDecimal amount=min.abs();
+                    max=max.subtract(amount);
+                    balances.put(maxId,max);
+                    balances.put(minId,BigDecimal.ZERO);
+                    settlements.add(new Settlement().
+                            amount(amount.setScale(2, RoundingMode.HALF_UP).doubleValue())
+                            .fromId(minId)
+                            .toId(maxId));
+                }else{
+                    BigDecimal amount=max.abs();
+                    min=min.add(amount);
+                    balances.put(minId,min);
+                    balances.put(maxId,BigDecimal.ZERO);
+                    settlements.add(new Settlement().
+                            amount(amount.setScale(2, RoundingMode.HALF_UP).doubleValue())
+                            .fromId(maxId)
+                            .toId(minId));
                 }
             }else{ done=true;}
         }
 
+        List<UserBalance> userBalances = originalBalances.entrySet().stream()
+                .map(e -> new UserBalance()
+                        .userId(e.getKey())
+                        .amount(e.getValue().setScale(2, RoundingMode.HALF_UP).doubleValue()))
+                .toList();
 
-        return null; //TODO
+        return new BalancesInfo()
+                .settlements(settlements)
+                .balances(userBalances);
     }
 }

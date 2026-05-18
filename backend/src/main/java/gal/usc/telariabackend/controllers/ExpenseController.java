@@ -1,9 +1,6 @@
 package gal.usc.telariabackend.controllers;
 
-import gal.usc.telariabackend.model.dto.CreateExpenseRequest;
-import gal.usc.telariabackend.model.dto.IdResponse;
-import gal.usc.telariabackend.model.dto.ExpenseSummary;
-import gal.usc.telariabackend.model.dto.Settlement;
+import gal.usc.telariabackend.model.dto.*;
 import gal.usc.telariabackend.services.ExpenseService;
 import gal.usc.telariabackend.utils.SecurityHelper;
 import org.springframework.http.HttpStatus;
@@ -36,10 +33,8 @@ public class ExpenseController implements ExpensesApi{
     }
 
     @Override
-    public ResponseEntity<List<Settlement>> getBalances(UUID tripId) {
-
-        List<Settlement> response=expenseService.getBalances(tripId, securityHelper.getUserId());
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<BalancesInfo> getBalances(UUID tripId) {
+        return new ResponseEntity<>(expenseService.getBalances(tripId, securityHelper.getUserId()), HttpStatus.OK);
     }
 
     @Override

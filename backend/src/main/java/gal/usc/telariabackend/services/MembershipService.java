@@ -63,6 +63,9 @@ public class MembershipService {
         trip.assertIsMember(user);
         trip.getMembers().remove(user);
         tripRepo.save(trip);
+        if(trip.getMembers().isEmpty()){
+            tripRepo.delete(trip);
+        }
     }
 
     public void resolveInvitation(UUID invitationId,UUID userId, @NotNull boolean accepted){
