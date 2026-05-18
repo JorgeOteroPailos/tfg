@@ -45,8 +45,7 @@ public class TripService {
     }
 
     public TripDetail getTripDetails(UUID tripId, UUID userId) {
-        User user = userRepo.findById(userId).orElseThrow();
-        Trip trip = tripRepo.findByIdAndMembersContaining(tripId, user)
+        Trip trip=tripRepo.findByIdAndMembersId(tripId, userId)
                 .orElseThrow(NotATripMemberException::new);
 
         List<JoinRequestSummary> pendingRequests = joinRequestRepo.findAllByTrip(trip)

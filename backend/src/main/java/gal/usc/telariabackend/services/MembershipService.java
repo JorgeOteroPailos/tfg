@@ -35,8 +35,8 @@ public class MembershipService {
     }
 
     public void createInvitation(UUID invitedUserId,UUID creatorId, @NotNull @Valid UUID tripId) {
-        User creator=userRepo.findById(creatorId).orElseThrow(IllegalStateException::new);
-        Trip trip=tripRepo.findByIdAndMembersContaining(tripId, creator).orElseThrow(NotATripMemberException::new);
+        Trip trip=tripRepo.findByIdAndMembersId(tripId, creatorId)
+                .orElseThrow(NotATripMemberException::new);
         trip.assertIsNotMember(invitedUserId);
         User user= userRepo.findById(invitedUserId).orElseThrow(IllegalStateException::new);
         Invitation invitation=new Invitation(trip, user);

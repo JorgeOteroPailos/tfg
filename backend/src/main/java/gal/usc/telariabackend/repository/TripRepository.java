@@ -15,4 +15,6 @@ public interface TripRepository extends JpaRepository<Trip, UUID>{
     List<Trip> findAllByMembersContaining(User u);
 
     Optional<Trip> findByIdAndMembersContaining(UUID tripId, User user);
+
+    Optional<Trip> findByIdAndMembersId(UUID tripId, UUID userId);
 }

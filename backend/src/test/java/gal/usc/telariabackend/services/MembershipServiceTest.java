@@ -62,8 +62,7 @@ class MembershipServiceTest {
         UUID invitedId = UUID.randomUUID();
         User invited = new User("manolo", "manolo@hotmail.com", "encoded", invitedId);
 
-        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
-        when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.of(trip));
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
         when(userRepo.findById(invitedId)).thenReturn(Optional.of(invited));
         doNothing().when(trip).assertIsNotMember(invitedId);
 
@@ -79,8 +78,7 @@ class MembershipServiceTest {
     void createInvitation_WhenCreatorIsNotMember_ShouldThrowAndNotSaveInvitation() {
         UUID invitedId = UUID.randomUUID();
 
-        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
-        when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.empty());
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.empty());
 
         assertThrows(NotATripMemberException.class,
                 () -> membershipService.createInvitation(invitedId, userId, tripId));
@@ -92,8 +90,8 @@ class MembershipServiceTest {
     void createInvitation_WhenInvitedIsAlreadyMember_ShouldThrowAndNotSaveInvitation() {
         UUID invitedId = UUID.randomUUID();
 
-        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
-        when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.of(trip));
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
+
         doThrow(AlreadyDoneException.class).when(trip).assertIsNotMember(invitedId);
 
         assertThrows(AlreadyDoneException.class,

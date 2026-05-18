@@ -178,9 +178,9 @@ schemas:
         type: number
         format: double
         example: 90.00
-      date:
+      datetime:
         type: string
-        format: date
+        format: date-time
         example: '2025-06-15'
       payerId:
         type: string

@@ -6,6 +6,7 @@ import gal.usc.telariabackend.model.dto.ExpenseSummary;
 import gal.usc.telariabackend.model.dto.Settlement;
 import gal.usc.telariabackend.services.ExpenseService;
 import gal.usc.telariabackend.utils.SecurityHelper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,22 +25,26 @@ public class ExpenseController implements ExpensesApi{
 
     @Override
     public ResponseEntity<IdResponse> createExpense(UUID tripId, CreateExpenseRequest createExpenseRequest) {
-        UUID expenseId=expenseService.createExpense(tripId, securityHelper.getUserId(), createExpenseRequest);
-        return ExpensesApi.super.createExpense(tripId, createExpenseRequest);
+        IdResponse response=new IdResponse().id(expenseService.createExpense(tripId, securityHelper.getUserId(), createExpenseRequest));
+        return new  ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> deleteExpense(UUID tripId, UUID expenseId) {
-        return ExpensesApi.super.deleteExpense(tripId, expenseId);
+        expenseService.deleteExpense(tripId, expenseId, securityHelper.getUserId());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Override
-    public ResponseEntity<List<Settlement>> getBalances(UUID id) {
-        return ExpensesApi.super.getBalances(id);
+    public ResponseEntity<List<Settlement>> getBalances(UUID tripId) {
+
+        List<Settlement> response=expenseService.getBalances(tripId, securityHelper.getUserId());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<ExpenseSummary>> listExpenses(UUID id) {
-        return ExpensesApi.super.listExpenses(id);
+    public ResponseEntity<List<ExpenseSummary>> listExpenses(UUID tripId) {
+        List<ExpenseSummary> response=expenseService.listExpenses(tripId, securityHelper.getUserId());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

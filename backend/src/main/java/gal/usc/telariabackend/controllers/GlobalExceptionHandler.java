@@ -1,9 +1,6 @@
 package gal.usc.telariabackend.controllers;
 
-import gal.usc.telariabackend.model.exceptions.AlreadyDoneException;
-import gal.usc.telariabackend.model.exceptions.InvalidRefreshTokenException;
-import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
-import gal.usc.telariabackend.model.exceptions.TripNotFoundException;
+import gal.usc.telariabackend.model.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
@@ -53,6 +50,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         error.setTitle("Trip not found");
         error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
                 .pathSegment("error", "trip-not-found").build().toUri());
+        error.setDetail(e.getMessage());
+        return error;
+    }
+
+    @ExceptionHandler(ExpenseNotFoundException.class)
+    public ProblemDetail handleExpenseNotFoundException(ExpenseNotFoundException e) {
+        ProblemDetail error = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        error.setTitle("Expense not found");
+        error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
+                .pathSegment("error", "expense-not-found").build().toUri());
         error.setDetail(e.getMessage());
         return error;
     }

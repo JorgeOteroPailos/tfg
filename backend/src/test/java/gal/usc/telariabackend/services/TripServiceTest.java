@@ -17,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 import java.util.*;
 
@@ -144,8 +143,7 @@ class TripServiceTest {
         JoinRequestSummary summary = mock(JoinRequestSummary.class);
         Trip realTrip = mock(Trip.class);
 
-        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
-        when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.of(realTrip));
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(realTrip));
         when(realTrip.getId()).thenReturn(tripId);
         when(realTrip.getName()).thenReturn("Viaje a Roma");
         when(realTrip.getMembers()).thenReturn(members);
@@ -158,13 +156,12 @@ class TripServiceTest {
         assertEquals("Viaje a Roma", result.getName());
         assertEquals(2, result.getMembers().size());
         assertEquals(1, result.getPendingRequests().size());
-        assertSame(summary, result.getPendingRequests().get(0));
+        assertSame(summary, result.getPendingRequests().getFirst());
     }
 
     @Test
     void getTripDetails_WhenNoPendingRequests_ShouldReturnEmptyPendingRequests() {
-        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
-        when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.of(trip));
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
         when(trip.getMembers()).thenReturn(Set.of(user));
         when(joinRequestRepo.findAllByTrip(trip)).thenReturn(List.of());
 
@@ -175,25 +172,23 @@ class TripServiceTest {
 
     @Test
     void getTripDetails_WhenUserIsNotMember_ShouldThrowAccessDenied() {
-        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
-        when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.empty());
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.empty());
 
         assertThrows(NotATripMemberException.class, () -> tripService.getTripDetails(tripId, userId));
     }
 
     @Test
     void getTripDetails_WhenUserDoesNotExist_ShouldThrowAndNotQueryTrips() {
-        when(userRepo.findById(userId)).thenReturn(Optional.empty());
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> tripService.getTripDetails(tripId, userId));
+        assertThrows(NotATripMemberException.class, () -> tripService.getTripDetails(tripId, userId));
 
-        verifyNoInteractions(tripRepo);
+        verifyNoInteractions(joinRequestRepo);
     }
 
     @Test
     void getTripDetails_WhenTripDoesNotExist_ShouldThrowAccessDenied() {
-        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
-        when(tripRepo.findByIdAndMembersContaining(tripId, user)).thenReturn(Optional.empty());
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.empty());
 
         assertThrows(NotATripMemberException.class, () -> tripService.getTripDetails(tripId, userId));
     }

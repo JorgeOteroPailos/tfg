@@ -1,10 +1,15 @@
 package gal.usc.telariabackend.model;
 
+import gal.usc.telariabackend.model.dto.ExpenseSummary;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,10 +21,12 @@ public class Expense {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Getter
     @ManyToOne(optional = false)
     @JoinColumn(name = "trip_id")
     private Trip trip;
 
+    @Getter
     @ManyToOne(optional = false)
     @JoinColumn(name = "payer_id")
     private User payer;
@@ -34,22 +41,34 @@ public class Expense {
             joinColumns = @JoinColumn(name = "expense_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+
+    @Getter
     private Set<User> beneficiaries;
 
+    @Getter
     private BigDecimal amount;
     private String description;
-    private LocalDateTime timestamp;
+    private OffsetDateTime timestamp;
 
     public Expense() {}
 
-    public Expense(Trip trip, User payer, BigDecimal amount, String description, LocalDateTime timestamp, User creator, Set<User> beneficiaries) {
-        this.trip = trip;
+    public Expense(Trip t, User payer, BigDecimal amount, @NotNull String description, User creator, Set<User> beneficiaries) {
+        this.trip = t;
         this.payer = payer;
         this.amount = amount;
         this.description = description;
-        this.timestamp = timestamp;
+        this.timestamp = OffsetDateTime.now();
         this.creator = creator;
         this.beneficiaries = beneficiaries;
+    }
+
+    public ExpenseSummary toExpenseSummary() {
+        return new ExpenseSummary()
+                .id(this.id)
+                .amount(this.amount.doubleValue())
+                .datetime(this.timestamp)
+                .payerId(this.payer.getId())
+                .description(this.description);
     }
 
 }
