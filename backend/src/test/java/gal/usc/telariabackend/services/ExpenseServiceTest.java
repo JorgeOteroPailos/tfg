@@ -241,7 +241,7 @@ class ExpenseServiceTest {
         BalancesInfo result = expenseService.getBalances(tripId, userId);
 
         assertEquals(1, result.getSettlements().size());
-        Settlement firstSettlement = result.getSettlements().stream()
+        SettlementSuggestion firstSettlement = result.getSettlements().stream()
                 .findFirst().orElseThrow();
         assertEquals(Double.valueOf(15.0), firstSettlement.getAmount());
     }
@@ -282,7 +282,7 @@ class ExpenseServiceTest {
 
         BalancesInfo result = expenseService.getBalances(tripId, userId);
 
-        double totalSettled = result.getSettlements().stream().mapToDouble(Settlement::getAmount).sum();
+        double totalSettled = result.getSettlements().stream().mapToDouble(SettlementSuggestion::getAmount).sum();
         assertEquals(60.0, totalSettled, 0.01);
 
         UserBalance payerBalance = result.getBalances().stream()
@@ -306,7 +306,7 @@ class ExpenseServiceTest {
         BalancesInfo result = expenseService.getBalances(tripId, userId);
 
         assertEquals(2, result.getSettlements().size());
-        double totalSettled = result.getSettlements().stream().mapToDouble(Settlement::getAmount).sum();
+        double totalSettled = result.getSettlements().stream().mapToDouble(SettlementSuggestion::getAmount).sum();
         assertEquals(50.0, totalSettled, 0.01);
     }
 

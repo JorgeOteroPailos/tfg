@@ -25,7 +25,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../schemas.yaml#/schemas/IdResponse'
+                $ref: '../schemas/shared/common.yaml#/schemas/IdResponse'
         '401':
           description: Not authenticated
 
@@ -44,7 +44,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '../schemas.yaml#/schemas/TripSummary'
+                  $ref: '../schemas/trips.yaml#/schemas/TripSummary'
         '401':
           description: Not authenticated
 
@@ -69,7 +69,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../schemas.yaml#/schemas/TripDetail'
+                $ref: '../schemas/trips.yaml#/schemas/TripDetail'
         '401':
           description: Not authenticated
         '403':

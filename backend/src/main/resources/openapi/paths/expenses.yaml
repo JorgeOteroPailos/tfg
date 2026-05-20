@@ -19,14 +19,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../schemas.yaml#/schemas/CreateExpenseRequest'
+              $ref: '../schemas/expenses.yaml#/schemas/CreateExpenseRequest'
       responses:
         '201':
           description: Expense created successfully
           content:
             application/json:
               schema:
-                $ref: '../schemas.yaml#/schemas/IdResponse'
+                $ref: '../schemas/shared/common.yaml#/schemas/IdResponse'
         '400':
           description: Invalid request body
         '401':
@@ -56,13 +56,43 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '../schemas.yaml#/schemas/ExpenseSummary'
+                  $ref: '../schemas/expenses.yaml#/schemas/ExpenseSummary'
         '401':
           description: Not authenticated
         '403':
           description: Not a member of this trip
 
   /trips/{tripId}/expenses/{expenseId}:
+    get:
+      summary: get details from an expense
+      operationId: getExpense
+      tags:
+        - Expenses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: expenseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Expense details
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../schemas/expenses.yaml#/schemas/ExpenseDetail'
+
     delete:
       summary: Delete an expense
       operationId: deleteExpense
@@ -89,7 +119,7 @@ paths:
         '401':
           description: Not authenticated
         '403':
-          description: Not a member of this trip or not the payer
+          description: Not a member of this trip
 
   /trips/{tripId}/balances:
     get:
@@ -112,7 +142,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../schemas.yaml#/schemas/BalancesInfo'
+                $ref: '../schemas/expenses.yaml#/schemas/BalancesInfo'
         '401':
           description: Not authenticated
         '403':

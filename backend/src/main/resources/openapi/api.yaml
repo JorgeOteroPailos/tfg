@@ -39,6 +39,10 @@ paths:
     $ref: './paths/membership.yaml#/paths/~1users~1me~1invitations'
   /users/me/invitations/{invitationId}:
     $ref: './paths/membership.yaml#/paths/~1users~1me~1invitations~1{invitationId}'
+  /trips/{tripId}/events:
+    $ref: './paths/events.yaml#/paths/~1trips~1{tripId}~1events'
+  /trips/{tripId}/events/{eventId}:
+    $ref: './paths/events.yaml#/paths/~1trips~1{tripId}~1events~1{eventId}'
 
 components:
   securitySchemes:

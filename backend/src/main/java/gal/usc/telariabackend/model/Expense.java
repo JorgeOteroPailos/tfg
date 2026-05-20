@@ -47,16 +47,16 @@ public class Expense {
 
     @Getter
     private BigDecimal amount;
-    private String description;
+    private String name;
     private OffsetDateTime timestamp;
 
     public Expense() {}
 
-    public Expense(Trip t, User payer, BigDecimal amount, @NotNull String description, User creator, Set<User> beneficiaries) {
+    public Expense(Trip t, User payer, BigDecimal amount, @NotNull String name, User creator, Set<User> beneficiaries) {
         this.trip = t;
         this.payer = payer;
         this.amount = amount;
-        this.description = description;
+        this.name = name;
         this.timestamp = OffsetDateTime.now();
         this.creator = creator;
         this.beneficiaries = beneficiaries;
@@ -68,7 +68,7 @@ public class Expense {
                 .amount(this.amount.doubleValue())
                 .datetime(this.timestamp)
                 .payerId(this.payer.getId())
-                .description(this.description);
+                .name(this.name);
     }
 
 }

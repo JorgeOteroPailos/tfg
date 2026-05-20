@@ -62,7 +62,6 @@ class MembershipE2ETest {
                 .getAccessToken();
     }
 
-    /** Decodes the JWT payload and extracts the subject as a UUID. */
     private UUID extractUserIdFromToken(String token) throws Exception {
         String payload = token.split("\\.")[1];
         byte[] decoded = Base64.getUrlDecoder().decode(payload);
@@ -85,10 +84,6 @@ class MembershipE2ETest {
                 .getId();
     }
 
-    /**
-     * Sends a join request and returns its ID by fetching the trip details
-     * and reading the first pending request (each test starts from a clean state).
-     */
     private UUID createJoinRequest(String token, String ownerToken, UUID tripId) throws Exception {
         mockMvc.perform(post("/trips/{tripId}/join-requests", tripId)
                         .header("Authorization", "Bearer " + token))

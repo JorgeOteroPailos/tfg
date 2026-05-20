@@ -1,0 +1,58 @@
+schemas:
+  CreateEventRequest:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        minLength: 1
+      startTime:
+        type: string
+        format: date-time
+      duration:
+        type: integer
+        description: Duration in minutes
+      location:
+        $ref: '#/schemas/Location'
+
+  EventSummary:
+    type: object
+    required:
+      - id
+      - name
+      - startTime
+      - duration
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+      startTime:
+        type: string
+        format: date-time
+      duration:
+        type: integer
+      location:
+        $ref: '#/schemas/Location'
+
+  Location:
+    type: object
+    required:
+    properties:
+      name:
+        type: string
+        example: Restaurante Casa Pepe
+      address:
+        type: string
+        example: Calle Mayor 1, Santiago
+      latitude:
+        type: number
+        format: double
+      longitude:
+        type: number
+        format: double
+      mapURL:
+        type: string
+        example: https://maps.google.com/?q=42.8782,-8.5448

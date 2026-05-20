@@ -1,0 +1,92 @@
+paths:
+  /trips/{tripId}/events:
+    post:
+      summary: Add an event to a trip
+      operationId: createEvent
+      tags:
+        - Events
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/events.yaml#/schemas/CreateEventRequest'
+      responses:
+        '201':
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/shared/common.yaml#/schemas/IdResponse'
+        '400':
+          description: Invalid request body
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip
+
+    get:
+      summary: List events of a trip
+      operationId: listEvents
+      tags:
+        - Events
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../schemas/events.yaml#/schemas/EventSummary'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip
+
+  /trips/{tripId}/events/{eventId}:
+    delete:
+      summary: Delete an event
+      operationId: deleteEvent
+      tags:
+        - Events
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Event deleted successfully
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip

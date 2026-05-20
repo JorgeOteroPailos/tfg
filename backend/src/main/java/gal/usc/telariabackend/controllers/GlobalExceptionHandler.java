@@ -1,6 +1,11 @@
 package gal.usc.telariabackend.controllers;
 
-import gal.usc.telariabackend.model.exceptions.*;
+import gal.usc.telariabackend.model.exceptions.AlreadyDoneException;
+import gal.usc.telariabackend.model.exceptions.EventNotFoundException;
+import gal.usc.telariabackend.model.exceptions.ExpenseNotFoundException;
+import gal.usc.telariabackend.model.exceptions.InvalidRefreshTokenException;
+import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
+import gal.usc.telariabackend.model.exceptions.TripNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
@@ -64,6 +69,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error;
     }
 
+
+    @ExceptionHandler(EventNotFoundException.class)
+    public ProblemDetail handleEventNotFoundException(EventNotFoundException e) {
+        ProblemDetail error = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        error.setTitle("Event not found");
+        error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
+                .pathSegment("error", "event-not-found").build().toUri());
+        error.setDetail(e.getMessage());
+        return error;
+    }
 
     @ExceptionHandler(NotATripMemberException.class)
     public ProblemDetail handleAccessDeniedException(NotATripMemberException e) {

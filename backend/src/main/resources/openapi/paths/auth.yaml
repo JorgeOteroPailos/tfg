@@ -10,7 +10,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../schemas.yaml#/schemas/RegisterRequest'
+              $ref: '../schemas/auth.yaml#/schemas/RegisterRequest'
             example:
               username: juanperez
               email: juan@example.com
@@ -21,7 +21,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../schemas.yaml#/schemas/LoginResponse'
+                $ref: '../schemas/auth.yaml#/schemas/LoginResponse'
         '409':
           description: User email already in use
         '400':
@@ -38,7 +38,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../schemas.yaml#/schemas/LoginRequest'
+              $ref: '../schemas/auth.yaml#/schemas/LoginRequest'
             example:
               email: juan@example.com
               password: secreto123
@@ -48,7 +48,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../schemas.yaml#/schemas/LoginResponse'
+                $ref: '../schemas/auth.yaml#/schemas/LoginResponse'
         '401':
           description: Incorrect credentials
 
@@ -77,7 +77,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../schemas.yaml#/schemas/RefreshRequest'
+              $ref: '../schemas/auth.yaml#/schemas/RefreshRequest'
             example:
               refreshToken: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...
       responses:
@@ -86,7 +86,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../schemas.yaml#/schemas/RefreshResponse'
+                $ref: '../schemas/auth.yaml#/schemas/RefreshResponse'
         '401':
           description: Invalid refresh Token
         '403':

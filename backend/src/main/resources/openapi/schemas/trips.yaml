@@ -1,0 +1,58 @@
+schemas:
+  TripSummary:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        example: Viaje a Roma
+
+  UserProfile:
+    type: object
+    required:
+      - id
+      - username
+    properties:
+      id:
+        type: string
+        format: uuid
+      username:
+        type: string
+
+  JoinRequestSummary:
+    type: object
+    required:
+      - id
+      - requester
+    properties:
+      id:
+        type: string
+        format: uuid
+      requester:
+        $ref: '#/schemas/UserProfile'
+
+  TripDetail:
+    type: object
+    required:
+      - id
+      - name
+      - members
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+      members:
+        type: array
+        items:
+          $ref: '#/schemas/UserProfile'
+      pendingRequests:
+        type: array
+        items:
+          $ref: '#/schemas/JoinRequestSummary'

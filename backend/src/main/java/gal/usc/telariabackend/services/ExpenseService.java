@@ -84,9 +84,11 @@ public class ExpenseService {
         return t.getExpenses().stream().map(Expense::toExpenseSummary).toList();
     }
 
+
+
     private BalancesInfo calculateBalances(Trip t){
         Map<UUID, BigDecimal> balances = new HashMap<>();
-        List <Settlement> settlements=new ArrayList<>();
+        List <SettlementSuggestion> settlements=new ArrayList<>();
 
         for (Expense e : t.getExpenses()) {
             BigDecimal total = e.getAmount();
@@ -103,7 +105,6 @@ public class ExpenseService {
                 distributed = distributed.add(share);
 
                 if (!beneficiary.getId().equals(e.getPayer().getId())) {
-                    System.out.println("Processing beneficiary: " + beneficiary.getId() + " share: " + share);
                     balances.merge(beneficiary.getId(), share.negate(), BigDecimal::add);
                     balances.merge(e.getPayer().getId(), share, BigDecimal::add);
                 }
@@ -128,7 +129,7 @@ public class ExpenseService {
                     max=max.subtract(amount);
                     balances.put(maxId,max);
                     balances.put(minId,BigDecimal.ZERO);
-                    settlements.add(new Settlement().
+                    settlements.add(new SettlementSuggestion().
                             amount(amount.setScale(2, RoundingMode.HALF_UP).doubleValue())
                             .fromId(minId)
                             .toId(maxId));
@@ -137,7 +138,7 @@ public class ExpenseService {
                     min=min.add(amount);
                     balances.put(minId,min);
                     balances.put(maxId,BigDecimal.ZERO);
-                    settlements.add(new Settlement().
+                    settlements.add(new SettlementSuggestion().
                             amount(amount.setScale(2, RoundingMode.HALF_UP).doubleValue())
                             .fromId(maxId)
                             .toId(minId));

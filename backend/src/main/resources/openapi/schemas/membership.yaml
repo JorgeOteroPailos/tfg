@@ -1,0 +1,30 @@
+schemas:
+  ResolveJoinRequest:
+    type: object
+    required:
+      - accepted
+    properties:
+      accepted:
+        type: boolean
+
+  CreateInvitationRequest:
+    type: object
+    required:
+      - tripId
+    properties:
+      tripId:
+        type: string
+        format: uuid
+
+  InvitationSummary:
+    type: object
+    required:
+      - id
+      - tripId
+    properties:
+      id:
+        type: string
+        format: uuid
+      tripId:
+        type: string
+        format: uuid

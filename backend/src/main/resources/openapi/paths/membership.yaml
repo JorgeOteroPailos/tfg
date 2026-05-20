@@ -50,7 +50,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../schemas.yaml#/schemas/ResolveJoinRequest'
+              $ref: '../schemas/membership.yaml#/schemas/ResolveJoinRequest'
       responses:
         '204':
           description: Request resolved successfully
@@ -79,7 +79,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../schemas.yaml#/schemas/CreateInvitationRequest'
+              $ref: '../schemas/membership.yaml#/schemas/CreateInvitationRequest'
       responses:
         '204':
           description: Invitation created successfully
@@ -106,7 +106,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '../schemas.yaml#/schemas/InvitationSummary'
+                  $ref: '../schemas/membership.yaml#/schemas/InvitationSummary'
         '401':
           description: Not authenticated
 
@@ -130,7 +130,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../schemas.yaml#/schemas/ResolveJoinRequest'
+              $ref: '../schemas/membership.yaml#/schemas/ResolveJoinRequest'
       responses:
         '204':
           description: Invitation resolved successfully

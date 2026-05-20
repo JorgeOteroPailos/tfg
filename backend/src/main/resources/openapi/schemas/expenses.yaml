@@ -1,0 +1,130 @@
+schemas:
+  CreateExpenseRequest:
+    type: object
+    required:
+      - description
+      - amount
+      - beneficiaryIds
+      - payerId
+    properties:
+      description:
+        type: string
+        example: Cena en trattoria
+      amount:
+        type: number
+        format: double
+        example: 90.00
+      beneficiaryIds:
+        type: array
+        items:
+          type: string
+          format: uuid
+      payerId:
+        type: string
+        format: uuid
+
+  ExpenseSummary:
+    type: object
+    required:
+      - id
+      - name
+      - datetime
+      - payerId
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        example: Mocho en el Sham
+      amount:
+        type: number
+        format: double
+        example: 90.00
+      datetime:
+        type: string
+        format: date-time
+        example: '2025-06-15'
+      payerId:
+        type: string
+        format: uuid
+
+  ExpenseDetail:
+    type: object
+    required:
+      - id
+      - name
+      - datetime
+      - payerId
+      - datetime
+      - beneficiaryIds
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        example: Mocho en el Sham
+      amount:
+        type: number
+        format: double
+        example: 90.00
+      datetime:
+        type: string
+        format: date-time
+        example: '2025-06-15'
+      payerId:
+        type: string
+        format: uuid
+      beneficiaryIds:
+        type: array
+        items:
+          type: string
+          format: uuid
+
+  SettlementSuggestion:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      fromId:
+        type: string
+        format: uuid
+      toId:
+        type: string
+        format: uuid
+      amount:
+        type: number
+        format: double
+        example: 25.00
+    required:
+      - fromId
+      - toId
+      - amount
+
+  UserBalance:
+    type: object
+    required:
+      - userId
+      - amount
+    properties:
+      userId:
+        type: string
+        format: uuid
+      amount:
+        type: number
+        format: double
+
+  BalancesInfo:
+    type: object
+    required:
+    properties:
+      settlements:
+        type: array
+        items:
+          $ref: '#/schemas/SettlementSuggestion'
+      balances:
+        type: array
+        items:
+          $ref: '#/schemas/UserBalance'
