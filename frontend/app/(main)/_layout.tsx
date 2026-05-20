@@ -32,8 +32,7 @@ export default function MainLayout() {
         <Stack.Screen name="settings" options={{ title: t('settings.title') }} />
         <Stack.Screen name="(profile)/profile" options={{ title: t('nav.profile') }} />
         <Stack.Screen name="(profile)/qr" options={{ title: t('nav.yourQR') }} />
-        <Stack.Screen name="(trip)/[tripId]" options={{ title: t('nav.tripDetail') }} />
-        <Stack.Screen name="(trip)/members" options={{ title: t('nav.members') }} />
+        <Stack.Screen name="(trip)" options={{ headerShown: false }} />
       </Stack>
       <Sidebar />
     </View>

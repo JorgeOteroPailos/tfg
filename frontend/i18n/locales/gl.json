@@ -76,8 +76,21 @@
     "requests": "Solicitudes de Unión",
     "invite": "Invitar Membros",
     "expenses": "Gastos",
+    "addExpense": "Agregar gasto",
+    "newExpense": "Novo gasto",
+    "description": "Descrición",
+    "amount": "Cantidade",
+    "payerId": "ID do pagador",
+    "selectPayer": "Selecciona un pagador",
+    "beneficiaryIds": "IDs de beneficiarios",
+    "fillAllRequiredFields": "Por favor completa todos os campos obrigatorios",
+    "createExpenseError": "Non se puido crear o gasto",
+    "noExpenses": "Aínda non hai gastos",
+    "unableLoadExpenses": "Non se puideron cargar os gastos",
+    "noName": "Sen nome",
     "events": "Eventos",
-    "chat": "Chat"
+    "chat": "Chat",
+    "addMember": "Engadir membro"
   },
   "calendar": {
     "title": "Calendario",

@@ -1,6 +1,7 @@
 import { useAuth } from './auth';
 import type { components } from './generated/types';
 import { AppError, ErrorCode } from './AppError';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 type TripSummary = components['schemas']['TripSummary'];
 type TripDetail = components['schemas']['TripDetail'];
@@ -31,3 +32,45 @@ export function useTrips() {
 
   return { listTrips, getTrip, createTrip };
 }
+
+type TripContextType = {
+  trip: TripDetail | null;
+  loading: boolean;
+  reload: () => Promise<void>;
+};
+
+const TripContext = createContext<TripContextType>({
+  trip: null,
+  loading: true,
+  reload: async () => {},
+});
+
+export const TripProvider = ({ tripId, children }: { tripId: string; children: React.ReactNode }) => {
+  const { getTrip } = useTrips();
+  const [trip, setTrip] = useState<TripDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    try {
+      setLoading(true);
+      const data = await getTrip(tripId);
+      setTrip(data);
+    } catch (e) {
+      console.error('Error cargando viaje:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, [tripId]);
+
+  return (
+    <TripContext.Provider value={{ trip, loading, reload: load }}>
+      {children}
+    </TripContext.Provider>
+  );
+};
+
+export const useTrip = () => useContext(TripContext);

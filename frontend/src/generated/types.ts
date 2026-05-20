@@ -72,23 +72,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all users */
-        get: operations["getAllUsers"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/trips": {
         parameters: {
             query?: never;
@@ -149,7 +132,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** get details from an expense */
+        get: operations["getExpense"];
         put?: never;
         post?: never;
         /** Delete an expense */
@@ -176,6 +160,143 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/trips/{tripId}/join-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit a join request to the selected trip */
+        post: operations["createJoinRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/{tripId}/join-requests/{requestId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Accept or reject a join request */
+        delete: operations["resolveJoinRequest"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{userId}/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Invite a user to a trip */
+        post: operations["createInvitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/{tripId}/members/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Leave a trip */
+        delete: operations["leaveTrip"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/me/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get my pending invitations */
+        get: operations["getMyInvitations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/me/invitations/{invitationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Accept or reject an invitation */
+        delete: operations["resolveInvitation"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/{tripId}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List events of a trip */
+        get: operations["listEvents"];
+        put?: never;
+        /** Add an event to a trip */
+        post: operations["createEvent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/{tripId}/events/{eventId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete an event */
+        delete: operations["deleteEvent"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -183,18 +304,6 @@ export interface components {
         RegisterRequest: {
             /** @example juanperez */
             username: string;
-            /**
-             * Format: email
-             * @example juan@example.com
-             */
-            email: string;
-            /**
-             * Format: password
-             * @example secreto123
-             */
-            password: string;
-        };
-        LoginRequest: {
             /**
              * Format: email
              * @example juan@example.com
@@ -223,6 +332,18 @@ export interface components {
              */
             username: string;
         };
+        LoginRequest: {
+            /**
+             * Format: email
+             * @example juan@example.com
+             */
+            email: string;
+            /**
+             * Format: password
+             * @example secreto123
+             */
+            password: string;
+        };
         RefreshRequest: {
             /**
              * @description Refresh Token obtained throuh login or register
@@ -242,28 +363,50 @@ export interface components {
              */
             refreshToken: string;
         };
-        User: {
-            /**
-             * Format: email
-             * @example juan@example.com
-             */
-            email?: string;
-            /** @example juanperez */
-            username?: string;
-        };
         TripSummary: {
             /** Format: uuid */
-            id?: string;
+            id: string;
             /** @example Viaje a Roma */
-            name?: string;
+            name: string;
+        };
+        IdResponse: {
+            /** Format: uuid */
+            id: string;
+        };
+        UserProfile: {
+            /** Format: uuid */
+            id: string;
+            username: string;
+        };
+        JoinRequestSummary: {
+            /** Format: uuid */
+            id: string;
+            requester: components["schemas"]["UserProfile"];
         };
         TripDetail: {
             /** Format: uuid */
-            id?: string;
-            /** @example Viaje a Roma */
-            name?: string;
-            /** @example campo de ejemplo qtengo q cambiar */
-            hola?: string;
+            id: string;
+            name: string;
+            members: components["schemas"]["UserProfile"][];
+            pendingRequests?: components["schemas"]["JoinRequestSummary"][];
+        };
+        ExpenseSummary: {
+            /** Format: uuid */
+            id: string;
+            /** @example Mocho en el Sham */
+            name: string;
+            /**
+             * Format: double
+             * @example 90
+             */
+            amount?: number;
+            /**
+             * Format: date-time
+             * @example 2025-06-15
+             */
+            datetime: string;
+            /** Format: uuid */
+            payerId: string;
         };
         CreateExpenseRequest: {
             /** @example Cena en trattoria */
@@ -273,43 +416,93 @@ export interface components {
              * @example 90
              */
             amount: number;
-            /**
-             * Format: date
-             * @example 2025-06-15
-             */
-            date: string;
             beneficiaryIds: string[];
             /** Format: uuid */
             payerId: string;
         };
-        ExpenseSummary: {
+        ExpenseDetail: {
             /** Format: uuid */
-            id?: string;
+            id: string;
             /** @example Mocho en el Sham */
-            description?: string;
+            name: string;
             /**
              * Format: double
              * @example 90
              */
             amount?: number;
             /**
-             * Format: date
+             * Format: date-time
              * @example 2025-06-15
              */
-            date?: string;
+            datetime: string;
             /** Format: uuid */
-            payerId?: string;
+            payerId: string;
+            beneficiaryIds: string[];
         };
-        Settlement: {
+        SettlementSuggestion: {
             /** Format: uuid */
-            fromId?: string;
+            id?: string;
             /** Format: uuid */
-            toId?: string;
+            fromId: string;
+            /** Format: uuid */
+            toId: string;
             /**
              * Format: double
              * @example 25
              */
-            amount?: number;
+            amount: number;
+        };
+        UserBalance: {
+            /** Format: uuid */
+            userId: string;
+            /** Format: double */
+            amount: number;
+        };
+        BalancesInfo: {
+            settlements?: components["schemas"]["SettlementSuggestion"][];
+            balances?: components["schemas"]["UserBalance"][];
+        };
+        ResolveJoinRequest: {
+            accepted: boolean;
+        };
+        CreateInvitationRequest: {
+            /** Format: uuid */
+            tripId: string;
+        };
+        InvitationSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tripId: string;
+        };
+        Location: {
+            /** @example Restaurante Casa Pepe */
+            name?: string;
+            /** @example Calle Mayor 1, Santiago */
+            address?: string;
+            /** Format: double */
+            latitude?: number;
+            /** Format: double */
+            longitude?: number;
+            /** @example https://maps.google.com/?q=42.8782,-8.5448 */
+            mapURL?: string;
+        };
+        EventSummary: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: date-time */
+            startTime: string;
+            duration: number;
+            location?: components["schemas"]["Location"];
+        };
+        CreateEventRequest: {
+            name: string;
+            /** Format: date-time */
+            startTime?: string;
+            /** @description Duration in minutes */
+            duration?: number;
+            location?: components["schemas"]["Location"];
         };
     };
     responses: never;
@@ -470,40 +663,6 @@ export interface operations {
             };
         };
     };
-    getAllUsers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of users */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["User"][];
-                };
-            };
-            /** @description Not authenticated */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     listTrips: {
         parameters: {
             query?: never;
@@ -553,10 +712,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        /** Format: uuid */
-                        id?: string;
-                    };
+                    "application/json": components["schemas"]["IdResponse"];
                 };
             };
             /** @description Not authenticated */
@@ -661,10 +817,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        /** Format: uuid */
-                        id?: string;
-                    };
+                    "application/json": components["schemas"]["IdResponse"];
                 };
             };
             /** @description Invalid request body */
@@ -687,6 +840,29 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    getExpense: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+                expenseId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Expense details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExpenseDetail"][];
+                };
             };
         };
     };
@@ -716,7 +892,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Not a member of this trip or not the payer */
+            /** @description Not a member of this trip */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -736,14 +912,356 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of settlements to balance the trip */
+            /** @description Balances and settlements for the trip */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Settlement"][];
+                    "application/json": components["schemas"]["BalancesInfo"];
                 };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    createJoinRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Join request created successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Trip not found */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Already a member or request already pending */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    resolveJoinRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+                requestId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveJoinRequest"];
+            };
+        };
+        responses: {
+            /** @description Request resolved successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    createInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateInvitationRequest"];
+            };
+        };
+        responses: {
+            /** @description Invitation created successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User is already a member or invitation already pending */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    leaveTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Left the trip successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getMyInvitations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of pending invitations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationSummary"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    resolveInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveJoinRequest"];
+            };
+        };
+        responses: {
+            /** @description Invitation resolved successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not your invitation */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listEvents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of events */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventSummary"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    createEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateEventRequest"];
+            };
+        };
+        responses: {
+            /** @description Event created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdResponse"];
+                };
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+                eventId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Event deleted successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Not authenticated */
             401: {

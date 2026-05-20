@@ -76,8 +76,21 @@
     "requests": "Join Requests",
     "invite": "Invite Members",
     "expenses": "Expenses",
+    "addExpense": "Add expense",
+    "newExpense": "New expense",
+    "description": "Description",
+    "amount": "Amount",
+    "payerId": "Payer ID",
+    "selectPayer": "Select payer",
+    "beneficiaryIds": "Beneficiary IDs",
+    "fillAllRequiredFields": "Please fill all required fields",
+    "createExpenseError": "Unable to create expense",
+    "noExpenses": "No expenses yet",
+    "unableLoadExpenses": "Unable to load expenses",
+    "noName": "No name",
     "events": "Events",
-    "chat": "Chat"
+    "chat": "Chat",
+    "addMember": "Add Member"
   },
   "calendar": {
     "title": "Calendar",
