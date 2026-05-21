@@ -97,7 +97,7 @@ const Main = () => {
             <TouchableOpacity
               style={[styles.tripCard, { backgroundColor: theme.tabBackground }]}
               onPress={() => {
-                router.push({ pathname: '/trip', params: { tripId: item.id } });
+                router.push({ pathname: '/expenses', params: { tripId: item.id } });
               }}
             >
               <View style={styles.tripContent}>

@@ -90,6 +90,9 @@
     "noName": "No name",
     "events": "Events",
     "chat": "Chat",
+    "more": "More",
+    "leave": "Leave trip",
+    "beneficiaries": "Beneficiaries",
     "addMember": "Add Member"
   },
   "calendar": {
