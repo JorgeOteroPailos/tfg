@@ -85,7 +85,25 @@ schemas:
   SettlementSuggestion:
     type: object
     properties:
-      id:
+      fromId:
+        type: string
+        format: uuid
+      toId:
+        type: string
+        format: uuid
+      amount:
+        type: number
+        format: double
+        example: 25.00
+    required:
+      - fromId
+      - toId
+      - amount
+
+  CreateSettlementRequest:
+    type: object
+    properties:
+      tripId:
         type: string
         format: uuid
       fromId:
@@ -99,6 +117,7 @@ schemas:
         format: double
         example: 25.00
     required:
+      - tripId
       - fromId
       - toId
       - amount

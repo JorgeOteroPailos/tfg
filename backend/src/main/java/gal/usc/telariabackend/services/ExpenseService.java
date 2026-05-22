@@ -84,7 +84,9 @@ public class ExpenseService {
         return t.getExpenses().stream().map(Expense::toExpenseSummary).toList();
     }
 
+    public void paySettlement(CreateSettlementRequest settlementRequest){
 
+    }
 
     private BalancesInfo calculateBalances(Trip t){
         Map<UUID, BigDecimal> balances = new HashMap<>();

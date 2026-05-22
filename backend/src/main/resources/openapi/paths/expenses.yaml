@@ -147,3 +147,36 @@ paths:
           description: Not authenticated
         '403':
           description: Not a member of this trip
+
+  /trips/{tripId}/settlements:
+    post:
+      summary: Pay a settlement
+      operationId: createSettlement
+      tags:
+        - Expenses
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/expenses.yaml#/schemas/CreateSettlementRequest'
+      responses:
+        '201':
+          description: Settlement added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/shared/common.yaml#/schemas/IdResponse'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip
