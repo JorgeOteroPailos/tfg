@@ -441,8 +441,6 @@ export interface components {
         };
         SettlementSuggestion: {
             /** Format: uuid */
-            id?: string;
-            /** Format: uuid */
             fromId: string;
             /** Format: uuid */
             toId: string;

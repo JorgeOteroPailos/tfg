@@ -73,6 +73,9 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
+
+    // MinIO / AWS S3
+    implementation("software.amazon.awssdk:s3:2.31.43")
 }
 
 openApiGenerate {

@@ -23,6 +23,7 @@ const TripLayout = () => {
     { name: 'expenses', icon: 'receipt-outline', label: t('trip.expenses') },
     { name: 'events', icon: 'calendar-outline', label: t('trip.events') },
     { name: 'chat', icon: 'chatbubble-outline', label: t('trip.chat') },
+    { name: 'members', icon: 'people-outline', label: t('trip.members') },
   ] as const;
 
   return (
@@ -99,17 +100,6 @@ const TripLayout = () => {
               >
                 <Ionicons name="settings-outline" size={22} color={theme.text} />
                 <ThemedText style={styles.sheetItemText}>{t('nav.settings')}</ThemedText>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.sheetItem}
-                onPress={() => {
-                  setMoreVisible(false);
-                  router.push({ pathname: '/members', params: { tripId } });
-                }}
-              >
-                <Ionicons name="people-outline" size={22} color={theme.text} />
-                <ThemedText style={styles.sheetItemText}>{t('trip.members')}</ThemedText>
               </TouchableOpacity>
 
               <TouchableOpacity
