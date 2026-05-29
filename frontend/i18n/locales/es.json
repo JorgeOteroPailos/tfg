@@ -14,7 +14,8 @@
     "profile": "Perfil",
     "yourQR": "Tu QR",
     "tripDetail": "Detalles del Viaje",
-    "members": "Miembros"
+    "members": "Miembros",
+    "invitations": "Invitaciones"
   },
   "auth": {
     "login": {
@@ -93,7 +94,35 @@
     "more": "Más",
     "leave": "Salir del viaje",
     "beneficiaries": "Beneficiarios",
-    "addMember": "Añadir miembro"
+    "addMember": "Añadir miembro",
+    "tripQrHint": "Comparte este QR para que otros puedan unirse al viaje",
+    "sendInvite": "Enviar invitación",
+    "inviteSent": "¡Invitación enviada!",
+    "inviteError": "No se pudo enviar la invitación",
+    "enterUserId": "ID de usuario",
+    "scanQr": "Escanear QR",
+    "scanMemberQr": "Escanear QR del miembro",
+    "scanTripQr": "Escanear QR del viaje",
+    "scanHintInvite": "Apunta al código QR de la persona",
+    "scanHintJoin": "Apunta al código QR del viaje",
+    "joinRequestSent": "¡Solicitud enviada!",
+    "joinRequestError": "No se pudo enviar la solicitud",
+    "cameraPermissionDenied": "Se requiere acceso a la cámara para escanear códigos QR",
+    "allowCamera": "Permitir cámara",
+    "tryAgain": "Intentar de nuevo",
+    "scanErrorConflictInvite": "El usuario ya está invitado o ya es miembro del viaje",
+    "scanErrorConflictJoin": "Ya eres miembro o tienes una solicitud pendiente",
+    "scanErrorForbidden": "No tienes permiso para realizar esta acción",
+    "scanErrorBadRequest": "Código QR no válido",
+    "scanErrorUnauthorized": "Tu sesión ha expirado, por favor inicia sesión de nuevo"
+  },
+  "invitations": {
+    "empty": "No tienes invitaciones pendientes",
+    "accept": "Aceptar",
+    "reject": "Rechazar",
+    "loadError": "No se pudieron cargar las invitaciones",
+    "acceptError": "No se pudo aceptar la invitación",
+    "rejectError": "No se pudo rechazar la invitación"
   },
   "calendar": {
     "title": "Calendario",

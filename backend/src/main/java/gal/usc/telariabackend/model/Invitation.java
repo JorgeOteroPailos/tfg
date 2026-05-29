@@ -19,6 +19,6 @@ public class Invitation extends PendingMembership {
     }
 
     public InvitationSummary toInvitationSummary(){
-        return new InvitationSummary().id(this.getId()).tripId(this.getTrip().getId());
+        return new InvitationSummary().id(this.getId()).tripId(this.getTrip().getId()).tripName(this.getTrip().getName());
     }
 }

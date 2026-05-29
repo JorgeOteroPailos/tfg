@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, FlatList } from 'react-native';
-import { Link, router } from 'expo-router';
+import { router, useFocusEffect, useNavigation } from 'expo-router';
 import ThemedText from '../../components/ThemedText';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../src/theme';
 import { Colors } from '../../constants/Colors';
 import { useAuth } from '../../src/auth';
 import { useTrips } from '../../src/trips';
+import { useInvitations } from '../../src/invitations';
 import { components } from '../../src/generated/types';
-import { Modal, TextInput, ActivityIndicator } from 'react-native';
+import { Modal, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import ThemedInput from '../../components/ThemedInput';
 
 type TripSummary = components['schemas']['TripSummary'];
@@ -20,19 +22,27 @@ const Main = () => {
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
   const { logout } = useAuth();
+  const navigation = useNavigation();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { listTrips, createTrip } = useTrips();
+  const { getMyInvitations } = useInvitations();
+  const initialLoadDone = useRef(false);
   const [trips, setTrips] = useState<TripSummary[]>([]);
+  const [invitationCount, setInvitationCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await listTrips();
-        setTrips(data);
+        const [tripsData, invitationsData] = await Promise.all([
+          listTrips(),
+          getMyInvitations(),
+        ]);
+        setTrips(tripsData);
+        setInvitationCount(invitationsData.length);
       } catch (e) {
         router.replace('/login');
         setError('Error cargando viajes');
@@ -42,7 +52,35 @@ const Main = () => {
     };
 
     load();
+    initialLoadDone.current = true;
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!initialLoadDone.current) return;
+      Promise.all([listTrips(), getMyInvitations()])
+        .then(([tripsData, invitationsData]) => {
+          setTrips(tripsData);
+          setInvitationCount(invitationsData.length);
+        })
+        .catch(() => {});
+    }, [listTrips, getMyInvitations])
+  );
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity style={styles.invitationsButton} onPress={() => router.push('/invitations')}>
+          <Ionicons name="mail-outline" size={24} color={theme.title} />
+          {invitationCount > 0 && (
+            <View style={styles.badge}>
+              <ThemedText style={styles.badgeText}>{invitationCount}</ThemedText>
+            </View>
+          )}
+        </TouchableOpacity>
+      ),
+    });
+  }, [invitationCount, theme]);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [newTripName, setNewTripName] = useState('');
@@ -328,5 +366,27 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     backgroundColor: 'transparent',
+  },
+  invitationsButton: {
+    paddingHorizontal: 8,
+    paddingTop: 6,
+  },
+  badge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#d9534f',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 3,
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: '700',
+    lineHeight: 12,
   },
 });

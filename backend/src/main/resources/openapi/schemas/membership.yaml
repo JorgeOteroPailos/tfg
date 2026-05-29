@@ -21,6 +21,7 @@ schemas:
     required:
       - id
       - tripId
+      - tripName
     properties:
       id:
         type: string
@@ -28,3 +29,5 @@ schemas:
       tripId:
         type: string
         format: uuid
+      tripName:
+        type: string

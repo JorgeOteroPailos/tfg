@@ -472,6 +472,7 @@ export interface components {
             id: string;
             /** Format: uuid */
             tripId: string;
+            tripName: string;
         };
         Location: {
             /** @example Restaurante Casa Pepe */

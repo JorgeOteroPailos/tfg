@@ -1,23 +1,35 @@
 import { StyleSheet, View } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
 import ThemedText from '../../../components/ThemedText';
 import ThemedButton from '../../../components/ThemedButton';
 import { useAuth } from '../../../src/auth';
 import { t } from 'i18next';
 import { router } from 'expo-router';
 
+const decodeJWT = (token: string) => {
+  const payload = token.split('.')[1];
+  return JSON.parse(atob(payload));
+};
+
 const Profile = () => {
-  const { userEmail, username, logout } = useAuth();
+  const { userEmail, username, logout, accessToken } = useAuth();
 
   const handleLogout = async () => {
     await logout();
     router.replace('/login');
   };
 
+  const userId = accessToken ? decodeJWT(accessToken).sub : null;
+
   return (
     <View style={styles.container}>
-      <ThemedText title={true}>
-        {t('profile.title')}
-      </ThemedText>
+      {userId && (
+        <View style={styles.qrContainer}>
+          <ThemedText title={true}>{t('profile.qrTitle')}</ThemedText>
+          <QRCode value={userId} size={200} />
+          <ThemedText style={styles.qrHint}>{t('profile.qrHint')}</ThemedText>
+        </View>
+      )}
 
       <View style={styles.infoContainer}>
         <ThemedText>
@@ -29,17 +41,12 @@ const Profile = () => {
         </ThemedText>
       </View>
 
-      <ThemedButton onPress={() => router.push('/(profile)/qr')}>
-        <ThemedText>{t('profile.showQR')}</ThemedText>
-      </ThemedButton>
+      
 
       <ThemedButton onPress={handleLogout}>
         <ThemedText>{t('profile.logout')}</ThemedText>
       </ThemedButton>
-
     </View>
-
-    
   );
 };
 
@@ -52,12 +59,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 30,
   },
-
   infoContainer: {
     gap: 15,
     padding: 20,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#ccc',
+  },
+  qrContainer: {
+    alignItems: 'center',
+    gap: 16,
+  },
+  qrHint: {
+    textAlign: 'center',
+    opacity: 0.7,
   },
 });

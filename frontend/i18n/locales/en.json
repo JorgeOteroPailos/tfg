@@ -14,7 +14,8 @@
     "profile": "Profile",
     "yourQR": "Your QR",
     "tripDetail": "Trip Details",
-    "members": "Members"
+    "members": "Members",
+    "invitations": "Invitations"
   },
   "auth": {
     "login": {
@@ -93,7 +94,35 @@
     "more": "More",
     "leave": "Leave trip",
     "beneficiaries": "Beneficiaries",
-    "addMember": "Add Member"
+    "addMember": "Add Member",
+    "tripQrHint": "Share this QR so others can join the trip",
+    "sendInvite": "Send Invite",
+    "inviteSent": "Invitation sent!",
+    "inviteError": "Could not send invitation",
+    "enterUserId": "User ID",
+    "scanQr": "Scan QR",
+    "scanMemberQr": "Scan Member QR",
+    "scanTripQr": "Scan Trip QR",
+    "scanHintInvite": "Point at the person's QR code",
+    "scanHintJoin": "Point at the trip's QR code",
+    "joinRequestSent": "Join request sent!",
+    "joinRequestError": "Could not send join request",
+    "cameraPermissionDenied": "Camera access is required to scan QR codes",
+    "allowCamera": "Allow Camera",
+    "tryAgain": "Try Again",
+    "scanErrorConflictInvite": "User is already invited or is already a member of this trip",
+    "scanErrorConflictJoin": "You are already a member or have a pending join request",
+    "scanErrorForbidden": "You are not allowed to perform this action",
+    "scanErrorBadRequest": "Invalid QR code",
+    "scanErrorUnauthorized": "Your session has expired, please log in again"
+  },
+  "invitations": {
+    "empty": "No pending invitations",
+    "accept": "Accept",
+    "reject": "Reject",
+    "loadError": "Could not load invitations",
+    "acceptError": "Could not accept invitation",
+    "rejectError": "Could not reject invitation"
   },
   "calendar": {
     "title": "Calendar",

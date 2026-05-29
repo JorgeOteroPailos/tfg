@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { router } from 'expo-router';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { useTrip } from '../../../src/trips';
@@ -36,7 +37,7 @@ const MembersScreen = () => {
         ListFooterComponent={
           <TouchableOpacity
             style={[styles.addButton, { backgroundColor: theme.tint }]}
-            onPress={() => {/* TODO: escáner QR */}}
+            onPress={() => router.push({ pathname: '/add-member', params: { tripId: trip.id } })}
           >
             <ThemedText style={styles.addButtonText}>+ {t('trip.addMember')}</ThemedText>
           </TouchableOpacity>

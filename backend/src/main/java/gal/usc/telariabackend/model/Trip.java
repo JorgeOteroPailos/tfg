@@ -53,18 +53,13 @@ public class Trip {
     }
 
     public void assertIsMember(UUID userId) {
-        boolean isMember = members.stream()
-                .anyMatch(u -> u.getId().equals(userId));
-
-        if (!isMember) {
+        if (members.stream().noneMatch(u -> u.getId().equals(userId))) {
             throw new NotATripMemberException("User " + userId + " is not a member of trip " + this.id);
         }
     }
 
     public void assertIsMember(User u) {
-        boolean isMember = members.contains(u);
-
-        if (!isMember) {
+        if (!members.contains(u)) {
             throw new NotATripMemberException("User " + u.getId() + " is not a member of trip " + this.id);
         }
     }
