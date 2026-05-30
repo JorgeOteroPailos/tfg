@@ -12,6 +12,7 @@ import gal.usc.telariabackend.repository.JoinRequestRepository;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
 import gal.usc.telariabackend.model.dto.TripSummary;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ public class TripService {
     }
 
 
+    @Transactional
     public UUID createTrip(@NotNull String tripname, UUID userId) {
         User owner = userRepo.findById(userId).orElseThrow();
         Trip trip = new Trip(tripname, owner);
@@ -38,12 +40,12 @@ public class TripService {
         return trip.getId();
     }
 
+    @Transactional
     public List<TripSummary> listTrips(UUID userId) {
-        User u = userRepo.findById(userId).orElseThrow();
-        List<Trip> list = tripRepo.findAllByMembersContaining(u);
-        return list.stream().map(Trip::toTripSummary).toList();
+        return tripRepo.findAllByMembersId(userId).stream().map(Trip::toTripSummary).toList();
     }
 
+    @Transactional
     public TripDetail getTripDetails(UUID tripId, UUID userId) {
         Trip trip=tripRepo.findByIdAndMembersId(tripId, userId)
                 .orElseThrow(NotATripMemberException::new);

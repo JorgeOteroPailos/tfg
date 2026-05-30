@@ -29,6 +29,7 @@ export default function MainLayout() {
       >
         <Stack.Screen name="main" options={{ title: t('nav.home') }} />
         <Stack.Screen name="invitations" options={{ title: t('nav.invitations') }} />
+        <Stack.Screen name="join-trip" options={{ headerShown: false }} />
         <Stack.Screen name="calendar" options={{ title: t('nav.calendar') }} />
         <Stack.Screen name="settings" options={{ title: t('settings.title') }} />
         <Stack.Screen name="(profile)/profile" options={{ title: t('nav.profile') }} />

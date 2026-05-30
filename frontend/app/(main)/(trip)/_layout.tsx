@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { TripProvider } from '../../../src/trips';
-import { useSidebar } from '../../../src/sidebar';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '../../../components/ThemedText';
 
@@ -14,7 +13,6 @@ const TripLayout = () => {
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
   const { t } = useTranslation();
-  const { setOpen } = useSidebar();
   const [moreVisible, setMoreVisible] = useState(false);
   const segments = useSegments();
   const activeTab = segments[segments.length - 1];
@@ -106,7 +104,7 @@ const TripLayout = () => {
                 style={styles.sheetItem}
                 onPress={() => {
                   setMoreVisible(false);
-                  // TODO: solicitudes
+                  router.push({ pathname: '/join-requests', params: { tripId } });
                 }}
               >
                 <Ionicons name="mail-outline" size={22} color={theme.text} />

@@ -92,8 +92,7 @@ class TripServiceTest {
         TripSummary summary1 = mock(TripSummary.class);
         TripSummary summary2 = mock(TripSummary.class);
 
-        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
-        when(tripRepo.findAllByMembersContaining(user)).thenReturn(List.of(trip1, trip2));
+        when(tripRepo.findAllByMembersId(userId)).thenReturn(List.of(trip1, trip2));
         when(trip1.toTripSummary()).thenReturn(summary1);
         when(trip2.toTripSummary()).thenReturn(summary2);
 
@@ -105,8 +104,7 @@ class TripServiceTest {
 
     @Test
     void listTrips_WhenUserHasNoTrips_ShouldReturnEmptyList() {
-        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
-        when(tripRepo.findAllByMembersContaining(user)).thenReturn(List.of());
+        when(tripRepo.findAllByMembersId(userId)).thenReturn(List.of());
 
         List<TripSummary> result = tripService.listTrips(userId);
 
@@ -115,24 +113,23 @@ class TripServiceTest {
     }
 
     @Test
-    void listTrips_ShouldQueryTripsByResolvedUser() {
-        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
-        when(tripRepo.findAllByMembersContaining(user)).thenReturn(List.of());
+    void listTrips_ShouldQueryTripsByUserId() {
+        when(tripRepo.findAllByMembersId(userId)).thenReturn(List.of());
 
         tripService.listTrips(userId);
 
-        var inOrder = inOrder(userRepo, tripRepo);
-        inOrder.verify(userRepo).findById(userId);
-        inOrder.verify(tripRepo).findAllByMembersContaining(user);
+        verify(tripRepo).findAllByMembersId(userId);
+        verifyNoInteractions(userRepo);
     }
 
     @Test
-    void listTrips_WhenUserDoesNotExist_ShouldThrowAndNotQueryTrips() {
-        when(userRepo.findById(userId)).thenReturn(Optional.empty());
+    void listTrips_WhenUserDoesNotExist_ShouldReturnEmptyList() {
+        when(tripRepo.findAllByMembersId(userId)).thenReturn(List.of());
 
-        assertThrows(NoSuchElementException.class, () -> tripService.listTrips(userId));
+        List<TripSummary> result = tripService.listTrips(userId);
 
-        verifyNoInteractions(tripRepo);
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(userRepo);
     }
 
     @Test

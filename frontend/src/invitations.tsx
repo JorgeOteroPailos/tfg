@@ -37,5 +37,13 @@ export function useInvitations() {
     if (!response.ok) throw new AppError(response.status as ErrorCode);
   }, [callAuthenticated]);
 
-  return { getMyInvitations, inviteUser, createJoinRequest, resolveInvitation };
+  const resolveJoinRequest = useCallback(async (tripId: string, requestId: string, accepted: boolean): Promise<void> => {
+    const response = await callAuthenticated(`/trips/${tripId}/join-requests/${requestId}`, {
+      method: 'DELETE',
+      body: JSON.stringify({ accepted }),
+    });
+    if (!response.ok) throw new AppError(response.status as ErrorCode);
+  }, [callAuthenticated]);
+
+  return { getMyInvitations, inviteUser, createJoinRequest, resolveInvitation, resolveJoinRequest };
 }

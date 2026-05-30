@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { components } from '../src/generated/types';
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -207,7 +208,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
       //TODO cerrar sesión en el servidor
     };
 
-    const callAuthenticated = async (path: string, options?: RequestInit): Promise<Response> => {
+    const callAuthenticated = useCallback(async (path: string, options?: RequestInit): Promise<Response> => {
       const currentToken = await getAccessToken();
       const url = `${BASE_URL}${path}`;
 
@@ -262,7 +263,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
           'Content-Type': 'application/json',
         },
       });
-    };
+    }, []);
 
     return (
       <AuthContext.Provider

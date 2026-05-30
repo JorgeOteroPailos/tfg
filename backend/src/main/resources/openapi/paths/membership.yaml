@@ -19,7 +19,7 @@ paths:
           description: Join request created successfully
         '401':
           description: Not authenticated
-        '403':
+        '404':
           description: Trip not found
         '409':
           description: Already a member or request already pending

@@ -1,26 +1,38 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, FlatList, ActivityIndicator, TouchableOpacity, Modal } from 'react-native';
+import { StyleSheet, View, FlatList, ActivityIndicator, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from 'expo-router';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
-import { useExpenses, type ExpenseSummary } from '../../../src/expenses';
+import { useExpenses, type ExpenseSummary, type BalancesInfo } from '../../../src/expenses';
 import { useTrip } from '../../../src/trips';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '../../../components/ThemedText';
 import ThemedInput from '../../../components/ThemedInput';
+
+type Tab = 'expenses' | 'balances';
 
 const ExpensesScreen = () => {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
   const { trip } = useTrip();
-  const { getExpenses, addExpense } = useExpenses();
+  const { getExpenses, addExpense, getBalances } = useExpenses();
   const navigation = useNavigation();
 
+  const [activeTab, setActiveTab] = useState<Tab>('expenses');
+
+  // --- Expenses state ---
   const [expenses, setExpenses] = useState<ExpenseSummary[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // --- Balances state ---
+  const [balancesInfo, setBalancesInfo] = useState<BalancesInfo | null>(null);
+  const [balancesLoading, setBalancesLoading] = useState(false);
+  const [balancesError, setBalancesError] = useState<string | null>(null);
+
+  // --- Create expense modal state ---
   const [modalVisible, setModalVisible] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -50,6 +62,25 @@ const ExpensesScreen = () => {
     load();
   }, [trip?.id, expenses]);
 
+  const loadBalances = async () => {
+    if (!trip?.id || balancesInfo !== null) return;
+    setBalancesLoading(true);
+    setBalancesError(null);
+    try {
+      const data = await getBalances(trip.id!);
+      setBalancesInfo(data);
+    } catch {
+      setBalancesError(t('trip.unableLoadBalances'));
+    } finally {
+      setBalancesLoading(false);
+    }
+  };
+
+  const handleTabChange = (tab: Tab) => {
+    setActiveTab(tab);
+    if (tab === 'balances') loadBalances();
+  };
+
   const handleCreate = async () => {
     if (!trip?.id) return;
     const amountValue = Number(amount);
@@ -67,6 +98,8 @@ const ExpensesScreen = () => {
         beneficiaryIds,
       });
       setExpenses(prev => prev ? [newExpense, ...prev] : [newExpense]);
+      // Invalidate balances so they reload next time
+      setBalancesInfo(null);
       setModalVisible(false);
       setDescription(''); setAmount(''); setPayerId(''); setBeneficiaryIds([]);
     } catch {
@@ -83,42 +116,106 @@ const ExpensesScreen = () => {
     setPayerDropdownOpen(false);
   };
 
+  const usernameFor = (userId: string) =>
+    trip?.members?.find(m => m.id === userId)?.username ?? '?';
+
   return (
     <View style={styles.container}>
-      {loading ? (
-        <ActivityIndicator size="large" color={theme.tint} style={styles.centered} />
-      ) : error ? (
-        <ThemedText style={styles.emptyText}>{error}</ThemedText>
-      ) : (
-        <FlatList
-          data={expenses ?? []}
-          keyExtractor={(item, i) => item.id ?? `${i}`}
-          contentContainerStyle={styles.list}
-          ListEmptyComponent={<ThemedText style={styles.emptyText}>{t('trip.noExpenses')}</ThemedText>}
-          renderItem={({ item }) => {
-            const payer = trip?.members?.find(m => m.id === item.payerId);
-            return (
-              <View style={[styles.expenseCard, { backgroundColor: theme.tabBackground }]}>
-                <View style={styles.expenseLeft}>
-                  <ThemedText style={styles.expenseDescription}>{item.name}</ThemedText>
-                  <ThemedText style={styles.expensePayer}>{payer?.username ?? '?'}</ThemedText>
+
+      {/* Segmented control */}
+      <View style={[styles.tabBar, { backgroundColor: theme.tabBackground }]}>
+        {(['expenses', 'balances'] as Tab[]).map(tab => (
+          <TouchableOpacity
+            key={tab}
+            style={[styles.tabPill, activeTab === tab && { backgroundColor: theme.tint }]}
+            onPress={() => handleTabChange(tab)}
+          >
+            <ThemedText style={[styles.tabLabel, activeTab === tab && styles.tabLabelActive]}>
+              {t(tab === 'expenses' ? 'trip.expenses' : 'trip.balances')}
+            </ThemedText>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Expenses tab */}
+      {activeTab === 'expenses' && (
+        loading ? (
+          <ActivityIndicator size="large" color={theme.tint} style={styles.centered} />
+        ) : error ? (
+          <ThemedText style={styles.emptyText}>{error}</ThemedText>
+        ) : (
+          <FlatList
+            data={expenses ?? []}
+            keyExtractor={(item, i) => item.id ?? `${i}`}
+            contentContainerStyle={styles.list}
+            ListEmptyComponent={<ThemedText style={styles.emptyText}>{t('trip.noExpenses')}</ThemedText>}
+            renderItem={({ item }) => {
+              const payer = trip?.members?.find(m => m.id === item.payerId);
+              return (
+                <View style={[styles.expenseCard, { backgroundColor: theme.tabBackground }]}>
+                  <View style={styles.expenseLeft}>
+                    <ThemedText style={styles.expenseDescription}>{item.name}</ThemedText>
+                    <ThemedText style={styles.expensePayer}>{payer?.username ?? '?'}</ThemedText>
+                  </View>
+                  <ThemedText style={styles.expenseAmount}>{item.amount?.toFixed(2)}€</ThemedText>
                 </View>
-                <ThemedText style={styles.expenseAmount}>{item.amount?.toFixed(2)}€</ThemedText>
-              </View>
-            );
-          }}
-          ListFooterComponent={
-            <TouchableOpacity
-              style={[styles.addButton, { backgroundColor: theme.tint }]}
-              onPress={() => setModalVisible(true)}
-            >
-              <Ionicons name="add" size={20} color="white" />
-              <ThemedText style={styles.addButtonText}>{t('trip.addExpense')}</ThemedText>
-            </TouchableOpacity>
-          }
-        />
+              );
+            }}
+            ListFooterComponent={
+              <TouchableOpacity
+                style={[styles.addButton, { backgroundColor: theme.tint }]}
+                onPress={() => setModalVisible(true)}
+              >
+                <Ionicons name="add" size={20} color="white" />
+                <ThemedText style={styles.addButtonText}>{t('trip.addExpense')}</ThemedText>
+              </TouchableOpacity>
+            }
+          />
+        )
       )}
 
+      {/* Balances tab */}
+      {activeTab === 'balances' && (
+        balancesLoading ? (
+          <ActivityIndicator size="large" color={theme.tint} style={styles.centered} />
+        ) : balancesError ? (
+          <ThemedText style={styles.emptyText}>{balancesError}</ThemedText>
+        ) : (
+          <ScrollView contentContainerStyle={styles.list}>
+
+            {/* Per-user balances */}
+            <ThemedText style={styles.sectionHeader}>{t('trip.balancePerMember')}</ThemedText>
+            {(balancesInfo?.balances ?? []).length === 0 && (
+              <ThemedText style={styles.emptyText}>{t('trip.noBalances')}</ThemedText>
+            )}
+            {(balancesInfo?.balances ?? []).map(b => (
+              <View key={b.userId} style={[styles.balanceCard, { backgroundColor: theme.tabBackground }]}>
+                <ThemedText style={styles.balanceName}>{usernameFor(b.userId)}</ThemedText>
+                <ThemedText style={[styles.balanceAmount, { color: b.amount >= 0 ? '#4caf50' : Colors.warning }]}>
+                  {b.amount >= 0 ? '+' : ''}{b.amount.toFixed(2)}€
+                </ThemedText>
+              </View>
+            ))}
+
+            {/* Settlement suggestions */}
+            <ThemedText style={[styles.sectionHeader, { marginTop: 16 }]}>{t('trip.settlements')}</ThemedText>
+            {(balancesInfo?.settlements ?? []).length === 0 && (
+              <ThemedText style={styles.emptyText}>{t('trip.noSettlements')}</ThemedText>
+            )}
+            {(balancesInfo?.settlements ?? []).map((s, i) => (
+              <View key={i} style={[styles.settlementCard, { backgroundColor: theme.tabBackground }]}>
+                <ThemedText style={styles.settlementFrom}>{usernameFor(s.fromId)}</ThemedText>
+                <Ionicons name="arrow-forward" size={16} color={theme.icon} />
+                <ThemedText style={styles.settlementTo}>{usernameFor(s.toId)}</ThemedText>
+                <ThemedText style={styles.settlementAmount}>{s.amount.toFixed(2)}€</ThemedText>
+              </View>
+            ))}
+
+          </ScrollView>
+        )
+      )}
+
+      {/* Create expense modal */}
       <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={resetModal}>
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={resetModal}>
           <TouchableOpacity activeOpacity={1} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
@@ -219,8 +316,38 @@ export default ExpensesScreen;
 const styles = StyleSheet.create({
   container: { flex: 1, marginTop: 20 },
   centered: { flex: 1 },
+  tabBar: {
+    flexDirection: 'row',
+    margin: 12,
+    borderRadius: 10,
+    padding: 4,
+  },
+  tabPill: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  tabLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    opacity: 0.6,
+  },
+  tabLabelActive: {
+    color: 'white',
+    opacity: 1,
+    fontWeight: '600',
+  },
   list: { padding: 16, gap: 10 },
-  emptyText: { textAlign: 'center', marginTop: 40, fontSize: 15 },
+  emptyText: { textAlign: 'center', marginTop: 20, fontSize: 15, opacity: 0.6 },
+  sectionHeader: {
+    fontSize: 13,
+    fontWeight: '600',
+    opacity: 0.5,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
   expenseCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -242,6 +369,25 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   addButtonText: { color: 'white', fontWeight: '600', fontSize: 16 },
+  balanceCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 14,
+    borderRadius: 12,
+  },
+  balanceName: { fontSize: 15, fontWeight: '500' },
+  balanceAmount: { fontSize: 15, fontWeight: '700' },
+  settlementCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderRadius: 12,
+    gap: 8,
+  },
+  settlementFrom: { fontSize: 14, fontWeight: '500' },
+  settlementTo: { flex: 1, fontSize: 14, fontWeight: '500' },
+  settlementAmount: { fontSize: 14, fontWeight: '700' },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.35)',

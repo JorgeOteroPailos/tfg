@@ -1,7 +1,8 @@
 import React from 'react';
 import { StyleSheet, View, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { useTrip } from '../../../src/trips';
@@ -11,7 +12,9 @@ const MembersScreen = () => {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
+  const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const { trip, loading } = useTrip();
+  const requestCount = trip?.pendingRequests?.length ?? 0;
 
   if (loading) {
     return (
@@ -29,6 +32,21 @@ const MembersScreen = () => {
         data={trip.members ?? []}
         keyExtractor={item => item.id ?? ''}
         contentContainerStyle={styles.list}
+        ListHeaderComponent={
+          <TouchableOpacity
+            style={[styles.requestsButton, { backgroundColor: theme.tabBackground }]}
+            onPress={() => router.push({ pathname: '/join-requests', params: { tripId } })}
+          >
+            <Ionicons name="person-add-outline" size={20} color={theme.tint} />
+            <ThemedText style={styles.requestsLabel}>{t('trip.requests')}</ThemedText>
+            {requestCount > 0 && (
+              <View style={[styles.badge, { backgroundColor: Colors.warning }]}>
+                <ThemedText style={styles.badgeText}>{requestCount}</ThemedText>
+              </View>
+            )}
+            <Ionicons name="chevron-forward" size={18} color={theme.icon} style={styles.chevron} />
+          </TouchableOpacity>
+        }
         renderItem={({ item }) => (
           <View style={[styles.memberCard, { backgroundColor: theme.tabBackground }]}>
             <ThemedText style={styles.memberName}>{item.username}</ThemedText>
@@ -83,5 +101,34 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '600',
     fontSize: 16,
+  },
+  requestsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderRadius: 10,
+    gap: 10,
+    marginBottom: 10,
+  },
+  requestsLabel: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  badge: {
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 5,
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  chevron: {
+    marginLeft: 2,
   },
 });

@@ -12,6 +12,7 @@ import gal.usc.telariabackend.repository.InvitationRepository;
 import gal.usc.telariabackend.repository.JoinRequestRepository;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.access.AccessDeniedException;
@@ -34,6 +35,7 @@ public class MembershipService {
         this.userRepo = userRepo;
     }
 
+    @Transactional
     public void createInvitation(UUID invitedUserId,UUID creatorId, @NotNull @Valid UUID tripId) {
         Trip trip=tripRepo.findByIdAndMembersId(tripId, creatorId)
                 .orElseThrow(NotATripMemberException::new);
@@ -44,6 +46,7 @@ public class MembershipService {
         invitationRepo.save(invitation);
     }
 
+    @Transactional
     public void createJoinRequest(UUID userId, UUID tripId){
         Trip trip=tripRepo.findById(tripId).orElseThrow(NotATripMemberException::new);
         User user =userRepo.findById(userId).orElseThrow(IllegalStateException::new);
@@ -52,11 +55,13 @@ public class MembershipService {
         joinRequestRepo.save(new JoinRequest(trip, user));
     }
 
+    @Transactional
     public List<InvitationSummary> getMyInvitations(UUID userId) {
         return invitationRepo.findByUserId(userId).stream().map(Invitation::toInvitationSummary).toList();
     }
 
 
+    @Transactional
     public void leaveTrip(UUID userId, UUID tripId){
         Trip trip=tripRepo.findById(tripId).orElseThrow(TripNotFoundException::new);
         User user=userRepo.findById(userId).orElseThrow(IllegalStateException::new);
@@ -68,6 +73,7 @@ public class MembershipService {
         }
     }
 
+    @Transactional
     public void resolveInvitation(UUID invitationId,UUID userId, @NotNull boolean accepted){
         Invitation invitation=invitationRepo.findById(invitationId).orElseThrow();
         Trip trip=invitation.getTrip();
@@ -82,6 +88,7 @@ public class MembershipService {
         invitationRepo.delete(invitation);
     }
 
+    @Transactional
     public void resolveJoinRequest(UUID requestId, UUID tripId, UUID userId, @NotNull Boolean accepted){
         JoinRequest request=joinRequestRepo.findById(requestId).orElseThrow(IllegalStateException::new);
         Trip trip=tripRepo.findById(tripId).orElseThrow(TripNotFoundException::new);

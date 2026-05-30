@@ -114,16 +114,28 @@ const Main = () => {
     <View style={styles.container}>
       {/* Main Content */}
       <View style={styles.content}>
-        {/* New Trip Card */}
-        <TouchableOpacity
-          style={[styles.tripCard, styles.newTripCard, { backgroundColor: theme.tint }]}
-          onPress={() => setModalVisible(true)}
-        >
-          <ThemedText style={styles.newTripTitle}>{t('trip.new')}</ThemedText>
-          <View style={styles.newTripButton}>
-            <ThemedText style={styles.newTripButtonText}>+</ThemedText>
-          </View>
-        </TouchableOpacity>
+        {/* Action Cards Row */}
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={[styles.actionCard, { backgroundColor: theme.tint }]}
+            onPress={() => setModalVisible(true)}
+          >
+            <ThemedText style={styles.actionCardTitle}>{t('trip.new')}</ThemedText>
+            <View style={styles.actionCardIcon}>
+              <ThemedText style={styles.actionCardIconText}>+</ThemedText>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionCard, { backgroundColor: theme.tabBackground }]}
+            onPress={() => router.push('/join-trip')}
+          >
+            <ThemedText style={styles.actionCardTitleSecondary}>{t('trip.join')}</ThemedText>
+            <View style={[styles.actionCardIcon, { backgroundColor: 'rgba(0,0,0,0.08)' }]}>
+              <Ionicons name="enter-outline" size={20} color={theme.tint} />
+            </View>
+          </TouchableOpacity>
+        </View>
 
         {/* Trips List */}
         <FlatList
@@ -288,25 +300,42 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 12,
   },
-  newTripCard: {
+  actionRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 12,
+  },
+  actionCard: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    borderRadius: 12,
     minHeight: 60,
   },
-  newTripTitle: {
-    fontSize: 16,
+  actionCardTitle: {
+    fontSize: 15,
     fontWeight: '600',
     color: 'white',
+    flexShrink: 1,
   },
-  newTripButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  actionCardTitleSecondary: {
+    fontSize: 15,
+    fontWeight: '600',
+    flexShrink: 1,
+  },
+  actionCardIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  newTripButtonText: {
-    fontSize: 24,
+  actionCardIconText: {
+    fontSize: 22,
     color: 'white',
     fontWeight: 'bold',
   },

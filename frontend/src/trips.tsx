@@ -1,7 +1,7 @@
 import { useAuth } from './auth';
 import type { components } from './generated/types';
 import { AppError, ErrorCode } from './AppError';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 type TripSummary = components['schemas']['TripSummary'];
 type TripDetail = components['schemas']['TripDetail'];
@@ -9,26 +9,26 @@ type TripDetail = components['schemas']['TripDetail'];
 export function useTrips() {
   const { callAuthenticated } = useAuth();
 
-  const listTrips = async (): Promise<TripSummary[]> => {
+  const listTrips = useCallback(async (): Promise<TripSummary[]> => {
     const response = await callAuthenticated(`/trips`);
     if (!response.ok) throw new AppError(response.status as ErrorCode);
     return response.json();
-  };
+  }, [callAuthenticated]);
 
-  const getTrip = async (id: string): Promise<TripDetail> => {
+  const getTrip = useCallback(async (id: string): Promise<TripDetail> => {
     const response = await callAuthenticated(`/trips/${id}`);
     if (!response.ok) throw new AppError(response.status as ErrorCode);
     return response.json();
-  };
+  }, [callAuthenticated]);
 
-  const createTrip = async (request: { name: string }): Promise<TripSummary> => {
+  const createTrip = useCallback(async (request: { name: string }): Promise<TripSummary> => {
     const response = await callAuthenticated(`/trips`, {
       method: 'POST',
       body: JSON.stringify(request),
     });
     if (!response.ok) throw new AppError(response.status as ErrorCode);
     return response.json();
-  };
+  }, [callAuthenticated]);
 
   return { listTrips, getTrip, createTrip };
 }
