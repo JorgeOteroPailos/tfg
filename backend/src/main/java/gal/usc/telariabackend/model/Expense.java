@@ -1,15 +1,13 @@
 package gal.usc.telariabackend.model;
 
+import gal.usc.telariabackend.model.dto.ExpenseDetail;
 import gal.usc.telariabackend.model.dto.ExpenseSummary;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
@@ -69,6 +67,16 @@ public class Expense {
                 .datetime(this.timestamp)
                 .payerId(this.payer.getId())
                 .name(this.name);
+    }
+
+    public ExpenseDetail toExpenseDetail() {
+        return new ExpenseDetail()
+                .id(this.id)
+                .amount(this.amount.doubleValue())
+                .datetime(this.timestamp)
+                .payerId(this.payer.getId())
+                .name(this.name)
+                .beneficiaryIds(this.beneficiaries.stream().map(User::getId).toList());
     }
 
 }

@@ -89,9 +89,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '../schemas/expenses.yaml#/schemas/ExpenseDetail'
+                $ref: '../schemas/expenses.yaml#/schemas/ExpenseDetail'
 
     delete:
       summary: Delete an expense

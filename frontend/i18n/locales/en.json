@@ -5,7 +5,8 @@
     "loading": "Loading...",
     "cancel": "Cancel",
     "create": "Create",
-    "notAvailable": "Not available"
+    "notAvailable": "Not available",
+    "close": "Close"
   },
   "nav": {
     "home": "Home",
@@ -126,7 +127,11 @@
     "scanErrorConflictJoin": "You are already a member or have a pending join request",
     "scanErrorForbidden": "You are not allowed to perform this action",
     "scanErrorBadRequest": "Invalid QR code",
-    "scanErrorUnauthorized": "Your session has expired, please log in again"
+    "scanErrorUnauthorized": "Your session has expired, please log in again",
+    "expenseDetail": "Expense details",
+    "payer": "Payer",
+    "date": "Date",
+    "loadExpenseDetailError": "Unable to load expense details"
   },
   "invitations": {
     "empty": "No pending invitations",

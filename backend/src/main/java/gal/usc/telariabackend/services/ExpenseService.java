@@ -9,6 +9,7 @@ import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import gal.usc.telariabackend.repository.ExpenseRepository;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -53,7 +54,7 @@ public class ExpenseService {
         Expense e=new Expense(t,
                 payer,
                 BigDecimal.valueOf(request.getAmount()),
-                request.getDescription(),
+                request.getName(),
                 creator,
                 beneficiaries);
         expenseRepo.save(e);
@@ -82,6 +83,16 @@ public class ExpenseService {
         Trip t=tripRepo.findByIdAndMembersId(tripId, userId)
                 .orElseThrow(NotATripMemberException::new);
         return t.getExpenses().stream().map(Expense::toExpenseSummary).toList();
+    }
+
+    public ExpenseDetail getExpense(UUID tripId, UUID expenseId, UUID userId) {
+        if(!tripRepo.existsByIdAndMembersId(tripId, userId)){
+            throw new NotATripMemberException();
+        }
+
+        return expenseRepo.findByIdAndTripId(expenseId, tripId)
+                .orElseThrow(ExpenseNotFoundException::new)
+                .toExpenseDetail();
     }
 
     private BalancesInfo calculateBalances(Trip t){

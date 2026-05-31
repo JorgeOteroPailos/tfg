@@ -107,10 +107,10 @@ class ExpenseE2ETest {
                 .getId();
     }
 
-    private UUID createExpense(String token, UUID tripId, UUID payerId, List<UUID> beneficiaryIds, double amount, String description) throws Exception {
+    private UUID createExpense(String token, UUID tripId, UUID payerId, List<UUID> beneficiaryIds, double amount, String name) throws Exception {
         CreateExpenseRequest body = new CreateExpenseRequest()
                 .amount(amount)
-                .description(description)
+                .name(name)
                 .payerId(payerId)
                 .beneficiaryIds(beneficiaryIds);
 
@@ -159,7 +159,7 @@ class ExpenseE2ETest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new CreateExpenseRequest()
                                 .amount(30.0)
-                                .description("Cena")
+                                .name("Cena")
                                 .payerId(userId)
                                 .beneficiaryIds(List.of(userId)))))
                 .andExpect(status().isCreated())
@@ -182,7 +182,7 @@ class ExpenseE2ETest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new CreateExpenseRequest()
                                 .amount(30.0)
-                                .description("Cena")
+                                .name("Cena")
                                 .payerId(outsiderId)
                                 .beneficiaryIds(List.of(outsiderId)))))
                 .andExpect(status().isForbidden());
@@ -199,7 +199,7 @@ class ExpenseE2ETest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new CreateExpenseRequest()
                                 .amount(30.0)
-                                .description("Cena")
+                                .name("Cena")
                                 .payerId(userId)
                                 .beneficiaryIds(List.of(userId)))))
                 .andExpect(status().isUnauthorized());
@@ -230,7 +230,7 @@ class ExpenseE2ETest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new CreateExpenseRequest()
                                 .amount(30.0)
-                                .description("Cena")
+                                .name("Cena")
                                 .payerId(UUID.randomUUID())
                                 .beneficiaryIds(List.of(userId)))))
                 .andExpect(status().isForbidden());
@@ -248,10 +248,18 @@ class ExpenseE2ETest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new CreateExpenseRequest()
                                 .amount(30.0)
-                                .description("Cena")
+                                .name("Cena")
                                 .payerId(userId)
                                 .beneficiaryIds(List.of(userId, UUID.randomUUID())))))
                 .andExpect(status().isForbidden());
+    }
+
+    private ExpenseDetail getExpenseDetail(String token, UUID tripId, UUID expenseId) throws Exception {
+        MvcResult result = mockMvc.perform(get("/trips/{tripId}/expenses/{expenseId}", tripId, expenseId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn();
+        return objectMapper.readValue(result.getResponse().getContentAsString(), ExpenseDetail.class);
     }
 
     // GET /trips/{tripId}/expenses
@@ -392,6 +400,76 @@ class ExpenseE2ETest {
         mockMvc.perform(delete("/trips/{tripId}/expenses/{expenseId}", tripId2, expenseId)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isForbidden());
+    }
+
+    // GET /trips/{tripId}/expenses/{expenseId}
+
+    @Test
+    @DisplayName("Get expense: member gets expense detail")
+    void getExpense_asMember_returns200WithDetail() throws Exception {
+        String token = registerAndObtainToken("pepe", "pepe@example.com");
+        UUID userId = extractUserIdFromToken(token);
+        UUID tripId = createTrip(token, "Viaje a Florencia");
+        UUID expenseId = createExpense(token, tripId, userId, List.of(userId), 45.0, "Museo");
+
+        ExpenseDetail detail = getExpenseDetail(token, tripId, expenseId);
+
+        assertEquals(expenseId, detail.getId());
+        assertEquals(45.0, detail.getAmount(), 0.001);
+        assertEquals(userId, detail.getPayerId());
+        assertEquals("Museo", detail.getName());
+        assertTrue(detail.getBeneficiaryIds().contains(userId));
+    }
+
+    @Test
+    @DisplayName("Get expense: non-member returns 403")
+    void getExpense_nonMember_returns403() throws Exception {
+        String ownerToken = registerAndObtainToken("pepe", "pepe@example.com");
+        String outsiderToken = registerAndObtainToken("manolo", "manolo@hotmail.com");
+        UUID ownerId = extractUserIdFromToken(ownerToken);
+        UUID tripId = createTrip(ownerToken, "Viaje a Génova");
+        UUID expenseId = createExpense(ownerToken, tripId, ownerId, List.of(ownerId), 30.0, "Cena");
+
+        mockMvc.perform(get("/trips/{tripId}/expenses/{expenseId}", tripId, expenseId)
+                        .header("Authorization", "Bearer " + outsiderToken))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Get expense: unauthenticated returns 401")
+    void getExpense_noToken_returns401() throws Exception {
+        String token = registerAndObtainToken("pepe", "pepe@example.com");
+        UUID userId = extractUserIdFromToken(token);
+        UUID tripId = createTrip(token, "Viaje a Turín");
+        UUID expenseId = createExpense(token, tripId, userId, List.of(userId), 30.0, "Cena");
+
+        mockMvc.perform(get("/trips/{tripId}/expenses/{expenseId}", tripId, expenseId))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Get expense: expense not found returns 404")
+    void getExpense_expenseNotFound_returns404() throws Exception {
+        String token = registerAndObtainToken("pepe", "pepe@example.com");
+        UUID tripId = createTrip(token, "Viaje a Bolonia");
+
+        mockMvc.perform(get("/trips/{tripId}/expenses/{expenseId}", tripId, UUID.randomUUID())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Get expense: expense from another trip returns 404")
+    void getExpense_expenseFromAnotherTrip_returns404() throws Exception {
+        String token = registerAndObtainToken("pepe", "pepe@example.com");
+        UUID userId = extractUserIdFromToken(token);
+        UUID tripId1 = createTrip(token, "Viaje a Verona");
+        UUID tripId2 = createTrip(token, "Viaje a Módena");
+        UUID expenseId = createExpense(token, tripId1, userId, List.of(userId), 30.0, "Cena");
+
+        mockMvc.perform(get("/trips/{tripId}/expenses/{expenseId}", tripId2, expenseId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNotFound());
     }
 
     // GET /trips/{tripId}/balances

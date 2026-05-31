@@ -5,7 +5,8 @@
     "loading": "Cargando...",
     "cancel": "Cancelar",
     "create": "Crear",
-    "notAvailable": "Non dispoñible"
+    "notAvailable": "Non dispoñible",
+    "close": "Pechar"
   },
   "nav": {
     "home": "Inicio",
@@ -126,7 +127,11 @@
     "scanErrorConflictJoin": "Xa es membro ou tes unha solicitude pendente",
     "scanErrorForbidden": "Non tes permiso para realizar esta acción",
     "scanErrorBadRequest": "Código QR non válido",
-    "scanErrorUnauthorized": "A túa sesión expirou, por favor inicia sesión de novo"
+    "scanErrorUnauthorized": "A túa sesión expirou, por favor inicia sesión de novo",
+    "expenseDetail": "Detalles do gasto",
+    "payer": "Pagador",
+    "date": "Data",
+    "loadExpenseDetailError": "Non se puideron cargar os detalles do gasto"
   },
   "invitations": {
     "empty": "Non tes invitacións pendentes",

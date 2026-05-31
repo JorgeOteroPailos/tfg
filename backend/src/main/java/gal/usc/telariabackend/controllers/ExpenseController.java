@@ -38,6 +38,11 @@ public class ExpenseController implements ExpensesApi{
     }
 
     @Override
+    public ResponseEntity<ExpenseDetail> getExpense(UUID tripId, UUID expenseId) {
+        return new ResponseEntity<>(expenseService.getExpense(tripId, expenseId, securityHelper.getUserId()), HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<List<ExpenseSummary>> listExpenses(UUID tripId) {
         List<ExpenseSummary> response=expenseService.listExpenses(tripId, securityHelper.getUserId());
         return new ResponseEntity<>(response, HttpStatus.OK);

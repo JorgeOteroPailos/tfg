@@ -410,7 +410,7 @@ export interface components {
         };
         CreateExpenseRequest: {
             /** @example Cena en trattoria */
-            description: string;
+            name: string;
             /**
              * Format: double
              * @example 90
@@ -860,7 +860,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ExpenseDetail"][];
+                    "application/json": components["schemas"]["ExpenseDetail"];
                 };
             };
         };
@@ -962,7 +962,7 @@ export interface operations {
                 content?: never;
             };
             /** @description Trip not found */
-            403: {
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

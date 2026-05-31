@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from 'expo-router';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
-import { useExpenses, type ExpenseSummary, type BalancesInfo } from '../../../src/expenses';
+import { useExpenses, type ExpenseSummary, type ExpenseDetail, type BalancesInfo } from '../../../src/expenses';
 import { useTrip } from '../../../src/trips';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '../../../components/ThemedText';
@@ -17,7 +17,7 @@ const ExpensesScreen = () => {
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
   const { trip } = useTrip();
-  const { getExpenses, addExpense, getBalances } = useExpenses();
+  const { getExpenses, addExpense, getExpenseDetail, getBalances } = useExpenses();
   const navigation = useNavigation();
 
   const [activeTab, setActiveTab] = useState<Tab>('expenses');
@@ -32,11 +32,17 @@ const ExpensesScreen = () => {
   const [balancesLoading, setBalancesLoading] = useState(false);
   const [balancesError, setBalancesError] = useState<string | null>(null);
 
+  // --- Expense detail modal state ---
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [expenseDetail, setExpenseDetail] = useState<ExpenseDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
+
   // --- Create expense modal state ---
   const [modalVisible, setModalVisible] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [payerId, setPayerId] = useState('');
   const [beneficiaryIds, setBeneficiaryIds] = useState<string[]>([]);
@@ -84,7 +90,7 @@ const ExpensesScreen = () => {
   const handleCreate = async () => {
     if (!trip?.id) return;
     const amountValue = Number(amount);
-    if (!description.trim() || !amountValue || !payerId || beneficiaryIds.length === 0) {
+    if (!name.trim() || !amountValue || !payerId || beneficiaryIds.length === 0) {
       setCreateError(t('trip.fillAllRequiredFields'));
       return;
     }
@@ -92,7 +98,7 @@ const ExpensesScreen = () => {
     setCreateError(null);
     try {
       const newExpense = await addExpense(trip.id, {
-        description: description.trim(),
+        name: name.trim(),
         amount: amountValue,
         payerId,
         beneficiaryIds,
@@ -101,7 +107,7 @@ const ExpensesScreen = () => {
       // Invalidate balances so they reload next time
       setBalancesInfo(null);
       setModalVisible(false);
-      setDescription(''); setAmount(''); setPayerId(''); setBeneficiaryIds([]);
+      setName(''); setAmount(''); setPayerId(''); setBeneficiaryIds([]);
     } catch {
       setCreateError(t('trip.createExpenseError'));
     } finally {
@@ -112,8 +118,25 @@ const ExpensesScreen = () => {
   const resetModal = () => {
     setModalVisible(false);
     setCreateError(null);
-    setDescription(''); setAmount(''); setPayerId(''); setBeneficiaryIds([]);
+    setName(''); setAmount(''); setPayerId(''); setBeneficiaryIds([]);
     setPayerDropdownOpen(false);
+  };
+
+  const handleOpenDetail = async (item: ExpenseSummary) => {
+    if (!trip?.id) return;
+    setExpenseDetail(null);
+    setDetailError(null);
+    setDetailModalVisible(true);
+    setDetailLoading(true);
+    try {
+      const detail = await getExpenseDetail(trip.id, item.id);
+      setExpenseDetail(detail);
+    } catch (e) {
+      console.log('[handleOpenDetail] error:', e);
+      setDetailError(t('trip.loadExpenseDetailError'));
+    } finally {
+      setDetailLoading(false);
+    }
   };
 
   const usernameFor = (userId: string) =>
@@ -157,7 +180,12 @@ const ExpensesScreen = () => {
                     <ThemedText style={styles.expenseDescription}>{item.name}</ThemedText>
                     <ThemedText style={styles.expensePayer}>{payer?.username ?? '?'}</ThemedText>
                   </View>
-                  <ThemedText style={styles.expenseAmount}>{item.amount?.toFixed(2)}€</ThemedText>
+                  <View style={styles.expenseRight}>
+                    <ThemedText style={styles.expenseAmount}>{item.amount?.toFixed(2)}€</ThemedText>
+                    <TouchableOpacity onPress={() => handleOpenDetail(item)} hitSlop={8}>
+                      <Ionicons name="chevron-down" size={18} color={theme.icon} />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               );
             }}
@@ -215,6 +243,53 @@ const ExpensesScreen = () => {
         )
       )}
 
+      {/* Expense detail modal */}
+      <Modal visible={detailModalVisible} transparent animationType="fade" onRequestClose={() => setDetailModalVisible(false)}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setDetailModalVisible(false)}>
+          <TouchableOpacity activeOpacity={1} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
+            <ThemedText style={styles.modalTitle}>{t('trip.expenseDetail')}</ThemedText>
+
+            {detailLoading && <ActivityIndicator color={theme.tint} style={{ marginVertical: 20 }} />}
+            {detailError && <ThemedText style={styles.errorText}>{detailError}</ThemedText>}
+
+            {expenseDetail && !detailLoading && (
+              <>
+                <ThemedText style={styles.detailName}>{expenseDetail.name}</ThemedText>
+
+                <View style={styles.detailRow}>
+                  <ThemedText style={styles.detailLabel}>{t('trip.amount')}</ThemedText>
+                  <ThemedText style={styles.detailValue}>{expenseDetail.amount?.toFixed(2)}€</ThemedText>
+                </View>
+
+                <View style={styles.detailRow}>
+                  <ThemedText style={styles.detailLabel}>{t('trip.date')}</ThemedText>
+                  <ThemedText style={styles.detailValue}>
+                    {new Date(expenseDetail.datetime).toLocaleDateString()}
+                  </ThemedText>
+                </View>
+
+                <View style={styles.detailRow}>
+                  <ThemedText style={styles.detailLabel}>{t('trip.payer')}</ThemedText>
+                  <ThemedText style={styles.detailValue}>{usernameFor(expenseDetail.payerId)}</ThemedText>
+                </View>
+
+                <ThemedText style={[styles.detailLabel, { marginTop: 12, marginBottom: 4 }]}>{t('trip.beneficiaries')}</ThemedText>
+                {expenseDetail.beneficiaryIds.map(id => (
+                  <ThemedText key={id} style={styles.detailBeneficiary}>· {usernameFor(id)}</ThemedText>
+                ))}
+              </>
+            )}
+
+            <TouchableOpacity
+              style={[styles.closeButton, { backgroundColor: theme.tint }]}
+              onPress={() => setDetailModalVisible(false)}
+            >
+              <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.close')}</ThemedText>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
       {/* Create expense modal */}
       <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={resetModal}>
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={resetModal}>
@@ -225,8 +300,8 @@ const ExpensesScreen = () => {
               style={[styles.modalInput, { color: theme.text, borderColor: theme.tint }]}
               placeholder={t('trip.description')}
               placeholderTextColor={theme.icon}
-              value={description}
-              onChangeText={setDescription}
+              value={name}
+              onChangeText={setName}
               autoFocus
             />
 
@@ -433,4 +508,11 @@ const styles = StyleSheet.create({
   modalButton: { flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
   cancelButton: { borderWidth: 1, borderColor: '#ccc' },
   errorText: { color: '#d9534f', marginBottom: 8, textAlign: 'center' },
+  expenseRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  detailName: { fontSize: 18, fontWeight: '700', marginBottom: 16 },
+  detailRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  detailLabel: { fontSize: 13, opacity: 0.6, fontWeight: '500' },
+  detailValue: { fontSize: 15, fontWeight: '600' },
+  detailBeneficiary: { fontSize: 14, marginBottom: 4 },
+  closeButton: { paddingVertical: 12, borderRadius: 10, alignItems: 'center', marginTop: 20 },
 });

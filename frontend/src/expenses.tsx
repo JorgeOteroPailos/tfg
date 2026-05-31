@@ -4,6 +4,7 @@ import type { components } from './generated/types';
 import { AppError, ErrorCode } from './AppError';
 
 type ExpenseSummary = components['schemas']['ExpenseSummary'];
+type ExpenseDetail = components['schemas']['ExpenseDetail'];
 type BalancesInfo = components['schemas']['BalancesInfo'];
 
 export function useExpenses() {
@@ -32,11 +33,18 @@ export function useExpenses() {
     const { id } = await response.json() as components['schemas']['IdResponse'];
     return {
       id,
-      name: expense.description,
+      name: expense.name,
       amount: expense.amount,
       payerId: expense.payerId,
       datetime: new Date().toISOString(),
     };
+  }, [callAuthenticated]);
+
+  const getExpenseDetail = useCallback(async (tripId: string, expenseId: string): Promise<ExpenseDetail> => {
+    const response = await callAuthenticated(`/trips/${tripId}/expenses/${expenseId}`);
+    if (!response.ok) throw new AppError(response.status as ErrorCode);
+    const data = await response.json();
+    return Array.isArray(data) ? data[0] : data;
   }, [callAuthenticated]);
 
   const getBalances = useCallback(async (tripId: string): Promise<BalancesInfo> => {
@@ -45,7 +53,7 @@ export function useExpenses() {
     return response.json();
   }, [callAuthenticated]);
 
-  return { getExpenses, addExpense, getBalances };
+  return { getExpenses, addExpense, getExpenseDetail, getBalances };
 }
 
-export type { ExpenseSummary, BalancesInfo };
+export type { ExpenseSummary, ExpenseDetail, BalancesInfo };

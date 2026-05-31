@@ -58,7 +58,7 @@ class ExpenseServiceTest {
 
         CreateExpenseRequest request = new CreateExpenseRequest()
                 .amount(90.0)
-                .description("Cena")
+                .name("Cena")
                 .payerId(payer.getId())
                 .beneficiaryIds(List.of(payer.getId(), beneficiary.getId()));
 
@@ -82,7 +82,7 @@ class ExpenseServiceTest {
 
         assertThrows(NotATripMemberException.class,
                 () -> expenseService.createExpense(tripId, userId, new CreateExpenseRequest()
-                        .amount(10.0).description("x").payerId(userId).beneficiaryIds(List.of(userId))));
+                        .amount(10.0).name("x").payerId(userId).beneficiaryIds(List.of(userId))));
 
         verifyNoInteractions(expenseRepo);
     }
@@ -94,7 +94,7 @@ class ExpenseServiceTest {
 
         CreateExpenseRequest request = new CreateExpenseRequest()
                 .amount(10.0)
-                .description("x")
+                .name("x")
                 .payerId(strangerId)
                 .beneficiaryIds(List.of(userId));
 
@@ -114,7 +114,7 @@ class ExpenseServiceTest {
 
         CreateExpenseRequest request = new CreateExpenseRequest()
                 .amount(10.0)
-                .description("x")
+                .name("x")
                 .payerId(userId)
                 .beneficiaryIds(List.of(userId, strangerId));
 
@@ -364,4 +364,56 @@ class ExpenseServiceTest {
         assertThrows(NotATripMemberException.class,
                 () -> expenseService.getBalances(tripId, userId));
     }
+
+    // getExpense
+
+    @Test
+    void getExpense_WhenUserIsMemberAndExpenseExists_ShouldReturnExpenseDetail() {
+        UUID expenseId = UUID.randomUUID();
+        Expense expense = mock(Expense.class);
+        ExpenseDetail detail = mock(ExpenseDetail.class);
+
+        when(tripRepo.existsByIdAndMembersId(tripId, userId)).thenReturn(true);
+        when(expenseRepo.findByIdAndTripId(expenseId, tripId)).thenReturn(Optional.of(expense));
+        when(expense.toExpenseDetail()).thenReturn(detail);
+
+        ExpenseDetail result = expenseService.getExpense(tripId, expenseId, userId);
+
+        assertEquals(detail, result);
+    }
+
+    @Test
+    void getExpense_WhenUserIsNotMember_ShouldThrowAndNotAccessRepo() {
+        when(tripRepo.existsByIdAndMembersId(tripId, userId)).thenReturn(false);
+
+        assertThrows(NotATripMemberException.class,
+                () -> expenseService.getExpense(tripId, UUID.randomUUID(), userId));
+
+        verifyNoInteractions(expenseRepo);
+    }
+
+    @Test
+    void getExpense_WhenExpenseDoesNotExist_ShouldThrow() {
+        UUID expenseId = UUID.randomUUID();
+
+        when(tripRepo.existsByIdAndMembersId(tripId, userId)).thenReturn(true);
+        when(expenseRepo.findByIdAndTripId(expenseId, tripId)).thenReturn(Optional.empty());
+
+        assertThrows(ExpenseNotFoundException.class,
+                () -> expenseService.getExpense(tripId, expenseId, userId));
+    }
+
+    @Test
+    void getExpense_WhenExpenseBelongsToAnotherTrip_ShouldThrow() {
+        UUID expenseId = UUID.randomUUID();
+        UUID otherTripId = UUID.randomUUID();
+
+        when(tripRepo.existsByIdAndMembersId(otherTripId, userId)).thenReturn(true);
+        when(expenseRepo.findByIdAndTripId(expenseId, otherTripId)).thenReturn(Optional.empty());
+
+        assertThrows(ExpenseNotFoundException.class,
+                () -> expenseService.getExpense(otherTripId, expenseId, userId));
+    }
+
+
 }

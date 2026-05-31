@@ -11,12 +11,11 @@ import java.util.UUID;
 
 public interface TripRepository extends JpaRepository<Trip, UUID>{
 
-
-    List<Trip> findAllByMembersContaining(User u);
-
     List<Trip> findAllByMembersId(UUID userId);
 
     Optional<Trip> findByIdAndMembersContaining(UUID tripId, User user);
 
     Optional<Trip> findByIdAndMembersId(UUID tripId, UUID userId);
+
+    boolean existsByIdAndMembersId(UUID tripId, UUID userId);
 }
