@@ -4,12 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gal.usc.telariabackend.model.dto.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -18,11 +15,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Transactional
-@TestMethodOrder(MethodOrderer.DisplayName.class)
-class AuthE2ETest {
+class AuthE2ETest extends BaseE2ETest{
 
     MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -63,8 +56,8 @@ class AuthE2ETest {
     @DisplayName("Register: new user returns 201 and tokens")
     void register_newUser_returnsTokens() throws Exception {
         RegisterRequest body = new RegisterRequest()
-                .username("pepe")
-                .email("pepe@example.com")
+                .username("nuevo")
+                .email("nuevo@example.com")
                 .password("pass1234");
 
         MvcResult result = mockMvc.perform(post("/auth/register")

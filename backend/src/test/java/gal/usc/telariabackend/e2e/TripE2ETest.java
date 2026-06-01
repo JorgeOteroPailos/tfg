@@ -4,12 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gal.usc.telariabackend.model.dto.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -22,11 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Transactional
-@TestMethodOrder(MethodOrderer.DisplayName.class)
-class TripE2ETest {
+class TripE2ETest extends BaseE2ETest{
 
     MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -45,7 +38,7 @@ class TripE2ETest {
     private String registerAndObtainToken(String username, String email) throws Exception {
         RegisterRequest body = new RegisterRequest()
                 .username(username)
-                .email(email)
+                .email(UUID.randomUUID()+email)
                 .password("pass1234");
 
         MvcResult result = mockMvc.perform(post("/auth/register")

@@ -1,0 +1,66 @@
+schemas:
+  DocumentUploadRequest:
+    type: object
+    required:
+      - name
+      - contentType
+    properties:
+      name:
+        type: string
+        example: billete_tren.pdf
+      contentType:
+        type: string
+        example: application/pdf
+      size:
+        type: integer
+        description: File size in bytes
+        example: 204800
+
+  DocumentUploadResponse:
+    type: object
+    required:
+      - documentId
+      - uploadUrl
+    properties:
+      documentId:
+        type: string
+        format: uuid
+      uploadUrl:
+        type: string
+        description: Presigned PUT URL to upload the file directly to Minio (expires in 15 minutes)
+        example: http://localhost:9000/telaria/uuid-key?X-Amz-Signature=...
+
+  DocumentResponse:
+    type: object
+    required:
+      - id
+      - name
+      - uploaderId
+      - uploadedAt
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        example: billete_tren.pdf
+      uploaderId:
+        type: string
+        format: uuid
+      uploadedAt:
+        type: string
+        format: date-time
+      size:
+        type: integer
+        description: File size in bytes
+        example: 204800
+
+  DocumentDownloadResponse:
+    type: object
+    required:
+      - downloadUrl
+    properties:
+      downloadUrl:
+        type: string
+        description: Presigned GET URL to download the file directly from Minio (expires in 15 minutes)
+        example: http://localhost:9000/telaria/uuid-key?X-Amz-Signature=...

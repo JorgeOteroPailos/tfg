@@ -4,12 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gal.usc.telariabackend.model.dto.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -22,11 +19,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Transactional
-@TestMethodOrder(MethodOrderer.DisplayName.class)
-class MembershipE2ETest {
+class MembershipE2ETest extends BaseE2ETest{
 
     MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -149,8 +142,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Join request: authenticated user can request to join an existing trip")
     void createJoinRequest_validTrip_returns204() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.jrv@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.jrv@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Roma");
 
         mockMvc.perform(post("/trips/{tripId}/join-requests", tripId)
@@ -161,7 +154,7 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Join request: unauthenticated request returns 401")
     void createJoinRequest_noToken_returns401() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.jrnt@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a París");
 
         mockMvc.perform(post("/trips/{tripId}/join-requests", tripId))
@@ -171,7 +164,7 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Join request: non-existent trip returns 403 (trip existence not revealed)")
     void createJoinRequest_nonExistentTrip_returns403() throws Exception {
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String guestToken = registerAndObtainToken("guest", "guest.jrnx@test.com");
 
         mockMvc.perform(post("/trips/{tripId}/join-requests", UUID.randomUUID())
                         .header("Authorization", "Bearer " + guestToken))
@@ -181,8 +174,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Join request: duplicate request returns 409")
     void createJoinRequest_alreadyPending_returns409() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.jrap@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.jrap@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Berlín");
 
         mockMvc.perform(post("/trips/{tripId}/join-requests", tripId)
@@ -197,8 +190,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Join request: already a member returns 409")
     void createJoinRequest_alreadyMember_returns409() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.jram@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.jram@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Lisboa");
 
         UUID requestId = createJoinRequest(guestToken, ownerToken, tripId);
@@ -216,8 +209,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Resolve join request: member can accept a pending request")
     void resolveJoinRequest_accept_returns200() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.rjra@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.rjra@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Amsterdam");
         UUID requestId = createJoinRequest(guestToken, ownerToken, tripId);
 
@@ -233,8 +226,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Resolve join request: member can reject a pending request")
     void resolveJoinRequest_reject_returns200() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.rjrr@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.rjrr@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Praga");
         UUID requestId = createJoinRequest(guestToken, ownerToken, tripId);
 
@@ -250,9 +243,9 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Resolve join request: non-member cannot resolve a request")
     void resolveJoinRequest_nonMember_returns403() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
-        String outsiderToken = registerAndObtainToken("outsider", "outsider@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.rjrx@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.rjrx@test.com");
+        String outsiderToken = registerAndObtainToken("outsider", "outsider.rjrx@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Viena");
         UUID requestId = createJoinRequest(guestToken, ownerToken, tripId);
 
@@ -268,8 +261,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Resolve join request: unauthenticated returns 401")
     void resolveJoinRequest_noToken_returns401() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.rjrnt@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.rjrnt@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Bruselas");
         UUID requestId = createJoinRequest(guestToken, ownerToken, tripId);
 
@@ -284,9 +277,9 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Resolve join request: any member (not just creator) can accept")
     void resolveJoinRequest_secondMemberCanAccept_returns200() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String member2Token = registerAndObtainToken("member2", "member2@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.rjr2@test.com");
+        String member2Token = registerAndObtainToken("member2", "member2.rjr2@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.rjr2@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Copenhague");
 
         UUID member2RequestId = createJoinRequest(member2Token, ownerToken, tripId);
@@ -309,8 +302,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Invite: member can invite another user to a trip")
     void createInvitation_validRequest_returns204() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.inv@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.inv@test.com");
         UUID guestId = extractUserIdFromToken(guestToken);
         UUID tripId = createTrip(ownerToken, "Viaje a Estocolmo");
 
@@ -320,9 +313,9 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Invite: non-member cannot invite to a trip")
     void createInvitation_nonMember_returns403() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String outsiderToken = registerAndObtainToken("outsider", "outsider@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.invx@test.com");
+        String outsiderToken = registerAndObtainToken("outsider", "outsider.invx@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.invx@test.com");
         UUID guestId = extractUserIdFromToken(guestToken);
         UUID tripId = createTrip(ownerToken, "Viaje a Helsinki");
 
@@ -338,8 +331,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Invite: unauthenticated returns 401")
     void createInvitation_noToken_returns401() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.invnt@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.invnt@test.com");
         UUID guestId = extractUserIdFromToken(guestToken);
         UUID tripId = createTrip(ownerToken, "Viaje a Oslo");
 
@@ -354,8 +347,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Invite: duplicate invitation returns 409")
     void createInvitation_alreadyPending_returns409() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.invap@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.invap@test.com");
         UUID guestId = extractUserIdFromToken(guestToken);
         UUID tripId = createTrip(ownerToken, "Viaje a Reikiavik");
 
@@ -372,8 +365,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Invite: inviting an already-member user returns 409")
     void createInvitation_alreadyMember_returns409() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.invam@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.invam@test.com");
         UUID guestId = extractUserIdFromToken(guestToken);
         UUID tripId = createTrip(ownerToken, "Viaje a Tallin");
 
@@ -395,8 +388,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Get invitations: returns list of pending invitations")
     void getMyInvitations_withPendingInvitation_returnsList() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.invl@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.invl@test.com");
         UUID guestId = extractUserIdFromToken(guestToken);
         UUID tripId = createTrip(ownerToken, "Viaje a Varsovia");
 
@@ -417,7 +410,7 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Get invitations: returns empty list when no invitations pending")
     void getMyInvitations_noPendingInvitations_returnsEmptyList() throws Exception {
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String guestToken = registerAndObtainToken("guest", "guest.inve@test.com");
 
         MvcResult result = mockMvc.perform(get("/users/me/invitations")
                         .header("Authorization", "Bearer " + guestToken))
@@ -444,8 +437,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Resolve invitation: user can accept their invitation")
     void resolveInvitation_accept_returns200() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.ria@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.ria@test.com");
         UUID guestId = extractUserIdFromToken(guestToken);
         UUID tripId = createTrip(ownerToken, "Viaje a Budapest");
 
@@ -463,8 +456,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Resolve invitation: user can reject their invitation")
     void resolveInvitation_reject_returns200() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.rir@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.rir@test.com");
         UUID guestId = extractUserIdFromToken(guestToken);
         UUID tripId = createTrip(ownerToken, "Viaje a Cracovia");
 
@@ -482,9 +475,9 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Resolve invitation: cannot resolve another user's invitation")
     void resolveInvitation_notYourInvitation_returns403() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
-        String otherToken = registerAndObtainToken("other", "other@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.rix@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.rix@test.com");
+        String otherToken = registerAndObtainToken("other", "other.rix@test.com");
         UUID guestId = extractUserIdFromToken(guestToken);
         UUID tripId = createTrip(ownerToken, "Viaje a Bratislava");
 
@@ -513,8 +506,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Resolve invitation: accepting adds the user to the trip")
     void resolveInvitation_accept_userIsNowMember() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.rim@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.rim@test.com");
         UUID guestId = extractUserIdFromToken(guestToken);
         UUID tripId = createTrip(ownerToken, "Viaje a Sofía");
 
@@ -534,8 +527,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Leave trip: member can leave a trip")
     void leaveTrip_asMember_returns200() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.lv@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.lv@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Atenas");
 
         UUID requestId = createJoinRequest(guestToken, ownerToken, tripId);
@@ -549,8 +542,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Leave trip: non-member returns 403")
     void leaveTrip_nonMember_returns403() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String outsiderToken = registerAndObtainToken("outsider", "outsider@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.lvx@test.com");
+        String outsiderToken = registerAndObtainToken("outsider", "outsider.lvx@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Dubrovnik");
 
         mockMvc.perform(delete("/trips/{tripId}/members/me", tripId)
@@ -561,7 +554,7 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Leave trip: unauthenticated returns 401")
     void leaveTrip_noToken_returns401() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.lvnt@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Kotor");
 
         mockMvc.perform(delete("/trips/{tripId}/members/me", tripId))
@@ -571,8 +564,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Leave trip: after leaving, user can no longer access the trip")
     void leaveTrip_afterLeaving_tripIsInaccessible() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.lva@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.lva@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Sarajevo");
 
         UUID requestId = createJoinRequest(guestToken, ownerToken, tripId);
@@ -594,8 +587,8 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Complete flow: join request -> accept -> leave")
     void completeFlow_joinRequestAcceptLeave() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String guestToken = registerAndObtainToken("guest", "guest@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.cjr@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.cjr@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Oporto");
 
         mockMvc.perform(get("/trips/{tripId}", tripId)
@@ -621,9 +614,9 @@ class MembershipE2ETest {
     @Test
     @DisplayName("Complete flow: invite -> accept -> new member can resolve other requests")
     void completeFlow_inviteAcceptAndResolveRequest() throws Exception {
-        String ownerToken = registerAndObtainToken("owner", "owner@example.com");
-        String invitedToken = registerAndObtainToken("invited", "invited@example.com");
-        String requesterToken = registerAndObtainToken("requester", "requester@example.com");
+        String ownerToken = registerAndObtainToken("owner", "owner.ci@test.com");
+        String invitedToken = registerAndObtainToken("invited", "invited.ci@test.com");
+        String requesterToken = registerAndObtainToken("requester", "requester.ci@test.com");
         UUID invitedId = extractUserIdFromToken(invitedToken);
         UUID tripId = createTrip(ownerToken, "Viaje a Nápoles");
 

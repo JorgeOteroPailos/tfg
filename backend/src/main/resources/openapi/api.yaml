@@ -43,6 +43,12 @@ paths:
     $ref: './paths/events.yaml#/paths/~1trips~1{tripId}~1events'
   /trips/{tripId}/events/{eventId}:
     $ref: './paths/events.yaml#/paths/~1trips~1{tripId}~1events~1{eventId}'
+  /trips/{tripId}/documents/{documentId}/confirm:
+    $ref: './paths/documents.yaml#/paths/~1trips~1{tripId}~1documents~1{documentId}~1confirm'
+  /trips/{tripId}/documents:
+    $ref: './paths/documents.yaml#/paths/~1trips~1{tripId}~1documents'
+  /trips/{tripId}/documents/{documentId}:
+    $ref: './paths/documents.yaml#/paths/~1trips~1{tripId}~1documents~1{documentId}'
 
 components:
   securitySchemes:

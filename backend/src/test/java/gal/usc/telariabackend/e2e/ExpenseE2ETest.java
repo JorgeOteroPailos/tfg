@@ -5,9 +5,7 @@ import gal.usc.telariabackend.model.dto.*;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -24,11 +22,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@TestMethodOrder(MethodOrderer.DisplayName.class)
-class ExpenseE2ETest {
+class ExpenseE2ETest extends BaseE2ETest{
 
     MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
@@ -414,6 +408,8 @@ class ExpenseE2ETest {
 
         ExpenseDetail detail = getExpenseDetail(token, tripId, expenseId);
 
+        assertNotNull(detail);
+        assertNotNull(detail.getAmount());
         assertEquals(expenseId, detail.getId());
         assertEquals(45.0, detail.getAmount(), 0.001);
         assertEquals(userId, detail.getPayerId());

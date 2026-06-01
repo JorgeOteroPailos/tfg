@@ -1,11 +1,6 @@
 package gal.usc.telariabackend.controllers;
 
-import gal.usc.telariabackend.model.exceptions.AlreadyDoneException;
-import gal.usc.telariabackend.model.exceptions.EventNotFoundException;
-import gal.usc.telariabackend.model.exceptions.ExpenseNotFoundException;
-import gal.usc.telariabackend.model.exceptions.InvalidRefreshTokenException;
-import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
-import gal.usc.telariabackend.model.exceptions.TripNotFoundException;
+import gal.usc.telariabackend.model.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
@@ -80,6 +75,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error;
     }
 
+    @ExceptionHandler(DocumentNotFoundException.class)
+    public ProblemDetail handleEventNotFoundException(DocumentNotFoundException e) {
+        ProblemDetail error = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        error.setTitle("Document not found");
+        error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
+                .pathSegment("error", "document-not-found").build().toUri());
+        error.setDetail(e.getMessage());
+        return error;
+    }
+
     @ExceptionHandler(NotATripMemberException.class)
     public ProblemDetail handleAccessDeniedException(NotATripMemberException e) {
         ProblemDetail error = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
@@ -106,6 +111,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         error.setTitle("Access denied");
         error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
                 .pathSegment("error", "access-denied").build().toUri());
+        error.setDetail(e.getMessage());
+        return error;
+    }
+
+    @ExceptionHandler(DocumentNotFoundInStorageException.class)
+    public ProblemDetail handle(DocumentNotFoundInStorageException e){
+        ProblemDetail error = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        error.setTitle("Document not found in storage");
+        error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
+                .pathSegment("error","document-not-found-in-storage").build().toUri());
         error.setDetail(e.getMessage());
         return error;
     }

@@ -106,8 +106,8 @@ public class SecurityConfig {
             var u = userRepository
                 .findByEmail(username)
                 .orElseThrow(() ->
-                    new ExpressionException("Usuario no encontrado")
-                ); //TODO hacer algo con la excepción
+                    new ExpressionException("User not found")
+                );
 
             return org.springframework.security.core.userdetails.User.withUsername(
                 u.getEmail()

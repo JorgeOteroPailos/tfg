@@ -1,9 +1,160 @@
-openapi: 3.1.0
-info:
-  title: Title
-  description: Title
-  version: 1.0.0
-servers:
-  - url: 'https'
 paths:
-  
+  /trips/{tripId}/documents/{documentId}/confirm:
+    post:
+      summary: Confirm that the upload to Minio completed successfully
+      operationId: confirmDocumentUpload
+      tags:
+        - Documents
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Document confirmed and marked as ACTIVE
+        '404':
+          description: Document not found or does not belong to this trip
+        '409':
+          description: File not found in storage (Minio verification failed)
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip
+
+  /trips/{tripId}/documents:
+    post:
+      summary: Request a presigned upload URL
+      operationId: initDocumentUpload
+      tags:
+        - Documents
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/documents.yaml#/schemas/DocumentUploadRequest'
+      responses:
+        '201':
+          description: Presigned upload URL generated, document created in PENDING state
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/documents.yaml#/schemas/DocumentUploadResponse'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip
+    get:
+      summary: List documents of a trip
+      operationId: listDocuments
+      tags:
+        - Documents
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: >
+            List of documents. Members see only ACTIVE documents.
+            The uploader also sees their own PENDING documents.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../schemas/documents.yaml#/schemas/DocumentResponse'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip
+
+  /trips/{tripId}/documents/{documentId}:
+    get:
+      summary: Get a presigned download URL for a document
+      operationId: getDocumentDownloadUrl
+      tags:
+        - Documents
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Presigned download URL (expires in 15 minutes)
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/documents.yaml#/schemas/DocumentDownloadResponse'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip
+        '404':
+          description: Document not found
+
+    delete:
+      summary: Delete a document
+      operationId: deleteDocument
+      tags:
+        - Documents
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Document deleted successfully
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip
+        '404':
+          description: Document not found

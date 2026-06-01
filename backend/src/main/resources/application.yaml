@@ -24,3 +24,10 @@ keystore:
   private:
     name: jwt
     password: miclavedelkeystore
+
+minio:
+  endpoint: http://localhost:9000
+  access-key: admin
+  secret-key: password123
+  bucket: telaria-document-sharing
+  presigned-url-expiration-minutes: 15
