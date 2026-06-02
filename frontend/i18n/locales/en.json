@@ -154,7 +154,18 @@
     "today": "Today",
     "tomorrow": "Tomorrow",
     "chooseDate": "Choose date",
-    "time": "Time"
+    "time": "Time",
+    "documents": "Documents",
+    "noDocuments": "No documents yet",
+    "unableLoadDocuments": "Unable to load documents",
+    "uploadError": "Upload failed",
+    "downloadError": "Could not open document",
+    "deleteDocumentError": "Unable to delete document",
+    "documentDetail": "Document details",
+    "fileSize": "Size",
+    "uploadedAt": "Uploaded at",
+    "uploadedBy": "Uploaded by",
+    "downloadDocument": "Download"
   },
   "invitations": {
     "empty": "No pending invitations",

@@ -1,7 +1,7 @@
 import { useAuth } from './auth';
 import type { components } from './generated/types';
 import { AppError, ErrorCode } from './AppError';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, use, useCallback, useEffect, useState } from 'react';
 
 type TripSummary = components['schemas']['TripSummary'];
 type TripDetail = components['schemas']['TripDetail'];
@@ -50,7 +50,7 @@ export const TripProvider = ({ tripId, children }: { tripId: string; children: R
   const [trip, setTrip] = useState<TripDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getTrip(tripId);
@@ -60,11 +60,11 @@ export const TripProvider = ({ tripId, children }: { tripId: string; children: R
     } finally {
       setLoading(false);
     }
-  };
+  }, [getTrip, tripId]);
 
   useEffect(() => {
     load();
-  }, [tripId]);
+  }, [load]);
 
   return (
     <TripContext.Provider value={{ trip, loading, reload: load }}>
@@ -73,4 +73,4 @@ export const TripProvider = ({ tripId, children }: { tripId: string; children: R
   );
 };
 
-export const useTrip = () => useContext(TripContext);
+export const useTrip = () => use(TripContext);

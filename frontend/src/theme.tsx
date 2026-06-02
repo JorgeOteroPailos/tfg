@@ -1,6 +1,6 @@
 import React, {
   createContext,
-  useContext,
+  use,
   useEffect,
   useMemo,
   useState,
@@ -71,7 +71,7 @@ export const ThemeProvider = ({
 };
 
 export const useAppTheme = () => {
-  const context = useContext(ThemeContext);
+  const context = use(ThemeContext);
 
   if (!context) {
     throw new Error('useAppTheme debe usarse dentro de ThemeProvider');

@@ -154,7 +154,18 @@
     "today": "Hoxe",
     "tomorrow": "Mañá",
     "chooseDate": "Escoller data",
-    "time": "Hora"
+    "time": "Hora",
+    "documents": "Documentos",
+    "noDocuments": "Aínda non hai documentos",
+    "unableLoadDocuments": "Non se puideron cargar os documentos",
+    "uploadError": "Erro ao subir o ficheiro",
+    "downloadError": "Non se puido abrir o documento",
+    "deleteDocumentError": "Non se puido eliminar o documento",
+    "documentDetail": "Detalles do documento",
+    "fileSize": "Tamaño",
+    "uploadedAt": "Subido o",
+    "uploadedBy": "Subido por",
+    "downloadDocument": "Descargar"
   },
   "invitations": {
     "empty": "Non tes invitacións pendentes",

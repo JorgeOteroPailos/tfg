@@ -50,7 +50,7 @@ const ExpensesScreen = () => {
 
   useEffect(() => {
     if (trip?.name) navigation.setOptions({ title: trip.name });
-  }, [trip?.name]);
+  }, [trip?.name, navigation]);
 
   useEffect(() => {
     if (!trip?.id || expenses !== null) return;
@@ -66,7 +66,7 @@ const ExpensesScreen = () => {
       }
     };
     load();
-  }, [trip?.id, expenses]);
+  }, [trip?.id, expenses, getExpenses, t]);
 
   const loadBalances = async () => {
     if (!trip?.id || balancesInfo !== null) return;

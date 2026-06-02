@@ -297,6 +297,59 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/trips/{tripId}/documents/{documentId}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm that the upload to Minio completed successfully */
+        post: operations["confirmDocumentUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/{tripId}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List documents of a trip */
+        get: operations["listDocuments"];
+        put?: never;
+        /** Request a presigned upload URL */
+        post: operations["initDocumentUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/{tripId}/documents/{documentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a presigned download URL for a document */
+        get: operations["getDocumentDownloadUrl"];
+        put?: never;
+        post?: never;
+        /** Delete a document */
+        delete: operations["deleteDocument"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -502,6 +555,48 @@ export interface components {
             /** @description Duration in minutes */
             duration?: number;
             location?: components["schemas"]["Location"];
+        };
+        DocumentResponse: {
+            /** Format: uuid */
+            id: string;
+            /** @example billete_tren.pdf */
+            name: string;
+            /** Format: uuid */
+            uploaderId: string;
+            /** Format: date-time */
+            uploadedAt: string;
+            /**
+             * @description File size in bytes
+             * @example 204800
+             */
+            size?: number;
+        };
+        DocumentUploadRequest: {
+            /** @example billete_tren.pdf */
+            name: string;
+            /** @example application/pdf */
+            contentType: string;
+            /**
+             * @description File size in bytes
+             * @example 204800
+             */
+            size?: number;
+        };
+        DocumentUploadResponse: {
+            /** Format: uuid */
+            documentId: string;
+            /**
+             * @description Presigned PUT URL to upload the file directly to Minio (expires in 15 minutes)
+             * @example http://localhost:9000/telaria/uuid-key?X-Amz-Signature=...
+             */
+            uploadUrl: string;
+        };
+        DocumentDownloadResponse: {
+            /**
+             * @description Presigned GET URL to download the file directly from Minio (expires in 15 minutes)
+             * @example http://localhost:9000/telaria/uuid-key?X-Amz-Signature=...
+             */
+            downloadUrl: string;
         };
     };
     responses: never;
@@ -1271,6 +1366,217 @@ export interface operations {
             };
             /** @description Not a member of this trip */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    confirmDocumentUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Document confirmed and marked as ACTIVE */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Document not found or does not belong to this trip */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File not found in storage (Minio verification failed) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listDocuments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of documents. Members see only ACTIVE documents. The uploader also sees their own PENDING documents. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentResponse"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    initDocumentUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentUploadRequest"];
+            };
+        };
+        responses: {
+            /** @description Presigned upload URL generated, document created in PENDING state */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentUploadResponse"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getDocumentDownloadUrl: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Presigned download URL (expires in 15 minutes) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentDownloadResponse"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Document not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Document deleted successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Document not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -5,9 +5,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { components } from '../src/generated/types';
 import React, {
   createContext,
+  use,
   useCallback,
-  useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 
@@ -87,6 +88,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [userEmail, setUserEmailState] = useState<string | null>(null);
     const [username, setUserNameState] = useState<string | null>(null);
+    const refreshPromiseRef = useRef<Promise<string> | null>(null);
 
     useEffect(() => {
       restoreSession();
@@ -208,28 +210,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
       //TODO cerrar sesión en el servidor
     };
 
-    const callAuthenticated = useCallback(async (path: string, options?: RequestInit): Promise<Response> => {
-      const currentToken = await getAccessToken();
-      const url = `${BASE_URL}${path}`;
-
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          ...options?.headers,
-          'Authorization': `Bearer ${currentToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.status !== 401) {
-
-        //console.log('llama exitosa  a ', url);
-        return response;
-      }
-
-      console.log('Token expirado, intentando refresh...');
-
-      // Token expirado — intentar refresh
+    const doRefresh = useCallback(async (): Promise<string> => {
       const refreshToken = await getRefreshToken();
       if (!refreshToken) {
         await clearSession();
@@ -253,8 +234,36 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
       await saveAccessToken(newAccessToken);
       await saveRefreshToken(newRefreshToken);
       setAccessToken(newAccessToken);
+      return newAccessToken;
+    }, []);
 
-      // Reintentar llamada original con nuevo token
+    const callAuthenticated = useCallback(async (path: string, options?: RequestInit): Promise<Response> => {
+      const currentToken = await getAccessToken();
+      const url = `${BASE_URL}${path}`;
+
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...options?.headers,
+          'Authorization': `Bearer ${currentToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status !== 401) {
+        return response;
+      }
+
+      console.log('Token expirado, intentando refresh...');
+
+      if (!refreshPromiseRef.current) {
+        refreshPromiseRef.current = doRefresh().finally(() => {
+          refreshPromiseRef.current = null;
+        });
+      }
+
+      const newAccessToken = await refreshPromiseRef.current;
+
       return fetch(url, {
         ...options,
         headers: {
@@ -263,7 +272,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
           'Content-Type': 'application/json',
         },
       });
-    }, []);
+    }, [doRefresh]);
 
     return (
       <AuthContext.Provider
@@ -285,7 +294,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
+  const context = use(AuthContext);
 
   if (!context) {
     throw new Error('useAuth debe usarse dentro de AuthProvider');

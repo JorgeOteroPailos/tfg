@@ -20,7 +20,7 @@ const TripLayout = () => {
   const tabs = [
     { name: 'expenses', icon: 'receipt-outline', label: t('trip.expenses') },
     { name: 'events', icon: 'calendar-outline', label: t('trip.events') },
-    { name: 'chat', icon: 'chatbubble-outline', label: t('trip.chat') },
+    { name: 'documents', icon: 'document-outline', label: t('trip.documents') },
     { name: 'members', icon: 'people-outline', label: t('trip.members') },
   ] as const;
 

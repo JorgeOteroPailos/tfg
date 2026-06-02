@@ -32,7 +32,7 @@ const InvitationsScreen = () => {
     }
   }, [getMyInvitations, t]);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   const handleResolve = async (id: string, accepted: boolean) => {
     setResolving(id);

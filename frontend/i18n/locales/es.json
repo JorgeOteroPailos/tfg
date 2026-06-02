@@ -154,7 +154,18 @@
     "today": "Hoy",
     "tomorrow": "Mañana",
     "chooseDate": "Elegir fecha",
-    "time": "Hora"
+    "time": "Hora",
+    "documents": "Documentos",
+    "noDocuments": "Aún no hay documentos",
+    "unableLoadDocuments": "No se pudieron cargar los documentos",
+    "uploadError": "Error al subir el archivo",
+    "downloadError": "No se pudo abrir el documento",
+    "deleteDocumentError": "No se pudo eliminar el documento",
+    "documentDetail": "Detalles del documento",
+    "fileSize": "Tamaño",
+    "uploadedAt": "Subido el",
+    "uploadedBy": "Subido por",
+    "downloadDocument": "Descargar"
   },
   "invitations": {
     "empty": "No tienes invitaciones pendientes",

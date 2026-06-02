@@ -146,6 +146,44 @@ const TimePicker = ({ hour, minute, tint, onChange }: TimePickerProps) => {
   );
 };
 
+// ── EventCard ─────────────────────────────────────────────────────────────────
+type EventCardProps = {
+  ev: EventSummary;
+  showDate?: boolean;
+  theme: typeof Colors.light;
+  formatTime: (iso: string) => string;
+  formatDateTime: (iso: string) => string;
+  formatDuration: (mins: number) => string;
+  onPress: (ev: EventSummary) => void;
+};
+
+const EventCard = ({ ev, showDate = false, theme, formatTime, formatDateTime, formatDuration, onPress }: EventCardProps) => (
+  <TouchableOpacity
+    style={[styles.eventCard, { backgroundColor: theme.tabBackground }]}
+    onPress={() => onPress(ev)}
+    activeOpacity={0.75}
+  >
+    <View style={styles.eventLeft}>
+      <ThemedText style={styles.eventName}>{ev.name}</ThemedText>
+      {ev.startTime && (
+        <ThemedText style={styles.eventMeta}>
+          {showDate ? formatDateTime(ev.startTime) : formatTime(ev.startTime)}
+        </ThemedText>
+      )}
+      {ev.location?.name && (
+        <View style={styles.locationRow}>
+          <Ionicons name="location-outline" size={13} color={theme.icon} />
+          <ThemedText style={styles.locationText}>{ev.location.name}</ThemedText>
+        </View>
+      )}
+    </View>
+    <View style={styles.eventRight}>
+      <ThemedText style={styles.eventDuration}>{formatDuration(ev.duration)}</ThemedText>
+      <Ionicons name="chevron-forward" size={18} color={theme.icon} />
+    </View>
+  </TouchableOpacity>
+);
+
 // ── Main screen ────────────────────────────────────────────────────────────────
 const EventsScreen = () => {
   const { t } = useTranslation();
@@ -193,7 +231,7 @@ const EventsScreen = () => {
 
   useEffect(() => {
     if (trip?.name) navigation.setOptions({ title: trip.name });
-  }, [trip?.name]);
+  }, [trip?.name, navigation]);
 
   useEffect(() => {
     if (!trip?.id || events !== null) return;
@@ -207,7 +245,7 @@ const EventsScreen = () => {
         setLoading(false);
       }
     })();
-  }, [trip?.id, events]);
+  }, [trip?.id, events, getEvents, t]);
 
   const eventsByDay = useMemo(() => {
     const map: Record<string, EventSummary[]> = {};
@@ -323,32 +361,7 @@ const EventsScreen = () => {
     }
   };
 
-  const EventCard = ({ ev, showDate = false }: { ev: EventSummary; showDate?: boolean }) => (
-    <TouchableOpacity
-      style={[styles.eventCard, { backgroundColor: theme.tabBackground }]}
-      onPress={() => { setSelectedEvent(ev); setDeleteError(null); setDetailVisible(true); }}
-      activeOpacity={0.75}
-    >
-      <View style={styles.eventLeft}>
-        <ThemedText style={styles.eventName}>{ev.name}</ThemedText>
-        {ev.startTime && (
-          <ThemedText style={styles.eventMeta}>
-            {showDate ? formatDateTime(ev.startTime) : formatTime(ev.startTime)}
-          </ThemedText>
-        )}
-        {ev.location?.name && (
-          <View style={styles.locationRow}>
-            <Ionicons name="location-outline" size={13} color={theme.icon} />
-            <ThemedText style={styles.locationText}>{ev.location.name}</ThemedText>
-          </View>
-        )}
-      </View>
-      <View style={styles.eventRight}>
-        <ThemedText style={styles.eventDuration}>{formatDuration(ev.duration)}</ThemedText>
-        <Ionicons name="chevron-forward" size={18} color={theme.icon} />
-      </View>
-    </TouchableOpacity>
-  );
+  
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -403,7 +416,15 @@ const EventsScreen = () => {
                           </ThemedText>
                         </View>
                         <View style={{ gap: 8 }}>
-                          {eventsByDay[k].map(ev => <EventCard key={ev.id} ev={ev} />)}
+                          {eventsByDay[k].map(ev => <EventCard
+                            key={ev.id}
+                            ev={ev}
+                            theme={theme}
+                            formatTime={formatTime}
+                            formatDateTime={formatDateTime}
+                            formatDuration={formatDuration}
+                            onPress={(ev) => { setSelectedEvent(ev); setDeleteError(null); setDetailVisible(true); }}
+                          />)}
                         </View>
                       </View>
                     ))}
@@ -413,7 +434,16 @@ const EventsScreen = () => {
                           <ThemedText style={styles.agendaDayText}>{t('trip.unscheduled')}</ThemedText>
                         </View>
                         <View style={{ gap: 8 }}>
-                          {unscheduled.map(ev => <EventCard key={ev.id} ev={ev} />)}
+                          {unscheduled.map(ev => <EventCard
+                            key={ev.id}
+                            ev={ev}
+                            theme={theme}
+                            formatTime={formatTime}
+                            formatDateTime={formatDateTime}
+                            formatDuration={formatDuration}
+                            onPress={(ev) => { setSelectedEvent(ev); setDeleteError(null); setDetailVisible(true); }}
+                          />
+                          )}
                         </View>
                       </View>
                     )}
@@ -430,7 +460,15 @@ const EventsScreen = () => {
               keyExtractor={(item, i) => item.id ?? `${i}`}
               contentContainerStyle={styles.list}
               ListEmptyComponent={<ThemedText style={styles.emptyText}>{t('trip.noEvents')}</ThemedText>}
-              renderItem={({ item }) => <EventCard ev={item} showDate />}
+              renderItem={({ item }) => <EventCard
+                ev={item}
+                showDate
+                theme={theme}
+                formatTime={formatTime}
+                formatDateTime={formatDateTime}
+                formatDuration={formatDuration}
+                onPress={(ev) => { setSelectedEvent(ev); setDeleteError(null); setDetailVisible(true); }}
+              />}
             />
           )}
         </>

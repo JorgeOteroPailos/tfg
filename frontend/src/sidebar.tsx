@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, use, useState } from 'react';
 
 type SidebarContextType = {
   open: boolean;
@@ -19,4 +19,4 @@ export const SidebarProvider = ({ children }: { children: React.ReactNode }) => 
   );
 };
 
-export const useSidebar = () => useContext(SidebarContext);
+export const useSidebar = () => use(SidebarContext);

@@ -48,7 +48,7 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
     };
 
     loadExpenses();
-  }, [tripId, expenses, getExpenses]);
+  }, [tripId, expenses, getExpenses, t]);
 
   const handleCreateExpense = async () => {
     if (!tripId) return;

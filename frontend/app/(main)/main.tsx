@@ -53,7 +53,7 @@ const Main = () => {
 
     load();
     initialLoadDone.current = true;
-  }, []);
+  }, [listTrips, getMyInvitations]);
 
   useFocusEffect(
     useCallback(() => {
@@ -80,7 +80,7 @@ const Main = () => {
         </TouchableOpacity>
       ),
     });
-  }, [invitationCount, theme]);
+  }, [invitationCount, theme, navigation]);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [newTripName, setNewTripName] = useState('');
