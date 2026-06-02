@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   StyleSheet, View, FlatList, ActivityIndicator,
-  TouchableOpacity, Modal, ScrollView,
+  Pressable, Modal, ScrollView,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from 'expo-router';
@@ -61,13 +61,13 @@ const MiniCal = ({
   return (
     <View>
       <View style={cal.header}>
-        <TouchableOpacity onPress={onPrevMonth} hitSlop={12}>
+        <Pressable onPress={onPrevMonth} hitSlop={12}>
           <Ionicons name="chevron-back" size={22} color={tint} />
-        </TouchableOpacity>
+        </Pressable>
         <ThemedText style={cal.title}>{MONTH_NAMES[month]} {year}</ThemedText>
-        <TouchableOpacity onPress={onNextMonth} hitSlop={12}>
+        <Pressable onPress={onNextMonth} hitSlop={12}>
           <Ionicons name="chevron-forward" size={22} color={tint} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <View style={cal.weekRow}>
@@ -84,11 +84,10 @@ const MiniCal = ({
           const isSel = selectedKey === k;
           const dots = Math.min(eventDots[k] ?? 0, 3);
           return (
-            <TouchableOpacity
+            <Pressable
               key={k}
-              style={[cal.cell, isSel && { backgroundColor: tint, borderRadius: 8 }]}
+              style={({ pressed }) => [cal.cell, isSel && { backgroundColor: tint, borderRadius: 8 }, { opacity: pressed ? 0.6 : 1 }]}
               onPress={() => onDayPress(day)}
-              activeOpacity={0.6}
             >
               <ThemedText style={[
                 cal.dayNum,
@@ -104,7 +103,7 @@ const MiniCal = ({
                   ))}
                 </View>
               )}
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </View>
@@ -123,24 +122,24 @@ const TimePicker = ({ hour, minute, tint, onChange }: TimePickerProps) => {
     <View style={tp.row}>
       {/* Hour */}
       <View style={tp.unit}>
-        <TouchableOpacity style={[tp.btn, { borderColor: tint }]} onPress={() => adj('h', 1)}>
+        <Pressable style={[tp.btn, { borderColor: tint }]} onPress={() => adj('h', 1)}>
           <Ionicons name="chevron-up" size={16} color={tint} />
-        </TouchableOpacity>
+        </Pressable>
         <ThemedText style={tp.value}>{String(hour).padStart(2, '0')}</ThemedText>
-        <TouchableOpacity style={[tp.btn, { borderColor: tint }]} onPress={() => adj('h', -1)}>
+        <Pressable style={[tp.btn, { borderColor: tint }]} onPress={() => adj('h', -1)}>
           <Ionicons name="chevron-down" size={16} color={tint} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
       <ThemedText style={tp.colon}>:</ThemedText>
       {/* Minute */}
       <View style={tp.unit}>
-        <TouchableOpacity style={[tp.btn, { borderColor: tint }]} onPress={() => adj('m', 5)}>
+        <Pressable style={[tp.btn, { borderColor: tint }]} onPress={() => adj('m', 5)}>
           <Ionicons name="chevron-up" size={16} color={tint} />
-        </TouchableOpacity>
+        </Pressable>
         <ThemedText style={tp.value}>{String(minute).padStart(2, '0')}</ThemedText>
-        <TouchableOpacity style={[tp.btn, { borderColor: tint }]} onPress={() => adj('m', -5)}>
+        <Pressable style={[tp.btn, { borderColor: tint }]} onPress={() => adj('m', -5)}>
           <Ionicons name="chevron-down" size={16} color={tint} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );
@@ -158,10 +157,9 @@ type EventCardProps = {
 };
 
 const EventCard = ({ ev, showDate = false, theme, formatTime, formatDateTime, formatDuration, onPress }: EventCardProps) => (
-  <TouchableOpacity
-    style={[styles.eventCard, { backgroundColor: theme.tabBackground }]}
+  <Pressable
+    style={({ pressed }) => [styles.eventCard, { backgroundColor: theme.tabBackground }, { opacity: pressed ? 0.75 : 1 }]}
     onPress={() => onPress(ev)}
-    activeOpacity={0.75}
   >
     <View style={styles.eventLeft}>
       <ThemedText style={styles.eventName}>{ev.name}</ThemedText>
@@ -181,7 +179,7 @@ const EventCard = ({ ev, showDate = false, theme, formatTime, formatDateTime, fo
       <ThemedText style={styles.eventDuration}>{formatDuration(ev.duration)}</ThemedText>
       <Ionicons name="chevron-forward" size={18} color={theme.icon} />
     </View>
-  </TouchableOpacity>
+  </Pressable>
 );
 
 // ── Main screen ────────────────────────────────────────────────────────────────
@@ -369,7 +367,7 @@ const EventsScreen = () => {
       {/* Tab bar */}
       <View style={[styles.tabBar, { backgroundColor: theme.tabBackground }]}>
         {(['calendar', 'list'] as Tab[]).map(tab => (
-          <TouchableOpacity
+          <Pressable
             key={tab}
             style={[styles.tabPill, activeTab === tab && { backgroundColor: theme.tint }]}
             onPress={() => setActiveTab(tab)}
@@ -377,7 +375,7 @@ const EventsScreen = () => {
             <ThemedText style={[styles.tabLabel, activeTab === tab && styles.tabLabelActive]}>
               {t(tab === 'calendar' ? 'trip.events' : 'trip.eventList')}
             </ThemedText>
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
 
@@ -476,18 +474,18 @@ const EventsScreen = () => {
 
       {/* FAB */}
       {!loading && !error && (
-        <TouchableOpacity
+        <Pressable
           style={[styles.fab, { backgroundColor: theme.tint }]}
           onPress={() => setCreateVisible(true)}
         >
           <Ionicons name="add" size={28} color="white" />
-        </TouchableOpacity>
+        </Pressable>
       )}
 
       {/* ── Detail modal ── */}
       <Modal visible={detailVisible} transparent animationType="fade" onRequestClose={() => setDetailVisible(false)}>
-        <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={() => setDetailVisible(false)}>
-          <TouchableOpacity activeOpacity={1} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
+        <Pressable style={styles.overlay} onPress={() => setDetailVisible(false)}>
+          <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
             <ThemedText style={styles.modalTitle}>{t('trip.eventDetail')}</ThemedText>
 
             {selectedEvent && (
@@ -519,17 +517,17 @@ const EventsScreen = () => {
             {deleteError && <ThemedText style={styles.errorText}>{deleteError}</ThemedText>}
 
             <View style={styles.modalButtons}>
-              <TouchableOpacity style={[styles.modalBtn, styles.deleteBtn]} onPress={handleDelete} disabled={deleting}>
+              <Pressable style={[styles.modalBtn, styles.deleteBtn]} onPress={handleDelete} disabled={deleting}>
                 {deleting
                   ? <ActivityIndicator color="white" />
                   : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.delete')}</ThemedText>}
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalBtn, { backgroundColor: theme.tint }]} onPress={() => setDetailVisible(false)}>
+              </Pressable>
+              <Pressable style={[styles.modalBtn, { backgroundColor: theme.tint }]} onPress={() => setDetailVisible(false)}>
                 <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.close')}</ThemedText>
-              </TouchableOpacity>
+              </Pressable>
             </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </Pressable>
+        </Pressable>
       </Modal>
 
       {/* ── Create modal ── */}
@@ -540,12 +538,12 @@ const EventsScreen = () => {
             contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
             keyboardShouldPersistTaps="handled"
           >
-            <TouchableOpacity activeOpacity={1} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
+            <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
               <View style={styles.modalTitleRow}>
                 <ThemedText style={styles.modalTitle}>{t('trip.newEvent')}</ThemedText>
-                <TouchableOpacity onPress={resetCreate} hitSlop={8}>
+                <Pressable onPress={resetCreate} hitSlop={8}>
                   <Ionicons name="close" size={22} color={theme.icon} />
-                </TouchableOpacity>
+                </Pressable>
               </View>
 
               {/* Name */}
@@ -559,7 +557,7 @@ const EventsScreen = () => {
               />
 
               {/* Date selector */}
-              <TouchableOpacity
+              <Pressable
                 style={[styles.dateBtn, { borderColor: theme.tint }]}
                 onPress={() => setDatePickerOpen(o => !o)}
               >
@@ -568,7 +566,7 @@ const EventsScreen = () => {
                   {pickedDate ? formatSectionDate(pickedDate) : t('trip.chooseDate')}
                 </ThemedText>
                 <Ionicons name={datePickerOpen ? 'chevron-up' : 'chevron-down'} size={16} color={theme.icon} />
-              </TouchableOpacity>
+              </Pressable>
 
               {datePickerOpen && (
                 <View style={[styles.calPickerBox, { borderColor: theme.tint + '40' }]}>
@@ -638,10 +636,10 @@ const EventsScreen = () => {
               {createError && <ThemedText style={styles.errorText}>{createError}</ThemedText>}
 
               <View style={styles.modalButtons}>
-                <TouchableOpacity style={[styles.modalBtn, styles.cancelBtn]} onPress={resetCreate}>
+                <Pressable style={[styles.modalBtn, styles.cancelBtn]} onPress={resetCreate}>
                   <ThemedText>{t('common.cancel')}</ThemedText>
-                </TouchableOpacity>
-                <TouchableOpacity
+                </Pressable>
+                <Pressable
                   style={[styles.modalBtn, { backgroundColor: theme.tint }]}
                   onPress={handleCreate}
                   disabled={creating}
@@ -649,9 +647,9 @@ const EventsScreen = () => {
                   {creating
                     ? <ActivityIndicator color="white" />
                     : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.create')}</ThemedText>}
-                </TouchableOpacity>
+                </Pressable>
               </View>
-            </TouchableOpacity>
+            </Pressable>
           </ScrollView>
         </View>
       </Modal>

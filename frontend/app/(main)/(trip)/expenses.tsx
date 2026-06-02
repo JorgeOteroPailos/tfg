@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, FlatList, ActivityIndicator, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { StyleSheet, View, FlatList, ActivityIndicator, Pressable, Modal, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from 'expo-router';
 import { useAppTheme } from '../../../src/theme';
@@ -148,7 +148,7 @@ const ExpensesScreen = () => {
       {/* Segmented control */}
       <View style={[styles.tabBar, { backgroundColor: theme.tabBackground }]}>
         {(['expenses', 'balances'] as Tab[]).map(tab => (
-          <TouchableOpacity
+          <Pressable
             key={tab}
             style={[styles.tabPill, activeTab === tab && { backgroundColor: theme.tint }]}
             onPress={() => handleTabChange(tab)}
@@ -156,7 +156,7 @@ const ExpensesScreen = () => {
             <ThemedText style={[styles.tabLabel, activeTab === tab && styles.tabLabelActive]}>
               {t(tab === 'expenses' ? 'trip.expenses' : 'trip.balances')}
             </ThemedText>
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
 
@@ -182,21 +182,21 @@ const ExpensesScreen = () => {
                   </View>
                   <View style={styles.expenseRight}>
                     <ThemedText style={styles.expenseAmount}>{item.amount?.toFixed(2)}€</ThemedText>
-                    <TouchableOpacity onPress={() => handleOpenDetail(item)} hitSlop={8}>
+                    <Pressable onPress={() => handleOpenDetail(item)} hitSlop={8}>
                       <Ionicons name="chevron-down" size={18} color={theme.icon} />
-                    </TouchableOpacity>
+                    </Pressable>
                   </View>
                 </View>
               );
             }}
             ListFooterComponent={
-              <TouchableOpacity
+              <Pressable
                 style={[styles.addButton, { backgroundColor: theme.tint }]}
                 onPress={() => setModalVisible(true)}
               >
                 <Ionicons name="add" size={20} color="white" />
                 <ThemedText style={styles.addButtonText}>{t('trip.addExpense')}</ThemedText>
-              </TouchableOpacity>
+              </Pressable>
             }
           />
         )
@@ -245,8 +245,8 @@ const ExpensesScreen = () => {
 
       {/* Expense detail modal */}
       <Modal visible={detailModalVisible} transparent animationType="fade" onRequestClose={() => setDetailModalVisible(false)}>
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setDetailModalVisible(false)}>
-          <TouchableOpacity activeOpacity={1} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
+        <Pressable style={styles.modalOverlay} onPress={() => setDetailModalVisible(false)}>
+          <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
             <ThemedText style={styles.modalTitle}>{t('trip.expenseDetail')}</ThemedText>
 
             {detailLoading && <ActivityIndicator color={theme.tint} style={{ marginVertical: 20 }} />}
@@ -280,20 +280,20 @@ const ExpensesScreen = () => {
               </>
             )}
 
-            <TouchableOpacity
+            <Pressable
               style={[styles.closeButton, { backgroundColor: theme.tint }]}
               onPress={() => setDetailModalVisible(false)}
             >
               <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.close')}</ThemedText>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        </TouchableOpacity>
+            </Pressable>
+          </Pressable>
+        </Pressable>
       </Modal>
 
       {/* Create expense modal */}
       <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={resetModal}>
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={resetModal}>
-          <TouchableOpacity activeOpacity={1} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
+        <Pressable style={styles.modalOverlay} onPress={resetModal}>
+          <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
             <ThemedText style={styles.modalTitle}>{t('trip.newExpense')}</ThemedText>
 
             <ThemedInput
@@ -314,7 +314,7 @@ const ExpensesScreen = () => {
               keyboardType="numeric"
             />
 
-            <TouchableOpacity
+            <Pressable
               style={[styles.dropdown, { borderColor: theme.tint }]}
               onPress={() => setPayerDropdownOpen(!payerDropdownOpen)}
             >
@@ -322,18 +322,18 @@ const ExpensesScreen = () => {
                 {payerId ? trip?.members?.find(m => m.id === payerId)?.username : t('trip.selectPayer')}
               </ThemedText>
               <Ionicons name={payerDropdownOpen ? 'chevron-up' : 'chevron-down'} size={16} color={theme.icon} />
-            </TouchableOpacity>
+            </Pressable>
 
             {payerDropdownOpen && (
               <View style={[styles.dropdownList, { backgroundColor: theme.tabBackground }]}>
                 {trip?.members?.map(member => (
-                  <TouchableOpacity
+                  <Pressable
                     key={member.id}
                     style={styles.dropdownItem}
                     onPress={() => { setPayerId(member.id ?? ''); setPayerDropdownOpen(false); }}
                   >
                     <ThemedText>{member.username}</ThemedText>
-                  </TouchableOpacity>
+                  </Pressable>
                 ))}
               </View>
             )}
@@ -343,7 +343,7 @@ const ExpensesScreen = () => {
               {trip?.members?.map(member => {
                 const selected = beneficiaryIds.includes(member.id ?? '');
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     key={member.id}
                     style={styles.dropdownItem}
                     onPress={() => setBeneficiaryIds(prev =>
@@ -358,7 +358,7 @@ const ExpensesScreen = () => {
                       size={20}
                       color={selected ? theme.tint : theme.icon}
                     />
-                  </TouchableOpacity>
+                  </Pressable>
                 );
               })}
             </View>
@@ -366,10 +366,10 @@ const ExpensesScreen = () => {
             {createError && <ThemedText style={styles.errorText}>{createError}</ThemedText>}
 
             <View style={styles.modalButtons}>
-              <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={resetModal}>
+              <Pressable style={[styles.modalButton, styles.cancelButton]} onPress={resetModal}>
                 <ThemedText>{t('common.cancel')}</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Pressable>
+              <Pressable
                 style={[styles.modalButton, { backgroundColor: theme.tint }]}
                 onPress={handleCreate}
                 disabled={creating}
@@ -377,10 +377,10 @@ const ExpensesScreen = () => {
                 {creating
                   ? <ActivityIndicator color="white" />
                   : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.create')}</ThemedText>}
-              </TouchableOpacity>
+              </Pressable>
             </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </Pressable>
+        </Pressable>
       </Modal>
     </View>
   );

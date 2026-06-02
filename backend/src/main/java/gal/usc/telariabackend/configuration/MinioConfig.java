@@ -19,6 +19,7 @@ import java.net.URI;
 public class MinioConfig {
 
     private String endpoint;
+    private String publicEndpoint;
     private String accessKey;
     private String secretKey;
     private String bucket;
@@ -41,7 +42,7 @@ public class MinioConfig {
     @Bean
     public S3Presigner s3Presigner() {
         return S3Presigner.builder()
-                .endpointOverride(URI.create(endpoint))
+                .endpointOverride(URI.create(publicEndpoint))
                 .credentialsProvider(StaticCredentialsProvider.create(
                         AwsBasicCredentials.create(accessKey, secretKey)
                 ))

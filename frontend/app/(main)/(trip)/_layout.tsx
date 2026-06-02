@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { View, Pressable, StyleSheet, Modal } from 'react-native';
 import { router, useLocalSearchParams, useSegments, Slot } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../src/theme';
@@ -38,7 +38,7 @@ const TripLayout = () => {
           {tabs.map(tab => {
             const isActive = tab.name === activeTab;
             return (
-              <TouchableOpacity
+              <Pressable
                 key={tab.name}
                 style={styles.tab}
                 onPress={() => router.replace({ pathname: `/${tab.name}`, params: { tripId } })}
@@ -51,15 +51,15 @@ const TripLayout = () => {
                 <ThemedText style={[styles.tabLabel, { color: isActive ? theme.tint : theme.icon, fontWeight: isActive ? '600' : 'normal' }]}>
                   {tab.label}
                 </ThemedText>
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
 
           {/* Más */}
-          <TouchableOpacity style={styles.tab} onPress={() => setMoreVisible(true)}>
+          <Pressable style={styles.tab} onPress={() => setMoreVisible(true)}>
             <Ionicons name="menu-outline" size={24} color={theme.icon} />
             <ThemedText style={styles.tabLabel}>{t('trip.more')}</ThemedText>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* Modal más */}
@@ -69,16 +69,15 @@ const TripLayout = () => {
           animationType="slide"
           onRequestClose={() => setMoreVisible(false)}
         >
-          <TouchableOpacity
+          <Pressable
             style={styles.modalOverlay}
-            activeOpacity={1}
             onPress={() => setMoreVisible(false)}
           >
-            <TouchableOpacity
-              activeOpacity={1}
+            <Pressable
+              onPress={() => {}}
               style={[styles.bottomSheet, { backgroundColor: theme.tabBackground }]}
             >
-              <TouchableOpacity
+              <Pressable
                 style={styles.sheetItem}
                 onPress={() => {
                   setMoreVisible(false);
@@ -87,9 +86,9 @@ const TripLayout = () => {
               >
                 <Ionicons name="person-outline" size={22} color={theme.text} />
                 <ThemedText style={styles.sheetItemText}>{t('nav.profile')}</ThemedText>
-              </TouchableOpacity>
+              </Pressable>
 
-              <TouchableOpacity
+              <Pressable
                 style={styles.sheetItem}
                 onPress={() => {
                   setMoreVisible(false);
@@ -98,9 +97,9 @@ const TripLayout = () => {
               >
                 <Ionicons name="settings-outline" size={22} color={theme.text} />
                 <ThemedText style={styles.sheetItemText}>{t('nav.settings')}</ThemedText>
-              </TouchableOpacity>
+              </Pressable>
 
-              <TouchableOpacity
+              <Pressable
                 style={styles.sheetItem}
                 onPress={() => {
                   setMoreVisible(false);
@@ -109,9 +108,9 @@ const TripLayout = () => {
               >
                 <Ionicons name="mail-outline" size={22} color={theme.text} />
                 <ThemedText style={styles.sheetItemText}>{t('trip.requests')}</ThemedText>
-              </TouchableOpacity>
+              </Pressable>
 
-              <TouchableOpacity
+              <Pressable
                 style={[styles.sheetItem, { borderBottomWidth: 0 }]}
                 onPress={() => {
                   setMoreVisible(false);
@@ -120,9 +119,9 @@ const TripLayout = () => {
               >
                 <Ionicons name="arrow-back-outline" size={22} color="#cc475a" />
                 <ThemedText style={[styles.sheetItemText, { color: '#cc475a' }]}>{t('trip.leave')}</ThemedText>
-              </TouchableOpacity>
-            </TouchableOpacity>
-          </TouchableOpacity>
+              </Pressable>
+            </Pressable>
+          </Pressable>
         </Modal>
       </View>
     </TripProvider>

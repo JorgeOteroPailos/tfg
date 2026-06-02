@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { StyleSheet, View, Pressable, FlatList, Alert } from 'react-native';
 import ThemedText from '../../components/ThemedText';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../src/theme';
@@ -94,7 +94,7 @@ const CalendarScreen = () => {
           {getDayName(selectedDate)}
         </ThemedText>
         <View style={styles.dateButtonsRow}>
-          <TouchableOpacity
+          <Pressable
             style={[styles.dateButton, { backgroundColor: theme.tint }]}
             onPress={() => {
               const d = new Date(selectedDate);
@@ -103,16 +103,16 @@ const CalendarScreen = () => {
             }}
           >
             <ThemedText style={styles.dateButtonText}>← Anterior</ThemedText>
-          </TouchableOpacity>
+          </Pressable>
 
-          <TouchableOpacity
+          <Pressable
             style={[styles.dateButton, { backgroundColor: theme.tint }]}
             onPress={() => setSelectedDate(new Date().toISOString().split('T')[0])}
           >
             <ThemedText style={styles.dateButtonText}>Hoy</ThemedText>
-          </TouchableOpacity>
+          </Pressable>
 
-          <TouchableOpacity
+          <Pressable
             style={[styles.dateButton, { backgroundColor: theme.tint }]}
             onPress={() => {
               const d = new Date(selectedDate);
@@ -121,7 +121,7 @@ const CalendarScreen = () => {
             }}
           >
             <ThemedText style={styles.dateButtonText}>Siguiente →</ThemedText>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
 
@@ -129,12 +129,12 @@ const CalendarScreen = () => {
       <View style={styles.eventsSection}>
         <View style={styles.sectionHeader}>
           <ThemedText style={styles.sectionTitle}>Eventos hoy</ThemedText>
-          <TouchableOpacity
+          <Pressable
             style={[styles.addButton, { backgroundColor: theme.tint }]}
             onPress={() => setShowAddForm(!showAddForm)}
           >
             <ThemedText style={styles.addButtonText}>+</ThemedText>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {showAddForm && (
@@ -165,18 +165,18 @@ const CalendarScreen = () => {
             </View>
 
             <View style={styles.formButtons}>
-              <TouchableOpacity
+              <Pressable
                 style={[styles.formButton, { backgroundColor: theme.tint }]}
                 onPress={handleAddEvent}
               >
                 <ThemedText style={styles.formButtonText}>Guardar</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Pressable>
+              <Pressable
                 style={[styles.formButton, { backgroundColor: theme.tabIconDefault }]}
                 onPress={() => setShowAddForm(false)}
               >
                 <ThemedText style={styles.formButtonText}>Cancelar</ThemedText>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         )}
@@ -197,12 +197,12 @@ const CalendarScreen = () => {
                     <ThemedText style={styles.eventDesc}>{item.description}</ThemedText>
                   )}
                 </View>
-                <TouchableOpacity
+                <Pressable
                   onPress={() => handleDeleteEvent(item.id)}
                   style={styles.deleteBtn}
                 >
                   <ThemedText style={styles.deleteBtnText}>✕</ThemedText>
-                </TouchableOpacity>
+                </Pressable>
               </View>
             )}
           />

@@ -1,4 +1,4 @@
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Pressable, StyleSheet } from 'react-native';
 import { Link, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSidebar } from '../src/sidebar';
@@ -25,40 +25,39 @@ const Sidebar = () => {
   return (
     <>
       {/* Overlay */}
-      <TouchableOpacity
+      <Pressable
         style={styles.overlay}
-        activeOpacity={1}
         onPress={() => setOpen(false)}
       />
 
       {/* Panel */}
       <View style={[styles.sidebar, { backgroundColor: theme.tabBackground }]}>
         <Link href="/profile" asChild>
-          <TouchableOpacity style={styles.item} onPress={() => setOpen(false)}>
+          <Pressable style={styles.item} onPress={() => setOpen(false)}>
             <ThemedText style={styles.itemText}>👤 {t('nav.profile')}</ThemedText>
-          </TouchableOpacity>
+          </Pressable>
         </Link>
 
         <Link href="/settings" asChild>
-          <TouchableOpacity style={styles.item} onPress={() => setOpen(false)}>
+          <Pressable style={styles.item} onPress={() => setOpen(false)}>
             <ThemedText style={styles.itemText}>⚙️ {t('settings.title')}</ThemedText>
-          </TouchableOpacity>
+          </Pressable>
         </Link>
 
         <Link href="/calendar" asChild>
-          <TouchableOpacity style={styles.item} onPress={() => setOpen(false)}>
+          <Pressable style={styles.item} onPress={() => setOpen(false)}>
             <ThemedText style={styles.itemText}>📅 {t('nav.calendar')}</ThemedText>
-          </TouchableOpacity>
+          </Pressable>
         </Link>
 
-        <TouchableOpacity
+        <Pressable
           style={[styles.item, styles.logoutItem]}
           onPress={handleLogout}
         >
           <ThemedText style={[styles.itemText, { color: '#cc475a' }]}>
             🚪 {t('profile.logout')}
           </ThemedText>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </>
   );

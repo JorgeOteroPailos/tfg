@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ActivityIndicator, TouchableOpacity, Modal } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, Pressable, Modal } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import ThemedText from './ThemedText';
 import ThemedInput from './ThemedInput';
@@ -18,7 +18,7 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
   const theme = Colors[themeName] ?? Colors.light;
   const { getExpenses, addExpense } = useExpenses();
   const [expenses, setExpenses] = useState<ExpenseSummary[] | null>(null);
-  const [loadingExpenses, setLoadingExpenses] = useState(false);
+  const loadingExpenses = Boolean(tripId) && expenses === null && expensesError === null;
   const [expensesError, setExpensesError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [creatingExpense, setCreatingExpense] = useState(false);
@@ -33,7 +33,6 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
     if (!tripId || expenses !== null) return;
 
     const loadExpenses = async () => {
-      setLoadingExpenses(true);
       setExpensesError(null);
 
       try {
@@ -42,8 +41,6 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
       } catch (error) {
         console.error('Error loading expenses:', error);
         setExpensesError(t('trip.unableLoadExpenses', 'Unable to load expenses'));
-      } finally {
-        setLoadingExpenses(false);
       }
     };
 
@@ -93,14 +90,14 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
 
   return (
     <View style={styles.expensesContainer}>
-      <TouchableOpacity
+      <Pressable
         style={[styles.addButton, { backgroundColor: theme.tabBackground }]}
         onPress={() => setModalVisible(true)}
       >
         <ThemedText style={styles.addButtonText}>
           + {t('trip.addExpense', 'Add expense')}
         </ThemedText>
-      </TouchableOpacity>
+      </Pressable>
 
       <Modal
         visible={modalVisible}
@@ -108,12 +105,11 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
         animationType="fade"
         onRequestClose={() => setModalVisible(false)}
       >
-        <TouchableOpacity
+        <Pressable
           style={styles.modalOverlay}
-          activeOpacity={1}
           onPress={() => setModalVisible(false)}
         >
-          <TouchableOpacity activeOpacity={1} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}> 
+          <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
             <ThemedText style={styles.modalTitle}>{t('trip.newExpense', 'New expense')}</ThemedText>
 
             <ThemedInput
@@ -134,7 +130,7 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
               keyboardType="numeric"
             />
 
-            <TouchableOpacity
+            <Pressable
               style={[styles.modalInput, styles.dropdown, { borderColor: theme.tint }]}
               onPress={() => setPayerDropdownOpen(!payerDropdownOpen)}
               >
@@ -143,12 +139,12 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
                   ? trip?.members?.find(m => m.id === payerId)?.username 
                   : t('trip.selectPayer')}
               </ThemedText>
-              </TouchableOpacity>
+              </Pressable>
 
               {payerDropdownOpen && (
               <View style={[styles.dropdownList, { backgroundColor: theme.tabBackground }]}>
                   {trip?.members?.map(member => (
-                  <TouchableOpacity
+                  <Pressable
                       key={member.id}
                       style={styles.dropdownItem}
                       onPress={() => {
@@ -157,7 +153,7 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
                       }}
                   >
                       <ThemedText>{member.username}</ThemedText>
-                  </TouchableOpacity>
+                  </Pressable>
                   ))}
               </View>
               )}
@@ -166,7 +162,7 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
               {trip?.members?.map(member => {
                 const isSelected = beneficiaryIds.includes(member.id ?? '');
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     key={member.id}
                     style={styles.dropdownItem}
                     onPress={() => {
@@ -180,7 +176,7 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
                   >
                     <ThemedText>{member.username}</ThemedText>
                     <ThemedText>{isSelected ? '☑️' : '⬜️'}</ThemedText>
-                  </TouchableOpacity>
+                  </Pressable>
                 );
               })}
             </View>
@@ -188,7 +184,7 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
             {createError ? <ThemedText style={styles.errorText}>{createError}</ThemedText> : null}
 
             <View style={styles.modalButtons}>
-              <TouchableOpacity
+              <Pressable
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => {
                   setModalVisible(false);
@@ -196,9 +192,9 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
                 }}
               >
                 <ThemedText>{t('common.cancel', 'Cancel')}</ThemedText>
-              </TouchableOpacity>
+              </Pressable>
 
-              <TouchableOpacity
+              <Pressable
                 style={[styles.modalButton, { backgroundColor: theme.tint }]}
                 onPress={handleCreateExpense}
                 disabled={creatingExpense}
@@ -207,10 +203,10 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
                   ? <ActivityIndicator color="white" />
                   : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.create', 'Create')}</ThemedText>
                 }
-              </TouchableOpacity>
+              </Pressable>
             </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </Pressable>
+        </Pressable>
       </Modal>
 
       {loadingExpenses ? (

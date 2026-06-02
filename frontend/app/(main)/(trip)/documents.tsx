@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   StyleSheet, View, FlatList, ActivityIndicator,
-  TouchableOpacity, Modal, Linking,
+  Pressable, Modal, Linking,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from 'expo-router';
@@ -192,10 +192,9 @@ const DocumentsScreen = () => {
             </View>
           }
           renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[styles.docCard, { backgroundColor: theme.tabBackground }]}
+            <Pressable
+              style={({ pressed }) => [styles.docCard, { backgroundColor: theme.tabBackground }, { opacity: pressed ? 0.75 : 1 }]}
               onPress={() => openDetail(item)}
-              activeOpacity={0.75}
             >
               <Ionicons name={fileIcon(item.name)} size={30} color={theme.tint} />
               <View style={styles.docInfo}>
@@ -208,13 +207,13 @@ const DocumentsScreen = () => {
                 )}
               </View>
               <Ionicons name="chevron-forward" size={18} color={theme.icon} />
-            </TouchableOpacity>
+            </Pressable>
           )}
         />
       )}
 
       {!loading && !error && (
-        <TouchableOpacity
+        <Pressable
           style={[styles.fab, { backgroundColor: uploading ? theme.icon : theme.tint }]}
           onPress={handleUpload}
           disabled={uploading}
@@ -222,7 +221,7 @@ const DocumentsScreen = () => {
           {uploading
             ? <ActivityIndicator color="white" />
             : <Ionicons name="add" size={28} color="white" />}
-        </TouchableOpacity>
+        </Pressable>
       )}
 
       {uploadError && (
@@ -237,13 +236,12 @@ const DocumentsScreen = () => {
         animationType="fade"
         onRequestClose={() => setDetailVisible(false)}
       >
-        <TouchableOpacity
+        <Pressable
           style={styles.overlay}
-          activeOpacity={1}
           onPress={() => setDetailVisible(false)}
         >
-          <TouchableOpacity
-            activeOpacity={1}
+          <Pressable
+            onPress={() => {}}
             style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}
           >
             <ThemedText style={styles.modalTitle}>{t('trip.documentDetail')}</ThemedText>
@@ -277,7 +275,7 @@ const DocumentsScreen = () => {
             {actionError && <ThemedText style={styles.errorText}>{actionError}</ThemedText>}
 
             <View style={styles.modalButtons}>
-              <TouchableOpacity
+              <Pressable
                 style={[styles.modalBtn, styles.deleteBtn]}
                 onPress={handleDelete}
                 disabled={deleting || downloading}
@@ -285,8 +283,8 @@ const DocumentsScreen = () => {
                 {deleting
                   ? <ActivityIndicator color="white" />
                   : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('trip.delete')}</ThemedText>}
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Pressable>
+              <Pressable
                 style={[styles.modalBtn, { backgroundColor: theme.tint }]}
                 onPress={handleDownload}
                 disabled={downloading || deleting}
@@ -294,17 +292,17 @@ const DocumentsScreen = () => {
                 {downloading
                   ? <ActivityIndicator color="white" />
                   : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('trip.downloadDocument')}</ThemedText>}
-              </TouchableOpacity>
+              </Pressable>
             </View>
 
-            <TouchableOpacity
+            <Pressable
               style={[styles.closeBtn]}
               onPress={() => setDetailVisible(false)}
             >
               <ThemedText style={styles.closeBtnText}>{t('common.close')}</ThemedText>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        </TouchableOpacity>
+            </Pressable>
+          </Pressable>
+        </Pressable>
       </Modal>
     </View>
   );

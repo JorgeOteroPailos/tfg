@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../src/theme';
@@ -42,9 +42,9 @@ const JoinRequestsScreen = () => {
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={[styles.header, { backgroundColor: theme.navBackground, borderBottomColor: theme.border }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
+          <Pressable onPress={() => router.back()} style={styles.headerButton}>
             <Ionicons name="chevron-back" size={26} color={theme.title} />
-          </TouchableOpacity>
+          </Pressable>
           <ThemedText style={[styles.headerTitle, { color: theme.title }]}>{t('trip.requests')}</ThemedText>
           <View style={styles.headerButton} />
         </View>
@@ -62,13 +62,13 @@ const JoinRequestsScreen = () => {
 
       {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.navBackground, borderBottomColor: theme.border }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
+        <Pressable onPress={() => router.back()} style={styles.headerButton}>
           <Ionicons name="chevron-back" size={26} color={theme.title} />
-        </TouchableOpacity>
+        </Pressable>
         <ThemedText style={[styles.headerTitle, { color: theme.title }]}>{t('trip.requests')}</ThemedText>
-        <TouchableOpacity onPress={() => setOpen(true)} style={styles.headerButton}>
+        <Pressable onPress={() => setOpen(true)} style={styles.headerButton}>
           <ThemedText style={[styles.hamburger, { color: theme.title }]}>☰</ThemedText>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {error && (
@@ -85,7 +85,7 @@ const JoinRequestsScreen = () => {
           <View style={[styles.card, { backgroundColor: theme.tabBackground }]}>
             <ThemedText style={styles.username}>{item.requester.username}</ThemedText>
             <View style={styles.actions}>
-              <TouchableOpacity
+              <Pressable
                 style={[styles.button, { backgroundColor: theme.tint }, resolving === item.id && styles.disabled]}
                 onPress={() => handleResolve(item.id, true)}
                 disabled={resolving !== null}
@@ -93,14 +93,14 @@ const JoinRequestsScreen = () => {
                 {resolving === item.id
                   ? <ActivityIndicator size="small" color="white" />
                   : <ThemedText style={styles.buttonText}>{t('invitations.accept')}</ThemedText>}
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Pressable>
+              <Pressable
                 style={[styles.button, styles.rejectButton, { borderColor: Colors.warning }, resolving === item.id && styles.disabled]}
                 onPress={() => handleResolve(item.id, false)}
                 disabled={resolving !== null}
               >
                 <ThemedText style={[styles.buttonText, { color: Colors.warning }]}>{t('invitations.reject')}</ThemedText>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         )}

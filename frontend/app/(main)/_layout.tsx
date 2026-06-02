@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-import { TouchableOpacity, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../src/theme';
 import { Colors } from '../../constants/Colors';
@@ -21,9 +21,9 @@ export default function MainLayout() {
           contentStyle: { backgroundColor: theme.background },
           animation: 'slide_from_right',
           headerRight: () => (
-            <TouchableOpacity onPress={() => setOpen(true)} style={{ paddingHorizontal: 8 }}>
+            <Pressable onPress={() => setOpen(true)} style={{ paddingHorizontal: 8 }}>
               <Text style={{ fontSize: 22, color: theme.title }}>☰</Text>
-            </TouchableOpacity>
+            </Pressable>
           ),
         }}
       >

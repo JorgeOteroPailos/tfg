@@ -34,6 +34,7 @@ public abstract class BaseE2ETest {
         registry.add("minio.access-key", () -> "admin");
         registry.add("minio.secret-key", () -> "password123");
         registry.add("minio.bucket", () -> "telaria-document-sharing");
+        registry.add("minio.public-endpoint", () -> "http://localhost:" + minio.getMappedPort(9000));
     }
 
     @BeforeAll

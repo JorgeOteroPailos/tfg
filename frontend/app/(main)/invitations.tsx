@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../src/theme';
 import { Colors } from '../../constants/Colors';
@@ -69,7 +69,7 @@ const InvitationsScreen = () => {
           <View style={[styles.card, { backgroundColor: theme.tabBackground }]}>
             <ThemedText style={styles.tripName}>{item.tripName}</ThemedText>
             <View style={styles.actions}>
-              <TouchableOpacity
+              <Pressable
                 style={[styles.button, { backgroundColor: theme.tint }, resolving === item.id && styles.disabled]}
                 onPress={() => handleResolve(item.id, true)}
                 disabled={resolving !== null}
@@ -79,14 +79,14 @@ const InvitationsScreen = () => {
                 ) : (
                   <ThemedText style={styles.buttonText}>{t('invitations.accept')}</ThemedText>
                 )}
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Pressable>
+              <Pressable
                 style={[styles.button, styles.rejectButton, { borderColor: Colors.warning }, resolving === item.id && styles.disabled]}
                 onPress={() => handleResolve(item.id, false)}
                 disabled={resolving !== null}
               >
                 <ThemedText style={[styles.buttonText, { color: Colors.warning }]}>{t('invitations.reject')}</ThemedText>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         )}

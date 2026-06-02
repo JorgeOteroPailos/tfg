@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, View, Pressable, FlatList } from 'react-native';
 import { router, useFocusEffect, useNavigation } from 'expo-router';
 import ThemedText from '../../components/ThemedText';
 import { useTranslation } from 'react-i18next';
@@ -70,14 +70,14 @@ const Main = () => {
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <TouchableOpacity style={styles.invitationsButton} onPress={() => router.push('/invitations')}>
+        <Pressable style={styles.invitationsButton} onPress={() => router.push('/invitations')}>
           <Ionicons name="mail-outline" size={24} color={theme.title} />
           {invitationCount > 0 && (
             <View style={styles.badge}>
               <ThemedText style={styles.badgeText}>{invitationCount}</ThemedText>
             </View>
           )}
-        </TouchableOpacity>
+        </Pressable>
       ),
     });
   }, [invitationCount, theme, navigation]);
@@ -116,7 +116,7 @@ const Main = () => {
       <View style={styles.content}>
         {/* Action Cards Row */}
         <View style={styles.actionRow}>
-          <TouchableOpacity
+          <Pressable
             style={[styles.actionCard, { backgroundColor: theme.tint }]}
             onPress={() => setModalVisible(true)}
           >
@@ -124,9 +124,9 @@ const Main = () => {
             <View style={styles.actionCardIcon}>
               <ThemedText style={styles.actionCardIconText}>+</ThemedText>
             </View>
-          </TouchableOpacity>
+          </Pressable>
 
-          <TouchableOpacity
+          <Pressable
             style={[styles.actionCard, { backgroundColor: theme.tabBackground }]}
             onPress={() => router.push('/join-trip')}
           >
@@ -134,7 +134,7 @@ const Main = () => {
             <View style={[styles.actionCardIcon, { backgroundColor: 'rgba(0,0,0,0.08)' }]}>
               <Ionicons name="enter-outline" size={20} color={theme.tint} />
             </View>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* Trips List */}
@@ -144,7 +144,7 @@ const Main = () => {
           scrollEnabled={true}
           contentContainerStyle={styles.tripsList}
           renderItem={({ item }) => (
-            <TouchableOpacity
+            <Pressable
               style={[styles.tripCard, { backgroundColor: theme.tabBackground }]}
               onPress={() => {
                 router.push({ pathname: '/expenses', params: { tripId: item.id } });
@@ -154,14 +154,14 @@ const Main = () => {
                 <ThemedText style={styles.tripName}>{item.name}</ThemedText>
               </View>
               <ThemedText style={styles.tripArrow}>→</ThemedText>
-            </TouchableOpacity>
+            </Pressable>
           )}
         />
       </View>
 
       {/* Overlay to close the sidebar when clicking outside */}
       {sidebarOpen && (
-        <TouchableOpacity
+        <Pressable
           style={styles.overlay}
           activeOpacity={1}
           onPress={() => setSidebarOpen(false)}
@@ -173,12 +173,11 @@ const Main = () => {
         animationType="fade"
         onRequestClose={() => setModalVisible(false)}
       >
-        <TouchableOpacity
+        <Pressable
           style={styles.modalOverlay}
-          activeOpacity={1}
           onPress={() => setModalVisible(false)}
         >
-          <TouchableOpacity activeOpacity={1} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
+          <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
             <ThemedText style={styles.modalTitle}>{t('trip.new')}</ThemedText>
 
             <ThemedInput
@@ -192,14 +191,14 @@ const Main = () => {
             />
 
             <View style={styles.modalButtons}>
-              <TouchableOpacity
+              <Pressable
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => { setModalVisible(false); setNewTripName(''); }}
               >
                 <ThemedText>{t('common.cancel')}</ThemedText>
-              </TouchableOpacity>
+              </Pressable>
 
-              <TouchableOpacity
+              <Pressable
                 style={[styles.modalButton, { backgroundColor: theme.tint }]}
                 onPress={handleCreateTrip}
                 disabled={creating || !newTripName.trim()}
@@ -208,10 +207,10 @@ const Main = () => {
                   ? <ActivityIndicator color="white" />
                   : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.create')}</ThemedText>
                 }
-              </TouchableOpacity>
+              </Pressable>
             </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </Pressable>
+        </Pressable>
       </Modal>
 
     </View>

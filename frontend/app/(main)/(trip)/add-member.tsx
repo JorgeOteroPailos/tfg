@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import { StyleSheet, View, Pressable, ActivityIndicator, ScrollView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import QRCode from 'react-native-qrcode-svg';
@@ -45,15 +45,15 @@ const AddMemberScreen = () => {
 
       {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.navBackground, borderBottomColor: theme.border }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
+        <Pressable onPress={() => router.back()} style={styles.headerButton}>
           <Ionicons name="chevron-back" size={26} color={theme.title} />
-        </TouchableOpacity>
+        </Pressable>
         <ThemedText style={[styles.headerTitle, { color: theme.title }]}>
           {t('trip.addMember')}
         </ThemedText>
-        <TouchableOpacity onPress={() => setOpen(true)} style={styles.headerButton}>
+        <Pressable onPress={() => setOpen(true)} style={styles.headerButton}>
           <ThemedText style={[styles.hamburger, { color: theme.title }]}>☰</ThemedText>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -84,7 +84,7 @@ const AddMemberScreen = () => {
             <ThemedText style={styles.errorText}>{error}</ThemedText>
           )}
 
-          <TouchableOpacity
+          <Pressable
             style={[styles.primaryButton, { backgroundColor: theme.tint }]}
             onPress={handleInvite}
             disabled={sending || !userId.trim()}
@@ -92,11 +92,11 @@ const AddMemberScreen = () => {
             {sending
               ? <ActivityIndicator color="white" />
               : <ThemedText style={styles.primaryButtonText}>{t('trip.sendInvite')}</ThemedText>}
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* Scan QR button */}
-        <TouchableOpacity
+        <Pressable
           style={[styles.secondaryButton, { borderColor: theme.tint }]}
           onPress={() => router.push({ pathname: '/scan-qr', params: { mode: 'invite', tripId } })}
         >
@@ -104,7 +104,7 @@ const AddMemberScreen = () => {
           <ThemedText style={[styles.secondaryButtonText, { color: theme.tint }]}>
             {t('trip.scanQr')}
           </ThemedText>
-        </TouchableOpacity>
+        </Pressable>
 
       </ScrollView>
     </View>

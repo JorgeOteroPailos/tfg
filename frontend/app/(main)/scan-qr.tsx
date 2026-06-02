@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Pressable, ActivityIndicator } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -77,12 +77,12 @@ const ScanQrScreen = () => {
           <Ionicons name="camera-reverse-outline" size={56} color={theme.icon} style={styles.permIcon} />
           <ThemedText style={styles.permText}>{t('trip.cameraPermissionDenied')}</ThemedText>
           {permission.canAskAgain && (
-            <TouchableOpacity
+            <Pressable
               style={[styles.primaryButton, { backgroundColor: theme.tint }]}
               onPress={requestPermission}
             >
               <ThemedText style={styles.primaryButtonText}>{t('trip.allowCamera')}</ThemedText>
-            </TouchableOpacity>
+            </Pressable>
           )}
         </View>
       </View>
@@ -125,12 +125,12 @@ const ScanQrScreen = () => {
                 <ThemedText style={styles.resultText}>
                   {errorMessage}
                 </ThemedText>
-                <TouchableOpacity
+                <Pressable
                   style={[styles.primaryButton, { backgroundColor: theme.tint, marginTop: 16 }]}
                   onPress={handleTryAgain}
                 >
                   <ThemedText style={styles.primaryButtonText}>{t('trip.tryAgain')}</ThemedText>
-                </TouchableOpacity>
+                </Pressable>
               </>
             )}
           </View>
@@ -143,9 +143,9 @@ const ScanQrScreen = () => {
 // Small inline header component to avoid repetition
 const Header = ({ title, theme }: { title: string; theme: Record<string, string> }) => (
   <View style={[styles.header, { backgroundColor: theme.navBackground, borderBottomColor: theme.border }]}>
-    <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
+    <Pressable onPress={() => router.back()} style={styles.headerButton}>
       <Ionicons name="chevron-back" size={26} color={theme.title} />
-    </TouchableOpacity>
+    </Pressable>
     <ThemedText style={[styles.headerTitle, { color: theme.title }]}>{title}</ThemedText>
     <View style={styles.headerButton} />
   </View>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, FlatList, Pressable, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -33,7 +33,7 @@ const MembersScreen = () => {
         keyExtractor={item => item.id ?? ''}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
-          <TouchableOpacity
+          <Pressable
             style={[styles.requestsButton, { backgroundColor: theme.tabBackground }]}
             onPress={() => router.push({ pathname: '/join-requests', params: { tripId } })}
           >
@@ -45,7 +45,7 @@ const MembersScreen = () => {
               </View>
             )}
             <Ionicons name="chevron-forward" size={18} color={theme.icon} style={styles.chevron} />
-          </TouchableOpacity>
+          </Pressable>
         }
         renderItem={({ item }) => (
           <View style={[styles.memberCard, { backgroundColor: theme.tabBackground }]}>
@@ -53,12 +53,12 @@ const MembersScreen = () => {
           </View>
         )}
         ListFooterComponent={
-          <TouchableOpacity
+          <Pressable
             style={[styles.addButton, { backgroundColor: theme.tint }]}
             onPress={() => router.push({ pathname: '/add-member', params: { tripId: trip.id } })}
           >
             <ThemedText style={styles.addButtonText}>+ {t('trip.addMember')}</ThemedText>
-          </TouchableOpacity>
+          </Pressable>
         }
       />
     </View>
