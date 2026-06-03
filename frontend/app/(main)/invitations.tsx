@@ -9,6 +9,46 @@ import { components } from '../../src/generated/types';
 
 type InvitationSummary = components['schemas']['InvitationSummary'];
 
+interface InvitationCardProps {
+  item: InvitationSummary;
+  resolving: string | null;
+  cardBackground: string;
+  tint: string;
+  onAccept: (id: string) => void;
+  onReject: (id: string) => void;
+}
+const InvitationCard = React.memo(function InvitationCard({
+  item, resolving, cardBackground, tint, onAccept, onReject,
+}: InvitationCardProps) {
+  const { t } = useTranslation();
+  const isResolving = resolving === item.id;
+  return (
+    <View style={[styles.card, { backgroundColor: cardBackground }]}>
+      <ThemedText style={styles.tripName}>{item.tripName}</ThemedText>
+      <View style={styles.actions}>
+        <Pressable
+          style={[styles.button, { backgroundColor: tint }, isResolving && styles.disabled]}
+          onPress={() => onAccept(item.id)}
+          disabled={resolving !== null}
+        >
+          {isResolving ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <ThemedText style={styles.buttonText}>{t('invitations.accept')}</ThemedText>
+          )}
+        </Pressable>
+        <Pressable
+          style={[styles.button, styles.rejectButton, { borderColor: Colors.warning }, isResolving && styles.disabled]}
+          onPress={() => onReject(item.id)}
+          disabled={resolving !== null}
+        >
+          <ThemedText style={[styles.buttonText, { color: Colors.warning }]}>{t('invitations.reject')}</ThemedText>
+        </Pressable>
+      </View>
+    </View>
+  );
+});
+
 const InvitationsScreen = () => {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
@@ -34,7 +74,7 @@ const InvitationsScreen = () => {
 
   useEffect(() => { load(); }, [load]);
 
-  const handleResolve = async (id: string, accepted: boolean) => {
+  const handleResolve = useCallback(async (id: string, accepted: boolean) => {
     setResolving(id);
     try {
       await resolveInvitation(id, accepted);
@@ -44,7 +84,20 @@ const InvitationsScreen = () => {
     } finally {
       setResolving(null);
     }
-  };
+  }, [resolveInvitation, t]);
+
+  const handleAccept = useCallback((id: string) => handleResolve(id, true), [handleResolve]);
+  const handleReject = useCallback((id: string) => handleResolve(id, false), [handleResolve]);
+  const renderInvitationItem = useCallback(({ item }: { item: InvitationSummary }) => (
+    <InvitationCard
+      item={item}
+      resolving={resolving}
+      cardBackground={theme.tabBackground}
+      tint={theme.tint}
+      onAccept={handleAccept}
+      onReject={handleReject}
+    />
+  ), [resolving, theme.tabBackground, theme.tint, handleAccept, handleReject]);
 
   if (loading) {
     return (
@@ -65,31 +118,7 @@ const InvitationsScreen = () => {
         data={invitations}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <View style={[styles.card, { backgroundColor: theme.tabBackground }]}>
-            <ThemedText style={styles.tripName}>{item.tripName}</ThemedText>
-            <View style={styles.actions}>
-              <Pressable
-                style={[styles.button, { backgroundColor: theme.tint }, resolving === item.id && styles.disabled]}
-                onPress={() => handleResolve(item.id, true)}
-                disabled={resolving !== null}
-              >
-                {resolving === item.id ? (
-                  <ActivityIndicator size="small" color="white" />
-                ) : (
-                  <ThemedText style={styles.buttonText}>{t('invitations.accept')}</ThemedText>
-                )}
-              </Pressable>
-              <Pressable
-                style={[styles.button, styles.rejectButton, { borderColor: Colors.warning }, resolving === item.id && styles.disabled]}
-                onPress={() => handleResolve(item.id, false)}
-                disabled={resolving !== null}
-              >
-                <ThemedText style={[styles.buttonText, { color: Colors.warning }]}>{t('invitations.reject')}</ThemedText>
-              </Pressable>
-            </View>
-          </View>
-        )}
+        renderItem={renderInvitationItem}
         ListEmptyComponent={
           <View style={styles.centered}>
             <ThemedText style={styles.emptyText}>{t('invitations.empty')}</ThemedText>

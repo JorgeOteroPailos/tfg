@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,44 @@ import { components } from '../../../src/generated/types';
 
 type JoinRequestSummary = components['schemas']['JoinRequestSummary'];
 
+interface JoinRequestCardProps {
+  item: JoinRequestSummary;
+  resolving: string | null;
+  cardBackground: string;
+  tint: string;
+  onAccept: (id: string) => void;
+  onReject: (id: string) => void;
+}
+const JoinRequestCard = React.memo(function JoinRequestCard({
+  item, resolving, cardBackground, tint, onAccept, onReject,
+}: JoinRequestCardProps) {
+  const { t } = useTranslation();
+  const isResolving = resolving === item.id;
+  return (
+    <View style={[styles.card, { backgroundColor: cardBackground }]}>
+      <ThemedText style={styles.username}>{item.requester.username}</ThemedText>
+      <View style={styles.actions}>
+        <Pressable
+          style={[styles.button, { backgroundColor: tint }, isResolving && styles.disabled]}
+          onPress={() => onAccept(item.id)}
+          disabled={resolving !== null}
+        >
+          {isResolving
+            ? <ActivityIndicator size="small" color="white" />
+            : <ThemedText style={styles.buttonText}>{t('invitations.accept')}</ThemedText>}
+        </Pressable>
+        <Pressable
+          style={[styles.button, styles.rejectButton, { borderColor: Colors.warning }, isResolving && styles.disabled]}
+          onPress={() => onReject(item.id)}
+          disabled={resolving !== null}
+        >
+          <ThemedText style={[styles.buttonText, { color: Colors.warning }]}>{t('invitations.reject')}</ThemedText>
+        </Pressable>
+      </View>
+    </View>
+  );
+});
+
 const JoinRequestsScreen = () => {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
@@ -24,7 +62,7 @@ const JoinRequestsScreen = () => {
   const [resolving, setResolving] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleResolve = async (requestId: string, accepted: boolean) => {
+  const handleResolve = useCallback(async (requestId: string, accepted: boolean) => {
     if (!trip) return;
     setResolving(requestId);
     setError(null);
@@ -36,7 +74,20 @@ const JoinRequestsScreen = () => {
     } finally {
       setResolving(null);
     }
-  };
+  }, [resolveJoinRequest, reload, t, trip]);
+
+  const handleAccept = useCallback((id: string) => handleResolve(id, true), [handleResolve]);
+  const handleReject = useCallback((id: string) => handleResolve(id, false), [handleResolve]);
+  const renderRequestItem = useCallback(({ item }: { item: JoinRequestSummary }) => (
+    <JoinRequestCard
+      item={item}
+      resolving={resolving}
+      cardBackground={theme.tabBackground}
+      tint={theme.tint}
+      onAccept={handleAccept}
+      onReject={handleReject}
+    />
+  ), [resolving, theme.tabBackground, theme.tint, handleAccept, handleReject]);
 
   if (loading) {
     return (
@@ -81,29 +132,7 @@ const JoinRequestsScreen = () => {
         data={requests}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <View style={[styles.card, { backgroundColor: theme.tabBackground }]}>
-            <ThemedText style={styles.username}>{item.requester.username}</ThemedText>
-            <View style={styles.actions}>
-              <Pressable
-                style={[styles.button, { backgroundColor: theme.tint }, resolving === item.id && styles.disabled]}
-                onPress={() => handleResolve(item.id, true)}
-                disabled={resolving !== null}
-              >
-                {resolving === item.id
-                  ? <ActivityIndicator size="small" color="white" />
-                  : <ThemedText style={styles.buttonText}>{t('invitations.accept')}</ThemedText>}
-              </Pressable>
-              <Pressable
-                style={[styles.button, styles.rejectButton, { borderColor: Colors.warning }, resolving === item.id && styles.disabled]}
-                onPress={() => handleResolve(item.id, false)}
-                disabled={resolving !== null}
-              >
-                <ThemedText style={[styles.buttonText, { color: Colors.warning }]}>{t('invitations.reject')}</ThemedText>
-              </Pressable>
-            </View>
-          </View>
-        )}
+        renderItem={renderRequestItem}
         ListEmptyComponent={
           <View style={styles.centered}>
             <ThemedText style={styles.emptyText}>{t('trip.noRequests')}</ThemedText>

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   StyleSheet, View, FlatList, ActivityIndicator,
   Pressable, Modal, Linking,
@@ -54,6 +54,35 @@ function uploadToUrl(uploadUrl: string, fileUri: string, contentType: string): P
     xhr.send({ uri: fileUri, type: contentType, name: 'file' } as any);
   });
 }
+
+interface DocCardProps {
+  item: DocumentResponse;
+  background: string;
+  tint: string;
+  icon: string;
+  memberName?: string;
+  onPress: (item: DocumentResponse) => void;
+}
+const DocCard = React.memo(function DocCard({ item, background, tint, icon, memberName, onPress }: DocCardProps) {
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.docCard, { backgroundColor: background, opacity: pressed ? 0.75 : 1 }]}
+      onPress={() => onPress(item)}
+    >
+      <Ionicons name={fileIcon(item.name)} size={30} color={tint} />
+      <View style={styles.docInfo}>
+        <ThemedText style={styles.docName} numberOfLines={1}>{item.name}</ThemedText>
+        <ThemedText style={styles.docMeta}>
+          {formatSize(item.size)} · {formatDate(item.uploadedAt)}
+        </ThemedText>
+        {memberName && (
+          <ThemedText style={styles.docUploader}>{memberName}</ThemedText>
+        )}
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={icon} />
+    </Pressable>
+  );
+});
 
 const DocumentsScreen = () => {
   const { t } = useTranslation();
@@ -168,11 +197,22 @@ const DocumentsScreen = () => {
     }
   };
 
-  const openDetail = (doc: DocumentResponse) => {
+  const openDetail = useCallback((doc: DocumentResponse) => {
     setSelectedDoc(doc);
     setActionError(null);
     setDetailVisible(true);
-  };
+  }, []);
+
+  const renderDocumentItem = useCallback(({ item }: { item: DocumentResponse }) => (
+    <DocCard
+      item={item}
+      background={theme.tabBackground}
+      tint={theme.tint}
+      icon={theme.icon}
+      memberName={memberMap[item.uploaderId]}
+      onPress={openDetail}
+    />
+  ), [theme.tabBackground, theme.tint, theme.icon, memberMap, openDetail]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -191,24 +231,7 @@ const DocumentsScreen = () => {
               <ThemedText style={styles.emptyText}>{t('trip.noDocuments')}</ThemedText>
             </View>
           }
-          renderItem={({ item }) => (
-            <Pressable
-              style={({ pressed }) => [styles.docCard, { backgroundColor: theme.tabBackground }, { opacity: pressed ? 0.75 : 1 }]}
-              onPress={() => openDetail(item)}
-            >
-              <Ionicons name={fileIcon(item.name)} size={30} color={theme.tint} />
-              <View style={styles.docInfo}>
-                <ThemedText style={styles.docName} numberOfLines={1}>{item.name}</ThemedText>
-                <ThemedText style={styles.docMeta}>
-                  {formatSize(item.size)} · {formatDate(item.uploadedAt)}
-                </ThemedText>
-                {memberMap[item.uploaderId] && (
-                  <ThemedText style={styles.docUploader}>{memberMap[item.uploaderId]}</ThemedText>
-                )}
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={theme.icon} />
-            </Pressable>
-          )}
+          renderItem={renderDocumentItem}
         />
       )}
 

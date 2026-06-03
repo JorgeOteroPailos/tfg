@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, FlatList, ActivityIndicator, Pressable, Modal, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from 'expo-router';
@@ -11,6 +11,30 @@ import ThemedText from '../../../components/ThemedText';
 import ThemedInput from '../../../components/ThemedInput';
 
 type Tab = 'expenses' | 'balances';
+
+interface ExpenseRowProps {
+  item: ExpenseSummary;
+  payerName: string;
+  background: string;
+  icon: string;
+  onPress: (item: ExpenseSummary) => void;
+}
+const ExpenseRow = React.memo(function ExpenseRow({ item, payerName, background, icon, onPress }: ExpenseRowProps) {
+  return (
+    <View style={[styles.expenseCard, { backgroundColor: background }]}>
+      <View style={styles.expenseLeft}>
+        <ThemedText style={styles.expenseDescription}>{item.name}</ThemedText>
+        <ThemedText style={styles.expensePayer}>{payerName}</ThemedText>
+      </View>
+      <View style={styles.expenseRight}>
+        <ThemedText style={styles.expenseAmount}>{item.amount?.toFixed(2)}€</ThemedText>
+        <Pressable onPress={() => onPress(item)} hitSlop={8}>
+          <Ionicons name="chevron-down" size={18} color={icon} />
+        </Pressable>
+      </View>
+    </View>
+  );
+});
 
 const ExpensesScreen = () => {
   const { t } = useTranslation();
@@ -47,13 +71,16 @@ const ExpensesScreen = () => {
   const [payerId, setPayerId] = useState('');
   const [beneficiaryIds, setBeneficiaryIds] = useState<string[]>([]);
   const [payerDropdownOpen, setPayerDropdownOpen] = useState(false);
+  const expensesLoadedRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (trip?.name) navigation.setOptions({ title: trip.name });
   }, [trip?.name, navigation]);
 
   useEffect(() => {
-    if (!trip?.id || expenses !== null) return;
+    if (!trip?.id) return;
+    if (expensesLoadedRef.current === trip.id) return;
+    expensesLoadedRef.current = trip.id;
     const load = async () => {
       setLoading(true);
       try {
@@ -66,7 +93,7 @@ const ExpensesScreen = () => {
       }
     };
     load();
-  }, [trip?.id, expenses, getExpenses, t]);
+  }, [trip?.id, getExpenses, t]);
 
   const loadBalances = async () => {
     if (!trip?.id || balancesInfo !== null) return;
@@ -122,7 +149,7 @@ const ExpensesScreen = () => {
     setPayerDropdownOpen(false);
   };
 
-  const handleOpenDetail = async (item: ExpenseSummary) => {
+  const handleOpenDetail = useCallback(async (item: ExpenseSummary) => {
     if (!trip?.id) return;
     setExpenseDetail(null);
     setDetailError(null);
@@ -137,7 +164,21 @@ const ExpensesScreen = () => {
     } finally {
       setDetailLoading(false);
     }
-  };
+  }, [trip?.id, getExpenseDetail, t]);
+
+  const members = trip?.members;
+  const renderExpenseItem = useCallback(({ item }: { item: ExpenseSummary }) => {
+    const payerName = members?.find(m => m.id === item.payerId)?.username ?? '?';
+    return (
+      <ExpenseRow
+        item={item}
+        payerName={payerName}
+        background={theme.tabBackground}
+        icon={theme.icon}
+        onPress={handleOpenDetail}
+      />
+    );
+  }, [members, theme.tabBackground, theme.icon, handleOpenDetail]);
 
   const usernameFor = (userId: string) =>
     trip?.members?.find(m => m.id === userId)?.username ?? '?';
@@ -172,23 +213,7 @@ const ExpensesScreen = () => {
             keyExtractor={(item, i) => item.id ?? `${i}`}
             contentContainerStyle={styles.list}
             ListEmptyComponent={<ThemedText style={styles.emptyText}>{t('trip.noExpenses')}</ThemedText>}
-            renderItem={({ item }) => {
-              const payer = trip?.members?.find(m => m.id === item.payerId);
-              return (
-                <View style={[styles.expenseCard, { backgroundColor: theme.tabBackground }]}>
-                  <View style={styles.expenseLeft}>
-                    <ThemedText style={styles.expenseDescription}>{item.name}</ThemedText>
-                    <ThemedText style={styles.expensePayer}>{payer?.username ?? '?'}</ThemedText>
-                  </View>
-                  <View style={styles.expenseRight}>
-                    <ThemedText style={styles.expenseAmount}>{item.amount?.toFixed(2)}€</ThemedText>
-                    <Pressable onPress={() => handleOpenDetail(item)} hitSlop={8}>
-                      <Ionicons name="chevron-down" size={18} color={theme.icon} />
-                    </Pressable>
-                  </View>
-                </View>
-              );
-            }}
+            renderItem={renderExpenseItem}
             ListFooterComponent={
               <Pressable
                 style={[styles.addButton, { backgroundColor: theme.tint }]}
