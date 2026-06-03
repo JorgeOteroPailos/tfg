@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import {
   StyleSheet, View, FlatList, ActivityIndicator,
   Pressable, Modal, Linking,
@@ -84,6 +84,50 @@ const DocCard = React.memo(function DocCard({ item, background, tint, icon, memb
   );
 });
 
+// --- Document list state ---
+type ListState = { documents: DocumentResponse[] | null; loading: boolean; error: string | null };
+type ListAction =
+  | { type: 'loading' }
+  | { type: 'loaded'; documents: DocumentResponse[] }
+  | { type: 'error'; error: string }
+  | { type: 'remove'; id: string };
+
+function listReducer(state: ListState, action: ListAction): ListState {
+  switch (action.type) {
+    case 'loading': return { ...state, loading: true, error: null };
+    case 'loaded': return { documents: action.documents, loading: false, error: null };
+    case 'error': return { ...state, loading: false, error: action.error };
+    case 'remove': return { ...state, documents: state.documents ? state.documents.filter(d => d.id !== action.id) : state.documents };
+    default: return state;
+  }
+}
+
+// --- Detail modal state ---
+type DetailState = { visible: boolean; doc: DocumentResponse | null; downloading: boolean; deleting: boolean; error: string | null };
+type DetailAction =
+  | { type: 'open'; doc: DocumentResponse }
+  | { type: 'close' }
+  | { type: 'start_download' }
+  | { type: 'end_download' }
+  | { type: 'start_delete' }
+  | { type: 'end_delete' }
+  | { type: 'set_error'; error: string };
+
+const DETAIL_INITIAL: DetailState = { visible: false, doc: null, downloading: false, deleting: false, error: null };
+
+function detailReducer(state: DetailState, action: DetailAction): DetailState {
+  switch (action.type) {
+    case 'open': return { visible: true, doc: action.doc, downloading: false, deleting: false, error: null };
+    case 'close': return DETAIL_INITIAL;
+    case 'start_download': return { ...state, downloading: true, error: null };
+    case 'end_download': return { ...state, downloading: false };
+    case 'start_delete': return { ...state, deleting: true, error: null };
+    case 'end_delete': return { ...state, deleting: false };
+    case 'set_error': return { ...state, error: action.error };
+    default: return state;
+  }
+}
+
 const DocumentsScreen = () => {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
@@ -95,18 +139,9 @@ const DocumentsScreen = () => {
   } = useDocuments();
   const navigation = useNavigation();
 
-  const [documents, setDocuments] = useState<DocumentResponse[] | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-
-  const [detailVisible, setDetailVisible] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState<DocumentResponse | null>(null);
-  const [downloading, setDownloading] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
+  const [list, listDispatch] = useReducer(listReducer, { documents: null, loading: false, error: null });
+  const [upload, setUpload] = useState<{ uploading: boolean; error: string | null }>({ uploading: false, error: null });
+  const [detail, detailDispatch] = useReducer(detailReducer, DETAIL_INITIAL);
 
   const memberMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -119,24 +154,22 @@ const DocumentsScreen = () => {
   }, [trip?.name, navigation]);
 
   useEffect(() => {
-    if (!trip?.id || documents !== null) return;
+    if (!trip?.id || list.documents !== null) return;
     (async () => {
-      setLoading(true);
+      listDispatch({ type: 'loading' });
       try {
-        setDocuments(await listDocuments(trip.id!));
+        listDispatch({ type: 'loaded', documents: await listDocuments(trip.id!) });
       } catch {
-        setError(t('trip.unableLoadDocuments'));
-      } finally {
-        setLoading(false);
+        listDispatch({ type: 'error', error: t('trip.unableLoadDocuments') });
       }
     })();
-  }, [trip?.id, documents, listDocuments, t]);
+  }, [trip?.id, list.documents, listDocuments, t]);
 
   useEffect(() => {
-    if (!uploadError) return;
-    const timer = setTimeout(() => setUploadError(null), 4000);
+    if (!upload.error) return;
+    const timer = setTimeout(() => setUpload(prev => ({ ...prev, error: null })), 4000);
     return () => clearTimeout(timer);
-  }, [uploadError]);
+  }, [upload.error]);
 
   const handleUpload = async () => {
     if (!trip?.id) return;
@@ -147,8 +180,7 @@ const DocumentsScreen = () => {
     const file = result.assets[0];
     const contentType = file.mimeType ?? 'application/octet-stream';
 
-    setUploading(true);
-    setUploadError(null);
+    setUpload({ uploading: true, error: null });
     try {
       const { documentId, uploadUrl } = await initDocumentUpload(trip.id, {
         name: file.name,
@@ -160,47 +192,43 @@ const DocumentsScreen = () => {
 
       await confirmDocumentUpload(trip.id, documentId);
 
-      setDocuments(await listDocuments(trip.id));
+      listDispatch({ type: 'loaded', documents: await listDocuments(trip.id) });
     } catch (e) {
-      setUploadError(t('trip.uploadError'));
+      setUpload(prev => ({ ...prev, error: t('trip.uploadError') }));
     } finally {
-      setUploading(false);
+      setUpload(prev => ({ ...prev, uploading: false }));
     }
   };
 
   const handleDownload = async () => {
-    if (!trip?.id || !selectedDoc) return;
-    setDownloading(true);
-    setActionError(null);
+    if (!trip?.id || !detail.doc) return;
+    detailDispatch({ type: 'start_download' });
     try {
-      const url = await getDocumentDownloadUrl(trip.id, selectedDoc.id);
+      const url = await getDocumentDownloadUrl(trip.id, detail.doc.id);
       await Linking.openURL(url);
     } catch {
-      setActionError(t('trip.downloadError'));
+      detailDispatch({ type: 'set_error', error: t('trip.downloadError') });
     } finally {
-      setDownloading(false);
+      detailDispatch({ type: 'end_download' });
     }
   };
 
   const handleDelete = async () => {
-    if (!trip?.id || !selectedDoc) return;
-    setDeleting(true);
-    setActionError(null);
+    if (!trip?.id || !detail.doc) return;
+    detailDispatch({ type: 'start_delete' });
     try {
-      await deleteDocument(trip.id, selectedDoc.id);
-      setDocuments(prev => prev ? prev.filter(d => d.id !== selectedDoc.id) : prev);
-      setDetailVisible(false);
+      await deleteDocument(trip.id, detail.doc.id);
+      listDispatch({ type: 'remove', id: detail.doc.id });
+      detailDispatch({ type: 'close' });
     } catch {
-      setActionError(t('trip.deleteDocumentError'));
+      detailDispatch({ type: 'set_error', error: t('trip.deleteDocumentError') });
     } finally {
-      setDeleting(false);
+      detailDispatch({ type: 'end_delete' });
     }
   };
 
   const openDetail = useCallback((doc: DocumentResponse) => {
-    setSelectedDoc(doc);
-    setActionError(null);
-    setDetailVisible(true);
+    detailDispatch({ type: 'open', doc });
   }, []);
 
   const renderDocumentItem = useCallback(({ item }: { item: DocumentResponse }) => (
@@ -216,13 +244,13 @@ const DocumentsScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {loading ? (
+      {list.loading ? (
         <ActivityIndicator size="large" color={theme.tint} style={styles.centered} />
-      ) : error ? (
-        <ThemedText style={styles.emptyText}>{error}</ThemedText>
+      ) : list.error ? (
+        <ThemedText style={styles.emptyText}>{list.error}</ThemedText>
       ) : (
         <FlatList
-          data={documents ?? []}
+          data={list.documents ?? []}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.list}
           ListEmptyComponent={
@@ -235,33 +263,33 @@ const DocumentsScreen = () => {
         />
       )}
 
-      {!loading && !error && (
+      {!list.loading && !list.error && (
         <Pressable
-          style={[styles.fab, { backgroundColor: uploading ? theme.icon : theme.tint }]}
+          style={[styles.fab, { backgroundColor: upload.uploading ? theme.icon : theme.tint }]}
           onPress={handleUpload}
-          disabled={uploading}
+          disabled={upload.uploading}
         >
-          {uploading
+          {upload.uploading
             ? <ActivityIndicator color="white" />
             : <Ionicons name="add" size={28} color="white" />}
         </Pressable>
       )}
 
-      {uploadError && (
+      {upload.error && (
         <View style={styles.toast}>
-          <ThemedText style={styles.toastText}>{uploadError}</ThemedText>
+          <ThemedText style={styles.toastText}>{upload.error}</ThemedText>
         </View>
       )}
 
       <Modal
-        visible={detailVisible}
+        visible={detail.visible}
         transparent
         animationType="fade"
-        onRequestClose={() => setDetailVisible(false)}
+        onRequestClose={() => detailDispatch({ type: 'close' })}
       >
         <Pressable
           style={styles.overlay}
-          onPress={() => setDetailVisible(false)}
+          onPress={() => detailDispatch({ type: 'close' })}
         >
           <Pressable
             onPress={() => {}}
@@ -269,50 +297,50 @@ const DocumentsScreen = () => {
           >
             <ThemedText style={styles.modalTitle}>{t('trip.documentDetail')}</ThemedText>
 
-            {selectedDoc && (
+            {detail.doc && (
               <>
                 <View style={styles.docIconCentered}>
-                  <Ionicons name={fileIcon(selectedDoc.name)} size={48} color={theme.tint} />
+                  <Ionicons name={fileIcon(detail.doc.name)} size={48} color={theme.tint} />
                 </View>
                 <ThemedText style={styles.detailName} numberOfLines={2}>
-                  {selectedDoc.name}
+                  {detail.doc.name}
                 </ThemedText>
 
                 <View style={styles.detailRow}>
                   <ThemedText style={styles.detailLabel}>{t('trip.fileSize')}</ThemedText>
-                  <ThemedText style={styles.detailValue}>{formatSize(selectedDoc.size)}</ThemedText>
+                  <ThemedText style={styles.detailValue}>{formatSize(detail.doc.size)}</ThemedText>
                 </View>
                 <View style={styles.detailRow}>
                   <ThemedText style={styles.detailLabel}>{t('trip.uploadedAt')}</ThemedText>
-                  <ThemedText style={styles.detailValue}>{formatDate(selectedDoc.uploadedAt)}</ThemedText>
+                  <ThemedText style={styles.detailValue}>{formatDate(detail.doc.uploadedAt)}</ThemedText>
                 </View>
-                {memberMap[selectedDoc.uploaderId] && (
+                {memberMap[detail.doc.uploaderId] && (
                   <View style={styles.detailRow}>
                     <ThemedText style={styles.detailLabel}>{t('trip.uploadedBy')}</ThemedText>
-                    <ThemedText style={styles.detailValue}>{memberMap[selectedDoc.uploaderId]}</ThemedText>
+                    <ThemedText style={styles.detailValue}>{memberMap[detail.doc.uploaderId]}</ThemedText>
                   </View>
                 )}
               </>
             )}
 
-            {actionError && <ThemedText style={styles.errorText}>{actionError}</ThemedText>}
+            {detail.error && <ThemedText style={styles.errorText}>{detail.error}</ThemedText>}
 
             <View style={styles.modalButtons}>
               <Pressable
                 style={[styles.modalBtn, styles.deleteBtn]}
                 onPress={handleDelete}
-                disabled={deleting || downloading}
+                disabled={detail.deleting || detail.downloading}
               >
-                {deleting
+                {detail.deleting
                   ? <ActivityIndicator color="white" />
                   : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('trip.delete')}</ThemedText>}
               </Pressable>
               <Pressable
                 style={[styles.modalBtn, { backgroundColor: theme.tint }]}
                 onPress={handleDownload}
-                disabled={downloading || deleting}
+                disabled={detail.downloading || detail.deleting}
               >
-                {downloading
+                {detail.downloading
                   ? <ActivityIndicator color="white" />
                   : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('trip.downloadDocument')}</ThemedText>}
               </Pressable>
@@ -320,7 +348,7 @@ const DocumentsScreen = () => {
 
             <Pressable
               style={styles.closeBtn}
-              onPress={() => setDetailVisible(false)}
+              onPress={() => detailDispatch({ type: 'close' })}
             >
               <ThemedText style={styles.closeBtnText}>{t('common.close')}</ThemedText>
             </Pressable>

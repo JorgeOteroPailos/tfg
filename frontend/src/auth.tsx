@@ -9,8 +9,8 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useReducer,
   useRef,
-  useState,
 } from 'react';
 
 type LoginRequest = components["schemas"]["LoginRequest"];
@@ -81,16 +81,50 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+type AuthState = {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  accessToken: string | null;
+  userEmail: string | null;
+  username: string | null;
+};
+
+type AuthAction =
+  | { type: 'session_restored'; accessToken: string | null; userEmail: string | null; username: string | null }
+  | { type: 'session_cleared' }
+  | { type: 'loading_done' }
+  | { type: 'token_refreshed'; accessToken: string };
+
+const initialAuthState: AuthState = {
+  isAuthenticated: false,
+  isLoading: true,
+  accessToken: null,
+  userEmail: null,
+  username: null,
+};
+
+function authReducer(state: AuthState, action: AuthAction): AuthState {
+  switch (action.type) {
+    case 'session_restored':
+      return { ...state, isAuthenticated: true, accessToken: action.accessToken, userEmail: action.userEmail, username: action.username };
+    case 'session_cleared':
+      return { ...state, isAuthenticated: false, accessToken: null, userEmail: null, username: null };
+    case 'loading_done':
+      return { ...state, isLoading: false };
+    case 'token_refreshed':
+      return { ...state, accessToken: action.accessToken };
+    default:
+      return state;
+  }
+}
+
   export const AuthProvider = ({
     children,
   }: {
     children: React.ReactNode;
   }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const [accessToken, setAccessToken] = useState<string | null>(null);
-    const [userEmail, setUserEmailState] = useState<string | null>(null);
-    const [username, setUserNameState] = useState<string | null>(null);
+    const [authState, dispatch] = useReducer(authReducer, initialAuthState);
+    const { isAuthenticated, isLoading, accessToken, userEmail, username } = authState;
     const refreshPromiseRef = useRef<Promise<string> | null>(null);
 
     useEffect(() => {
@@ -105,35 +139,26 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
           getUserEmail(),
           getUserName(),
         ]);
-        
+
         console.log('restoreSession -> refreshToken:', refreshToken);
         console.log('restoreSession -> accessToken:', storedAccessToken);
         console.log('restoreSession -> userEmail:', storedUserEmail);
         console.log('restoreSession -> username:', storedUserName);
 
         if (!refreshToken) {
-          setIsAuthenticated(false);
-          setAccessToken(null);
-          setUserEmailState(null);
-          setUserNameState(null);
+          dispatch({ type: 'session_cleared' });
           return;
         }
 
         //TODO refresh aquí
 
-        setAccessToken(storedAccessToken);
-        setUserEmailState(storedUserEmail);
-        setUserNameState(storedUserName);
-        setIsAuthenticated(true);
+        dispatch({ type: 'session_restored', accessToken: storedAccessToken, userEmail: storedUserEmail, username: storedUserName });
       } catch (error) {
         console.log('restoreSession error:', error);
         await clearSession();
-        setIsAuthenticated(false);
-        setAccessToken(null);
-        setUserEmailState(null);
-        setUserNameState(null);
+        dispatch({ type: 'session_cleared' });
       } finally {
-        setIsLoading(false);
+        dispatch({ type: 'loading_done' });
       }
     };
 
@@ -165,10 +190,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
         throw new AppError(ErrorCode.SESSION_SAVE_ERROR);
       }
 
-      setAccessToken(accessToken);
-      setUserEmailState(email);
-      setUserNameState(username);
-      setIsAuthenticated(true);
+      dispatch({ type: 'session_restored', accessToken, userEmail: email, username });
     }, []);
 
     const register = useCallback(async (username: string, email: string, password: string) => {
@@ -198,20 +220,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
         throw new AppError(ErrorCode.SESSION_SAVE_ERROR);
       }
 
-      setAccessToken(accessToken);
-      setUserEmailState(email);
-      setUserNameState(username);
-      setIsAuthenticated(true);
+      dispatch({ type: 'session_restored', accessToken, userEmail: email, username });
     }, []);
 
     const logout = useCallback(async () => {
       await clearSession();
-
-      setAccessToken(null);
-      setUserEmailState(null);
-      setUserNameState(null);
-      setIsAuthenticated(false);
-
+      dispatch({ type: 'session_cleared' });
       //TODO cerrar sesión en el servidor
     }, []);
 
@@ -219,7 +233,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
       const refreshToken = await getRefreshToken();
       if (!refreshToken) {
         await clearSession();
-        setIsAuthenticated(false);
+        dispatch({ type: 'session_cleared' });
         throw new AppError(ErrorCode.UNKNOWN_ERROR);
       }
 
@@ -231,13 +245,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
       if (!refreshResponse.ok) {
         await clearSession();
-        setIsAuthenticated(false);
+        dispatch({ type: 'session_cleared' });
         throw new AppError(ErrorCode.UNKNOWN_ERROR);
       }
 
       const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await refreshResponse.json();
       await Promise.all([saveAccessToken(newAccessToken), saveRefreshToken(newRefreshToken)]);
-      setAccessToken(newAccessToken);
+      dispatch({ type: 'token_refreshed', accessToken: newAccessToken });
       return newAccessToken;
     }, []);
 
@@ -315,7 +329,7 @@ async function loginRequest(data: LoginRequest): Promise<LoginResponse> {
     try {
       const errorData = await response.json();
       console.log('Error from backend:', errorData);
-      
+
       throw new AppError(response.status as ErrorCode);
     } catch (err) {
       if (err instanceof AppError) throw err;
@@ -339,7 +353,7 @@ async function registerRequest(data: RegisterRequest): Promise<LoginResponse> {
     try {
       const errorData = await response.json();
       console.log('Error from backend:', errorData);
-      
+
       throw new AppError(response.status as ErrorCode);
     } catch (err) {
       if (err instanceof AppError) throw err;

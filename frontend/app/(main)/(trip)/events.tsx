@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import {
   StyleSheet, View, FlatList, ActivityIndicator,
   Pressable, Modal, ScrollView,
@@ -46,7 +46,7 @@ type MiniCalProps = {
   year: number;
   month: number;
   selectedKey: string | null;
-  eventDots?: Record<string, number>;  // dateKey → count, optional
+  eventDots?: Record<string, number>;
   tint: string;
   todayKey: string;
   onPrevMonth: () => void;
@@ -199,6 +199,125 @@ function formatDuration(mins: number) {
   return `${h}h ${m}min`;
 }
 
+// ── Reducers ───────────────────────────────────────────────────────────────────
+
+type EventsListState = { events: EventSummary[] | null; loading: boolean; error: string | null };
+type EventsListAction =
+  | { type: 'loading' }
+  | { type: 'loaded'; events: EventSummary[] }
+  | { type: 'error'; error: string }
+  | { type: 'add'; event: EventSummary }
+  | { type: 'remove'; id: string };
+
+function evListReducer(state: EventsListState, action: EventsListAction): EventsListState {
+  switch (action.type) {
+    case 'loading': return { ...state, loading: true, error: null };
+    case 'loaded': return { events: action.events, loading: false, error: null };
+    case 'error': return { ...state, loading: false, error: action.error };
+    case 'add': return { ...state, events: state.events ? [action.event, ...state.events] : [action.event] };
+    case 'remove': return { ...state, events: state.events ? state.events.filter(e => e.id !== action.id) : state.events };
+    default: return state;
+  }
+}
+
+type CalState = { year: number; month: number; selectedKey: string };
+type CalAction =
+  | { type: 'prev_month' }
+  | { type: 'next_month' }
+  | { type: 'select_day'; key: string };
+
+function calReducer(state: CalState, action: CalAction): CalState {
+  switch (action.type) {
+    case 'prev_month':
+      if (state.month === 0) return { ...state, year: state.year - 1, month: 11 };
+      return { ...state, month: state.month - 1 };
+    case 'next_month':
+      if (state.month === 11) return { ...state, year: state.year + 1, month: 0 };
+      return { ...state, month: state.month + 1 };
+    case 'select_day': return { ...state, selectedKey: action.key };
+    default: return state;
+  }
+}
+
+type DetailState = { visible: boolean; event: EventSummary | null; deleting: boolean; error: string | null };
+type DetailAction =
+  | { type: 'open'; event: EventSummary }
+  | { type: 'close' }
+  | { type: 'start_delete' }
+  | { type: 'end_delete' }
+  | { type: 'set_error'; error: string };
+
+function detailReducer(state: DetailState, action: DetailAction): DetailState {
+  switch (action.type) {
+    case 'open': return { visible: true, event: action.event, deleting: false, error: null };
+    case 'close': return { visible: false, event: null, deleting: false, error: null };
+    case 'start_delete': return { ...state, deleting: true, error: null };
+    case 'end_delete': return { ...state, deleting: false };
+    case 'set_error': return { ...state, error: action.error };
+    default: return state;
+  }
+}
+
+type CreateState = {
+  visible: boolean;
+  creating: boolean;
+  error: string | null;
+  evName: string;
+  duration: string;
+  locationName: string;
+  locationAddress: string;
+  pickedDate: string | null;
+  pickHour: number;
+  pickMinute: number;
+  datePickerOpen: boolean;
+  pickerYear: number;
+  pickerMonth: number;
+};
+type CreateAction =
+  | { type: 'open' }
+  | { type: 'close' }
+  | { type: 'set_name'; value: string }
+  | { type: 'set_duration'; value: string }
+  | { type: 'set_location_name'; value: string }
+  | { type: 'set_location_address'; value: string }
+  | { type: 'pick_date'; key: string }
+  | { type: 'set_time'; hour: number; minute: number }
+  | { type: 'toggle_date_picker' }
+  | { type: 'prev_picker_month' }
+  | { type: 'next_picker_month' }
+  | { type: 'start_creating' }
+  | { type: 'done_creating' }
+  | { type: 'set_error'; error: string | null };
+
+function createReducer(state: CreateState, action: CreateAction): CreateState {
+  switch (action.type) {
+    case 'open': return { ...state, visible: true };
+    case 'close': return {
+      ...state,
+      visible: false, creating: false, error: null,
+      evName: '', duration: '', locationName: '', locationAddress: '',
+      pickedDate: null, pickHour: 12, pickMinute: 0, datePickerOpen: false,
+    };
+    case 'set_name': return { ...state, evName: action.value };
+    case 'set_duration': return { ...state, duration: action.value };
+    case 'set_location_name': return { ...state, locationName: action.value };
+    case 'set_location_address': return { ...state, locationAddress: action.value };
+    case 'pick_date': return { ...state, pickedDate: action.key, datePickerOpen: false };
+    case 'set_time': return { ...state, pickHour: action.hour, pickMinute: action.minute };
+    case 'toggle_date_picker': return { ...state, datePickerOpen: !state.datePickerOpen };
+    case 'prev_picker_month':
+      if (state.pickerMonth === 0) return { ...state, pickerYear: state.pickerYear - 1, pickerMonth: 11 };
+      return { ...state, pickerMonth: state.pickerMonth - 1 };
+    case 'next_picker_month':
+      if (state.pickerMonth === 11) return { ...state, pickerYear: state.pickerYear + 1, pickerMonth: 0 };
+      return { ...state, pickerMonth: state.pickerMonth + 1 };
+    case 'start_creating': return { ...state, creating: true, error: null };
+    case 'done_creating': return { ...state, creating: false };
+    case 'set_error': return { ...state, error: action.error };
+    default: return state;
+  }
+}
+
 // ── Main screen ────────────────────────────────────────────────────────────────
 const EventsScreen = () => {
   const { t } = useTranslation();
@@ -209,96 +328,64 @@ const EventsScreen = () => {
   const navigation = useNavigation();
 
   const [activeTab, setActiveTab] = useState<Tab>('calendar');
-
-  const [events, setEvents] = useState<EventSummary[] | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [evList, evListDispatch] = useReducer(evListReducer, { events: null, loading: false, error: null });
+  const [calState, calDispatch] = useReducer(calReducer, undefined, () => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth(), selectedKey: dateKey(now) };
+  });
+  const [detail, detailDispatch] = useReducer(detailReducer, { visible: false, event: null, deleting: false, error: null });
+  const [create, createDispatch] = useReducer(createReducer, undefined, () => {
+    const now = new Date();
+    return {
+      visible: false, creating: false, error: null,
+      evName: '', duration: '', locationName: '', locationAddress: '',
+      pickedDate: null, pickHour: 12, pickMinute: 0,
+      datePickerOpen: false,
+      pickerYear: now.getFullYear(),
+      pickerMonth: now.getMonth(),
+    };
+  });
 
   const today = useMemo(() => new Date(), []);
   const todayKey = useMemo(() => dateKey(today), [today]);
-
-  // Main calendar nav
-  const [calYear, setCalYear] = useState(() => today.getFullYear());
-  const [calMonth, setCalMonth] = useState(() => today.getMonth());
-  const [selectedKey, setSelectedKey] = useState<string>(todayKey);
-
-  // Detail modal
-  const [detailVisible, setDetailVisible] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<EventSummary | null>(null);
-  const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-
-  // Create modal
-  const [createVisible, setCreateVisible] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [evName, setEvName] = useState('');
-  const [duration, setDuration] = useState('');
-  const [locationName, setLocationName] = useState('');
-  const [locationAddress, setLocationAddress] = useState('');
-  // Date/time picker state
-  const [pickedDate, setPickedDate] = useState<string | null>(null); // dateKey
-  const [pickHour, setPickHour] = useState(12);
-  const [pickMinute, setPickMinute] = useState(0);
-  const [datePickerOpen, setDatePickerOpen] = useState(false);
-  const [pickerYear, setPickerYear] = useState(() => today.getFullYear());
-  const [pickerMonth, setPickerMonth] = useState(() => today.getMonth());
 
   useEffect(() => {
     if (trip?.name) navigation.setOptions({ title: trip.name });
   }, [trip?.name, navigation]);
 
   useEffect(() => {
-    if (!trip?.id || events !== null) return;
+    if (!trip?.id || evList.events !== null) return;
     (async () => {
-      setLoading(true);
+      evListDispatch({ type: 'loading' });
       try {
-        setEvents(await getEvents(trip.id!));
+        evListDispatch({ type: 'loaded', events: await getEvents(trip.id!) });
       } catch {
-        setError(t('trip.unableLoadEvents'));
-      } finally {
-        setLoading(false);
+        evListDispatch({ type: 'error', error: t('trip.unableLoadEvents') });
       }
     })();
-  }, [trip?.id, events, getEvents, t]);
+  }, [trip?.id, evList.events, getEvents, t]);
 
   const eventsByDay = useMemo(() => {
     const map: Record<string, EventSummary[]> = {};
-    for (const ev of events ?? []) {
+    for (const ev of evList.events ?? []) {
       if (!ev.startTime) continue;
       const k = dateKey(new Date(ev.startTime));
       (map[k] ??= []).push(ev);
     }
-    // Sort within each day
     for (const k of Object.keys(map)) {
       map[k].sort((a, b) => a.startTime!.localeCompare(b.startTime!));
     }
     return map;
-  }, [events]);
+  }, [evList.events]);
 
-  // All days with events, re-ordered to start from selectedKey
   const agendaDays = useMemo(() => {
     const all = Object.keys(eventsByDay).sort();
-    const after = all.filter(d => d >= selectedKey);
-    const before = all.filter(d => d < selectedKey).reverse();
+    const after = all.filter(d => d >= calState.selectedKey);
+    const before = all.filter(d => d < calState.selectedKey).reverse();
     return [...after, ...before];
-  }, [eventsByDay, selectedKey]);
+  }, [eventsByDay, calState.selectedKey]);
 
-  const unscheduled = useMemo(() => (events ?? []).filter(e => !e.startTime), [events]);
-
-  const prevMainMonth = () => {
-    if (calMonth === 0) { setCalYear(y => y - 1); setCalMonth(11); }
-    else setCalMonth(m => m - 1);
-  };
-  const nextMainMonth = () => {
-    if (calMonth === 11) { setCalYear(y => y + 1); setCalMonth(0); }
-    else setCalMonth(m => m + 1);
-  };
-
-  const handleDayPress = (day: number) => {
-    const k = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    setSelectedKey(k);
-  };
+  const unscheduled = useMemo(() => (evList.events ?? []).filter(e => !e.startTime), [evList.events]);
 
   const formatSectionDate = (k: string) => {
     const tomorrow = dateKey(new Date(today.getTime() + 86_400_000));
@@ -308,47 +395,35 @@ const EventsScreen = () => {
     return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
   };
 
-
   const handleCreate = async () => {
     if (!trip?.id) return;
-    if (!evName.trim()) { setCreateError(t('trip.fillAllRequiredFields')); return; }
-    setCreating(true);
-    setCreateError(null);
+    if (!create.evName.trim()) { createDispatch({ type: 'set_error', error: t('trip.fillAllRequiredFields') }); return; }
+    createDispatch({ type: 'start_creating' });
     try {
-      const payload: Parameters<typeof addEvent>[1] = { name: evName.trim() };
-      if (pickedDate) {
-        const d = new Date(`${pickedDate}T00:00:00`);
-        d.setHours(pickHour, pickMinute, 0, 0);
+      const payload: Parameters<typeof addEvent>[1] = { name: create.evName.trim() };
+      if (create.pickedDate) {
+        const d = new Date(`${create.pickedDate}T00:00:00`);
+        d.setHours(create.pickHour, create.pickMinute, 0, 0);
         payload.startTime = d.toISOString();
       }
-      if (duration.trim()) payload.duration = Number(duration);
-      if (locationName.trim() || locationAddress.trim()) {
+      if (create.duration.trim()) payload.duration = Number(create.duration);
+      if (create.locationName.trim() || create.locationAddress.trim()) {
         payload.location = {};
-        if (locationName.trim()) payload.location.name = locationName.trim();
-        if (locationAddress.trim()) payload.location.address = locationAddress.trim();
+        if (create.locationName.trim()) payload.location.name = create.locationName.trim();
+        if (create.locationAddress.trim()) payload.location.address = create.locationAddress.trim();
       }
       const newEvent = await addEvent(trip.id, payload);
-      setEvents(prev => prev ? [newEvent, ...prev] : [newEvent]);
-      resetCreate();
+      evListDispatch({ type: 'add', event: newEvent });
+      createDispatch({ type: 'close' });
     } catch {
-      setCreateError(t('trip.createEventError'));
+      createDispatch({ type: 'set_error', error: t('trip.createEventError') });
     } finally {
-      setCreating(false);
+      createDispatch({ type: 'done_creating' });
     }
   };
 
-  const resetCreate = () => {
-    setCreateVisible(false);
-    setCreateError(null);
-    setEvName(''); setDuration(''); setLocationName(''); setLocationAddress('');
-    setPickedDate(null); setPickHour(12); setPickMinute(0);
-    setDatePickerOpen(false);
-  };
-
   const handleEventPress = useCallback((ev: EventSummary) => {
-    setSelectedEvent(ev);
-    setDeleteError(null);
-    setDetailVisible(true);
+    detailDispatch({ type: 'open', event: ev });
   }, []);
 
   const renderEventCard = useCallback(({ item }: { item: EventSummary }) => (
@@ -364,21 +439,18 @@ const EventsScreen = () => {
   ), [theme, handleEventPress]);
 
   const handleDelete = async () => {
-    if (!trip?.id || !selectedEvent) return;
-    setDeleting(true);
-    setDeleteError(null);
+    if (!trip?.id || !detail.event) return;
+    detailDispatch({ type: 'start_delete' });
     try {
-      await deleteEvent(trip.id, selectedEvent.id);
-      setEvents(prev => prev ? prev.filter(e => e.id !== selectedEvent.id) : prev);
-      setDetailVisible(false);
+      await deleteEvent(trip.id, detail.event.id);
+      evListDispatch({ type: 'remove', id: detail.event.id });
+      detailDispatch({ type: 'close' });
     } catch {
-      setDeleteError(t('trip.deleteEventError'));
+      detailDispatch({ type: 'set_error', error: t('trip.deleteEventError') });
     } finally {
-      setDeleting(false);
+      detailDispatch({ type: 'end_delete' });
     }
   };
-
-  
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -398,25 +470,28 @@ const EventsScreen = () => {
         ))}
       </View>
 
-      {loading ? (
+      {evList.loading ? (
         <ActivityIndicator size="large" color={theme.tint} style={styles.centered} />
-      ) : error ? (
-        <ThemedText style={styles.emptyText}>{error}</ThemedText>
+      ) : evList.error ? (
+        <ThemedText style={styles.emptyText}>{evList.error}</ThemedText>
       ) : (
         <>
           {/* ── Calendar tab ── */}
           {activeTab === 'calendar' && (
             <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
               <MiniCal
-                year={calYear}
-                month={calMonth}
-                selectedKey={selectedKey}
+                year={calState.year}
+                month={calState.month}
+                selectedKey={calState.selectedKey}
                 eventDots={Object.fromEntries(Object.entries(eventsByDay).map(([k, v]) => [k, v.length]))}
                 tint={theme.tint}
                 todayKey={todayKey}
-                onPrevMonth={prevMainMonth}
-                onNextMonth={nextMainMonth}
-                onDayPress={handleDayPress}
+                onPrevMonth={() => calDispatch({ type: 'prev_month' })}
+                onNextMonth={() => calDispatch({ type: 'next_month' })}
+                onDayPress={(day) => {
+                  const k = `${calState.year}-${String(calState.month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                  calDispatch({ type: 'select_day', key: k });
+                }}
               />
 
               {/* Agenda list */}
@@ -427,8 +502,8 @@ const EventsScreen = () => {
                   <>
                     {agendaDays.map(k => (
                       <View key={k}>
-                        <View style={[styles.agendaDayHeader, k === selectedKey && { borderLeftColor: theme.tint, borderLeftWidth: 3 }]}>
-                          <ThemedText style={[styles.agendaDayText, k === selectedKey && { color: theme.tint }]}>
+                        <View style={[styles.agendaDayHeader, k === calState.selectedKey && { borderLeftColor: theme.tint, borderLeftWidth: 3 }]}>
+                          <ThemedText style={[styles.agendaDayText, k === calState.selectedKey && { color: theme.tint }]}>
                             {formatSectionDate(k)}
                           </ThemedText>
                         </View>
@@ -440,7 +515,7 @@ const EventsScreen = () => {
                             formatTime={formatTime}
                             formatDateTime={formatDateTime}
                             formatDuration={formatDuration}
-                            onPress={(ev) => { setSelectedEvent(ev); setDeleteError(null); setDetailVisible(true); }}
+                            onPress={(ev) => detailDispatch({ type: 'open', event: ev })}
                           />)}
                         </View>
                       </View>
@@ -458,7 +533,7 @@ const EventsScreen = () => {
                             formatTime={formatTime}
                             formatDateTime={formatDateTime}
                             formatDuration={formatDuration}
-                            onPress={(ev) => { setSelectedEvent(ev); setDeleteError(null); setDetailVisible(true); }}
+                            onPress={(ev) => detailDispatch({ type: 'open', event: ev })}
                           />
                           )}
                         </View>
@@ -473,7 +548,7 @@ const EventsScreen = () => {
           {/* ── List tab ── */}
           {activeTab === 'list' && (
             <FlatList
-              data={events ?? []}
+              data={evList.events ?? []}
               keyExtractor={(item, i) => item.id ?? `${i}`}
               contentContainerStyle={styles.list}
               ListEmptyComponent={<ThemedText style={styles.emptyText}>{t('trip.noEvents')}</ThemedText>}
@@ -484,56 +559,56 @@ const EventsScreen = () => {
       )}
 
       {/* FAB */}
-      {!loading && !error && (
+      {!evList.loading && !evList.error && (
         <Pressable
           style={[styles.fab, { backgroundColor: theme.tint }]}
-          onPress={() => setCreateVisible(true)}
+          onPress={() => createDispatch({ type: 'open' })}
         >
           <Ionicons name="add" size={28} color="white" />
         </Pressable>
       )}
 
       {/* ── Detail modal ── */}
-      <Modal visible={detailVisible} transparent animationType="fade" onRequestClose={() => setDetailVisible(false)}>
-        <Pressable style={styles.overlay} onPress={() => setDetailVisible(false)}>
+      <Modal visible={detail.visible} transparent animationType="fade" onRequestClose={() => detailDispatch({ type: 'close' })}>
+        <Pressable style={styles.overlay} onPress={() => detailDispatch({ type: 'close' })}>
           <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
             <ThemedText style={styles.modalTitle}>{t('trip.eventDetail')}</ThemedText>
 
-            {selectedEvent && (
+            {detail.event && (
               <>
-                <ThemedText style={styles.detailName}>{selectedEvent.name}</ThemedText>
-                {selectedEvent.startTime && (
+                <ThemedText style={styles.detailName}>{detail.event.name}</ThemedText>
+                {detail.event.startTime && (
                   <View style={styles.detailRow}>
                     <ThemedText style={styles.detailLabel}>{t('trip.startTime')}</ThemedText>
-                    <ThemedText style={styles.detailValue}>{formatDateTime(selectedEvent.startTime)}</ThemedText>
+                    <ThemedText style={styles.detailValue}>{formatDateTime(detail.event.startTime)}</ThemedText>
                   </View>
                 )}
                 <View style={styles.detailRow}>
                   <ThemedText style={styles.detailLabel}>{t('trip.duration')}</ThemedText>
-                  <ThemedText style={styles.detailValue}>{formatDuration(selectedEvent.duration)}</ThemedText>
+                  <ThemedText style={styles.detailValue}>{formatDuration(detail.event.duration)}</ThemedText>
                 </View>
-                {selectedEvent.location && (
+                {detail.event.location && (
                   <>
                     <ThemedText style={[styles.detailLabel, { marginTop: 12, marginBottom: 6 }]}>{t('trip.location')}</ThemedText>
-                    {selectedEvent.location.name && <ThemedText style={styles.locationDetail}>· {selectedEvent.location.name}</ThemedText>}
-                    {selectedEvent.location.address && <ThemedText style={styles.locationDetail}>· {selectedEvent.location.address}</ThemedText>}
-                    {selectedEvent.location.mapURL && (
-                      <ThemedText style={[styles.locationDetail, { color: theme.tint }]}>{selectedEvent.location.mapURL}</ThemedText>
+                    {detail.event.location.name && <ThemedText style={styles.locationDetail}>· {detail.event.location.name}</ThemedText>}
+                    {detail.event.location.address && <ThemedText style={styles.locationDetail}>· {detail.event.location.address}</ThemedText>}
+                    {detail.event.location.mapURL && (
+                      <ThemedText style={[styles.locationDetail, { color: theme.tint }]}>{detail.event.location.mapURL}</ThemedText>
                     )}
                   </>
                 )}
               </>
             )}
 
-            {deleteError && <ThemedText style={styles.errorText}>{deleteError}</ThemedText>}
+            {detail.error && <ThemedText style={styles.errorText}>{detail.error}</ThemedText>}
 
             <View style={styles.modalButtons}>
-              <Pressable style={[styles.modalBtn, styles.deleteBtn]} onPress={handleDelete} disabled={deleting}>
-                {deleting
+              <Pressable style={[styles.modalBtn, styles.deleteBtn]} onPress={handleDelete} disabled={detail.deleting}>
+                {detail.deleting
                   ? <ActivityIndicator color="white" />
                   : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.delete')}</ThemedText>}
               </Pressable>
-              <Pressable style={[styles.modalBtn, { backgroundColor: theme.tint }]} onPress={() => setDetailVisible(false)}>
+              <Pressable style={[styles.modalBtn, { backgroundColor: theme.tint }]} onPress={() => detailDispatch({ type: 'close' })}>
                 <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.close')}</ThemedText>
               </Pressable>
             </View>
@@ -542,7 +617,7 @@ const EventsScreen = () => {
       </Modal>
 
       {/* ── Create modal ── */}
-      <Modal visible={createVisible} transparent animationType="slide" onRequestClose={resetCreate}>
+      <Modal visible={create.visible} transparent animationType="slide" onRequestClose={() => createDispatch({ type: 'close' })}>
         <View style={styles.overlay}>
           <ScrollView
             style={{ width: '100%' }}
@@ -552,7 +627,7 @@ const EventsScreen = () => {
             <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
               <View style={styles.modalTitleRow}>
                 <ThemedText style={styles.modalTitle}>{t('trip.newEvent')}</ThemedText>
-                <Pressable onPress={resetCreate} hitSlop={8}>
+                <Pressable onPress={() => createDispatch({ type: 'close' })} hitSlop={8}>
                   <Ionicons name="close" size={22} color={theme.icon} />
                 </Pressable>
               </View>
@@ -562,57 +637,50 @@ const EventsScreen = () => {
                 style={[styles.input, { color: theme.text, borderColor: theme.tint }]}
                 placeholder={t('trip.eventName')}
                 placeholderTextColor={theme.icon}
-                value={evName}
-                onChangeText={setEvName}
+                value={create.evName}
+                onChangeText={value => createDispatch({ type: 'set_name', value })}
                 autoFocus
               />
 
               {/* Date selector */}
               <Pressable
                 style={[styles.dateBtn, { borderColor: theme.tint }]}
-                onPress={() => setDatePickerOpen(o => !o)}
+                onPress={() => createDispatch({ type: 'toggle_date_picker' })}
               >
                 <Ionicons name="calendar-outline" size={18} color={theme.tint} />
                 <ThemedText style={{ flex: 1, marginLeft: 8 }}>
-                  {pickedDate ? formatSectionDate(pickedDate) : t('trip.chooseDate')}
+                  {create.pickedDate ? formatSectionDate(create.pickedDate) : t('trip.chooseDate')}
                 </ThemedText>
-                <Ionicons name={datePickerOpen ? 'chevron-up' : 'chevron-down'} size={16} color={theme.icon} />
+                <Ionicons name={create.datePickerOpen ? 'chevron-up' : 'chevron-down'} size={16} color={theme.icon} />
               </Pressable>
 
-              {datePickerOpen && (
+              {create.datePickerOpen && (
                 <View style={[styles.calPickerBox, { borderColor: theme.tint + '40' }]}>
                   <MiniCal
-                    year={pickerYear}
-                    month={pickerMonth}
-                    selectedKey={pickedDate}
+                    year={create.pickerYear}
+                    month={create.pickerMonth}
+                    selectedKey={create.pickedDate}
                     tint={theme.tint}
                     todayKey={todayKey}
-                    onPrevMonth={() => {
-                      if (pickerMonth === 0) { setPickerYear(y => y - 1); setPickerMonth(11); }
-                      else setPickerMonth(m => m - 1);
-                    }}
-                    onNextMonth={() => {
-                      if (pickerMonth === 11) { setPickerYear(y => y + 1); setPickerMonth(0); }
-                      else setPickerMonth(m => m + 1);
-                    }}
+                    onPrevMonth={() => createDispatch({ type: 'prev_picker_month' })}
+                    onNextMonth={() => createDispatch({ type: 'next_picker_month' })}
                     onDayPress={(day) => {
-                      const k = `${pickerYear}-${String(pickerMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                      setPickedDate(k);
-                      setDatePickerOpen(false);
+                      const k = `${create.pickerYear}-${String(create.pickerMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                      createDispatch({ type: 'pick_date', key: k });
                     }}
                   />
                 </View>
               )}
 
               {/* Time picker — only shown when a date is picked */}
-              {pickedDate && (
+              {create.pickedDate && (
                 <>
                   <ThemedText style={styles.fieldLabel}>{t('trip.time')}</ThemedText>
                   <TimePicker
-                    hour={pickHour}
-                    minute={pickMinute}
+                    hour={create.pickHour}
+                    minute={create.pickMinute}
                     tint={theme.tint}
-                    onChange={(h, m) => { setPickHour(h); setPickMinute(m); }}
+                    onChange={(h, m) => createDispatch({ type: 'set_time', hour: h, minute: m })}
                   />
                 </>
               )}
@@ -622,8 +690,8 @@ const EventsScreen = () => {
                 style={[styles.input, { color: theme.text, borderColor: theme.tint }]}
                 placeholder={t('trip.durationPlaceholder')}
                 placeholderTextColor={theme.icon}
-                value={duration}
-                onChangeText={setDuration}
+                value={create.duration}
+                onChangeText={value => createDispatch({ type: 'set_duration', value })}
                 keyboardType="numeric"
               />
 
@@ -633,29 +701,29 @@ const EventsScreen = () => {
                 style={[styles.input, { color: theme.text, borderColor: theme.tint }]}
                 placeholder={t('trip.locationName')}
                 placeholderTextColor={theme.icon}
-                value={locationName}
-                onChangeText={setLocationName}
+                value={create.locationName}
+                onChangeText={value => createDispatch({ type: 'set_location_name', value })}
               />
               <ThemedInput
                 style={[styles.input, { color: theme.text, borderColor: theme.tint }]}
                 placeholder={t('trip.locationAddress')}
                 placeholderTextColor={theme.icon}
-                value={locationAddress}
-                onChangeText={setLocationAddress}
+                value={create.locationAddress}
+                onChangeText={value => createDispatch({ type: 'set_location_address', value })}
               />
 
-              {createError && <ThemedText style={styles.errorText}>{createError}</ThemedText>}
+              {create.error && <ThemedText style={styles.errorText}>{create.error}</ThemedText>}
 
               <View style={styles.modalButtons}>
-                <Pressable style={[styles.modalBtn, styles.cancelBtn]} onPress={resetCreate}>
+                <Pressable style={[styles.modalBtn, styles.cancelBtn]} onPress={() => createDispatch({ type: 'close' })}>
                   <ThemedText>{t('common.cancel')}</ThemedText>
                 </Pressable>
                 <Pressable
                   style={[styles.modalBtn, { backgroundColor: theme.tint }]}
                   onPress={handleCreate}
-                  disabled={creating}
+                  disabled={create.creating}
                 >
-                  {creating
+                  {create.creating
                     ? <ActivityIndicator color="white" />
                     : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.create')}</ThemedText>}
                 </Pressable>

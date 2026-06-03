@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { StyleSheet, View, Pressable, FlatList } from 'react-native';
 import { router, useFocusEffect, useNavigation } from 'expo-router';
 import ThemedText from '../../components/ThemedText';
@@ -15,7 +15,43 @@ import ThemedInput from '../../components/ThemedInput';
 
 type TripSummary = components['schemas']['TripSummary'];
 
+// --- Data loaded together from API ---
+type DataState = { trips: TripSummary[]; invitationCount: number };
+type DataAction =
+  | { type: 'loaded'; trips: TripSummary[]; invitationCount: number }
+  | { type: 'trip_added'; trip: TripSummary };
 
+const DATA_INITIAL: DataState = { trips: [], invitationCount: 0 };
+
+function dataReducer(state: DataState, action: DataAction): DataState {
+  switch (action.type) {
+    case 'loaded': return { trips: action.trips, invitationCount: action.invitationCount };
+    case 'trip_added': return { ...state, trips: [...state.trips, action.trip] };
+    default: return state;
+  }
+}
+
+// --- Create-trip modal (all fields updated together) ---
+type ModalState = { visible: boolean; name: string; creating: boolean };
+type ModalAction =
+  | { type: 'open' }
+  | { type: 'close' }
+  | { type: 'set_name'; name: string }
+  | { type: 'start_creating' }
+  | { type: 'done_creating' };
+
+const MODAL_INITIAL: ModalState = { visible: false, name: '', creating: false };
+
+function modalReducer(state: ModalState, action: ModalAction): ModalState {
+  switch (action.type) {
+    case 'open': return { ...state, visible: true };
+    case 'close': return MODAL_INITIAL;
+    case 'set_name': return { ...state, name: action.name };
+    case 'start_creating': return { ...state, creating: true };
+    case 'done_creating': return { ...state, creating: false };
+    default: return state;
+  }
+}
 
 const Main = () => {
   const { t } = useTranslation();
@@ -25,12 +61,12 @@ const Main = () => {
   const navigation = useNavigation();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [data, dataDispatch] = useReducer(dataReducer, DATA_INITIAL);
+  const [modal, modalDispatch] = useReducer(modalReducer, MODAL_INITIAL);
 
   const { listTrips, createTrip } = useTrips();
   const { getMyInvitations } = useInvitations();
   const initialLoadDone = useRef(false);
-  const [trips, setTrips] = useState<TripSummary[]>([]);
-  const [invitationCount, setInvitationCount] = useState(0);
 
   useEffect(() => {
     const load = async () => {
@@ -39,8 +75,7 @@ const Main = () => {
           listTrips(),
           getMyInvitations(),
         ]);
-        setTrips(tripsData);
-        setInvitationCount(invitationsData.length);
+        dataDispatch({ type: 'loaded', trips: tripsData, invitationCount: invitationsData.length });
       } catch (e) {
         router.replace('/login');
       }
@@ -55,8 +90,7 @@ const Main = () => {
       if (!initialLoadDone.current) return;
       Promise.all([listTrips(), getMyInvitations()])
         .then(([tripsData, invitationsData]) => {
-          setTrips(tripsData);
-          setInvitationCount(invitationsData.length);
+          dataDispatch({ type: 'loaded', trips: tripsData, invitationCount: invitationsData.length });
         })
         .catch(() => {});
     }, [listTrips, getMyInvitations])
@@ -67,34 +101,30 @@ const Main = () => {
       headerLeft: () => (
         <Pressable style={styles.invitationsButton} onPress={() => router.push('/invitations')}>
           <Ionicons name="mail-outline" size={24} color={theme.title} />
-          {invitationCount > 0 && (
+          {data.invitationCount > 0 && (
             <View style={styles.badge}>
-              <ThemedText style={styles.badgeText}>{invitationCount}</ThemedText>
+              <ThemedText style={styles.badgeText}>{data.invitationCount}</ThemedText>
             </View>
           )}
         </Pressable>
       ),
     });
-  }, [invitationCount, theme, navigation]);
-
-  const [modalVisible, setModalVisible] = useState(false);
-  const [newTripName, setNewTripName] = useState('');
-  const [creating, setCreating] = useState(false);
+  }, [data.invitationCount, theme, navigation]);
 
   const handleCreateTrip = async () => {
-    if (!newTripName.trim()) return;
+    if (!modal.name.trim()) return;
     try {
-      setCreating(true);
-      const { id } = await createTrip({ name: newTripName.trim() });
-      setTrips(prev => [...prev, { id, name: newTripName.trim() }]);
-      setNewTripName('');
-      setModalVisible(false);
+      modalDispatch({ type: 'start_creating' });
+      const { id } = await createTrip({ name: modal.name.trim() });
+      dataDispatch({ type: 'trip_added', trip: { id, name: modal.name.trim() } });
+      modalDispatch({ type: 'close' });
     } catch (e) {
       console.error('Error creando viaje:', e);
     } finally {
-      setCreating(false);
+      modalDispatch({ type: 'done_creating' });
     }
   };
+
   //TODO  ver pq no se usa
   const handleLogout = async () => {
     try {
@@ -132,7 +162,7 @@ const Main = () => {
         <View style={styles.actionRow}>
           <Pressable
             style={[styles.actionCard, { backgroundColor: theme.tint }]}
-            onPress={() => setModalVisible(true)}
+            onPress={() => modalDispatch({ type: 'open' })}
           >
             <ThemedText style={styles.actionCardTitle}>{t('trip.new')}</ThemedText>
             <View style={styles.actionCardIcon}>
@@ -153,7 +183,7 @@ const Main = () => {
 
         {/* Trips List */}
         <FlatList
-          data={trips}
+          data={data.trips}
           keyExtractor={item => item.id ?? ''}
           scrollEnabled={true}
           contentContainerStyle={styles.tripsList}
@@ -170,14 +200,14 @@ const Main = () => {
         />
       )}
       <Modal
-        visible={modalVisible}
+        visible={modal.visible}
         transparent
         animationType="fade"
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => modalDispatch({ type: 'close' })}
       >
         <Pressable
           style={styles.modalOverlay}
-          onPress={() => setModalVisible(false)}
+          onPress={() => modalDispatch({ type: 'close' })}
         >
           <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
             <ThemedText style={styles.modalTitle}>{t('trip.new')}</ThemedText>
@@ -186,8 +216,8 @@ const Main = () => {
               style={[styles.modalInput, { color: theme.text, borderColor: theme.tint }]}
               placeholder={t('trip.tripName')}
               placeholderTextColor={theme.icon}
-              value={newTripName}
-              onChangeText={setNewTripName}
+              value={modal.name}
+              onChangeText={(name) => modalDispatch({ type: 'set_name', name })}
               autoFocus
               onSubmitEditing={handleCreateTrip}
             />
@@ -195,7 +225,7 @@ const Main = () => {
             <View style={styles.modalButtons}>
               <Pressable
                 style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => { setModalVisible(false); setNewTripName(''); }}
+                onPress={() => modalDispatch({ type: 'close' })}
               >
                 <ThemedText>{t('common.cancel')}</ThemedText>
               </Pressable>
@@ -203,9 +233,9 @@ const Main = () => {
               <Pressable
                 style={[styles.modalButton, { backgroundColor: theme.tint }]}
                 onPress={handleCreateTrip}
-                disabled={creating || !newTripName.trim()}
+                disabled={modal.creating || !modal.name.trim()}
               >
-                {creating
+                {modal.creating
                   ? <ActivityIndicator color="white" />
                   : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.create')}</ThemedText>
                 }
