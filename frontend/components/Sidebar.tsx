@@ -80,11 +80,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     margin: 12,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 5,
+    boxShadow: '2px 4px 4px rgba(0, 0, 0, 0.15)',
   },
   item: {
     paddingVertical: 12,

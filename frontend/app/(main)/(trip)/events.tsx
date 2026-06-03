@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   StyleSheet, View, FlatList, ActivityIndicator,
   Pressable, Modal, ScrollView,
@@ -39,6 +39,8 @@ function buildGrid(year: number, month: number): (number | null)[] {
   return cells;
 }
 
+const EMPTY_EVENT_DOTS: Record<string, number> = {};
+
 // ── Mini calendar used in both the main view and the create modal ──────────────
 type MiniCalProps = {
   year: number;
@@ -52,7 +54,7 @@ type MiniCalProps = {
   onDayPress: (day: number) => void;
 };
 const MiniCal = ({
-  year, month, selectedKey, eventDots = {}, tint, todayKey,
+  year, month, selectedKey, eventDots = EMPTY_EVENT_DOTS, tint, todayKey,
   onPrevMonth, onNextMonth, onDayPress,
 }: MiniCalProps) => {
   const isThisMonth = todayKey.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`);
@@ -182,6 +184,21 @@ const EventCard = ({ ev, showDate = false, theme, formatTime, formatDateTime, fo
   </Pressable>
 );
 
+function formatTime(iso: string) {
+  try { return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+  catch { return ''; }
+}
+function formatDateTime(iso: string) {
+  try { return new Date(iso).toLocaleString(); } catch { return iso; }
+}
+function formatDuration(mins: number) {
+  if (!mins) return '—';
+  const h = Math.floor(mins / 60), m = mins % 60;
+  if (h === 0) return `${m}min`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}min`;
+}
+
 // ── Main screen ────────────────────────────────────────────────────────────────
 const EventsScreen = () => {
   const { t } = useTranslation();
@@ -201,8 +218,8 @@ const EventsScreen = () => {
   const todayKey = useMemo(() => dateKey(today), [today]);
 
   // Main calendar nav
-  const [calYear, setCalYear] = useState(today.getFullYear());
-  const [calMonth, setCalMonth] = useState(today.getMonth());
+  const [calYear, setCalYear] = useState(() => today.getFullYear());
+  const [calMonth, setCalMonth] = useState(() => today.getMonth());
   const [selectedKey, setSelectedKey] = useState<string>(todayKey);
 
   // Detail modal
@@ -224,8 +241,8 @@ const EventsScreen = () => {
   const [pickHour, setPickHour] = useState(12);
   const [pickMinute, setPickMinute] = useState(0);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
-  const [pickerYear, setPickerYear] = useState(today.getFullYear());
-  const [pickerMonth, setPickerMonth] = useState(today.getMonth());
+  const [pickerYear, setPickerYear] = useState(() => today.getFullYear());
+  const [pickerMonth, setPickerMonth] = useState(() => today.getMonth());
 
   useEffect(() => {
     if (trip?.name) navigation.setOptions({ title: trip.name });
@@ -291,22 +308,6 @@ const EventsScreen = () => {
     return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
   };
 
-  const formatTime = (iso: string) => {
-    try { return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
-    catch { return ''; }
-  };
-
-  const formatDateTime = (iso: string) => {
-    try { return new Date(iso).toLocaleString(); } catch { return iso; }
-  };
-
-  const formatDuration = (mins: number) => {
-    if (!mins) return '—';
-    const h = Math.floor(mins / 60), m = mins % 60;
-    if (h === 0) return `${m}min`;
-    if (m === 0) return `${h}h`;
-    return `${h}h ${m}min`;
-  };
 
   const handleCreate = async () => {
     if (!trip?.id) return;
@@ -343,6 +344,24 @@ const EventsScreen = () => {
     setPickedDate(null); setPickHour(12); setPickMinute(0);
     setDatePickerOpen(false);
   };
+
+  const handleEventPress = useCallback((ev: EventSummary) => {
+    setSelectedEvent(ev);
+    setDeleteError(null);
+    setDetailVisible(true);
+  }, []);
+
+  const renderEventCard = useCallback(({ item }: { item: EventSummary }) => (
+    <EventCard
+      ev={item}
+      showDate
+      theme={theme}
+      formatTime={formatTime}
+      formatDateTime={formatDateTime}
+      formatDuration={formatDuration}
+      onPress={handleEventPress}
+    />
+  ), [theme, handleEventPress]);
 
   const handleDelete = async () => {
     if (!trip?.id || !selectedEvent) return;
@@ -458,15 +477,7 @@ const EventsScreen = () => {
               keyExtractor={(item, i) => item.id ?? `${i}`}
               contentContainerStyle={styles.list}
               ListEmptyComponent={<ThemedText style={styles.emptyText}>{t('trip.noEvents')}</ThemedText>}
-              renderItem={({ item }) => <EventCard
-                ev={item}
-                showDate
-                theme={theme}
-                formatTime={formatTime}
-                formatDateTime={formatDateTime}
-                formatDuration={formatDuration}
-                onPress={(ev) => { setSelectedEvent(ev); setDeleteError(null); setDetailVisible(true); }}
-              />}
+              renderItem={renderEventCard}
             />
           )}
         </>
@@ -717,8 +728,7 @@ const styles = StyleSheet.create({
     position: 'absolute', bottom: 24, right: 24,
     width: 56, height: 56, borderRadius: 28,
     alignItems: 'center', justifyContent: 'center',
-    elevation: 4, shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4,
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)',
   },
 
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center' },

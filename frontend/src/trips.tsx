@@ -1,7 +1,7 @@
 import { useAuth } from './auth';
 import type { components } from './generated/types';
 import { AppError, ErrorCode } from './AppError';
-import { createContext, use, useCallback, useEffect, useState } from 'react';
+import { createContext, use, useCallback, useEffect, useMemo, useState } from 'react';
 
 type TripSummary = components['schemas']['TripSummary'];
 type TripDetail = components['schemas']['TripDetail'];
@@ -66,8 +66,9 @@ export const TripProvider = ({ tripId, children }: { tripId: string; children: R
     load();
   }, [load]);
 
+  const value = useMemo(() => ({ trip, loading, reload: load }), [trip, loading, load]);
   return (
-    <TripContext.Provider value={{ trip, loading, reload: load }}>
+    <TripContext.Provider value={value}>
       {children}
     </TripContext.Provider>
   );

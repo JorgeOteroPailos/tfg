@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, View, FlatList, Pressable, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -15,6 +15,18 @@ const MembersScreen = () => {
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const { trip, loading } = useTrip();
   const requestCount = trip?.pendingRequests?.length ?? 0;
+  const memberCardStyle = useMemo(
+    () => [styles.memberCard, { backgroundColor: theme.tabBackground }],
+    [theme.tabBackground]
+  );
+  const renderMemberItem = useCallback(
+    ({ item }: { item: { id?: string; username: string } }) => (
+      <View style={memberCardStyle}>
+        <ThemedText style={styles.memberName}>{item.username}</ThemedText>
+      </View>
+    ),
+    [memberCardStyle]
+  );
 
   if (loading) {
     return (
@@ -47,11 +59,7 @@ const MembersScreen = () => {
             <Ionicons name="chevron-forward" size={18} color={theme.icon} style={styles.chevron} />
           </Pressable>
         }
-        renderItem={({ item }) => (
-          <View style={[styles.memberCard, { backgroundColor: theme.tabBackground }]}>
-            <ThemedText style={styles.memberName}>{item.username}</ThemedText>
-          </View>
-        )}
+        renderItem={renderMemberItem}
         ListFooterComponent={
           <Pressable
             style={[styles.addButton, { backgroundColor: theme.tint }]}

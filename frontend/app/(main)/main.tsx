@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, Pressable, FlatList } from 'react-native';
 import { router, useFocusEffect, useNavigation } from 'expo-router';
 import ThemedText from '../../components/ThemedText';
@@ -31,8 +31,6 @@ const Main = () => {
   const initialLoadDone = useRef(false);
   const [trips, setTrips] = useState<TripSummary[]>([]);
   const [invitationCount, setInvitationCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -45,9 +43,6 @@ const Main = () => {
         setInvitationCount(invitationsData.length);
       } catch (e) {
         router.replace('/login');
-        setError('Error cargando viajes');
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -110,6 +105,25 @@ const Main = () => {
     }
   };
 
+  const tripCardStyle = useMemo(
+    () => [styles.tripCard, { backgroundColor: theme.tabBackground }] as const,
+    [theme.tabBackground]
+  );
+  const renderTripItem = useCallback(
+    ({ item }: { item: TripSummary }) => (
+      <Pressable
+        style={tripCardStyle}
+        onPress={() => router.push({ pathname: '/expenses', params: { tripId: item.id } })}
+      >
+        <View style={styles.tripContent}>
+          <ThemedText style={styles.tripName}>{item.name}</ThemedText>
+        </View>
+        <ThemedText style={styles.tripArrow}>→</ThemedText>
+      </Pressable>
+    ),
+    [tripCardStyle]
+  );
+
   return (
     <View style={styles.container}>
       {/* Main Content */}
@@ -143,19 +157,7 @@ const Main = () => {
           keyExtractor={item => item.id ?? ''}
           scrollEnabled={true}
           contentContainerStyle={styles.tripsList}
-          renderItem={({ item }) => (
-            <Pressable
-              style={[styles.tripCard, { backgroundColor: theme.tabBackground }]}
-              onPress={() => {
-                router.push({ pathname: '/expenses', params: { tripId: item.id } });
-              }}
-            >
-              <View style={styles.tripContent}>
-                <ThemedText style={styles.tripName}>{item.name}</ThemedText>
-              </View>
-              <ThemedText style={styles.tripArrow}>→</ThemedText>
-            </Pressable>
-          )}
+          renderItem={renderTripItem}
         />
       </View>
 
@@ -258,11 +260,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
     marginTop: 4,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 5,
+    boxShadow: '2px 4px 4px rgba(0, 0, 0, 0.15)',
   },
   sidebarItem: {
     paddingVertical: 12,

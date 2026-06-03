@@ -8,6 +8,7 @@ import React, {
   use,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -55,11 +56,13 @@ async function getUserName() {
 }
 
 
-export async function clearSession() {
-  await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-  await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-  await AsyncStorage.removeItem(USER_EMAIL_KEY);
-  await AsyncStorage.removeItem(USER_NAME_KEY);
+async function clearSession() {
+  await Promise.all([
+    SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY),
+    SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY),
+    AsyncStorage.removeItem(USER_EMAIL_KEY),
+    AsyncStorage.removeItem(USER_NAME_KEY),
+  ]);
   //TODO cerrar sesión en el servidor
 }
 
@@ -96,10 +99,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
     const restoreSession = async () => {
       try {
-        const refreshToken = await getRefreshToken();
-        const storedAccessToken = await getAccessToken();
-        const storedUserEmail = await getUserEmail();
-        const storedUserName = await getUserName();
+        const [refreshToken, storedAccessToken, storedUserEmail, storedUserName] = await Promise.all([
+          getRefreshToken(),
+          getAccessToken(),
+          getUserEmail(),
+          getUserName(),
+        ]);
         
         console.log('restoreSession -> refreshToken:', refreshToken);
         console.log('restoreSession -> accessToken:', storedAccessToken);
@@ -132,7 +137,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
       }
     };
 
-    const login = async (email: string, password: string) => {
+    const login = useCallback(async (email: string, password: string) => {
       let accessToken: string;
       let refreshToken: string;
       let username: string;
@@ -164,9 +169,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
       setUserEmailState(email);
       setUserNameState(username);
       setIsAuthenticated(true);
-    };
+    }, []);
 
-    const register = async (username: string, email: string, password: string) => {
+    const register = useCallback(async (username: string, email: string, password: string) => {
       let accessToken: string;
       let refreshToken: string;
 
@@ -197,9 +202,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
       setUserEmailState(email);
       setUserNameState(username);
       setIsAuthenticated(true);
-    };
+    }, []);
 
-    const logout = async () => {
+    const logout = useCallback(async () => {
       await clearSession();
 
       setAccessToken(null);
@@ -208,7 +213,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
       setIsAuthenticated(false);
 
       //TODO cerrar sesión en el servidor
-    };
+    }, []);
 
     const doRefresh = useCallback(async (): Promise<string> => {
       const refreshToken = await getRefreshToken();
@@ -231,8 +236,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
       }
 
       const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await refreshResponse.json();
-      await saveAccessToken(newAccessToken);
-      await saveRefreshToken(newRefreshToken);
+      await Promise.all([saveAccessToken(newAccessToken), saveRefreshToken(newRefreshToken)]);
       setAccessToken(newAccessToken);
       return newAccessToken;
     }, []);
@@ -274,20 +278,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
       });
     }, [doRefresh]);
 
+    const value = useMemo(
+      () => ({ isAuthenticated, isLoading, accessToken, userEmail, username, login, logout, register, callAuthenticated }),
+      [isAuthenticated, isLoading, accessToken, userEmail, username, login, logout, register, callAuthenticated]
+    );
+
     return (
-      <AuthContext.Provider
-        value={{
-          isAuthenticated,
-          isLoading,
-          accessToken,
-          userEmail,
-          username,
-          login,
-          logout,
-          register,
-          callAuthenticated
-        }}
-      >
+      <AuthContext.Provider value={value}>
         {children}
       </AuthContext.Provider>
     );

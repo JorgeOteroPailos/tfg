@@ -87,7 +87,7 @@ const DocumentsScreen = () => {
 
   useEffect(() => {
     if (trip?.name) navigation.setOptions({ title: trip.name });
-  }, [trip?.name]);
+  }, [trip?.name, navigation]);
 
   useEffect(() => {
     if (!trip?.id || documents !== null) return;
@@ -101,7 +101,7 @@ const DocumentsScreen = () => {
         setLoading(false);
       }
     })();
-  }, [trip?.id, documents]);
+  }, [trip?.id, documents, listDocuments, t]);
 
   useEffect(() => {
     if (!uploadError) return;
@@ -296,7 +296,7 @@ const DocumentsScreen = () => {
             </View>
 
             <Pressable
-              style={[styles.closeBtn]}
+              style={styles.closeBtn}
               onPress={() => setDetailVisible(false)}
             >
               <ThemedText style={styles.closeBtnText}>{t('common.close')}</ThemedText>
@@ -333,8 +333,7 @@ const styles = StyleSheet.create({
     position: 'absolute', bottom: 24, right: 24,
     width: 56, height: 56, borderRadius: 28,
     alignItems: 'center', justifyContent: 'center',
-    elevation: 4, shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4,
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)',
   },
 
   toast: {

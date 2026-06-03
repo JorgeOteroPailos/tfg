@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View, Pressable, FlatList, Alert } from 'react-native';
 import ThemedText from '../../components/ThemedText';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,11 @@ interface Event {
   date: string; // YYYY-MM-DD
   time: string; // HH:mm
   description?: string;
+}
+
+function getDayName(dateStr: string) {
+  const date = new Date(dateStr + 'T00:00:00');
+  return date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 const CalendarScreen = () => {
@@ -71,15 +76,55 @@ const CalendarScreen = () => {
     Alert.alert('Éxito', 'Evento creado');
   };
 
-  const handleDeleteEvent = (id: string) => {
-    setEvents(events.filter(e => e.id !== id));
+  const handleDeleteEvent = useCallback((id: string) => {
+    setEvents(prev => prev.filter(e => e.id !== id));
     Alert.alert('Eliminado', 'Evento removido');
-  };
+  }, []);
 
-  const getDayName = (dateStr: string) => {
-    const date = new Date(dateStr + 'T00:00:00');
-    return date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  };
+  const upcomingEvents = useMemo(() => {
+    const todayDate = new Date(selectedDate);
+    const limit = new Date(todayDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+    return events
+      .filter(e => { const d = new Date(e.date); return d >= todayDate && d <= limit; })
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(0, 5);
+  }, [events, selectedDate]);
+
+  const eventCardStyle = useMemo(
+    () => [styles.eventCard, { borderLeftColor: theme.tint }],
+    [theme.tint]
+  );
+  const upcomingCardStyle = useMemo(
+    () => [styles.upcomingCard, { backgroundColor: theme.tabBackground }],
+    [theme.tabBackground]
+  );
+  const renderEventItem = useCallback(
+    ({ item }: { item: Event }) => (
+      <View style={eventCardStyle}>
+        <View style={styles.eventInfo}>
+          <ThemedText style={styles.eventTime}>{item.time}</ThemedText>
+          <ThemedText style={styles.eventTitle}>{item.title}</ThemedText>
+          {item.description && (
+            <ThemedText style={styles.eventDesc}>{item.description}</ThemedText>
+          )}
+        </View>
+        <Pressable onPress={() => handleDeleteEvent(item.id)} style={styles.deleteBtn}>
+          <ThemedText style={styles.deleteBtnText}>✕</ThemedText>
+        </Pressable>
+      </View>
+    ),
+    [eventCardStyle, handleDeleteEvent]
+  );
+  const renderUpcomingItem = useCallback(
+    ({ item }: { item: Event }) => (
+      <View style={upcomingCardStyle}>
+        <ThemedText style={styles.upcomingDate}>{item.date}</ThemedText>
+        <ThemedText style={styles.upcomingTitle}>{item.title}</ThemedText>
+        <ThemedText style={styles.upcomingTime}>{item.time}</ThemedText>
+      </View>
+    ),
+    [upcomingCardStyle]
+  );
 
   return (
     <View style={styles.container}>
@@ -188,23 +233,7 @@ const CalendarScreen = () => {
             scrollEnabled={false}
             data={todayEvents}
             keyExtractor={e => e.id}
-            renderItem={({ item }) => (
-              <View style={[styles.eventCard, { borderLeftColor: theme.tint }]}>
-                <View style={styles.eventInfo}>
-                  <ThemedText style={styles.eventTime}>{item.time}</ThemedText>
-                  <ThemedText style={styles.eventTitle}>{item.title}</ThemedText>
-                  {item.description && (
-                    <ThemedText style={styles.eventDesc}>{item.description}</ThemedText>
-                  )}
-                </View>
-                <Pressable
-                  onPress={() => handleDeleteEvent(item.id)}
-                  style={styles.deleteBtn}
-                >
-                  <ThemedText style={styles.deleteBtnText}>✕</ThemedText>
-                </Pressable>
-              </View>
-            )}
+            renderItem={renderEventItem}
           />
         )}
       </View>
@@ -212,27 +241,20 @@ const CalendarScreen = () => {
       {/* Upcoming events */}
       <View style={styles.upcomingSection}>
         <ThemedText style={styles.sectionTitle}>Próximos eventos</ThemedText>
-        {getUpcoming().length === 0 ? (
+        {upcomingEvents.length === 0 ? (
           <ThemedText style={styles.emptyText}>No hay eventos próximos</ThemedText>
         ) : (
           <FlatList
             scrollEnabled={false}
-            data={getUpcoming().slice(0, 5)}
+            data={upcomingEvents}
             keyExtractor={e => e.id}
-            renderItem={({ item }) => (
-              <View style={[styles.upcomingCard, { backgroundColor: theme.tabBackground }]}>
-                <ThemedText style={styles.upcomingDate}>{item.date}</ThemedText>
-                <ThemedText style={styles.upcomingTitle}>{item.title}</ThemedText>
-                <ThemedText style={styles.upcomingTime}>{item.time}</ThemedText>
-              </View>
-            )}
+            renderItem={renderUpcomingItem}
           />
         )}
       </View>
     </View>
   );
 };
-
 export default CalendarScreen;
 
 const styles = StyleSheet.create({

@@ -216,7 +216,7 @@ const TripExpenses = ({ tripId }: TripExpensesProps) => {
       ) : expenses && expenses.length > 0 ? (
         expenses.map((expense, index) => (
           <ThemedText key={expense.id ?? `expense-${index}`} style={styles.expenseItem}>
-            {expense.name ?? t('trip.noName', 'No name')} — {expense.amount?.toFixed(2) ?? '0.00'}
+            {expense.name ?? t('trip.noName', 'No name')}: {expense.amount?.toFixed(2) ?? '0.00'}
           </ThemedText>
         ))
       ) : (
@@ -258,11 +258,7 @@ const styles = StyleSheet.create({
     maxWidth: 450,
     borderRadius: 16,
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
-    shadowRadius: 20,
-    elevation: 10,
+    boxShadow: '0px 10px 20px rgba(0, 0, 0, 0.12)',
   },
   modalTitle: {
     fontSize: 20,

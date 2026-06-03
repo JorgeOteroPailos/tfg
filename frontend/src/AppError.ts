@@ -22,7 +22,7 @@ export class AppError extends Error {
   }
 }
 
-export function mapHttpStatusToErrorCode(status: number): ErrorCode {
+function mapHttpStatusToErrorCode(status: number): ErrorCode {
   switch (status) {
     case 400:
       return ErrorCode.BAD_REQUEST;

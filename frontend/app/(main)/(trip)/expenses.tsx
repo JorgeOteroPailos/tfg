@@ -230,8 +230,8 @@ const ExpensesScreen = () => {
             {(balancesInfo?.settlements ?? []).length === 0 && (
               <ThemedText style={styles.emptyText}>{t('trip.noSettlements')}</ThemedText>
             )}
-            {(balancesInfo?.settlements ?? []).map((s, i) => (
-              <View key={i} style={[styles.settlementCard, { backgroundColor: theme.tabBackground }]}>
+            {(balancesInfo?.settlements ?? []).map(s => (
+              <View key={`${s.fromId}-${s.toId}`} style={[styles.settlementCard, { backgroundColor: theme.tabBackground }]}>
                 <ThemedText style={styles.settlementFrom}>{usernameFor(s.fromId)}</ThemedText>
                 <Ionicons name="arrow-forward" size={16} color={theme.icon} />
                 <ThemedText style={styles.settlementTo}>{usernameFor(s.toId)}</ThemedText>
