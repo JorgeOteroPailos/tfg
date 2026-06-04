@@ -350,6 +350,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/trips/{tripId}/ai-chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the AI chat history for a trip */
+        get: operations["getAiChatHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -490,6 +507,8 @@ export interface components {
             datetime: string;
             /** Format: uuid */
             payerId: string;
+            /** Format: uuid */
+            creatorId: string;
             beneficiaryIds: string[];
         };
         SettlementSuggestion: {
@@ -597,6 +616,15 @@ export interface components {
              * @example http://localhost:9000/telaria/uuid-key?X-Amz-Signature=...
              */
             downloadUrl: string;
+        };
+        AiChatMessage: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            role: "user" | "assistant";
+            content: string;
+            /** Format: date-time */
+            timestamp: string;
         };
     };
     responses: never;
@@ -1576,6 +1604,49 @@ export interface operations {
                 content?: never;
             };
             /** @description Document not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getAiChatHistory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Full message history for this trip's AI conversation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiChatMessage"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Trip not found */
             404: {
                 headers: {
                     [name: string]: unknown;

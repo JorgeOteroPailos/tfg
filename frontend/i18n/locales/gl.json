@@ -165,7 +165,8 @@
     "fileSize": "Tamaño",
     "uploadedAt": "Subido o",
     "uploadedBy": "Subido por",
-    "downloadDocument": "Descargar"
+    "downloadDocument": "Descargar",
+    "aiChatPlaceholder": "Escribe unha mensaxe..."
   },
   "invitations": {
     "empty": "Non tes invitacións pendentes",

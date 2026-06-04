@@ -7,6 +7,7 @@ import { Colors } from '../../../constants/Colors';
 import { TripProvider } from '../../../src/trips';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '../../../components/ThemedText';
+import { AiChatButton } from '../../../components/AiChatModal';
 
 const TripLayout = () => {
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
@@ -32,6 +33,9 @@ const TripLayout = () => {
         <View style={styles.content}>
           <Slot />
         </View>
+
+        {/* AI Chat FAB */}
+        <AiChatButton tripId={tripId} />
 
         {/* Tab bar */}
         <View style={[styles.tabBar, { backgroundColor: theme.navBackground }]}>

@@ -22,7 +22,8 @@
         "backgroundColor": "#EA8A00"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.Telaria"
     },
     "web": {
       "favicon": "./assets/favicon.png"

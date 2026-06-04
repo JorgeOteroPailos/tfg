@@ -165,7 +165,8 @@
     "fileSize": "Size",
     "uploadedAt": "Uploaded at",
     "uploadedBy": "Uploaded by",
-    "downloadDocument": "Download"
+    "downloadDocument": "Download",
+    "aiChatPlaceholder": "Write a message..."
   },
   "invitations": {
     "empty": "No pending invitations",
