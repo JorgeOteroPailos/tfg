@@ -5,6 +5,7 @@ import gal.usc.telariabackend.model.dto.ExpenseSummary;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -45,6 +46,7 @@ public class Expense {
 
     @Getter
     private BigDecimal amount;
+    @Getter
     private String name;
     private OffsetDateTime timestamp;
 

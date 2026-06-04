@@ -49,6 +49,8 @@ paths:
     $ref: './paths/documents.yaml#/paths/~1trips~1{tripId}~1documents'
   /trips/{tripId}/documents/{documentId}:
     $ref: './paths/documents.yaml#/paths/~1trips~1{tripId}~1documents~1{documentId}'
+  /trips/{tripId}/ai-chat:
+    $ref: './paths/ai-chat.yaml#/paths/~1trips~1{tripId}~1ai-chat'
 
 components:
   securitySchemes:

@@ -2,18 +2,15 @@ spring:
   application:
     name: telaria-backend
   datasource:
-    url: jdbc:h2:file:./data/telaria-db
-    driver-class-name: org.h2.Driver
-    username: jorge
-    password: prueba
+    url: jdbc:postgresql://localhost:5432/telaria
+    driver-class-name: org.postgresql.Driver
+    username: telaria
+    password: telaria
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 server:
   port: 8082
@@ -27,7 +24,7 @@ keystore:
 
 minio:
   endpoint: http://localhost:9000
-  public-endpoint: http://10.164.206.49:9000
+  public-endpoint: http://192.168.1.142:9000
   access-key: admin
   secret-key: password123
   bucket: telaria-document-sharing

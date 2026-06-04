@@ -1,0 +1,31 @@
+schemas:
+  AiChatMessageRequest:
+    type: object
+    required:
+      - content
+    properties:
+      content:
+        type: string
+        example: "¿Qué actividades hay disponibles en Roma en abril?"
+
+  AiChatMessage:
+    type: object
+    required:
+      - id
+      - role
+      - content
+      - timestamp
+    properties:
+      id:
+        type: string
+        format: uuid
+      role:
+        type: string
+        enum:
+          - user
+          - assistant
+      content:
+        type: string
+      timestamp:
+        type: string
+        format: date-time

@@ -3,7 +3,7 @@ plugins {
     id("org.springframework.boot") version "4.0.2"
     id("io.spring.dependency-management") version "1.1.7"
     jacoco
-    id("org.openapi.generator") version "7.12.0"
+    id("org.openapi.generator") version "7.16.0"
 }
 
 group = "gal.usc"
@@ -46,9 +46,8 @@ dependencies {
     // JPA
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
-    // H2 database
-    runtimeOnly("com.h2database:h2")
-    developmentOnly("org.springframework.boot:spring-boot-h2console")
+    //BD postgre
+    runtimeOnly("org.postgresql:postgresql")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     // Validation (DTO validation)
@@ -65,7 +64,7 @@ dependencies {
 
     // Tests
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("com.h2database:h2")
+    testImplementation("org.testcontainers:postgresql:1.20.4")
     testImplementation("org.springframework.security:spring-security-test")
 
     //Lombok
@@ -96,7 +95,8 @@ openApiGenerate {
         "generateModels"     to "true",
         "useBeanValidation"  to "true",
         "performBeanValidation" to "true",
-        "useTags" to "true"
+        "useTags" to "true",
+        "serverSentEvents"      to "true"
     ))
 }
 

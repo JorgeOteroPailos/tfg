@@ -1,4 +1,20 @@
 services:
+  postgres:
+    image: docker.io/library/postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: telaria
+      POSTGRES_USER: telaria
+      POSTGRES_PASSWORD: telaria
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U telaria" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   minio:
     image: quay.io/minio/minio
     ports:
@@ -11,5 +27,24 @@ services:
       - minio_data:/data
     command: server /data --console-address ":9001"
 
+  ollama:
+    image: docker.io/ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  ollama-gpu:
+    image: docker.io/ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    profiles: [ gpu ]
+    devices:
+      - nvidia.com/gpu=all
+
 volumes:
   minio_data:
+  ollama_data:
+  postgres_data:

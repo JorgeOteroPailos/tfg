@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.io.IOException;
 
@@ -24,12 +25,23 @@ public abstract class BaseE2ETest {
             .withExposedPorts(9000)
             .withCommand("server /data");
 
+    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")
+            .withDatabaseName("telaria")
+            .withUsername("telaria")
+            .withPassword("telaria");
+
     static {
+        postgres.start();
         minio.start();
     }
 
     @DynamicPropertySource
-    static void minioProperties(DynamicPropertyRegistry registry) {
+    static void Properties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.PostgreSQLDialect");
+
         registry.add("minio.endpoint", () -> "http://localhost:" + minio.getMappedPort(9000));
         registry.add("minio.access-key", () -> "admin");
         registry.add("minio.secret-key", () -> "password123");
