@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { StyleSheet, View, Pressable, FlatList } from 'react-native';
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { StyleSheet, View, Pressable, FlatList, Modal, ActivityIndicator, Text } from 'react-native';
 import { router, useFocusEffect, useNavigation } from 'expo-router';
-import ThemedText from '../../components/ThemedText';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../src/theme';
 import { Colors } from '../../constants/Colors';
@@ -9,13 +8,12 @@ import { useAuth } from '../../src/auth';
 import { useTrips } from '../../src/trips';
 import { useInvitations } from '../../src/invitations';
 import { components } from '../../src/generated/types';
-import { Modal, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedInput from '../../components/ThemedInput';
+import { AmbientBlobs, DotGrid } from '../../components/BackgroundTexture';
 
 type TripSummary = components['schemas']['TripSummary'];
 
-// --- Data loaded together from API ---
 type DataState = { trips: TripSummary[]; invitationCount: number };
 type DataAction =
   | { type: 'loaded'; trips: TripSummary[]; invitationCount: number }
@@ -31,7 +29,6 @@ function dataReducer(state: DataState, action: DataAction): DataState {
   }
 }
 
-// --- Create-trip modal (all fields updated together) ---
 type ModalState = { visible: boolean; name: string; creating: boolean };
 type ModalAction =
   | { type: 'open' }
@@ -57,10 +54,9 @@ const Main = () => {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
-  const { logout } = useAuth();
+  const isDark = themeName === 'dark';
   const navigation = useNavigation();
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [data, dataDispatch] = useReducer(dataReducer, DATA_INITIAL);
   const [modal, modalDispatch] = useReducer(modalReducer, MODAL_INITIAL);
 
@@ -71,16 +67,12 @@ const Main = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [tripsData, invitationsData] = await Promise.all([
-          listTrips(),
-          getMyInvitations(),
-        ]);
+        const [tripsData, invitationsData] = await Promise.all([listTrips(), getMyInvitations()]);
         dataDispatch({ type: 'loaded', trips: tripsData, invitationCount: invitationsData.length });
-      } catch (e) {
+      } catch {
         router.replace('/login');
       }
     };
-
     load();
     initialLoadDone.current = true;
   }, [listTrips, getMyInvitations]);
@@ -99,11 +91,11 @@ const Main = () => {
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <Pressable style={styles.invitationsButton} onPress={() => router.push('/invitations')}>
-          <Ionicons name="mail-outline" size={24} color={theme.title} />
+        <Pressable style={styles.invBtn} onPress={() => router.push('/invitations')}>
+          <Ionicons name="mail-outline" size={22} color={theme.title} />
           {data.invitationCount > 0 && (
-            <View style={styles.badge}>
-              <ThemedText style={styles.badgeText}>{data.invitationCount}</ThemedText>
+            <View style={[styles.badge, { backgroundColor: Colors.warning }]}>
+              <Text style={styles.badgeText}>{data.invitationCount}</Text>
             </View>
           )}
         </Pressable>
@@ -118,133 +110,142 @@ const Main = () => {
       const { id } = await createTrip({ name: modal.name.trim() });
       dataDispatch({ type: 'trip_added', trip: { id, name: modal.name.trim() } });
       modalDispatch({ type: 'close' });
-    } catch (e) {
-      console.error('Error creando viaje:', e);
+    } catch {
+      /* ignore */
     } finally {
       modalDispatch({ type: 'done_creating' });
     }
   };
 
-  //TODO  ver pq no se usa
-  const handleLogout = async () => {
-    try {
-      await logout();
-      router.replace('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
-  const tripCardStyle = useMemo(
-    () => [styles.tripCard, { backgroundColor: theme.tabBackground }] as const,
-    [theme.tabBackground]
-  );
   const renderTripItem = useCallback(
     ({ item }: { item: TripSummary }) => (
       <Pressable
-        style={tripCardStyle}
+        style={({ pressed }) => [styles.tripCard, { backgroundColor: theme.tabBackground, borderColor: theme.border }, pressed && styles.pressed]}
         onPress={() => router.push({ pathname: '/expenses', params: { tripId: item.id } })}
       >
-        <View style={styles.tripContent}>
-          <ThemedText style={styles.tripName}>{item.name}</ThemedText>
+        {/* left glow stripe */}
+        <View style={[styles.tripStripe, { backgroundColor: theme.tint, boxShadow: `0 0 10px ${theme.tint}` }]} />
+
+        <View style={[styles.tripIconWrap, { backgroundColor: `${theme.tint}18` }]}>
+          <Ionicons name="airplane-outline" size={22} color={theme.tint} />
         </View>
-        <ThemedText style={styles.tripArrow}>→</ThemedText>
+
+        <Text style={[styles.tripName, { color: theme.title }]} numberOfLines={1}>{item.name}</Text>
+
+        <View style={[styles.tripChevron, { backgroundColor: theme.uiBackground }]}>
+          <Ionicons name="chevron-forward" size={14} color={theme.tint} />
+        </View>
       </Pressable>
     ),
-    [tripCardStyle]
+    [theme]
   );
 
   return (
-    <View style={styles.container}>
-      {/* Main Content */}
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      {isDark && <DotGrid color="rgba(168,85,247,0.055)" />}
+      <AmbientBlobs tint={theme.tint} secondary={Colors.secondary} />
+
       <View style={styles.content}>
-        {/* Action Cards Row */}
+        {/* Action row */}
         <View style={styles.actionRow}>
           <Pressable
-            style={[styles.actionCard, { backgroundColor: theme.tint }]}
+            style={({ pressed }) => [
+              styles.actionCard, styles.actionCardCreate,
+              { backgroundColor: theme.tint, boxShadow: `0 0 28px ${theme.tint}55` },
+              pressed && styles.pressed,
+            ]}
             onPress={() => modalDispatch({ type: 'open' })}
           >
-            <ThemedText style={styles.actionCardTitle}>{t('trip.new')}</ThemedText>
-            <View style={styles.actionCardIcon}>
-              <ThemedText style={styles.actionCardIconText}>+</ThemedText>
+            <View style={styles.actionIconRing}>
+              <Ionicons name="add" size={24} color="#fff" />
             </View>
+            <Text style={styles.actionLabel}>{t('trip.new').toUpperCase()}</Text>
           </Pressable>
 
           <Pressable
-            style={[styles.actionCard, { backgroundColor: theme.tabBackground }]}
+            style={({ pressed }) => [
+              styles.actionCard,
+              { backgroundColor: theme.tabBackground, borderColor: theme.border, borderWidth: 1 },
+              pressed && styles.pressed,
+            ]}
             onPress={() => router.push('/join-trip')}
           >
-            <ThemedText style={styles.actionCardTitleSecondary}>{t('trip.join')}</ThemedText>
-            <View style={[styles.actionCardIcon, { backgroundColor: 'rgba(0,0,0,0.08)' }]}>
-              <Ionicons name="enter-outline" size={20} color={theme.tint} />
+            <View style={[styles.actionIconRing, { backgroundColor: `${theme.tint}22` }]}>
+              <Ionicons name="enter-outline" size={24} color={theme.tint} />
             </View>
+            <Text style={[styles.actionLabel, { color: theme.tint }]}>{t('trip.join').toUpperCase()}</Text>
           </Pressable>
         </View>
 
-        {/* Trips List */}
+        {data.trips.length > 0 && (
+          <Text style={[styles.sectionLabel, { color: theme.icon }]}>
+            {t('nav.trips', 'TRIPS')}
+          </Text>
+        )}
+
         <FlatList
           data={data.trips}
           keyExtractor={item => item.id ?? ''}
-          scrollEnabled={true}
-          contentContainerStyle={styles.tripsList}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
           renderItem={renderTripItem}
+          ListEmptyComponent={
+            <View style={styles.empty}>
+              <View style={[styles.emptyIcon, { borderColor: `${theme.tint}30`, backgroundColor: `${theme.tint}0a` }]}>
+                <Ionicons name="map-outline" size={36} color={theme.tint} style={{ opacity: 0.5 }} />
+              </View>
+              <Text style={[styles.emptyText, { color: theme.icon }]}>
+                {t('trip.noTrips', 'No trips yet')}
+              </Text>
+              <Text style={[styles.emptyHint, { color: theme.icon }]}>
+                Create one to get started
+              </Text>
+            </View>
+          }
         />
       </View>
 
-      {/* Overlay to close the sidebar when clicking outside */}
-      {sidebarOpen && (
-        <Pressable
-          style={styles.overlay}
-          activeOpacity={1}
-          onPress={() => setSidebarOpen(false)}
-        />
-      )}
-      <Modal
-        visible={modal.visible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => modalDispatch({ type: 'close' })}
-      >
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => modalDispatch({ type: 'close' })}
-        >
-          <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
-            <ThemedText style={styles.modalTitle}>{t('trip.new')}</ThemedText>
+      {/* Create trip modal */}
+      <Modal visible={modal.visible} transparent animationType="fade" onRequestClose={() => modalDispatch({ type: 'close' })}>
+        <Pressable style={styles.overlay} onPress={() => modalDispatch({ type: 'close' })}>
+          <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
+            <View style={styles.modalTop}>
+              <View style={[styles.modalIcon, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
+                <Ionicons name="airplane-outline" size={24} color={theme.tint} />
+              </View>
+              <Text style={[styles.modalTitle, { color: theme.title }]}>{t('trip.new')}</Text>
+            </View>
 
             <ThemedInput
-              style={[styles.modalInput, { color: theme.text, borderColor: theme.tint }]}
+              style={{ borderColor: theme.tint, borderWidth: 1.5 }}
               placeholder={t('trip.tripName')}
-              placeholderTextColor={theme.icon}
               value={modal.name}
-              onChangeText={(name) => modalDispatch({ type: 'set_name', name })}
+              onChangeText={name => modalDispatch({ type: 'set_name', name })}
               autoFocus
               onSubmitEditing={handleCreateTrip}
             />
 
-            <View style={styles.modalButtons}>
+            <View style={styles.modalBtns}>
               <Pressable
-                style={[styles.modalButton, styles.cancelButton]}
+                style={[styles.modalBtn, { borderColor: theme.border, borderWidth: 1 }]}
                 onPress={() => modalDispatch({ type: 'close' })}
               >
-                <ThemedText>{t('common.cancel')}</ThemedText>
+                <Text style={[styles.modalBtnText, { color: theme.text }]}>{t('common.cancel')}</Text>
               </Pressable>
-
               <Pressable
-                style={[styles.modalButton, { backgroundColor: theme.tint }]}
+                style={[styles.modalBtn, { backgroundColor: theme.tint, boxShadow: `0 0 20px ${theme.tint}55` }]}
                 onPress={handleCreateTrip}
                 disabled={modal.creating || !modal.name.trim()}
               >
                 {modal.creating
-                  ? <ActivityIndicator color="white" />
-                  : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.create')}</ThemedText>
+                  ? <ActivityIndicator color="#fff" size="small" />
+                  : <Text style={[styles.modalBtnText, { color: '#fff', fontWeight: '800', letterSpacing: 1 }]}>{t('common.create').toUpperCase()}</Text>
                 }
               </Pressable>
             </View>
           </Pressable>
         </Pressable>
       </Modal>
-
     </View>
   );
 };
@@ -252,197 +253,135 @@ const Main = () => {
 export default Main;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  menuButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  menuIcon: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  headerTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  headerSpacer: {
-    width: 40,
-  },
-  sidebar: {
-    position: 'absolute',
-    top: 60,
-    left: 0,
-    width: 220,
-    zIndex: 100,
-    borderRadius: 8,
-    marginHorizontal: 12,
-    marginTop: 4,
-    overflow: 'hidden',
-    boxShadow: '2px 4px 4px rgba(0, 0, 0, 0.15)',
-  },
-  sidebarItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  sidebarItemText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  logoutItem: {
-    borderBottomWidth: 0,
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 99,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 16,
-  },
-  tripCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 12,
-    borderRadius: 12,
-  },
-  actionRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 12,
-  },
+  container: { flex: 1 },
+  content: { flex: 1, paddingHorizontal: 16, paddingTop: 16 },
+  pressed: { opacity: 0.8, transform: [{ scale: 0.98 }] },
+
+  actionRow: { flexDirection: 'row', gap: 12, marginBottom: 24 },
   actionCard: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 10,
     paddingHorizontal: 14,
-    paddingVertical: 14,
-    borderRadius: 12,
-    minHeight: 60,
-  },
-  actionCardTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: 'white',
-    flexShrink: 1,
-  },
-  actionCardTitleSecondary: {
-    fontSize: 15,
-    fontWeight: '600',
-    flexShrink: 1,
-  },
-  actionCardIcon: {
-    width: 36,
-    height: 36,
+    paddingVertical: 18,
     borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  actionCardCreate: { borderRadius: 18 },
+  actionIconRing: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  actionCardIconText: {
-    fontSize: 22,
-    color: 'white',
-    fontWeight: 'bold',
+  actionLabel: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#fff',
+    letterSpacing: 1.5,
   },
-  tripsList: {
-    paddingBottom: 20,
+
+  sectionLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 2.5,
+    marginBottom: 12,
+    marginLeft: 4,
   },
-  tripContent: {
+  list: { gap: 10, paddingBottom: 28 },
+
+  tripCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    borderRadius: 18,
+    borderWidth: 1,
+    overflow: 'hidden',
+    paddingVertical: 16,
+    paddingRight: 14,
+    gap: 14,
+    boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
   },
-  tripIcon: {
-    fontSize: 28,
-    marginRight: 12,
+  tripStripe: {
+    width: 3,
+    alignSelf: 'stretch',
+    borderRadius: 2,
+  },
+  tripIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   tripName: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  tripArrow: {
-    fontSize: 20,
-    marginLeft: 12,
-    opacity: 0.6,
-  },
-  modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  tripChevron: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modalBox: {
-    width: '80%',
-    borderRadius: 16,
-    padding: 24,
-    gap: 16,
+
+  empty: { alignItems: 'center', paddingTop: 64, gap: 14 },
+  emptyIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  modalInput: {
-    borderWidth: 1.5,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-  },
-  modalButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  cancelButton: {
-    backgroundColor: 'transparent',
-  },
-  invitationsButton: {
-    paddingHorizontal: 8,
-    paddingTop: 6,
-  },
+  emptyText: { fontSize: 16, fontWeight: '700', letterSpacing: 0.3 },
+  emptyHint: { fontSize: 13, fontWeight: '500', opacity: 0.5 },
+
+  invBtn: { paddingHorizontal: 8, paddingTop: 4 },
   badge: {
     position: 'absolute',
-    top: 2,
-    right: 2,
+    top: 0,
+    right: 0,
     minWidth: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#d9534f',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 3,
   },
-  badgeText: {
-    color: 'white',
-    fontSize: 10,
-    fontWeight: '700',
-    lineHeight: 12,
+  badgeText: { color: '#fff', fontSize: 10, fontWeight: '800' },
+
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
   },
+  modalBox: {
+    width: '100%',
+    borderRadius: 24,
+    padding: 24,
+    gap: 16,
+    borderWidth: 1,
+    boxShadow: '0 0 60px rgba(168,85,247,0.2), 0 16px 40px rgba(0,0,0,0.4)',
+  },
+  modalTop: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  modalIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalTitle: { fontSize: 22, fontWeight: '800', letterSpacing: 0.3 },
+  modalBtns: { flexDirection: 'row', gap: 10 },
+  modalBtn: { flex: 1, paddingVertical: 15, borderRadius: 14, alignItems: 'center' },
+  modalBtnText: { fontSize: 14, fontWeight: '700' },
 });

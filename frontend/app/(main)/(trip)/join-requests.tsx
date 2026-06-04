@@ -1,13 +1,12 @@
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Pressable, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { useTrip } from '../../../src/trips';
 import { useInvitations } from '../../../src/invitations';
 import { Ionicons } from '@expo/vector-icons';
-import { useSidebar } from '../../../src/sidebar';
 import ThemedText from '../../../components/ThemedText';
 import { components } from '../../../src/generated/types';
 
@@ -57,7 +56,7 @@ const JoinRequestsScreen = () => {
   const theme = Colors[themeName] ?? Colors.light;
   const { trip, loading, reload } = useTrip();
   const { resolveJoinRequest } = useInvitations();
-  const { setOpen } = useSidebar();
+  const { tripId } = useLocalSearchParams<{ tripId: string }>();
 
   const [resolving, setResolving] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -92,13 +91,6 @@ const JoinRequestsScreen = () => {
   if (loading) {
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <View style={[styles.header, { backgroundColor: theme.navBackground, borderBottomColor: theme.border }]}>
-          <Pressable onPress={() => router.back()} style={styles.headerButton}>
-            <Ionicons name="chevron-back" size={26} color={theme.title} />
-          </Pressable>
-          <ThemedText style={[styles.headerTitle, { color: theme.title }]}>{t('trip.requests')}</ThemedText>
-          <View style={styles.headerButton} />
-        </View>
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={theme.tint} />
         </View>
@@ -111,16 +103,17 @@ const JoinRequestsScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
 
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: theme.navBackground, borderBottomColor: theme.border }]}>
-        <Pressable onPress={() => router.back()} style={styles.headerButton}>
-          <Ionicons name="chevron-back" size={26} color={theme.title} />
-        </Pressable>
-        <ThemedText style={[styles.headerTitle, { color: theme.title }]}>{t('trip.requests')}</ThemedText>
-        <Pressable onPress={() => setOpen(true)} style={styles.headerButton}>
-          <ThemedText style={[styles.hamburger, { color: theme.title }]}>☰</ThemedText>
-        </Pressable>
-      </View>
+      {/* Back to members */}
+      <Pressable
+        style={({ pressed }) => [styles.backRow, { borderBottomColor: theme.border }, pressed && styles.pressed]}
+        onPress={() => router.replace({ pathname: '/members', params: { tripId } })}
+      >
+        <View style={[styles.backIconBox, { backgroundColor: `${theme.tint}18` }]}>
+          <Ionicons name="people-outline" size={18} color={theme.tint} />
+        </View>
+        <ThemedText style={[styles.backLabel, { color: theme.tint }]}>{t('trip.members')}</ThemedText>
+        <Ionicons name="chevron-back" size={16} color={theme.tint} style={{ position: 'absolute', left: 12 }} />
+      </Pressable>
 
       {error && (
         <View style={[styles.errorBanner, { backgroundColor: Colors.warning }]}>
@@ -149,27 +142,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
+  backRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 50,
-    paddingBottom: 12,
-    paddingHorizontal: 8,
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 0.5,
   },
-  headerButton: {
-    width: 40,
+  backIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  headerTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 17,
-    fontWeight: '600',
+  backLabel: {
+    fontSize: 14,
+    fontWeight: '700',
   },
-  hamburger: {
-    fontSize: 22,
-  },
+  pressed: { opacity: 0.65 },
   centered: {
     flex: 1,
     justifyContent: 'center',

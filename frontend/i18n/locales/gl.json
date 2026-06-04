@@ -6,10 +6,12 @@
     "cancel": "Cancelar",
     "create": "Crear",
     "notAvailable": "Non dispoñible",
-    "close": "Pechar"
+    "close": "Pechar",
+    "delete": "Eliminar"
   },
   "nav": {
     "home": "Inicio",
+    "trips": "Viaxes",
     "calendar": "Calendario",
     "settings": "Axustes",
     "profile": "Perfil",
@@ -87,6 +89,7 @@
     "beneficiaryIds": "IDs de beneficiarios",
     "fillAllRequiredFields": "Por favor completa todos os campos obrigatorios",
     "createExpenseError": "Non se puido crear o gasto",
+    "noTrips": "Aínda non hai viaxes",
     "noExpenses": "Aínda non hai gastos",
     "unableLoadExpenses": "Non se puideron cargar os gastos",
     "balances": "Saldos",
@@ -100,6 +103,9 @@
     "chat": "Chat",
     "more": "Máis",
     "leave": "Saír da viaxe",
+    "backHomeTitle": "Volver?",
+    "backHomeMessage": "Volverás á pantalla principal.",
+    "backHomeConfirm": "Volver",
     "beneficiaries": "Beneficiarios",
     "addMember": "Engadir membro",
     "tripQrHint": "Comparte este QR para que outros poidan unirse á viaxe",

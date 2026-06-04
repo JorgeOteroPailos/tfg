@@ -1,22 +1,23 @@
 import { useState } from 'react';
-import { View, Pressable, StyleSheet, Modal } from 'react-native';
+import { View, Pressable, StyleSheet, Modal, Text } from 'react-native';
 import { router, useLocalSearchParams, useSegments, Slot } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
-import { TripProvider } from '../../../src/trips';
+import { TripProvider, useTrip } from '../../../src/trips';
 import { Ionicons } from '@expo/vector-icons';
-import ThemedText from '../../../components/ThemedText';
 import { AiChatButton } from '../../../components/AiChatModal';
 
-const TripLayout = () => {
+const TripContent = () => {
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
   const { t } = useTranslation();
   const [moreVisible, setMoreVisible] = useState(false);
+  const [backConfirmVisible, setBackConfirmVisible] = useState(false);
   const segments = useSegments();
   const activeTab = segments[segments.length - 1];
+  const { trip } = useTrip();
 
   const tabs = [
     { name: 'expenses', icon: 'receipt-outline', label: t('trip.expenses') },
@@ -26,108 +27,146 @@ const TripLayout = () => {
   ] as const;
 
   return (
-    <TripProvider tripId={tripId}>
-      <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
 
-        {/* Contenido */}
-        <View style={styles.content}>
-          <Slot />
-        </View>
-
-        {/* AI Chat FAB */}
-        <AiChatButton tripId={tripId} />
-
-        {/* Tab bar */}
-        <View style={[styles.tabBar, { backgroundColor: theme.navBackground }]}>
-          {tabs.map(tab => {
-            const isActive = tab.name === activeTab;
-            return (
-              <Pressable
-                key={tab.name}
-                style={styles.tab}
-                onPress={() => router.replace({ pathname: `/${tab.name}`, params: { tripId } })}
-              >
-                <Ionicons
-                  name={tab.icon}
-                  size={isActive ? 28 : 24}
-                  color={isActive ? theme.tint : theme.icon}
-                />
-                <ThemedText style={[styles.tabLabel, { color: isActive ? theme.tint : theme.icon, fontWeight: isActive ? '600' : 'normal' }]}>
-                  {tab.label}
-                </ThemedText>
-              </Pressable>
-            );
-          })}
-
-          {/* Más */}
-          <Pressable style={styles.tab} onPress={() => setMoreVisible(true)}>
-            <Ionicons name="menu-outline" size={24} color={theme.icon} />
-            <ThemedText style={styles.tabLabel}>{t('trip.more')}</ThemedText>
-          </Pressable>
-        </View>
-
-        {/* Modal más */}
-        <Modal
-          visible={moreVisible}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setMoreVisible(false)}
+      {/* ── Header ────────────────────────────────────────── */}
+      <View style={[styles.header, { backgroundColor: theme.navBackground, borderBottomColor: theme.border }]}>
+        <Pressable
+          style={({ pressed }) => [styles.headerBtn, { backgroundColor: theme.uiBackground, borderColor: theme.border }, pressed && styles.pressed]}
+          onPress={() => setBackConfirmVisible(true)}
         >
-          <Pressable
-            style={styles.modalOverlay}
-            onPress={() => setMoreVisible(false)}
-          >
+          <Ionicons name="home-outline" size={18} color={theme.icon} />
+        </Pressable>
+
+        <View style={styles.headerCenter}>
+          <Text style={[styles.headerTitle, { color: theme.title }]} numberOfLines={1}>
+            {trip?.name ?? t('trip.noName')}
+          </Text>
+        </View>
+
+        <Pressable
+          style={({ pressed }) => [styles.headerBtn, { backgroundColor: theme.uiBackground, borderColor: theme.border }, pressed && styles.pressed]}
+          onPress={() => setMoreVisible(true)}
+        >
+          <Ionicons name="menu-outline" size={18} color={theme.icon} />
+        </Pressable>
+      </View>
+
+      {/* ── Screen content ────────────────────────────────── */}
+      <View style={styles.content}>
+        <Slot />
+      </View>
+
+      <AiChatButton tripId={tripId} />
+
+      {/* ── Tab bar ───────────────────────────────────────── */}
+      <View style={[styles.tabBar, { backgroundColor: theme.navBackground, borderTopColor: theme.border }]}>
+        {tabs.map(tab => {
+          const isActive = tab.name === activeTab;
+          return (
             <Pressable
-              onPress={() => {}}
-              style={[styles.bottomSheet, { backgroundColor: theme.tabBackground }]}
+              key={tab.name}
+              style={styles.tab}
+              onPress={() => router.replace({ pathname: `/${tab.name}`, params: { tripId } })}
             >
-              <Pressable
-                style={styles.sheetItem}
-                onPress={() => {
-                  setMoreVisible(false);
-                  router.push('/profile');
-                }}
-              >
-                <Ionicons name="person-outline" size={22} color={theme.text} />
-                <ThemedText style={styles.sheetItemText}>{t('nav.profile')}</ThemedText>
-              </Pressable>
+              {isActive && (
+                <View style={[
+                  styles.tabGlow,
+                  { backgroundColor: `${theme.tint}18`, boxShadow: `0 0 12px ${theme.tint}50` },
+                ]} />
+              )}
+              <Ionicons
+                name={tab.icon}
+                size={isActive ? 26 : 22}
+                color={isActive ? theme.tint : theme.icon}
+              />
+              <Text style={[
+                styles.tabLabel,
+                { color: isActive ? theme.tint : theme.icon },
+                isActive && styles.tabLabelActive,
+              ]}>
+                {tab.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
 
+      {/* ── Back-home confirm ─────────────────────────────── */}
+      <Modal visible={backConfirmVisible} transparent animationType="fade" onRequestClose={() => setBackConfirmVisible(false)}>
+        <Pressable style={styles.overlay} onPress={() => setBackConfirmVisible(false)}>
+          <Pressable onPress={() => {}} style={[styles.confirmBox, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
+            <View style={[styles.confirmIcon, { backgroundColor: `${theme.tint}18`, borderColor: `${theme.tint}35` }]}>
+              <Ionicons name="home-outline" size={30} color={theme.tint} />
+            </View>
+            <Text style={[styles.confirmTitle, { color: theme.title }]}>{t('trip.backHomeTitle')}</Text>
+            <Text style={[styles.confirmMsg, { color: theme.icon }]}>{t('trip.backHomeMessage')}</Text>
+            <View style={styles.confirmBtns}>
               <Pressable
-                style={styles.sheetItem}
-                onPress={() => {
-                  setMoreVisible(false);
-                  router.push('/settings');
-                }}
+                style={[styles.confirmBtn, { borderColor: theme.border, borderWidth: 1 }]}
+                onPress={() => setBackConfirmVisible(false)}
               >
-                <Ionicons name="settings-outline" size={22} color={theme.text} />
-                <ThemedText style={styles.sheetItemText}>{t('nav.settings')}</ThemedText>
+                <Text style={[styles.confirmBtnText, { color: theme.text }]}>{t('common.cancel')}</Text>
               </Pressable>
+              <Pressable
+                style={[styles.confirmBtn, { backgroundColor: theme.tint, boxShadow: `0 0 20px ${theme.tint}60` }]}
+                onPress={() => { setBackConfirmVisible(false); router.replace('/main'); }}
+              >
+                <Ionicons name="home-outline" size={15} color="#fff" />
+                <Text style={[styles.confirmBtnText, { color: '#fff', letterSpacing: 1 }]}>
+                  {t('trip.backHomeConfirm').toUpperCase()}
+                </Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
-              <Pressable
-                style={styles.sheetItem}
-                onPress={() => {
-                  setMoreVisible(false);
-                  router.push({ pathname: '/join-requests', params: { tripId } });
-                }}
-              >
-                <Ionicons name="mail-outline" size={22} color={theme.text} />
-                <ThemedText style={styles.sheetItemText}>{t('trip.requests')}</ThemedText>
-              </Pressable>
+      {/* ── More bottom sheet ─────────────────────────────── */}
+      <Modal visible={moreVisible} transparent animationType="slide" onRequestClose={() => setMoreVisible(false)}>
+        <Pressable style={styles.overlay} onPress={() => setMoreVisible(false)}>
+          <Pressable onPress={() => {}} style={[styles.sheet, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
+            <View style={[styles.sheetHandle, { backgroundColor: theme.tint, boxShadow: `0 0 8px ${theme.tint}` }]} />
 
+            {[
+              { icon: 'person-circle-outline' as const, label: t('nav.profile'), action: () => { setMoreVisible(false); router.push('/profile'); } },
+              { icon: 'settings-outline' as const, label: t('nav.settings'), action: () => { setMoreVisible(false); router.push('/settings'); } },
+              { icon: 'mail-outline' as const, label: t('trip.requests'), action: () => { setMoreVisible(false); router.push({ pathname: '/join-requests', params: { tripId } }); } },
+            ].map(item => (
               <Pressable
-                style={[styles.sheetItem, { borderBottomWidth: 0 }]}
-                onPress={() => {
-                  setMoreVisible(false);
-                  router.replace('/main');
-                }}
+                key={item.label}
+                style={({ pressed }) => [styles.sheetRow, { borderBottomColor: theme.border }, pressed && styles.pressed]}
+                onPress={item.action}
               >
-                <Ionicons name="arrow-back-outline" size={22} color="#cc475a" />
-                <ThemedText style={[styles.sheetItemText, { color: '#cc475a' }]}>{t('trip.leave')}</ThemedText>
+                <View style={[styles.sheetIcon, { backgroundColor: `${theme.tint}18` }]}>
+                  <Ionicons name={item.icon} size={20} color={theme.tint} />
+                </View>
+                <Text style={[styles.sheetLabel, { color: theme.title }]}>{item.label}</Text>
+                <Ionicons name="chevron-forward" size={15} color={theme.icon} style={{ opacity: 0.4 }} />
               </Pressable>
+            ))}
+
+            <Pressable
+              style={({ pressed }) => [styles.sheetRow, { borderBottomWidth: 0 }, pressed && styles.pressed]}
+              onPress={() => { setMoreVisible(false); router.replace('/main'); }}
+            >
+              <View style={[styles.sheetIcon, { backgroundColor: 'rgba(239,68,68,0.14)' }]}>
+                <Ionicons name="arrow-back-outline" size={20} color={Colors.warning} />
+              </View>
+              <Text style={[styles.sheetLabel, { color: Colors.warning }]}>{t('trip.leave')}</Text>
             </Pressable>
           </Pressable>
-        </Modal>
-      </View>
+        </Pressable>
+      </Modal>
+    </View>
+  );
+};
+
+const TripLayout = () => {
+  const { tripId } = useLocalSearchParams<{ tripId: string }>();
+  return (
+    <TripProvider tripId={tripId}>
+      <TripContent />
     </TripProvider>
   );
 };
@@ -135,63 +174,133 @@ const TripLayout = () => {
 export default TripLayout;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: 15
-  },
+  container: { flex: 1 },
+  pressed: { opacity: 0.7, transform: [{ scale: 0.97 }] },
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    paddingHorizontal: 16,
+    paddingTop: 52,
+    paddingBottom: 14,
     borderBottomWidth: 0.5,
-    borderBottomColor: '#e0e0e0',
+    gap: 12,
   },
-  headerButton: {
-    padding: 4,
+  headerBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 11,
+    borderWidth: 0.5,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  headerCenter: {
-    flex: 1,
+  headerCenter: { flex: 1, alignItems: 'center' },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
-  content: {
-    flex: 1,
-  },
+
+  content: { flex: 1 },
+
   tabBar: {
     flexDirection: 'row',
     borderTopWidth: 0.5,
-    borderTopColor: '#e0e0e0',
-    paddingBottom: 40,
-    paddingTop: 8,
+    paddingBottom: 50,
+    paddingTop: 4,
   },
   tab: {
     flex: 1,
     alignItems: 'center',
-    gap: 4,
+    paddingTop: 8,
+    gap: 3,
+    position: 'relative',
+  },
+  tabGlow: {
+    position: 'absolute',
+    top: 4,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
   },
   tabLabel: {
-    fontSize: 10,
+    fontSize: 9,
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
-  modalOverlay: {
+  tabLabelActive: {
+    fontWeight: '800',
+  },
+
+  overlay: {
     flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.35)',
   },
-  bottomSheet: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: 8,
-    paddingBottom: 32,
+
+  confirmBox: {
+    margin: 18,
+    marginBottom: 40,
+    borderRadius: 28,
+    padding: 28,
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 1,
+    boxShadow: '0 0 60px rgba(168,85,247,0.2), 0 16px 40px rgba(0,0,0,0.5)',
   },
-  sheetItem: {
+  confirmIcon: {
+    width: 66,
+    height: 66,
+    borderRadius: 22,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  confirmTitle: { fontSize: 20, fontWeight: '800', letterSpacing: 0.3 },
+  confirmMsg: { fontSize: 14, fontWeight: '500', textAlign: 'center', lineHeight: 20, marginBottom: 6 },
+  confirmBtns: { flexDirection: 'row', gap: 10, width: '100%' },
+  confirmBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    paddingVertical: 15,
+    borderRadius: 16,
+  },
+  confirmBtnText: { fontSize: 13, fontWeight: '800' },
+
+  sheet: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingTop: 10,
+    paddingBottom: 40,
+    borderWidth: 1,
+    borderBottomWidth: 0,
+    boxShadow: '0 -8px 40px rgba(0,0,0,0.4)',
+  },
+  sheetHandle: {
+    width: 40,
+    height: 3,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 14,
+  },
+  sheetRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    paddingHorizontal: 24,
-    paddingVertical: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
     borderBottomWidth: 0.5,
-    borderBottomColor: '#e0e0e0',
   },
-  sheetItemText: {
-    fontSize: 16,
+  sheetIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 11,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
+  sheetLabel: { flex: 1, fontSize: 15, fontWeight: '700' },
 });

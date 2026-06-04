@@ -8,19 +8,19 @@ const ThemedInput = ({ style, ...props }: ThemedInputProps) => {
 
     const { themeName } = useAppTheme();
     const theme = Colors[themeName] ?? Colors.light;
-    
+
     return (
         <TextInput
             style={[
                 styles.input,
                 {
-                    color: theme.text,
+                    color: theme.title,
                     backgroundColor: theme.uiBackground,
-                    borderColor: theme.iconColor
+                    borderColor: theme.border,
                 },
                 style
             ]}
-            placeholderTextColor={theme.iconColor}
+            placeholderTextColor={theme.icon}
             {...props}
         />
     )
@@ -32,8 +32,9 @@ const styles = StyleSheet.create({
     input: {
         width: '100%',
         borderWidth: 1,
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 16
+        borderRadius: 13,
+        padding: 14,
+        fontSize: 15,
+        fontWeight: '600',
     }
 })

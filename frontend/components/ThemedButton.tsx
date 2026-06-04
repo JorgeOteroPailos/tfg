@@ -27,11 +27,15 @@ export default ThemedButton
 const styles = StyleSheet.create({
     button: {
         backgroundColor: Colors.primary,
-        padding: 18,
-        borderRadius: 6,
-        marginVertical: 10
+        paddingVertical: 17,
+        paddingHorizontal: 24,
+        borderRadius: 16,
+        marginVertical: 8,
+        alignItems: 'center',
+        boxShadow: '0 0 28px rgba(157,68,240,0.45)',
     },
     pressed: {
-        opacity: 0.5
+        opacity: 0.75,
+        transform: [{ scale: 0.97 }],
     }
 })

@@ -1,11 +1,14 @@
-import { View, Pressable, StyleSheet } from 'react-native';
-import { Link, router } from 'expo-router';
+import { View, Pressable, StyleSheet, Text, Platform } from 'react-native';
+import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSidebar } from '../src/sidebar';
 import { useAuth } from '../src/auth';
 import { useAppTheme } from '../src/theme';
 import { Colors } from '../constants/Colors';
-import ThemedText from './ThemedText';
+import { Ionicons } from '@expo/vector-icons';
+
+const TOOLBAR_HEIGHT = Platform.OS === 'ios' ? 44 : 56;
 
 const Sidebar = () => {
   const { open, setOpen } = useSidebar();
@@ -13,6 +16,7 @@ const Sidebar = () => {
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
   const { t } = useTranslation();
+  const { top: safeTop } = useSafeAreaInsets();
 
   if (!open) return null;
 
@@ -22,41 +26,43 @@ const Sidebar = () => {
     router.replace('/login');
   };
 
+  const items = [
+    { icon: 'person-circle-outline' as const, label: t('nav.profile'), href: '/profile' as const },
+    { icon: 'settings-outline' as const, label: t('settings.title'), href: '/settings' as const },
+    { icon: 'mail-outline' as const, label: t('nav.invitations'), href: '/invitations' as const },
+  ] as const;
+
+  const panelTop = safeTop + TOOLBAR_HEIGHT;
+
   return (
     <>
-      {/* Overlay */}
-      <Pressable
-        style={styles.overlay}
-        onPress={() => setOpen(false)}
-      />
+      <Pressable style={styles.overlay} onPress={() => setOpen(false)} />
 
-      {/* Panel */}
-      <View style={[styles.sidebar, { backgroundColor: theme.tabBackground }]}>
-        <Link href="/profile" asChild>
-          <Pressable style={styles.item} onPress={() => setOpen(false)}>
-            <ThemedText style={styles.itemText}>👤 {t('nav.profile')}</ThemedText>
-          </Pressable>
-        </Link>
+      <View style={[styles.panel, { top: panelTop, backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
+        <View style={[styles.handle, { backgroundColor: theme.tint, boxShadow: `0 0 6px ${theme.tint}` }]} />
 
-        <Link href="/settings" asChild>
-          <Pressable style={styles.item} onPress={() => setOpen(false)}>
-            <ThemedText style={styles.itemText}>⚙️ {t('settings.title')}</ThemedText>
+        {items.map(item => (
+          <Pressable
+            key={item.label}
+            style={({ pressed }) => [styles.row, { borderBottomColor: theme.border }, pressed && styles.pressed]}
+            onPress={() => { setOpen(false); router.push(item.href); }}
+          >
+            <View style={[styles.iconBox, { backgroundColor: `${theme.tint}18` }]}>
+              <Ionicons name={item.icon} size={19} color={theme.tint} />
+            </View>
+            <Text style={[styles.label, { color: theme.title }]}>{item.label}</Text>
+            <Ionicons name="chevron-forward" size={14} color={theme.icon} style={{ opacity: 0.35 }} />
           </Pressable>
-        </Link>
-
-        <Link href="/calendar" asChild>
-          <Pressable style={styles.item} onPress={() => setOpen(false)}>
-            <ThemedText style={styles.itemText}>📅 {t('nav.calendar')}</ThemedText>
-          </Pressable>
-        </Link>
+        ))}
 
         <Pressable
-          style={[styles.item, styles.logoutItem]}
+          style={({ pressed }) => [styles.row, { borderBottomWidth: 0 }, pressed && styles.pressed]}
           onPress={handleLogout}
         >
-          <ThemedText style={[styles.itemText, { color: '#cc475a' }]}>
-            🚪 {t('profile.logout')}
-          </ThemedText>
+          <View style={[styles.iconBox, { backgroundColor: 'rgba(239,68,68,0.14)' }]}>
+            <Ionicons name="log-out-outline" size={19} color={Colors.warning} />
+          </View>
+          <Text style={[styles.label, { color: Colors.warning }]}>{t('profile.logout')}</Text>
         </Pressable>
       </View>
     </>
@@ -70,29 +76,47 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
     zIndex: 99,
+    backgroundColor: 'rgba(0,0,0,0.35)',
   },
-  sidebar: {
+  panel: {
     position: 'absolute',
-    top: 65,     
-    right:0,
-    width: 220,
+    right: 0,
+    width: 235,
     zIndex: 100,
-    borderRadius: 8,
-    margin: 12,
+    borderRadius: 20,
+    margin: 10,
     overflow: 'hidden',
-    boxShadow: '2px 4px 4px rgba(0, 0, 0, 0.15)',
+    borderWidth: 1,
+    boxShadow: '0 0 40px rgba(0,0,0,0.4), 0 0 20px rgba(168,85,247,0.1)',
   },
-  item: {
-    paddingVertical: 12,
+  handle: {
+    width: 36,
+    height: 3,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginTop: 10,
+    marginBottom: 8,
+    opacity: 0.7,
+  },
+  pressed: { opacity: 0.65 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 13,
     paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomWidth: 0.5,
   },
-  itemText: {
+  iconBox: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  label: {
+    flex: 1,
     fontSize: 14,
-    fontWeight: '500',
-  },
-  logoutItem: {
-    borderBottomWidth: 0,
+    fontWeight: '700',
   },
 });

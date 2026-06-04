@@ -1,12 +1,11 @@
-import React, { useCallback, useMemo } from 'react';
-import { StyleSheet, View, FlatList, Pressable, ActivityIndicator } from 'react-native';
+import React, { useCallback } from 'react';
+import { StyleSheet, View, FlatList, Pressable, ActivityIndicator, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { useTrip } from '../../../src/trips';
-import ThemedText from '../../../components/ThemedText';
 
 const MembersScreen = () => {
   const { t } = useTranslation();
@@ -15,22 +14,33 @@ const MembersScreen = () => {
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const { trip, loading } = useTrip();
   const requestCount = trip?.pendingRequests?.length ?? 0;
-  const memberCardStyle = useMemo(
-    () => [styles.memberCard, { backgroundColor: theme.tabBackground }],
-    [theme.tabBackground]
-  );
+
   const renderMemberItem = useCallback(
-    ({ item }: { item: { id?: string; username: string } }) => (
-      <View style={memberCardStyle}>
-        <ThemedText style={styles.memberName}>{item.username}</ThemedText>
-      </View>
-    ),
-    [memberCardStyle]
+    ({ item, index }: { item: { id?: string; username: string }; index: number }) => {
+      const initial = item.username.charAt(0).toUpperCase();
+      const isFirst = index === 0;
+      return (
+        <View style={[styles.card, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
+          {/* left stripe */}
+          <View style={[styles.stripe, { backgroundColor: theme.tint, opacity: isFirst ? 1 : 0.4, boxShadow: isFirst ? `0 0 8px ${theme.tint}` : undefined }]} />
+          <View style={[styles.avatar, { backgroundColor: `${theme.tint}${isFirst ? '28' : '12'}` }]}>
+            <Text style={[styles.initial, { color: theme.tint, opacity: isFirst ? 1 : 0.7 }]}>{initial}</Text>
+          </View>
+          <Text style={[styles.memberName, { color: theme.title }]} numberOfLines={1}>{item.username}</Text>
+          {isFirst && (
+            <View style={[styles.ownerTag, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
+              <Text style={[styles.ownerTagText, { color: theme.tint }]}>OWNER</Text>
+            </View>
+          )}
+        </View>
+      );
+    },
+    [theme]
   );
 
   if (loading) {
     return (
-      <View style={styles.centered}>
+      <View style={[styles.centered, { backgroundColor: theme.background }]}>
         <ActivityIndicator size="large" color={theme.tint} />
       </View>
     );
@@ -39,33 +49,45 @@ const MembersScreen = () => {
   if (!trip) return null;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <FlatList
         data={trip.members ?? []}
         keyExtractor={item => item.id ?? ''}
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <Pressable
-            style={[styles.requestsButton, { backgroundColor: theme.tabBackground }]}
+            style={({ pressed }) => [
+              styles.requestsBtn,
+              { backgroundColor: theme.tabBackground, borderColor: theme.border },
+              pressed && { opacity: 0.75, transform: [{ scale: 0.98 }] },
+            ]}
             onPress={() => router.push({ pathname: '/join-requests', params: { tripId } })}
           >
-            <Ionicons name="person-add-outline" size={20} color={theme.tint} />
-            <ThemedText style={styles.requestsLabel}>{t('trip.requests')}</ThemedText>
+            <View style={[styles.reqIcon, { backgroundColor: `${theme.tint}18` }]}>
+              <Ionicons name="person-add-outline" size={20} color={theme.tint} />
+            </View>
+            <Text style={[styles.reqLabel, { color: theme.title }]}>{t('trip.requests')}</Text>
             {requestCount > 0 && (
-              <View style={[styles.badge, { backgroundColor: Colors.warning }]}>
-                <ThemedText style={styles.badgeText}>{requestCount}</ThemedText>
+              <View style={[styles.badge, { backgroundColor: Colors.warning, boxShadow: `0 0 10px ${Colors.warning}` }]}>
+                <Text style={styles.badgeText}>{requestCount}</Text>
               </View>
             )}
-            <Ionicons name="chevron-forward" size={18} color={theme.icon} style={styles.chevron} />
+            <Ionicons name="chevron-forward" size={16} color={theme.icon} style={{ opacity: 0.4 }} />
           </Pressable>
         }
         renderItem={renderMemberItem}
         ListFooterComponent={
           <Pressable
-            style={[styles.addButton, { backgroundColor: theme.tint }]}
+            style={({ pressed }) => [
+              styles.addBtn,
+              { backgroundColor: theme.tint, boxShadow: `0 0 28px ${theme.tint}55` },
+              pressed && { opacity: 0.8 },
+            ]}
             onPress={() => router.push({ pathname: '/add-member', params: { tripId: trip.id } })}
           >
-            <ThemedText style={styles.addButtonText}>+ {t('trip.addMember')}</ThemedText>
+            <Ionicons name="person-add-outline" size={20} color="#fff" />
+            <Text style={styles.addBtnText}>{t('trip.addMember').toUpperCase()}</Text>
           </Pressable>
         }
       />
@@ -76,67 +98,67 @@ const MembersScreen = () => {
 export default MembersScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    marginTop: 15
+  container: { flex: 1 },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  list: { padding: 16, gap: 10, paddingBottom: 28 },
+
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 18,
+    borderWidth: 1,
+    overflow: 'hidden',
+    paddingVertical: 15,
+    paddingRight: 16,
+    gap: 12,
+    boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
   },
-  centered: {
-    flex: 1,
+  stripe: {
+    width: 3,
+    alignSelf: 'stretch',
+    borderRadius: 2,
+  },
+  avatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  list: {
-    gap: 10,
-    paddingBottom: 20,
+  initial: { fontSize: 18, fontWeight: '800' },
+  memberName: { flex: 1, fontSize: 15, fontWeight: '700' },
+  ownerTag: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    borderWidth: 1,
   },
-  memberCard: {
-    padding: 16,
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  memberName: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  addButton: {
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  requestsButton: {
+  ownerTagText: { fontSize: 9, fontWeight: '900', letterSpacing: 1.5 },
+
+  requestsBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 14,
-    borderRadius: 10,
-    gap: 10,
-    marginBottom: 10,
+    borderRadius: 18,
+    borderWidth: 1,
+    gap: 12,
+    marginBottom: 4,
+    boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
   },
-  requestsLabel: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  badge: {
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
-    justifyContent: 'center',
+  reqIcon: { width: 38, height: 38, borderRadius: 11, justifyContent: 'center', alignItems: 'center' },
+  reqLabel: { flex: 1, fontSize: 15, fontWeight: '700' },
+
+  badge: { minWidth: 24, height: 24, borderRadius: 12, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6 },
+  badgeText: { color: '#fff', fontSize: 11, fontWeight: '900' },
+
+  addBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 5,
+    justifyContent: 'center',
+    gap: 8,
+    padding: 17,
+    borderRadius: 18,
+    marginTop: 8,
   },
-  badgeText: {
-    color: 'white',
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  chevron: {
-    marginLeft: 2,
-  },
+  addBtnText: { color: '#fff', fontWeight: '900', fontSize: 13, letterSpacing: 2 },
 });

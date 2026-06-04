@@ -6,10 +6,12 @@
     "cancel": "Cancel",
     "create": "Create",
     "notAvailable": "Not available",
-    "close": "Close"
+    "close": "Close",
+    "delete": "Delete"
   },
   "nav": {
     "home": "Home",
+    "trips": "Trips",
     "calendar": "Calendar",
     "settings": "Settings",
     "profile": "Profile",
@@ -87,6 +89,7 @@
     "beneficiaryIds": "Beneficiary IDs",
     "fillAllRequiredFields": "Please fill all required fields",
     "createExpenseError": "Unable to create expense",
+    "noTrips": "No trips yet",
     "noExpenses": "No expenses yet",
     "unableLoadExpenses": "Unable to load expenses",
     "balances": "Balances",
@@ -100,6 +103,9 @@
     "chat": "Chat",
     "more": "More",
     "leave": "Leave trip",
+    "backHomeTitle": "Go back?",
+    "backHomeMessage": "You'll return to the main screen.",
+    "backHomeConfirm": "Go back",
     "beneficiaries": "Beneficiaries",
     "addMember": "Add Member",
     "tripQrHint": "Share this QR so others can join the trip",

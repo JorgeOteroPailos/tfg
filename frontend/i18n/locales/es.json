@@ -6,10 +6,12 @@
     "cancel": "Cancelar",
     "create": "Crear",
     "notAvailable": "No disponible",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "delete": "Eliminar"
   },
   "nav": {
     "home": "Inicio",
+    "trips": "Viajes",
     "calendar": "Calendario",
     "settings": "Ajustes",
     "profile": "Perfil",
@@ -87,6 +89,7 @@
     "beneficiaryIds": "IDs de beneficiarios",
     "fillAllRequiredFields": "Por favor completa todos los campos requeridos",
     "createExpenseError": "No se pudo crear el gasto",
+    "noTrips": "Sin viajes aún",
     "noExpenses": "Aún no hay gastos",
     "unableLoadExpenses": "No se pudieron cargar los gastos",
     "balances": "Saldos",
@@ -100,6 +103,9 @@
     "chat": "Chat",
     "more": "Más",
     "leave": "Salir del viaje",
+    "backHomeTitle": "¿Volver atrás?",
+    "backHomeMessage": "Volverás a la pantalla principal.",
+    "backHomeConfirm": "Volver",
     "beneficiaries": "Beneficiarios",
     "addMember": "Añadir miembro",
     "tripQrHint": "Comparte este QR para que otros puedan unirse al viaje",
