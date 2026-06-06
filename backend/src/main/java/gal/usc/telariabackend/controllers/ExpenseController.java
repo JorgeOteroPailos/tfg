@@ -21,6 +21,12 @@ public class ExpenseController implements ExpensesApi{
     }
 
     @Override
+    public ResponseEntity<IdResponse> createSettlement(UUID tripId, CreateSettlementRequest createSettlementRequest) {
+        IdResponse response = new IdResponse().id(expenseService.createSettlement(tripId, securityHelper.getUserId(), createSettlementRequest));
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @Override
     public ResponseEntity<IdResponse> createExpense(UUID tripId, CreateExpenseRequest createExpenseRequest) {
         IdResponse response=new IdResponse().id(expenseService.createExpense(tripId, securityHelper.getUserId(), createExpenseRequest));
         return new  ResponseEntity<>(response, HttpStatus.CREATED);

@@ -73,6 +73,7 @@ type AuthContextType = {
   accessToken: string | null;
   userEmail: string | null;
   username: string | null;
+  userId: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
@@ -292,9 +293,18 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       });
     }, [doRefresh]);
 
+    const userId = useMemo(() => {
+      if (!accessToken) return null;
+      try {
+        return JSON.parse(atob(accessToken.split('.')[1])).sub as string;
+      } catch {
+        return null;
+      }
+    }, [accessToken]);
+
     const value = useMemo(
-      () => ({ isAuthenticated, isLoading, accessToken, userEmail, username, login, logout, register, callAuthenticated }),
-      [isAuthenticated, isLoading, accessToken, userEmail, username, login, logout, register, callAuthenticated]
+      () => ({ isAuthenticated, isLoading, accessToken, userEmail, username, userId, login, logout, register, callAuthenticated }),
+      [isAuthenticated, isLoading, accessToken, userEmail, username, userId, login, logout, register, callAuthenticated]
     );
 
     return (

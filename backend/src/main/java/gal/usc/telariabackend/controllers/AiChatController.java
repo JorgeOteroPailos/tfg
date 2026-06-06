@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 public class AiChatController implements AiChatApi {
     private final AiChatService aiChatService;
     private final SecurityHelper securityHelper;
+    private final ExecutorService executor = Executors.newCachedThreadPool();
 
     public AiChatController(AiChatService aiChatService, SecurityHelper securityHelper) {
         this.aiChatService = aiChatService;
@@ -33,12 +34,21 @@ public class AiChatController implements AiChatApi {
         return new ResponseEntity<>(aiChatService.getHistory(tripId, securityHelper.getUserId()), HttpStatus.OK);
     }
 
+    /**
+     * Streams an AI assistant response for the given trip as Server-Sent Events.
+     * The assistant has context of the trip's events and expenses.
+     * Message history (last 10 messages) is included in each request to Ollama.
+     * The user message and assistant response are persisted after the stream completes.
+     *
+     * @param tripId  the trip to chat about
+     * @param request the user's message
+     * @return an {@link SseEmitter} that streams the assistant response token by token
+     */
     @PostMapping(value = "/trips/{tripId}/ai-chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter sendAiChatMessage(@PathVariable UUID tripId, @RequestBody AiChatMessageRequest request) {
         UUID userId = securityHelper.getUserId();
         SseEmitter emitter = new SseEmitter();
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
             try {
                 aiChatService.streamResponse(tripId, userId, request.getContent(), emitter);

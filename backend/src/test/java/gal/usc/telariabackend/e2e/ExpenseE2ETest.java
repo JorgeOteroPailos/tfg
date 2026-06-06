@@ -495,8 +495,8 @@ class ExpenseE2ETest extends BaseE2ETest{
         var firstSettlement = balances.getSettlements().getFirst();
         assertNotNull(firstSettlement.getAmount());
         assertEquals(30.0, firstSettlement.getAmount(), 0.01);
-        assertEquals(manoloId, firstSettlement.getToId());
-        assertEquals(pepeId, firstSettlement.getFromId());
+        assertEquals(manoloId, firstSettlement.getFromId());
+        assertEquals(pepeId, firstSettlement.getToId());
     }
 
     @Test
@@ -583,7 +583,7 @@ class ExpenseE2ETest extends BaseE2ETest{
         var firstSettlement2 = balances2.getSettlements().getFirst();
         assertNotNull(firstSettlement2.getAmount());
         assertEquals(20.0, firstSettlement2.getAmount(), 0.01);
-        assertEquals(pepeId, firstSettlement2.getToId());
-        assertEquals(manoloId, firstSettlement2.getFromId());
+        assertEquals(manoloId, firstSettlement2.getToId());
+        assertEquals(pepeId, firstSettlement2.getFromId());
     }
 }

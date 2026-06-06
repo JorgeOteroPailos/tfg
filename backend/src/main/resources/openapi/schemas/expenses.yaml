@@ -56,6 +56,7 @@ schemas:
       - name
       - datetime
       - payerId
+      - creatorId
       - datetime
       - beneficiaryIds
     properties:
@@ -74,6 +75,9 @@ schemas:
         format: date-time
         example: '2025-06-15'
       payerId:
+        type: string
+        format: uuid
+      creatorId:
         type: string
         format: uuid
       beneficiaryIds:

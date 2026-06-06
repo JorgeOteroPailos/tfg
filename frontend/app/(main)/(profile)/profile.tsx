@@ -6,20 +6,13 @@ import { useAuth } from '../../../src/auth';
 import { t } from 'i18next';
 import { router } from 'expo-router';
 
-const decodeJWT = (token: string) => {
-  const payload = token.split('.')[1];
-  return JSON.parse(atob(payload));
-};
-
 const Profile = () => {
-  const { userEmail, username, logout, accessToken } = useAuth();
+  const { userEmail, username, logout, userId } = useAuth();
 
   const handleLogout = async () => {
     await logout();
     router.replace('/login');
   };
-
-  const userId = accessToken ? decodeJWT(accessToken).sub : null;
 
   return (
     <View style={styles.container}>

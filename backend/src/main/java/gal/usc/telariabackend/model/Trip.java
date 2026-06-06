@@ -41,6 +41,10 @@ public class Trip {
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Event> events = new ArrayList<>();
 
+    @Getter
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Settlement> settlements = new ArrayList<>();
+
     protected Trip(){}
 
     public Trip(@NotNull String tripname, User owner) {

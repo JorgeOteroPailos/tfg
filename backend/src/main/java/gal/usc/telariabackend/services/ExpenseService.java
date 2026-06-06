@@ -6,7 +6,9 @@ import gal.usc.telariabackend.model.User;
 import gal.usc.telariabackend.model.dto.*;
 import gal.usc.telariabackend.model.exceptions.ExpenseNotFoundException;
 import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
+import gal.usc.telariabackend.model.Settlement;
 import gal.usc.telariabackend.repository.ExpenseRepository;
+import gal.usc.telariabackend.repository.SettlementRepository;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -22,11 +24,13 @@ public class ExpenseService {
     private final TripRepository tripRepo;
     private final UserRepository userRepo;
     private final ExpenseRepository expenseRepo;
+    private final SettlementRepository settlementRepo;
 
-    public ExpenseService(TripRepository tripRepo, UserRepository userRepo, ExpenseRepository expenseRepo) {
+    public ExpenseService(TripRepository tripRepo, UserRepository userRepo, ExpenseRepository expenseRepo, SettlementRepository settlementRepo) {
         this.tripRepo = tripRepo;
-        this.userRepo=userRepo;
+        this.userRepo = userRepo;
         this.expenseRepo = expenseRepo;
+        this.settlementRepo = settlementRepo;
     }
 
     public UUID createExpense(UUID tripId, UUID creatorId, CreateExpenseRequest request) {
@@ -85,6 +89,16 @@ public class ExpenseService {
         return t.getExpenses().stream().map(Expense::toExpenseSummary).toList();
     }
 
+    public UUID createSettlement(UUID tripId, UUID payerId, CreateSettlementRequest request) {
+        User payer = userRepo.findById(payerId).orElseThrow();
+        Trip trip = tripRepo.findByIdAndMembersContaining(tripId, payer)
+                .orElseThrow(NotATripMemberException::new);
+        User receiver = userRepo.findById(request.getToId()).orElseThrow();
+        Settlement s = new Settlement(trip, payer, receiver, BigDecimal.valueOf(request.getAmount()));
+        settlementRepo.save(s);
+        return s.getId();
+    }
+
     public ExpenseDetail getExpense(UUID tripId, UUID expenseId, UUID userId) {
         if(!tripRepo.existsByIdAndMembersId(tripId, userId)){
             throw new NotATripMemberException();
@@ -119,6 +133,11 @@ public class ExpenseService {
                 }
             }
         }
+        for (Settlement s : t.getSettlements()) {
+            balances.merge(s.getPayer().getId(), s.getAmount(), BigDecimal::add);
+            balances.merge(s.getReceiver().getId(), s.getAmount().negate(), BigDecimal::add);
+        }
+
         Map<UUID, BigDecimal> originalBalances = new HashMap<>(balances);
 
         boolean done=false;
@@ -149,8 +168,8 @@ public class ExpenseService {
                     balances.put(maxId,BigDecimal.ZERO);
                     settlements.add(new SettlementSuggestion().
                             amount(amount.setScale(2, RoundingMode.HALF_UP).doubleValue())
-                            .fromId(maxId)
-                            .toId(minId));
+                            .fromId(minId)
+                            .toId(maxId));
                 }
             }else{ done=true;}
         }

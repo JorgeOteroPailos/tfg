@@ -53,7 +53,20 @@ export function useExpenses() {
     return response.json();
   }, [callAuthenticated]);
 
-  return { getExpenses, addExpense, getExpenseDetail, getBalances };
+  const paySettlement = useCallback(async (tripId: string, fromId: string, toId: string, amount: number): Promise<void> => {
+    const response = await callAuthenticated(`/trips/${tripId}/settlements`, {
+      method: 'POST',
+      body: JSON.stringify({ fromId, toId, amount }),
+    });
+    if (!response.ok) throw new AppError(response.status as ErrorCode);
+  }, [callAuthenticated]);
+
+  const deleteExpense = useCallback(async (tripId: string, expenseId: string): Promise<void> => {
+    const response = await callAuthenticated(`/trips/${tripId}/expenses/${expenseId}`, { method: 'DELETE' });
+    if (!response.ok) throw new AppError(response.status as ErrorCode);
+  }, [callAuthenticated]);
+
+  return { getExpenses, addExpense, getExpenseDetail, getBalances, paySettlement, deleteExpense };
 }
 
 export type { ExpenseSummary, ExpenseDetail, BalancesInfo };

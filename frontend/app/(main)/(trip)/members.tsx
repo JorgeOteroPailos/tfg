@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { useTrip } from '../../../src/trips';
+import { useAuth } from '../../../src/auth';
 
 const MembersScreen = () => {
   const { t } = useTranslation();
@@ -13,29 +14,30 @@ const MembersScreen = () => {
   const theme = Colors[themeName] ?? Colors.light;
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const { trip, loading } = useTrip();
+  const { userId: currentUserId } = useAuth();
   const requestCount = trip?.pendingRequests?.length ?? 0;
 
   const renderMemberItem = useCallback(
-    ({ item, index }: { item: { id?: string; username: string }; index: number }) => {
+    ({ item }: { item: { id?: string; username: string } }) => {
       const initial = item.username.charAt(0).toUpperCase();
-      const isFirst = index === 0;
+      const isMe = item.id === currentUserId;
       return (
         <View style={[styles.card, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
           {/* left stripe */}
-          <View style={[styles.stripe, { backgroundColor: theme.tint, opacity: isFirst ? 1 : 0.4, boxShadow: isFirst ? `0 0 8px ${theme.tint}` : undefined }]} />
-          <View style={[styles.avatar, { backgroundColor: `${theme.tint}${isFirst ? '28' : '12'}` }]}>
-            <Text style={[styles.initial, { color: theme.tint, opacity: isFirst ? 1 : 0.7 }]}>{initial}</Text>
+          <View style={[styles.stripe, { backgroundColor: theme.tint, opacity: isMe ? 1 : 0.4, boxShadow: isMe ? `0 0 8px ${theme.tint}` : undefined }]} />
+          <View style={[styles.avatar, { backgroundColor: `${theme.tint}${isMe ? '28' : '12'}` }]}>
+            <Text style={[styles.initial, { color: theme.tint, opacity: isMe ? 1 : 0.7 }]}>{initial}</Text>
           </View>
           <Text style={[styles.memberName, { color: theme.title }]} numberOfLines={1}>{item.username}</Text>
-          {isFirst && (
-            <View style={[styles.ownerTag, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
-              <Text style={[styles.ownerTagText, { color: theme.tint }]}>OWNER</Text>
+          {isMe && (
+            <View style={[styles.meTag, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
+              <Text style={[styles.meTagText, { color: theme.tint }]}>{t('common.you').toUpperCase()}</Text>
             </View>
           )}
         </View>
       );
     },
-    [theme]
+    [theme, currentUserId]
   );
 
   if (loading) {
@@ -127,13 +129,13 @@ const styles = StyleSheet.create({
   },
   initial: { fontSize: 18, fontWeight: '800' },
   memberName: { flex: 1, fontSize: 15, fontWeight: '700' },
-  ownerTag: {
+  meTag: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,
     borderWidth: 1,
   },
-  ownerTagText: { fontSize: 9, fontWeight: '900', letterSpacing: 1.5 },
+  meTagText: { fontSize: 9, fontWeight: '900', letterSpacing: 1.5 },
 
   requestsBtn: {
     flexDirection: 'row',

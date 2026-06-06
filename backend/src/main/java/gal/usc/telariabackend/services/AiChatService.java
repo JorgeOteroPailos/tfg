@@ -8,15 +8,6 @@ import gal.usc.telariabackend.repository.AiChatMessageRepository;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -26,9 +17,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class AiChatService {
+
     private final AiChatMessageRepository chatMessageRepo;
     private final TripRepository tripRepo;
     private final UserRepository userRepo;
@@ -42,11 +42,12 @@ public class AiChatService {
     private RestClient restClient;
     private final ObjectMapper objectMapper;
 
-
-    public AiChatService(AiChatMessageRepository chatMessageRepo,
-                         TripRepository tripRepo,
-                         UserRepository userRepo,
-                         ObjectMapper objectMapper) {
+    public AiChatService(
+        AiChatMessageRepository chatMessageRepo,
+        TripRepository tripRepo,
+        UserRepository userRepo,
+        ObjectMapper objectMapper
+    ) {
         this.chatMessageRepo = chatMessageRepo;
         this.tripRepo = tripRepo;
         this.userRepo = userRepo;
@@ -55,29 +56,38 @@ public class AiChatService {
 
     @PostConstruct
     private void init() {
-        this.restClient = RestClient.builder()
-                .baseUrl(ollamaBaseUrl)
-                .build();
+        this.restClient = RestClient.builder().baseUrl(ollamaBaseUrl).build();
     }
 
-    public List<gal.usc.telariabackend.model.dto.AiChatMessage> getHistory(UUID tripId, UUID userId) {
-        tripRepo.findByIdAndMembersId(tripId, userId)
-                .orElseThrow(NotATripMemberException::new);
-        return chatMessageRepo.findByTripIdAndUserIdOrderByTimestampAsc(tripId, userId)
-                .stream()
-                .map(AiChatMessage::toDto)
-                .toList();
+    public List<gal.usc.telariabackend.model.dto.AiChatMessage> getHistory(
+        UUID tripId,
+        UUID userId
+    ) {
+        tripRepo
+            .findByIdAndMembersId(tripId, userId)
+            .orElseThrow(NotATripMemberException::new);
+        return chatMessageRepo
+            .findByTripIdAndUserIdOrderByTimestampAsc(tripId, userId)
+            .stream()
+            .map(AiChatMessage::toDto)
+            .toList();
     }
 
     @Transactional
-    public void streamResponse(UUID tripId, UUID userId, String userMessage, SseEmitter emitter) {
-        Trip trip = tripRepo.findByIdAndMembersId(tripId, userId)
-                .orElseThrow(NotATripMemberException::new);
+    public void streamResponse(
+        UUID tripId,
+        UUID userId,
+        String userMessage,
+        SseEmitter emitter
+    ) {
+        Trip trip = tripRepo
+            .findByIdAndMembersId(tripId, userId)
+            .orElseThrow(NotATripMemberException::new);
         User user = userRepo.findById(userId).orElseThrow();
 
         List<AiChatMessage> history = chatMessageRepo
-                .findTop10ByTripIdAndUserIdOrderByTimestampDesc(tripId, userId)
-                .reversed();
+            .findTop5ByTripIdAndUserIdOrderByTimestampDesc(tripId, userId)
+            .reversed();
 
         String systemPrompt = buildSystemPrompt(trip);
 
@@ -93,10 +103,23 @@ public class AiChatService {
                 }
             });
 
-            chatMessageRepo.save(new AiChatMessage(trip, user, AiChatMessage.Role.USER, userMessage));
-            chatMessageRepo.save(new AiChatMessage(trip, user, AiChatMessage.Role.ASSISTANT, fullResponse.toString()));
+            chatMessageRepo.save(
+                new AiChatMessage(
+                    trip,
+                    user,
+                    AiChatMessage.Role.USER,
+                    userMessage
+                )
+            );
+            chatMessageRepo.save(
+                new AiChatMessage(
+                    trip,
+                    user,
+                    AiChatMessage.Role.ASSISTANT,
+                    fullResponse.toString()
+                )
+            );
             emitter.complete();
-
         } catch (Exception e) {
             emitter.completeWithError(e);
         }
@@ -105,55 +128,97 @@ public class AiChatService {
     private String buildSystemPrompt(Trip trip) {
         StringBuilder sb = new StringBuilder();
         sb.append("Eres un asistente experto en viajes. ");
-        sb.append("El usuario está en un viaje llamado \"").append(trip.getName()).append("\".\n\n");
+        sb.append("El usuario está en un viaje llamado \"")
+            .append(trip.getName())
+            .append("\".\n\n");
 
         sb.append("EVENTOS:\n");
-        trip.getEvents().forEach(e -> sb.append("- ").append(e.getName())
-                .append(" (").append(e.getStartTime()).append(")")
-                .append(" en ").append(e.getLocation().getName()).append("\n"));
+        trip.getEvents().forEach(e ->
+            sb
+                .append("- ")
+                .append(e.getName())
+                .append(" (")
+                .append(e.getStartTime())
+                .append(")")
+                .append(" en ")
+                .append(e.getLocation().getName())
+                .append("\n")
+        );
 
         sb.append("\nGASTOS:\n");
-        trip.getExpenses().forEach(e -> sb.append("- ").append(e.getName())
-                .append(": ").append(e.getAmount()).append("€")
-                .append(" (pagado por ").append(e.getPayer().getUsername()).append(")\n"));
+        trip.getExpenses().forEach(e ->
+            sb
+                .append("- ")
+                .append(e.getName())
+                .append(": ")
+                .append(e.getAmount())
+                .append("€")
+                .append(" (pagado por ")
+                .append(e.getPayer().getUsername())
+                .append(")\n")
+        );
 
         sb.append("\nResponde en el idioma en que te escriba el usuario.");
         return sb.toString();
     }
 
-    private void callOllamaStream(String systemPrompt, List<AiChatMessage> history,
-                                  String userMessage, Consumer<String> onChunk) {
+    private void callOllamaStream(
+        String systemPrompt,
+        List<AiChatMessage> history,
+        String userMessage,
+        Consumer<String> onChunk
+    ) {
         List<Map<String, String>> messages = new ArrayList<>();
         messages.add(Map.of("role", "system", "content", systemPrompt));
 
-        history.forEach(m -> messages.add(Map.of(
-                "role", m.getRole() == AiChatMessage.Role.USER ? "user" : "assistant",
-                "content", m.getContent()
-        )));
+        history.forEach(m ->
+            messages.add(
+                Map.of(
+                    "role",
+                    m.getRole() == AiChatMessage.Role.USER
+                        ? "user"
+                        : "assistant",
+                    "content",
+                    m.getContent()
+                )
+            )
+        );
 
         messages.add(Map.of("role", "user", "content", userMessage));
 
         Map<String, Object> body = Map.of(
-                "model", ollamaModel,
-                "messages", messages,
-                "stream", true
+            "model",
+            ollamaModel,
+            "messages",
+            messages,
+            "stream",
+            true
         );
 
-        restClient.post()
-                .uri("/api/chat")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(body)
-                .exchange((_, res) -> {
-                    try (BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(res.getBody()))) {
-                        String line;
-                        while ((line = reader.readLine()) != null && !line.isBlank()) {
-                            JsonNode node = objectMapper.readTree(line);
-                            String chunk = node.path("message").path("content").asString();
-                            if (!chunk.isEmpty()) onChunk.accept(chunk);
-                        }
+        restClient
+            .post()
+            .uri("/api/chat")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(body)
+            .exchange((_, res) -> {
+                try (
+                    BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(res.getBody())
+                    )
+                ) {
+                    String line;
+                    while (
+                        (line = reader.readLine()) != null && !line.isBlank()
+                    ) {
+                        JsonNode node = objectMapper.readTree(line);
+                        String chunk = node
+                            .path("message")
+                            .path("content")
+                            .asString();
+                        if (!chunk.isEmpty()) onChunk.accept(chunk);
                     }
-                    return null;
-                });
+                }
+                return null;
+            });
     }
 }

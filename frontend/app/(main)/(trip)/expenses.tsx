@@ -6,6 +6,7 @@ import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { useExpenses, type ExpenseSummary, type ExpenseDetail, type BalancesInfo } from '../../../src/expenses';
 import { useTrip } from '../../../src/trips';
+import { useAuth } from '../../../src/auth';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedInput from '../../../components/ThemedInput';
 
@@ -99,7 +100,7 @@ function createReducer(state: CreateState, action: CreateAction): CreateState {
   }
 }
 
-type BalanceFlatRow = { _kind: 'header'; title: string; mt?: number } | { _kind: 'balance'; userId: string; amount: number } | { _kind: 'settlement'; fromId: string; toId: string; amount: number } | { _kind: 'empty'; text: string };
+type BalanceFlatRow = { _kind: 'header'; title: string; mt?: number } | { _kind: 'balance'; userId: string; amount: number } | { _kind: 'settlement'; fromId: string; toId: string; amount: number } | { _kind: 'separator' } | { _kind: 'empty'; text: string };
 
 // ── Screen ─────────────────────────────────────────────────────────────────
 const ExpensesScreen = () => {
@@ -107,7 +108,8 @@ const ExpensesScreen = () => {
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
   const { trip } = useTrip();
-  const { getExpenses, addExpense, getExpenseDetail, getBalances } = useExpenses();
+  const { getExpenses, addExpense, getExpenseDetail, getBalances, paySettlement, deleteExpense } = useExpenses();
+  const { userId: currentUserId } = useAuth();
   const navigation = useNavigation();
 
   const [activeTab, setActiveTab] = useState<Tab>('expenses');
@@ -115,6 +117,13 @@ const ExpensesScreen = () => {
   const [bals, balsDispatch] = useReducer(balsReducer, { info: null, loading: false, error: null });
   const [detailModal, detailDispatch] = useReducer(detailReducer, { visible: false, expense: null, loading: false, error: null });
   const [createModal, createDispatch] = useReducer(createReducer, CREATE_INITIAL);
+  const [payingKey, setPayingKey] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    if (!detailModal.visible) setConfirmingDelete(false);
+  }, [detailModal.visible]);
   const expensesLoadedRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -175,6 +184,41 @@ const ExpensesScreen = () => {
 
   const usernameFor = useCallback((id: string) => trip?.members?.find(m => m.id === id)?.username ?? '?', [trip?.members]);
 
+  const handleDelete = useCallback(async () => {
+    if (!trip?.id || !detailModal.expense) return;
+    setDeleting(true);
+    try {
+      await deleteExpense(trip.id, detailModal.expense.id);
+      listDispatch({ type: 'loaded', expenses: (list.expenses ?? []).filter(e => e.id !== detailModal.expense!.id) });
+      balsDispatch({ type: 'invalidate' });
+      detailDispatch({ type: 'close' });
+    } catch {
+      detailDispatch({ type: 'error', error: t('trip.deleteExpenseError') });
+    } finally {
+      setDeleting(false);
+      setConfirmingDelete(false);
+    }
+  }, [trip?.id, detailModal.expense, deleteExpense, list.expenses, t]);
+
+  const handlePaySettlement = useCallback(async (fromId: string, toId: string, amount: number) => {
+    if (!trip?.id) return;
+    const key = `${fromId}-${toId}`;
+    setPayingKey(key);
+    try {
+      await paySettlement(trip.id, fromId, toId, amount);
+      balsDispatch({ type: 'invalidate' });
+      await (async () => {
+        balsDispatch({ type: 'loading' });
+        try { balsDispatch({ type: 'loaded', info: await getBalances(trip.id!) }); }
+        catch { balsDispatch({ type: 'error', error: t('trip.unableLoadBalances') }); }
+      })();
+    } catch {
+      /* ignore — could add a toast here */
+    } finally {
+      setPayingKey(null);
+    }
+  }, [trip?.id, paySettlement, getBalances, t]);
+
   const balanceRows: BalanceFlatRow[] = (() => {
     const rows: BalanceFlatRow[] = [];
     const bl = bals.info?.balances ?? [];
@@ -183,8 +227,15 @@ const ExpensesScreen = () => {
     if (!bl.length) rows.push({ _kind: 'empty', text: t('trip.noBalances') });
     else bl.forEach(b => rows.push({ _kind: 'balance', userId: b.userId, amount: b.amount }));
     rows.push({ _kind: 'header', title: t('trip.settlements'), mt: 20 });
-    if (!sl.length) rows.push({ _kind: 'empty', text: t('trip.noSettlements') });
-    else sl.forEach(s => rows.push({ _kind: 'settlement', fromId: s.fromId, toId: s.toId, amount: s.amount }));
+    if (!sl.length) {
+      rows.push({ _kind: 'empty', text: t('trip.noSettlements') });
+    } else {
+      const mine = sl.filter(s => s.fromId === currentUserId);
+      const others = sl.filter(s => s.fromId !== currentUserId);
+      mine.forEach(s => rows.push({ _kind: 'settlement', fromId: s.fromId, toId: s.toId, amount: s.amount }));
+      if (mine.length && others.length) rows.push({ _kind: 'separator' });
+      others.forEach(s => rows.push({ _kind: 'settlement', fromId: s.fromId, toId: s.toId, amount: s.amount }));
+    }
     return rows;
   })();
 
@@ -194,33 +245,81 @@ const ExpensesScreen = () => {
         return <Text style={[styles.sectionHeader, { color: theme.icon }, item.mt ? { marginTop: item.mt } : undefined]}>{item.title.toUpperCase()}</Text>;
       case 'balance': {
         const pos = item.amount >= 0;
+        const isMe = item.userId === currentUserId;
         return (
           <View style={[styles.balanceCard, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
             <View style={[styles.balanceAvatar, { backgroundColor: `${theme.tint}18` }]}>
               <Text style={[styles.balanceInitial, { color: theme.tint }]}>{usernameFor(item.userId).charAt(0).toUpperCase()}</Text>
             </View>
-            <Text style={[styles.balanceName, { color: theme.title }]}>{usernameFor(item.userId)}</Text>
+            <View style={styles.nameRow}>
+              <Text style={[styles.balanceName, { color: theme.title }, isMe && styles.meText]} numberOfLines={1}>{usernameFor(item.userId)}</Text>
+              {isMe && (
+                <View style={[styles.meTag, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
+                  <Text style={[styles.meTagText, { color: theme.tint }]}>{t('common.you').toUpperCase()}</Text>
+                </View>
+              )}
+            </View>
             <View style={[styles.balancePill, { backgroundColor: pos ? 'rgba(76,175,80,0.15)' : 'rgba(239,68,68,0.15)', boxShadow: pos ? '0 0 10px rgba(76,175,80,0.3)' : '0 0 10px rgba(239,68,68,0.3)' }]}>
               <Text style={[styles.balanceAmt, { color: pos ? '#4caf50' : Colors.warning }]}>{pos ? '+' : ''}{item.amount.toFixed(2)}€</Text>
             </View>
           </View>
         );
       }
-      case 'settlement':
+      case 'settlement': {
+        const fromMe = item.fromId === currentUserId;
+        const toMe = item.toId === currentUserId;
+        const key = `${item.fromId}-${item.toId}`;
+        const isPaying = payingKey === key;
         return (
           <View style={[styles.settlementCard, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
-            <Text style={[styles.settlementName, { color: theme.title }]}>{usernameFor(item.fromId)}</Text>
-            <View style={[styles.settlementArrow, { backgroundColor: `${theme.tint}20` }]}>
-              <Ionicons name="arrow-forward" size={13} color={theme.tint} />
+            <View style={styles.settlementTop}>
+              <View style={[styles.nameRow, { flex: 0 }]}>
+                <Text style={[styles.settlementName, { color: theme.title }, fromMe && styles.meText]} numberOfLines={1}>{usernameFor(item.fromId)}</Text>
+                {fromMe && (
+                  <View style={[styles.meTag, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
+                    <Text style={[styles.meTagText, { color: theme.tint }]}>{t('common.you').toUpperCase()}</Text>
+                  </View>
+                )}
+              </View>
+              <View style={[styles.settlementArrow, { backgroundColor: `${theme.tint}20` }]}>
+                <Ionicons name="arrow-forward" size={13} color={theme.tint} />
+              </View>
+              <View style={[styles.nameRow, { flex: 1 }]}>
+                <Text style={[styles.settlementName, { color: theme.title }, toMe && styles.meText]} numberOfLines={1}>{usernameFor(item.toId)}</Text>
+                {toMe && (
+                  <View style={[styles.meTag, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
+                    <Text style={[styles.meTagText, { color: theme.tint }]}>{t('common.you').toUpperCase()}</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={[styles.settlementAmt, { color: theme.tint }]}>{item.amount.toFixed(2)}€</Text>
             </View>
-            <Text style={[styles.settlementName, { color: theme.title, flex: 1 }]}>{usernameFor(item.toId)}</Text>
-            <Text style={[styles.settlementAmt, { color: theme.tint }]}>{item.amount.toFixed(2)}€</Text>
+            {fromMe && (
+              <Pressable
+                style={({ pressed }) => [styles.payBtn, { borderColor: theme.tint }, pressed && { opacity: 0.7 }]}
+                onPress={() => handlePaySettlement(item.fromId, item.toId, item.amount)}
+                disabled={isPaying}
+              >
+                {isPaying
+                  ? <ActivityIndicator size="small" color={theme.tint} />
+                  : <>
+                      <Ionicons name="checkmark-circle-outline" size={15} color={theme.tint} />
+                      <Text style={[styles.payBtnText, { color: theme.tint }]}>{t('trip.markAsPaid')}</Text>
+                    </>
+                }
+              </Pressable>
+            )}
           </View>
         );
+      }
+      case 'separator':
+        return <View style={[styles.separator, { borderBottomColor: theme.border }]} />;
       case 'empty':
         return <Text style={[styles.emptyText, { color: theme.icon }]}>{item.text}</Text>;
+      default:
+        return null;
     }
-  }, [theme, usernameFor]);
+  }, [theme, usernameFor, currentUserId, payingKey, handlePaySettlement, t]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -271,7 +370,7 @@ const ExpensesScreen = () => {
         bals.error ? <Text style={[styles.emptyText, { color: theme.icon }]}>{bals.error}</Text> : (
           <FlatList
             data={balanceRows}
-            keyExtractor={(item, i) => item._kind === 'balance' ? item.userId : item._kind === 'settlement' ? `${item.fromId}-${item.toId}` : `${item._kind}-${i}`}
+            keyExtractor={(item, i) => item._kind === 'balance' ? item.userId : item._kind === 'settlement' ? `${item.fromId}-${item.toId}` : item._kind === 'separator' ? `sep-${i}` : `${item._kind}-${i}`}
             contentContainerStyle={styles.list}
             showsVerticalScrollIndicator={false}
             renderItem={renderBalanceRow}
@@ -298,33 +397,81 @@ const ExpensesScreen = () => {
                   </Text>
                 </View>
 
-                {[
-                  { label: t('trip.date'), val: new Date(detailModal.expense.datetime).toLocaleDateString() },
-                  { label: t('trip.payer'), val: usernameFor(detailModal.expense.payerId) },
-                ].map(row => (
-                  <View key={row.label} style={[styles.detailRow, { borderBottomColor: theme.border }]}>
-                    <Text style={[styles.detailLabel, { color: theme.icon }]}>{row.label}</Text>
-                    <Text style={[styles.detailVal, { color: theme.title }]}>{row.val}</Text>
-                  </View>
-                ))}
-
-                <Text style={[styles.detailLabel, { color: theme.icon, marginTop: 16, marginBottom: 10 }]}>{t('trip.beneficiaries').toUpperCase()}</Text>
-                <View style={styles.chips}>
-                  {detailModal.expense.beneficiaryIds.map(id => (
-                    <View key={id} style={[styles.chip, { backgroundColor: `${theme.tint}18`, borderColor: `${theme.tint}30` }]}>
-                      <Text style={[styles.chipText, { color: theme.tint }]}>{usernameFor(id)}</Text>
+                {/* Date + Created by — side by side */}
+                <View style={styles.detailPairRow}>
+                  {[
+                    { label: t('trip.date'), val: new Date(detailModal.expense.datetime).toLocaleDateString() },
+                    { label: t('trip.createdBy'), val: usernameFor(detailModal.expense.creatorId) },
+                  ].map(cell => (
+                    <View key={cell.label} style={[styles.detailCell, { backgroundColor: theme.uiBackground, borderColor: theme.border }]}>
+                      <Text style={[styles.detailLabel, { color: theme.icon }]}>{cell.label.toUpperCase()}</Text>
+                      <Text style={[styles.detailVal, { color: theme.title }]} numberOfLines={1}>{cell.val}</Text>
                     </View>
                   ))}
+                </View>
+
+                {/* Payer + Beneficiaries — grouped */}
+                <View style={[styles.detailGroup, { borderColor: theme.border }]}>
+                  <View style={[styles.detailGroupSection, { borderBottomColor: theme.border }]}>
+                    <Text style={[styles.detailLabel, { color: theme.icon }]}>{t('trip.payer').toUpperCase()}</Text>
+                    <Text style={[styles.detailVal, { color: theme.title }]}>{usernameFor(detailModal.expense.payerId)}</Text>
+                  </View>
+                  <View style={styles.detailGroupSection}>
+                    <Text style={[styles.detailLabel, { color: theme.icon }]}>{t('trip.beneficiaries').toUpperCase()}</Text>
+                    <View style={styles.chips}>
+                      {detailModal.expense.beneficiaryIds.map(id => (
+                        <View key={id} style={[styles.chip, { backgroundColor: `${theme.tint}18`, borderColor: `${theme.tint}30` }]}>
+                          <Text style={[styles.chipText, { color: theme.tint }]}>{usernameFor(id)}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
                 </View>
               </>
             )}
 
-            <Pressable
-              style={[styles.closeBtn, { backgroundColor: theme.tint, boxShadow: `0 0 20px ${theme.tint}55` }]}
-              onPress={() => detailDispatch({ type: 'close' })}
-            >
-              <Text style={styles.closeBtnText}>{t('common.close').toUpperCase()}</Text>
-            </Pressable>
+            {confirmingDelete ? (
+              <>
+                <Text style={[styles.detailLabel, { color: Colors.warning, textAlign: 'center', marginTop: 4 }]}>
+                  {t('trip.deleteExpenseConfirm').toUpperCase()}
+                </Text>
+                <View style={styles.modalBtns}>
+                  <Pressable
+                    style={[styles.modalBtn, { borderColor: theme.border, borderWidth: 1 }]}
+                    onPress={() => setConfirmingDelete(false)}
+                    disabled={deleting}
+                  >
+                    <Text style={{ color: theme.text, fontWeight: '700' }}>{t('common.cancel')}</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.modalBtn, { backgroundColor: Colors.warning, boxShadow: `0 0 20px ${Colors.warning}55` }]}
+                    onPress={handleDelete}
+                    disabled={deleting}
+                  >
+                    {deleting
+                      ? <ActivityIndicator color="#fff" size="small" />
+                      : <Text style={{ color: '#fff', fontWeight: '800', letterSpacing: 1 }}>{t('common.delete').toUpperCase()}</Text>}
+                  </Pressable>
+                </View>
+              </>
+            ) : (
+              <View style={styles.modalBtns}>
+                <Pressable
+                  style={[styles.modalBtn, { backgroundColor: Colors.warning, boxShadow: `0 0 20px ${Colors.warning}55`, flexDirection: 'row', gap: 6, justifyContent: 'center' }]}
+                  onPress={() => setConfirmingDelete(true)}
+                  disabled={detailModal.loading || !detailModal.expense}
+                >
+                  <Ionicons name="trash-outline" size={15} color="#fff" />
+                  <Text style={{ color: '#fff', fontWeight: '800', letterSpacing: 1 }}>{t('common.delete').toUpperCase()}</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.modalBtn, { backgroundColor: theme.tint, boxShadow: `0 0 20px ${theme.tint}55` }]}
+                  onPress={() => { setConfirmingDelete(false); detailDispatch({ type: 'close' }); }}
+                >
+                  <Text style={styles.closeBtnText}>{t('common.close').toUpperCase()}</Text>
+                </Pressable>
+              </View>
+            )}
           </Pressable>
         </Pressable>
       </Modal>
@@ -422,14 +569,22 @@ const styles = StyleSheet.create({
   balanceCard: { flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 18, borderWidth: 1, gap: 12 },
   balanceAvatar: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
   balanceInitial: { fontSize: 16, fontWeight: '800' },
-  balanceName: { flex: 1, fontSize: 15, fontWeight: '700' },
+  balanceName: { fontSize: 15, fontWeight: '700' },
+  nameRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 },
   balancePill: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20 },
   balanceAmt: { fontSize: 15, fontWeight: '800' },
 
-  settlementCard: { flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 18, borderWidth: 1, gap: 10 },
-  settlementName: { fontSize: 14, fontWeight: '700' },
+  settlementCard: { borderRadius: 18, borderWidth: 1, overflow: 'hidden' },
+  settlementTop: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 10 },
+  settlementName: { fontSize: 14, fontWeight: '700', flexShrink: 1 },
   settlementArrow: { width: 28, height: 28, borderRadius: 9, justifyContent: 'center', alignItems: 'center' },
   settlementAmt: { fontSize: 14, fontWeight: '800' },
+  payBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderTopWidth: 0.5, minHeight: 38 },
+  payBtnText: { fontSize: 12, fontWeight: '800', letterSpacing: 0.5 },
+  separator: { borderBottomWidth: 0.5, marginVertical: 4 },
+  meText: { fontWeight: '900' },
+  meTag: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, borderWidth: 1 },
+  meTagText: { fontSize: 9, fontWeight: '900', letterSpacing: 1.5 },
 
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 16 },
   modalBox: {
@@ -453,7 +608,11 @@ const styles = StyleSheet.create({
   amountHeroText: { fontSize: 42, fontWeight: '900', letterSpacing: -1 },
 
   detailName: { fontSize: 18, fontWeight: '800', marginBottom: 4 },
-  detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 11, borderBottomWidth: 0.5 },
+  detailPairRow: { flexDirection: 'row', gap: 10 },
+  detailCell: { flex: 1, borderRadius: 12, borderWidth: 1, padding: 12, gap: 4 },
+  detailGroup: { borderRadius: 12, borderWidth: 1, overflow: 'hidden' },
+  detailGroupSection: { padding: 12, gap: 4, borderBottomWidth: 0.5 },
+  detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 0.5 },
   detailLabel: { fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },
   detailVal: { fontSize: 14, fontWeight: '700' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },

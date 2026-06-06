@@ -38,4 +38,9 @@ abstract class PendingMembership{
         PendingMembership other = (PendingMembership) o;
         return id != null && id.equals(other.id);
     }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
 }

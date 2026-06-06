@@ -27,6 +27,8 @@ paths:
     $ref: './paths/expenses.yaml#/paths/~1trips~1{tripId}~1expenses~1{expenseId}'
   /trips/{tripId}/balances:
     $ref: './paths/expenses.yaml#/paths/~1trips~1{tripId}~1balances'
+  /trips/{tripId}/settlements:
+    $ref: './paths/expenses.yaml#/paths/~1trips~1{tripId}~1settlements'
   /trips/{tripId}/join-requests:
     $ref: './paths/membership.yaml#/paths/~1trips~1{tripId}~1join-requests'
   /trips/{tripId}/join-requests/{requestId}:

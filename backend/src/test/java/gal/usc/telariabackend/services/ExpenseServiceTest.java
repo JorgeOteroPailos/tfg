@@ -6,7 +6,9 @@ import gal.usc.telariabackend.model.User;
 import gal.usc.telariabackend.model.dto.*;
 import gal.usc.telariabackend.model.exceptions.ExpenseNotFoundException;
 import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
+import gal.usc.telariabackend.model.Settlement;
 import gal.usc.telariabackend.repository.ExpenseRepository;
+import gal.usc.telariabackend.repository.SettlementRepository;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +33,8 @@ class ExpenseServiceTest {
     private UserRepository userRepo;
     @Mock
     private ExpenseRepository expenseRepo;
+    @Mock
+    private SettlementRepository settlementRepo;
 
     private ExpenseService expenseService;
 
@@ -40,7 +44,7 @@ class ExpenseServiceTest {
 
     @BeforeEach
     void setUp() {
-        expenseService = new ExpenseService(tripRepo, userRepo, expenseRepo);
+        expenseService = new ExpenseService(tripRepo, userRepo, expenseRepo, settlementRepo);
         userId = UUID.randomUUID();
         tripId = UUID.randomUUID();
         user = new User("pepe", "pepe@example.com", "encoded", userId);
@@ -244,6 +248,8 @@ class ExpenseServiceTest {
         SettlementSuggestion firstSettlement = result.getSettlements().stream()
                 .findFirst().orElseThrow();
         assertEquals(Double.valueOf(15.0), firstSettlement.getAmount());
+        assertEquals(manolo.getId(), firstSettlement.getFromId());
+        assertEquals(user.getId(), firstSettlement.getToId());
     }
 
     @Test
@@ -285,6 +291,12 @@ class ExpenseServiceTest {
         double totalSettled = result.getSettlements().stream().mapToDouble(SettlementSuggestion::getAmount).sum();
         assertEquals(60.0, totalSettled, 0.01);
 
+        result.getSettlements().forEach(s -> assertEquals(user.getId(), s.getToId()));
+        Set<UUID> debtors = result.getSettlements().stream()
+                .map(SettlementSuggestion::getFromId)
+                .collect(java.util.stream.Collectors.toSet());
+        assertEquals(Set.of(manolo.getId(), lola.getId()), debtors);
+
         UserBalance payerBalance = result.getBalances().stream()
                 .filter(b -> user.getId().equals(b.getUserId()))
                 .findFirst().orElseThrow();
@@ -308,6 +320,18 @@ class ExpenseServiceTest {
         assertEquals(2, result.getSettlements().size());
         double totalSettled = result.getSettlements().stream().mapToDouble(SettlementSuggestion::getAmount).sum();
         assertEquals(50.0, totalSettled, 0.01);
+
+        // lola (net -50) is the sole debtor: pays user 40 and manolo 10
+        result.getSettlements().forEach(s -> assertEquals(lola.getId(), s.getFromId()));
+        SettlementSuggestion toUser = result.getSettlements().stream()
+                .filter(s -> user.getId().equals(s.getToId()))
+                .findFirst().orElseThrow();
+        assertEquals(40.0, toUser.getAmount(), 0.01);
+
+        SettlementSuggestion toManolo = result.getSettlements().stream()
+                .filter(s -> manolo.getId().equals(s.getToId()))
+                .findFirst().orElseThrow();
+        assertEquals(10.0, toManolo.getAmount(), 0.01);
     }
 
     @Test
@@ -415,5 +439,185 @@ class ExpenseServiceTest {
                 () -> expenseService.getExpense(otherTripId, expenseId, userId));
     }
 
+    // getBalances — settlements
+
+    @Test
+    void getBalances_WhenSettlementFullyCoversDebt_ShouldReturnZeroBalances() {
+        // user pays €60 for user+manolo → manolo owes user €30
+        // manolo settles €30 → both balances reach 0
+        User manolo = new User("manolo", "manolo@hotmail.com", "encoded", UUID.randomUUID());
+        Trip trip = mock(Trip.class);
+        Expense expense = new Expense(trip, user, BigDecimal.valueOf(60), "Cena", user, Set.of(user, manolo));
+        Settlement settlement = new Settlement(trip, manolo, user, BigDecimal.valueOf(30));
+
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
+        when(trip.getExpenses()).thenReturn(List.of(expense));
+        when(trip.getSettlements()).thenReturn(List.of(settlement));
+
+        BalancesInfo result = expenseService.getBalances(tripId, userId);
+
+        assertTrue(result.getSettlements().isEmpty());
+        result.getBalances().forEach(b -> assertEquals(0.0, b.getAmount(), 0.01));
+    }
+
+    @Test
+    void getBalances_WhenSettlementPartiallyCoversDebt_ShouldReduceBalanceAndSuggestRemainder() {
+        // user pays €60 for user+manolo → manolo owes user €30
+        // manolo pays €15 → manolo still owes €15
+        User manolo = new User("manolo", "manolo@hotmail.com", "encoded", UUID.randomUUID());
+        Trip trip = mock(Trip.class);
+        Expense expense = new Expense(trip, user, BigDecimal.valueOf(60), "Cena", user, Set.of(user, manolo));
+        Settlement settlement = new Settlement(trip, manolo, user, BigDecimal.valueOf(15));
+
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
+        when(trip.getExpenses()).thenReturn(List.of(expense));
+        when(trip.getSettlements()).thenReturn(List.of(settlement));
+
+        BalancesInfo result = expenseService.getBalances(tripId, userId);
+
+        UserBalance userBalance = result.getBalances().stream()
+                .filter(b -> user.getId().equals(b.getUserId()))
+                .findFirst().orElseThrow();
+        assertEquals(15.0, userBalance.getAmount(), 0.01);
+
+        UserBalance manoloBalance = result.getBalances().stream()
+                .filter(b -> manolo.getId().equals(b.getUserId()))
+                .findFirst().orElseThrow();
+        assertEquals(-15.0, manoloBalance.getAmount(), 0.01);
+
+        assertEquals(1, result.getSettlements().size());
+        SettlementSuggestion suggestion = result.getSettlements().get(0);
+        assertEquals(manolo.getId(), suggestion.getFromId());
+        assertEquals(user.getId(), suggestion.getToId());
+        assertEquals(15.0, suggestion.getAmount(), 0.01);
+    }
+
+    @Test
+    void getBalances_WhenSettlementExceedsDebt_ShouldReverseBalance() {
+        // user pays €60 for user+manolo → manolo owes user €30
+        // manolo overpays €50 → now user owes manolo €20
+        User manolo = new User("manolo", "manolo@hotmail.com", "encoded", UUID.randomUUID());
+        Trip trip = mock(Trip.class);
+        Expense expense = new Expense(trip, user, BigDecimal.valueOf(60), "Cena", user, Set.of(user, manolo));
+        Settlement settlement = new Settlement(trip, manolo, user, BigDecimal.valueOf(50));
+
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
+        when(trip.getExpenses()).thenReturn(List.of(expense));
+        when(trip.getSettlements()).thenReturn(List.of(settlement));
+
+        BalancesInfo result = expenseService.getBalances(tripId, userId);
+
+        UserBalance userBalance = result.getBalances().stream()
+                .filter(b -> user.getId().equals(b.getUserId()))
+                .findFirst().orElseThrow();
+        assertEquals(-20.0, userBalance.getAmount(), 0.01);
+
+        UserBalance manoloBalance = result.getBalances().stream()
+                .filter(b -> manolo.getId().equals(b.getUserId()))
+                .findFirst().orElseThrow();
+        assertEquals(20.0, manoloBalance.getAmount(), 0.01);
+
+        assertEquals(1, result.getSettlements().size());
+        SettlementSuggestion suggestion = result.getSettlements().get(0);
+        assertEquals(user.getId(), suggestion.getFromId());
+        assertEquals(manolo.getId(), suggestion.getToId());
+        assertEquals(20.0, suggestion.getAmount(), 0.01);
+    }
+
+    @Test
+    void getBalances_WhenMultipleSettlements_ShouldApplyAll() {
+        // user pays €90 for 3 → manolo owes €30, lola owes €30
+        // manolo settles fully (€30), lola settles partially (€15)
+        User manolo = new User("manolo", "manolo@hotmail.com", "encoded", UUID.randomUUID());
+        User lola = new User("lola", "lola@test.com", "encoded", UUID.randomUUID());
+        Trip trip = mock(Trip.class);
+        Expense expense = new Expense(trip, user, BigDecimal.valueOf(90), "Cena", user, Set.of(user, manolo, lola));
+        Settlement s1 = new Settlement(trip, manolo, user, BigDecimal.valueOf(30));
+        Settlement s2 = new Settlement(trip, lola, user, BigDecimal.valueOf(15));
+
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
+        when(trip.getExpenses()).thenReturn(List.of(expense));
+        when(trip.getSettlements()).thenReturn(List.of(s1, s2));
+
+        BalancesInfo result = expenseService.getBalances(tripId, userId);
+
+        // user: +60 from expense, -30 manolo, -15 lola = +15
+        UserBalance userBalance = result.getBalances().stream()
+                .filter(b -> user.getId().equals(b.getUserId()))
+                .findFirst().orElseThrow();
+        assertEquals(15.0, userBalance.getAmount(), 0.01);
+
+        // manolo: -30 + 30 = 0
+        UserBalance manoloBalance = result.getBalances().stream()
+                .filter(b -> manolo.getId().equals(b.getUserId()))
+                .findFirst().orElseThrow();
+        assertEquals(0.0, manoloBalance.getAmount(), 0.01);
+
+        // lola: -30 + 15 = -15
+        UserBalance lolaBalance = result.getBalances().stream()
+                .filter(b -> lola.getId().equals(b.getUserId()))
+                .findFirst().orElseThrow();
+        assertEquals(-15.0, lolaBalance.getAmount(), 0.01);
+
+        assertEquals(1, result.getSettlements().size());
+        SettlementSuggestion suggestion = result.getSettlements().get(0);
+        assertEquals(lola.getId(), suggestion.getFromId());
+        assertEquals(user.getId(), suggestion.getToId());
+        assertEquals(15.0, suggestion.getAmount(), 0.01);
+    }
+
+    @Test
+    void getBalances_WhenAllDebtsSettledByMultipleSettlements_ShouldReturnNoSuggestions() {
+        // e1: user pays €90 → user +60, manolo -30, lola -30
+        // e2: manolo pays €60 → manolo +40, user -20, lola -20
+        // net: user +40, manolo +10, lola -50
+        // lola pays user €40 and manolo €10 → all zero
+        User manolo = new User("manolo", "manolo@hotmail.com", "encoded", UUID.randomUUID());
+        User lola = new User("lola", "lola@test.com", "encoded", UUID.randomUUID());
+        Trip trip = mock(Trip.class);
+        Expense e1 = new Expense(trip, user, BigDecimal.valueOf(90), "Cena", user, Set.of(user, manolo, lola));
+        Expense e2 = new Expense(trip, manolo, BigDecimal.valueOf(60), "Hotel", manolo, Set.of(user, manolo, lola));
+        Settlement s1 = new Settlement(trip, lola, user, BigDecimal.valueOf(40));
+        Settlement s2 = new Settlement(trip, lola, manolo, BigDecimal.valueOf(10));
+
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
+        when(trip.getExpenses()).thenReturn(List.of(e1, e2));
+        when(trip.getSettlements()).thenReturn(List.of(s1, s2));
+
+        BalancesInfo result = expenseService.getBalances(tripId, userId);
+
+        assertTrue(result.getSettlements().isEmpty());
+        result.getBalances().forEach(b -> assertEquals(0.0, b.getAmount(), 0.01));
+    }
+
+    @Test
+    void getBalances_WhenSettlementWithNoExpenses_ShouldShowReverseBalance() {
+        // No expenses, but manolo paid user €20 (e.g. a direct transfer)
+        // manolo: +20 (owed back), user: -20 (owes manolo)
+        User manolo = new User("manolo", "manolo@hotmail.com", "encoded", UUID.randomUUID());
+        Trip trip = mock(Trip.class);
+        Settlement settlement = new Settlement(trip, manolo, user, BigDecimal.valueOf(20));
+
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
+        when(trip.getExpenses()).thenReturn(List.of());
+        when(trip.getSettlements()).thenReturn(List.of(settlement));
+
+        BalancesInfo result = expenseService.getBalances(tripId, userId);
+
+        UserBalance userBalance = result.getBalances().stream()
+                .filter(b -> user.getId().equals(b.getUserId()))
+                .findFirst().orElseThrow();
+        assertEquals(-20.0, userBalance.getAmount(), 0.01);
+
+        UserBalance manoloBalance = result.getBalances().stream()
+                .filter(b -> manolo.getId().equals(b.getUserId()))
+                .findFirst().orElseThrow();
+        assertEquals(20.0, manoloBalance.getAmount(), 0.01);
+
+        assertEquals(1, result.getSettlements().size());
+        assertEquals(user.getId(), result.getSettlements().get(0).getFromId());
+        assertEquals(manolo.getId(), result.getSettlements().get(0).getToId());
+        assertEquals(20.0, result.getSettlements().get(0).getAmount(), 0.01);
+    }
 
 }

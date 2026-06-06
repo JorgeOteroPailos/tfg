@@ -26,6 +26,7 @@ public class Settlement{
     @JoinColumn(name = "payer_id")
     private User payer;
 
+    @Getter
     @ManyToOne(optional = false)
     @JoinColumn(name = "receiver_id")
     private User receiver;
@@ -33,6 +34,9 @@ public class Settlement{
     @Getter
     private BigDecimal amount;
     private OffsetDateTime timestamp;
+
+    public Settlement() {
+    }
 
     public Settlement(Trip trip, User payer, User receiver, BigDecimal amount) {
         this.trip = trip;
