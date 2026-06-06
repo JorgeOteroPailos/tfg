@@ -1,5 +1,6 @@
 package gal.usc.telariabackend.model;
 
+import gal.usc.telariabackend.model.dto.ExpenseCategory;
 import gal.usc.telariabackend.model.dto.ExpenseDetail;
 import gal.usc.telariabackend.model.dto.ExpenseSummary;
 import jakarta.persistence.*;
@@ -49,9 +50,17 @@ public class Expense {
     private String name;
     private OffsetDateTime timestamp;
 
+    @Getter
+    @Enumerated(EnumType.STRING)
+    private ExpenseCategory category = ExpenseCategory.GENERAL;
+
     public Expense() {}
 
     public Expense(Trip t, User payer, BigDecimal amount, @NotNull String name, User creator, Set<User> beneficiaries) {
+        this(t, payer, amount, name, creator, beneficiaries, ExpenseCategory.GENERAL);
+    }
+
+    public Expense(Trip t, User payer, BigDecimal amount, @NotNull String name, User creator, Set<User> beneficiaries, ExpenseCategory category) {
         this.trip = t;
         this.payer = payer;
         this.amount = amount;
@@ -59,6 +68,7 @@ public class Expense {
         this.timestamp = OffsetDateTime.now();
         this.creator = creator;
         this.beneficiaries = beneficiaries;
+        this.category = category != null ? category : ExpenseCategory.GENERAL;
     }
 
     public ExpenseSummary toExpenseSummary() {
@@ -67,7 +77,8 @@ public class Expense {
                 .amount(this.amount.doubleValue())
                 .datetime(this.timestamp)
                 .payerId(this.payer.getId())
-                .name(this.name);
+                .name(this.name)
+                .category(this.category);
     }
 
     public ExpenseDetail toExpenseDetail() {
@@ -78,7 +89,8 @@ public class Expense {
                 .payerId(this.payer.getId())
                 .creatorId(this.creator.getId())
                 .name(this.name)
-                .beneficiaryIds(this.beneficiaries.stream().map(User::getId).toList());
+                .beneficiaryIds(this.beneficiaries.stream().map(User::getId).toList())
+                .category(this.category);
     }
 
 }

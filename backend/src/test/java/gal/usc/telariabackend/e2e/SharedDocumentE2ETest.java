@@ -3,12 +3,14 @@ package gal.usc.telariabackend.e2e;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gal.usc.telariabackend.model.dto.*;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.net.URI;
@@ -34,6 +36,30 @@ class SharedDocumentE2ETest extends BaseE2ETest {
                 .webAppContextSetup(context)
                 .apply(springSecurity())
                 .build();
+    }
+
+    @Autowired
+    private TransactionTemplate tx;
+    @Autowired
+    private EntityManager em;
+
+    @BeforeEach
+    @SuppressWarnings("SqlNoDataSourceInspection")
+    @AfterAll
+    void cleanDb() {
+        tx.execute(_ -> {
+            em.createNativeQuery("DELETE FROM expense_beneficiaries").executeUpdate();
+            em.createNativeQuery("DELETE FROM expenses").executeUpdate();
+            em.createNativeQuery("DELETE FROM events").executeUpdate();
+            em.createNativeQuery("DELETE FROM documents").executeUpdate();
+            em.createNativeQuery("DELETE FROM trip_members").executeUpdate();
+            em.createNativeQuery("DELETE FROM joinrequest").executeUpdate();
+            em.createNativeQuery("DELETE FROM invitations").executeUpdate();
+            em.createNativeQuery("DELETE FROM trips").executeUpdate();
+            em.createNativeQuery("DELETE FROM refreshtokens").executeUpdate();
+            em.createNativeQuery("DELETE FROM users").executeUpdate();
+            return null;
+        });
     }
 
     // -------------------------------------------------------------------------
@@ -94,17 +120,18 @@ class SharedDocumentE2ETest extends BaseE2ETest {
     private void uploadFileToMinio(String uploadUrl) throws Exception {
         byte[] minimalPdf = "%PDF-1.4 1 0 obj<</Type/Catalog>>endobj".getBytes();
 
-        java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
-        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-                .uri(URI.create(uploadUrl))
-                .PUT(java.net.http.HttpRequest.BodyPublishers.ofByteArray(minimalPdf))
-                .build();
+        try (java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient()) {
+            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                    .uri(URI.create(uploadUrl))
+                    .PUT(java.net.http.HttpRequest.BodyPublishers.ofByteArray(minimalPdf))
+                    .build();
 
-        java.net.http.HttpResponse<String> response = client.send(request,
-                java.net.http.HttpResponse.BodyHandlers.ofString());
+            java.net.http.HttpResponse<String> response = client.send(request,
+                    java.net.http.HttpResponse.BodyHandlers.ofString());
 
-        if (response.statusCode() >= 400) {
-            throw new RuntimeException("Minio upload failed: " + response.statusCode() + "\nBody: " + response.body());
+            if (response.statusCode() >= 400) {
+                throw new RuntimeException("Minio upload failed: " + response.statusCode() + "\nBody: " + response.body());
+            }
         }
     }
 

@@ -160,6 +160,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/trips/{tripId}/settlements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pay a settlement */
+        post: operations["createSettlement"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/trips/{tripId}/join-requests": {
         parameters: {
             query?: never;
@@ -439,6 +456,7 @@ export interface components {
             /** @example Viaje a Roma */
             name: string;
             memberCount: number;
+            /** Format: double */
             totalSpent: number;
         };
         IdResponse: {
@@ -462,6 +480,11 @@ export interface components {
             members: components["schemas"]["UserProfile"][];
             pendingRequests?: components["schemas"]["JoinRequestSummary"][];
         };
+        /**
+         * @default GENERAL
+         * @enum {string}
+         */
+        ExpenseCategory: "GENERAL" | "FOOD" | "TRANSPORT" | "ACCOMMODATION" | "ENTERTAINMENT" | "SHOPPING" | "HEALTH";
         ExpenseSummary: {
             /** Format: uuid */
             id: string;
@@ -479,6 +502,7 @@ export interface components {
             datetime: string;
             /** Format: uuid */
             payerId: string;
+            category?: components["schemas"]["ExpenseCategory"];
         };
         CreateExpenseRequest: {
             /** @example Cena en trattoria */
@@ -491,6 +515,7 @@ export interface components {
             beneficiaryIds: string[];
             /** Format: uuid */
             payerId: string;
+            category?: components["schemas"]["ExpenseCategory"];
         };
         ExpenseDetail: {
             /** Format: uuid */
@@ -512,6 +537,7 @@ export interface components {
             /** Format: uuid */
             creatorId: string;
             beneficiaryIds: string[];
+            category?: components["schemas"]["ExpenseCategory"];
         };
         SettlementSuggestion: {
             /** Format: uuid */
@@ -533,6 +559,19 @@ export interface components {
         BalancesInfo: {
             settlements?: components["schemas"]["SettlementSuggestion"][];
             balances?: components["schemas"]["UserBalance"][];
+        };
+        CreateSettlementRequest: {
+            /** Format: uuid */
+            tripId?: string;
+            /** Format: uuid */
+            fromId: string;
+            /** Format: uuid */
+            toId: string;
+            /**
+             * Format: double
+             * @example 25
+             */
+            amount: number;
         };
         ResolveJoinRequest: {
             accepted: boolean;
@@ -1043,6 +1082,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BalancesInfo"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    createSettlement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSettlementRequest"];
+            };
+        };
+        responses: {
+            /** @description Settlement added successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdResponse"];
                 };
             };
             /** @description Not authenticated */

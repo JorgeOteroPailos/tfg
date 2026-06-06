@@ -9,10 +9,28 @@ import { useTrips } from '../../src/trips';
 import { useInvitations } from '../../src/invitations';
 import { components } from '../../src/generated/types';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import ThemedInput from '../../components/ThemedInput';
 import { AmbientBlobs, DotGrid } from '../../components/BackgroundTexture';
 
 type TripSummary = components['schemas']['TripSummary'];
+
+function nameToHue(name: string): number {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash) % 360;
+}
+
+function tripGradient(name: string): [string, string] {
+  const hue = 200 + (nameToHue(name) % 110);
+  return [`hsl(${hue}, 72%, 58%)`, `hsl(${hue + 20}, 85%, 38%)`];
+}
+
+function tripInitials(name: string): string {
+  return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+}
 
 type DataState = { trips: TripSummary[]; invitationCount: number };
 type DataAction =
@@ -126,9 +144,9 @@ const Main = () => {
         {/* left glow stripe */}
         <View style={[styles.tripStripe, { backgroundColor: theme.tint, boxShadow: `0 0 10px ${theme.tint}` }]} />
 
-        <View style={[styles.tripIconWrap, { backgroundColor: `${theme.tint}18` }]}>
-          <Ionicons name="airplane-outline" size={22} color={theme.tint} />
-        </View>
+        <LinearGradient colors={tripGradient(item.name)} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.tripIconWrap}>
+          <Text style={styles.tripInitials}>{tripInitials(item.name)}</Text>
+        </LinearGradient>
 
         <View style={styles.tripInfo}>
           <Text style={[styles.tripName, { color: theme.title }]} numberOfLines={1}>{item.name}</Text>
@@ -324,6 +342,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
+  },
+  tripInitials: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#fff',
+    letterSpacing: 0.5,
   },
   tripInfo: { flex: 1 },
   tripName: {

@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { StyleSheet, View, FlatList, ActivityIndicator, Pressable, Modal, Text } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { StyleSheet, View, FlatList, ActivityIndicator, Pressable, Modal, Text, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from 'expo-router';
 import { useAppTheme } from '../../../src/theme';
@@ -9,6 +9,20 @@ import { useTrip } from '../../../src/trips';
 import { useAuth } from '../../../src/auth';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedInput from '../../../components/ThemedInput';
+import type { components } from '../../../src/generated/types';
+
+type ExpenseCategory = components['schemas']['ExpenseCategory'];
+
+type CategoryMeta = { icon: React.ComponentProps<typeof Ionicons>['name']; labelKey: string };
+const CATEGORIES: Record<NonNullable<ExpenseCategory>, CategoryMeta> = {
+  GENERAL:       { icon: 'receipt-outline',          labelKey: 'trip.catGeneral' },
+  FOOD:          { icon: 'restaurant-outline',        labelKey: 'trip.catFood' },
+  TRANSPORT:     { icon: 'car-outline',               labelKey: 'trip.catTransport' },
+  ACCOMMODATION: { icon: 'bed-outline',               labelKey: 'trip.catAccommodation' },
+  ENTERTAINMENT: { icon: 'game-controller-outline',   labelKey: 'trip.catEntertainment' },
+  SHOPPING:      { icon: 'bag-handle-outline',        labelKey: 'trip.catShopping' },
+  HEALTH:        { icon: 'medical-outline',           labelKey: 'trip.catHealth' },
+};
 
 type Tab = 'expenses' | 'balances';
 
@@ -20,6 +34,7 @@ interface ExpenseRowProps {
 }
 
 const ExpenseRow = React.memo(function ExpenseRow({ item, payerName, theme, onPress }: ExpenseRowProps) {
+  const cat = CATEGORIES[item.category ?? 'GENERAL'];
   return (
     <Pressable
       style={({ pressed }) => [
@@ -30,7 +45,7 @@ const ExpenseRow = React.memo(function ExpenseRow({ item, payerName, theme, onPr
       onPress={() => onPress(item)}
     >
       <View style={[styles.expenseIcon, { backgroundColor: `${theme.tint}18` }]}>
-        <Ionicons name="receipt-outline" size={20} color={theme.tint} />
+        <Ionicons name={cat.icon} size={20} color={theme.tint} />
       </View>
       <View style={styles.expenseLeft}>
         <Text style={[styles.expenseName, { color: theme.title }]} numberOfLines={1}>{item.name}</Text>
@@ -81,9 +96,9 @@ function detailReducer(state: DetailState, action: DetailAction): DetailState {
   }
 }
 
-type CreateState = { visible: boolean; creating: boolean; error: string | null; name: string; amount: string; payerId: string; beneficiaryIds: string[]; payerDropdownOpen: boolean };
-type CreateAction = { type: 'open' } | { type: 'close' } | { type: 'set_name'; value: string } | { type: 'set_amount'; value: string } | { type: 'set_payer'; id: string } | { type: 'toggle_beneficiary'; id: string } | { type: 'toggle_dropdown' } | { type: 'start_creating' } | { type: 'done_creating' } | { type: 'set_error'; error: string | null };
-const CREATE_INITIAL: CreateState = { visible: false, creating: false, error: null, name: '', amount: '', payerId: '', beneficiaryIds: [], payerDropdownOpen: false };
+type CreateState = { visible: boolean; creating: boolean; error: string | null; name: string; amount: string; payerId: string; beneficiaryIds: string[]; payerDropdownOpen: boolean; category: NonNullable<ExpenseCategory>; categoryOpen: boolean };
+type CreateAction = { type: 'open' } | { type: 'close' } | { type: 'set_name'; value: string } | { type: 'set_amount'; value: string } | { type: 'set_payer'; id: string } | { type: 'toggle_beneficiary'; id: string } | { type: 'toggle_dropdown' } | { type: 'toggle_category' } | { type: 'start_creating' } | { type: 'done_creating' } | { type: 'set_error'; error: string | null } | { type: 'set_category'; category: NonNullable<ExpenseCategory> };
+const CREATE_INITIAL: CreateState = { visible: false, creating: false, error: null, name: '', amount: '', payerId: '', beneficiaryIds: [], payerDropdownOpen: false, category: 'GENERAL', categoryOpen: false };
 function createReducer(state: CreateState, action: CreateAction): CreateState {
   switch (action.type) {
     case 'open': return { ...CREATE_INITIAL, visible: true };
@@ -93,6 +108,8 @@ function createReducer(state: CreateState, action: CreateAction): CreateState {
     case 'set_payer': return { ...state, payerId: action.id, payerDropdownOpen: false };
     case 'toggle_beneficiary': return { ...state, beneficiaryIds: state.beneficiaryIds.includes(action.id) ? state.beneficiaryIds.filter(id => id !== action.id) : [...state.beneficiaryIds, action.id] };
     case 'toggle_dropdown': return { ...state, payerDropdownOpen: !state.payerDropdownOpen };
+    case 'toggle_category': return { ...state, categoryOpen: !state.categoryOpen };
+    case 'set_category': return { ...state, category: action.category, categoryOpen: false };
     case 'start_creating': return { ...state, creating: true, error: null };
     case 'done_creating': return { ...state, creating: false };
     case 'set_error': return { ...state, error: action.error };
@@ -100,6 +117,7 @@ function createReducer(state: CreateState, action: CreateAction): CreateState {
   }
 }
 
+type ExpenseFlatRow = { _kind: 'date'; label: string } | { _kind: 'expense'; item: ExpenseSummary };
 type BalanceFlatRow = { _kind: 'header'; title: string; mt?: number } | { _kind: 'balance'; userId: string; amount: number } | { _kind: 'settlement'; fromId: string; toId: string; amount: number } | { _kind: 'separator' } | { _kind: 'empty'; text: string };
 
 // ── Modals ─────────────────────────────────────────────────────────────────
@@ -142,6 +160,7 @@ const ExpenseDetailModal = React.memo(function ExpenseDetailModal({
                 {[
                   { label: t('trip.date'), val: new Date(detail.expense.datetime).toLocaleDateString() },
                   { label: t('trip.createdBy'), val: usernameFor(detail.expense.creatorId) },
+                  { label: t('trip.category'), val: t(CATEGORIES[detail.expense.category ?? 'GENERAL'].labelKey) },
                 ].map(cell => (
                   <View key={cell.label} style={[styles.detailCell, { backgroundColor: theme.uiBackground, borderColor: theme.border }]}>
                     <Text style={[styles.detailLabel, { color: theme.icon }]}>{cell.label.toUpperCase()}</Text>
@@ -227,6 +246,36 @@ const CreateExpenseModal = React.memo(function CreateExpenseModal({
 
           <ThemedInput placeholder={t('trip.description')} value={createModal.name} onChangeText={v => createDispatch({ type: 'set_name', value: v })} autoFocus />
           <ThemedInput placeholder={t('trip.amount')} value={createModal.amount} onChangeText={v => createDispatch({ type: 'set_amount', value: v })} keyboardType="numeric" />
+
+          <Pressable
+            style={[styles.dropdown, { backgroundColor: theme.uiBackground, borderColor: theme.border }]}
+            onPress={() => createDispatch({ type: 'toggle_category' })}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Ionicons name={CATEGORIES[createModal.category].icon} size={18} color={theme.tint} />
+              <Text style={{ color: theme.title, fontWeight: '600' }}>{t(CATEGORIES[createModal.category].labelKey)}</Text>
+            </View>
+            <Ionicons name={createModal.categoryOpen ? 'chevron-up' : 'chevron-down'} size={16} color={theme.icon} />
+          </Pressable>
+
+          {createModal.categoryOpen && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryRow}>
+              {(Object.keys(CATEGORIES) as NonNullable<ExpenseCategory>[]).map(key => {
+                const meta = CATEGORIES[key];
+                const selected = createModal.category === key;
+                return (
+                  <Pressable
+                    key={key}
+                    style={[styles.categoryChip, { borderColor: selected ? theme.tint : theme.border, backgroundColor: selected ? `${theme.tint}18` : theme.uiBackground }]}
+                    onPress={() => createDispatch({ type: 'set_category', category: key })}
+                  >
+                    <Ionicons name={meta.icon} size={20} color={selected ? theme.tint : theme.icon} />
+                    <Text style={[styles.categoryChipLabel, { color: selected ? theme.tint : theme.icon }]}>{t(meta.labelKey)}</Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          )}
 
           <Pressable style={[styles.dropdown, { backgroundColor: theme.uiBackground, borderColor: theme.border }]} onPress={() => createDispatch({ type: 'toggle_dropdown' })}>
             <Text style={{ color: createModal.payerId ? theme.title : theme.icon, fontWeight: '600' }}>
@@ -330,7 +379,7 @@ const ExpensesScreen = () => {
     }
     createDispatch({ type: 'start_creating' });
     try {
-      const newExpense = await addExpense(trip.id, { name: createModal.name.trim(), amount: amountValue, payerId: createModal.payerId, beneficiaryIds: createModal.beneficiaryIds });
+      const newExpense = await addExpense(trip.id, { name: createModal.name.trim(), amount: amountValue, payerId: createModal.payerId, beneficiaryIds: createModal.beneficiaryIds, category: createModal.category });
       listDispatch({ type: 'add', expense: newExpense });
       balsDispatch({ type: 'invalidate' });
       createDispatch({ type: 'close' });
@@ -349,10 +398,44 @@ const ExpensesScreen = () => {
   }, [trip?.id, getExpenseDetail, t]);
 
   const members = trip?.members;
-  const renderExpenseItem = useCallback(({ item }: { item: ExpenseSummary }) => {
-    const payerName = members?.find(m => m.id === item.payerId)?.username ?? '?';
-    return <ExpenseRow item={item} payerName={payerName} theme={theme} onPress={handleOpenDetail} />;
-  }, [members, theme, handleOpenDetail]);
+
+  const expenseRows = useMemo((): ExpenseFlatRow[] => {
+    const sorted = [...(list.expenses ?? [])].sort(
+      (a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime()
+    );
+    const todayStr = new Date().toDateString();
+    const yesterdayStr = new Date(Date.now() - 86_400_000).toDateString();
+    const rows: ExpenseFlatRow[] = [];
+    let lastDateKey: string | null = null;
+    for (const item of sorted) {
+      const d = new Date(item.datetime);
+      const dateKey = d.toDateString();
+      if (dateKey !== lastDateKey) {
+        let label: string;
+        if (dateKey === todayStr) label = t('trip.today');
+        else if (dateKey === yesterdayStr) label = t('trip.yesterday');
+        else label = d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+        rows.push({ _kind: 'date', label });
+        lastDateKey = dateKey;
+      }
+      rows.push({ _kind: 'expense', item });
+    }
+    return rows;
+  }, [list.expenses, t]);
+
+  const renderExpenseRow = useCallback(({ item: row }: { item: ExpenseFlatRow }) => {
+    if (row._kind === 'date') {
+      return (
+        <View style={styles.dateSeparator}>
+          <View style={[styles.dateLine, { backgroundColor: theme.border }]} />
+          <Text style={[styles.dateLabel, { color: theme.icon }]}>{row.label}</Text>
+          <View style={[styles.dateLine, { backgroundColor: theme.border }]} />
+        </View>
+      );
+    }
+    const payerName = members?.find(m => m.id === row.item.payerId)?.username ?? '?';
+    return <ExpenseRow item={row.item} payerName={payerName} theme={theme} onPress={handleOpenDetail} />;
+  }, [members, theme, handleOpenDetail, t]);
 
   const usernameFor = useCallback((id: string) => trip?.members?.find(m => m.id === id)?.username ?? '?', [trip?.members]);
 
@@ -523,12 +606,12 @@ const ExpensesScreen = () => {
         list.loading ? <ActivityIndicator size="large" color={theme.tint} style={styles.centered} /> :
         list.error ? <Text style={[styles.emptyText, { color: theme.icon }]}>{list.error}</Text> : (
           <FlatList
-            data={list.expenses ?? []}
-            keyExtractor={(item, i) => item.id ?? `${i}`}
+            data={expenseRows}
+            keyExtractor={(row, i) => row._kind === 'expense' ? (row.item.id ?? `e-${i}`) : `d-${row.label}-${i}`}
             contentContainerStyle={styles.list}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={<Text style={[styles.emptyText, { color: theme.icon }]}>{t('trip.noExpenses')}</Text>}
-            renderItem={renderExpenseItem}
+            renderItem={renderExpenseRow}
             ListFooterComponent={
               <Pressable
                 style={({ pressed }) => [styles.addBtn, { backgroundColor: theme.tint, boxShadow: `0 0 28px ${theme.tint}55` }, pressed && { opacity: 0.8 }]}
@@ -665,6 +748,14 @@ const styles = StyleSheet.create({
   closeBtn: { paddingVertical: 15, borderRadius: 14, alignItems: 'center', marginTop: 10 },
   closeBtnText: { color: '#fff', fontWeight: '900', fontSize: 13, letterSpacing: 2 },
   errText: { color: Colors.warning, fontSize: 13, fontWeight: '600', textAlign: 'center' },
+
+  dateSeparator: { flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 4 },
+  dateLine: { flex: 1, height: StyleSheet.hairlineWidth },
+  dateLabel: { fontSize: 11, fontWeight: '500', letterSpacing: 0.3 },
+
+  categoryRow: { flexDirection: 'row', gap: 8, paddingBottom: 4 },
+  categoryChip: { alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 14, borderWidth: 1.5, minWidth: 68 },
+  categoryChipLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.3 },
 
   dropdown: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 14, borderWidth: 1, borderRadius: 12 },
   dropList: { borderRadius: 12, overflow: 'hidden', borderWidth: 0.5 },

@@ -48,6 +48,7 @@ class EventE2ETest extends BaseE2ETest{
             em.createNativeQuery("DELETE FROM expense_beneficiaries").executeUpdate();
             em.createNativeQuery("DELETE FROM expenses").executeUpdate();
             em.createNativeQuery("DELETE FROM events").executeUpdate();
+            em.createNativeQuery("DELETE FROM documents").executeUpdate();
             em.createNativeQuery("DELETE FROM trip_members").executeUpdate();
             em.createNativeQuery("DELETE FROM joinrequest").executeUpdate();
             em.createNativeQuery("DELETE FROM invitations").executeUpdate();

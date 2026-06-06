@@ -37,6 +37,7 @@ export function useExpenses() {
       amount: expense.amount,
       payerId: expense.payerId,
       datetime: new Date().toISOString(),
+      category: expense.category,
     };
   }, [callAuthenticated]);
 

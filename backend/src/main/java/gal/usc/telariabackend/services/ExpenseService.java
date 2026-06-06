@@ -1,6 +1,7 @@
 package gal.usc.telariabackend.services;
 
 import gal.usc.telariabackend.model.Expense;
+import gal.usc.telariabackend.model.dto.ExpenseCategory;
 import gal.usc.telariabackend.model.Trip;
 import gal.usc.telariabackend.model.User;
 import gal.usc.telariabackend.model.dto.*;
@@ -55,12 +56,15 @@ public class ExpenseService {
                 .map(userRepo::getReferenceById)
                 .collect(Collectors.toSet());
 
+        ExpenseCategory cat = request.getCategory() != null ? request.getCategory() : ExpenseCategory.GENERAL;
+
         Expense e=new Expense(t,
                 payer,
                 BigDecimal.valueOf(request.getAmount()),
                 request.getName(),
                 creator,
-                beneficiaries);
+                beneficiaries,
+                cat);
         expenseRepo.save(e);
         return e.getId();
     }
