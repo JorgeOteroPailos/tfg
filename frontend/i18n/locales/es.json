@@ -178,7 +178,8 @@
     "uploadedAt": "Subido el",
     "uploadedBy": "Subido por",
     "downloadDocument": "Descargar",
-    "aiChatPlaceholder": "Escribe un mensaje..."
+    "aiChatPlaceholder": "Escribe un mensaje...",
+    "totalSpent": "Total gastado"
   },
   "invitations": {
     "empty": "No tienes invitaciones pendientes",

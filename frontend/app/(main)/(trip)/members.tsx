@@ -37,7 +37,7 @@ const MembersScreen = () => {
         </View>
       );
     },
-    [theme, currentUserId]
+    [theme, currentUserId, t]
   );
 
   if (loading) {

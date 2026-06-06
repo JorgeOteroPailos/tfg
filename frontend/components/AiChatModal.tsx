@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useReducer, useCallback, useRef, useEffect } from 'react';
 import {
-  View, Modal, Pressable, TextInput, ScrollView,
+  View, Modal, Pressable, TextInput, FlatList,
   StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -22,21 +22,79 @@ type AiChatModalProps = {
   tripId: string;
 };
 
+type ChatState = {
+  messages: Message[];
+  input: string;
+  loading: boolean;
+  streaming: boolean;
+  streamingContent: string;
+};
+
+type ChatAction =
+  | { type: 'load_start' }
+  | { type: 'load_done'; messages: Message[] }
+  | { type: 'load_error' }
+  | { type: 'send'; userMessage: Message }
+  | { type: 'stream_token'; content: string }
+  | { type: 'stream_done'; messages: Message[] }
+  | { type: 'stream_abort' }
+  | { type: 'set_input'; input: string }
+  | { type: 'close' };
+
+function chatReducer(state: ChatState, action: ChatAction): ChatState {
+  switch (action.type) {
+    case 'load_start':
+      return { ...state, loading: true };
+    case 'load_done':
+      return { ...state, loading: false, messages: action.messages };
+    case 'load_error':
+      return { ...state, loading: false };
+    case 'send':
+      return { ...state, messages: [...state.messages, action.userMessage], input: '', streaming: true, streamingContent: '' };
+    case 'stream_token':
+      return { ...state, streamingContent: action.content };
+    case 'stream_done':
+      return { ...state, streaming: false, streamingContent: '', messages: action.messages };
+    case 'stream_abort':
+      return { ...state, streaming: false, streamingContent: '' };
+    case 'set_input':
+      return { ...state, input: action.input };
+    case 'close':
+      return { ...state, streaming: false, streamingContent: '' };
+    default:
+      return state;
+  }
+}
+
 const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
   const { getHistory, streamMessage } = useAiChat();
 
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [streaming, setStreaming] = useState(false);
-  const [streamingContent, setStreamingContent] = useState('');
+  const [state, dispatch] = useReducer(chatReducer, {
+    messages: [],
+    input: '',
+    loading: false,
+    streaming: false,
+    streamingContent: '',
+  });
+  const { messages, input, loading, streaming, streamingContent } = state;
 
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<FlatList<Message>>(null);
   const abortRef = useRef<(() => void) | null>(null);
   const streamingContentRef = useRef('');
+
+  const loadHistory = useCallback(async () => {
+    dispatch({ type: 'load_start' });
+    try {
+      const history = await getHistory(tripId);
+      dispatch({ type: 'load_done', messages: history.map(m => ({ id: m.id, role: m.role, content: m.content })) });
+    } catch {
+      // silent — empty chat is a valid state
+      dispatch({ type: 'load_error' });
+    }
+  }, [getHistory, tripId]);
 
   useEffect(() => {
     if (visible) {
@@ -44,8 +102,9 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
     } else {
       abortRef.current?.();
       abortRef.current = null;
+      dispatch({ type: 'close' });
     }
-  }, [visible]);
+  }, [visible, loadHistory]);
 
   useEffect(() => {
     if (visible) {
@@ -54,27 +113,12 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
     }
   }, [messages, streamingContent, visible]);
 
-  const loadHistory = async () => {
-    setLoading(true);
-    try {
-      const history = await getHistory(tripId);
-      setMessages(history.map(m => ({ id: m.id, role: m.role, content: m.content })));
-    } catch {
-      // silent — empty chat is a valid state
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSend = useCallback(() => {
     const text = input.trim();
     if (!text || streaming) return;
 
     const userMessage: Message = { id: `u-${Date.now()}`, role: 'user', content: text };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setStreaming(true);
-    setStreamingContent('');
+    dispatch({ type: 'send', userMessage });
     streamingContentRef.current = '';
 
     const abort = streamMessage(
@@ -82,25 +126,22 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
       text,
       (token) => {
         streamingContentRef.current += token;
-        setStreamingContent(streamingContentRef.current);
+        dispatch({ type: 'stream_token', content: streamingContentRef.current });
       },
       async () => {
         // SSE strips the leading space from tokens like " este" → "este",
         // so we reload from the server to get the correctly-spaced full text.
         streamingContentRef.current = '';
-        setStreaming(false);
-        setStreamingContent('');
         try {
           const history = await getHistory(tripId);
-          setMessages(history.map(m => ({ id: m.id, role: m.role, content: m.content })));
+          dispatch({ type: 'stream_done', messages: history.map(m => ({ id: m.id, role: m.role, content: m.content })) });
         } catch {
-          // keep whatever messages we have
+          dispatch({ type: 'stream_abort' });
         }
       },
       () => {
         streamingContentRef.current = '';
-        setStreaming(false);
-        setStreamingContent('');
+        dispatch({ type: 'stream_abort' });
       }
     );
 
@@ -110,11 +151,40 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
   const handleClose = () => {
     abortRef.current?.();
     abortRef.current = null;
-    setStreaming(false);
-    setStreamingContent('');
     streamingContentRef.current = '';
+    dispatch({ type: 'close' });
     onClose();
   };
+
+  const renderMessage = useCallback(({ item: msg }: { item: Message }) => {
+    const isUser = msg.role === 'user';
+    return (
+      <View style={[styles.messageRow, isUser ? styles.rowUser : styles.rowAssistant]}>
+        <View style={[
+          styles.bubble,
+          isUser
+            ? [styles.bubbleUser, { backgroundColor: Colors.primary }]
+            : [styles.bubbleAssistant, { backgroundColor: theme.uiBackground }],
+        ]}>
+          <ThemedText style={[styles.bubbleText, isUser && styles.bubbleTextUser]}>
+            {msg.content}
+          </ThemedText>
+        </View>
+      </View>
+    );
+  }, [theme.uiBackground]);
+
+  const streamingBubble = streaming ? (
+    <View style={[styles.messageRow, styles.rowAssistant]}>
+      <View style={[styles.bubble, styles.bubbleAssistant, { backgroundColor: theme.uiBackground }]}>
+        {streamingContent ? (
+          <ThemedText style={styles.bubbleText}>{streamingContent}</ThemedText>
+        ) : (
+          <ActivityIndicator size="small" color={Colors.primary} />
+        )}
+      </View>
+    </View>
+  ) : null;
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={handleClose}>
@@ -136,52 +206,23 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
               <ActivityIndicator color={Colors.primary} />
             </View>
           ) : (
-            <ScrollView
+            <FlatList
               ref={scrollRef}
               style={styles.messageList}
               contentContainerStyle={styles.messageListContent}
               keyboardShouldPersistTaps="handled"
-            >
-              {messages.map(msg => {
-                const isUser = msg.role === 'user';
-                return (
-                  <View
-                    key={msg.id}
-                    style={[styles.messageRow, isUser ? styles.rowUser : styles.rowAssistant]}
-                  >
-                    <View style={[
-                      styles.bubble,
-                      isUser
-                        ? [styles.bubbleUser, { backgroundColor: Colors.primary }]
-                        : [styles.bubbleAssistant, { backgroundColor: theme.uiBackground }],
-                    ]}>
-                      <ThemedText style={[styles.bubbleText, isUser && styles.bubbleTextUser]}>
-                        {msg.content}
-                      </ThemedText>
-                    </View>
-                  </View>
-                );
-              })}
-
-              {streaming && (
-                <View style={[styles.messageRow, styles.rowAssistant]}>
-                  <View style={[styles.bubble, styles.bubbleAssistant, { backgroundColor: theme.uiBackground }]}>
-                    {streamingContent ? (
-                      <ThemedText style={styles.bubbleText}>{streamingContent}</ThemedText>
-                    ) : (
-                      <ActivityIndicator size="small" color={Colors.primary} />
-                    )}
-                  </View>
-                </View>
-              )}
-            </ScrollView>
+              data={messages}
+              renderItem={renderMessage}
+              keyExtractor={msg => msg.id}
+              ListFooterComponent={streamingBubble}
+            />
           )}
 
           <View style={[styles.inputRow, { borderTopColor: theme.border, backgroundColor: theme.navBackground }]}>
             <TextInput
               style={[styles.input, { color: theme.text, backgroundColor: theme.uiBackground }]}
               value={input}
-              onChangeText={setInput}
+              onChangeText={text => dispatch({ type: 'set_input', input: text })}
               placeholder={t('trip.aiChatPlaceholder')}
               placeholderTextColor={theme.icon}
               multiline
@@ -221,8 +262,6 @@ export const AiChatButton = ({ tripId }: { tripId: string }) => {
     </>
   );
 };
-
-export default AiChatButton;
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
@@ -286,10 +325,6 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    boxShadow: '0 2px 4px rgba(0,0,0,0.25)',
   },
 });

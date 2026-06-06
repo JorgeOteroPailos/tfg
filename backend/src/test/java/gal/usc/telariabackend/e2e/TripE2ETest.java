@@ -10,6 +10,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,6 +52,26 @@ class TripE2ETest extends BaseE2ETest{
 
         return objectMapper.readValue(result.getResponse().getContentAsString(), LoginResponse.class)
                 .getAccessToken();
+    }
+
+    private UUID extractUserIdFromToken(String token) throws Exception {
+        String payload = token.split("\\.")[1];
+        byte[] decoded = Base64.getUrlDecoder().decode(payload);
+        String json = new String(decoded, StandardCharsets.UTF_8);
+        String sub = objectMapper.readTree(json).get("sub").asText();
+        return UUID.fromString(sub);
+    }
+
+    private void createExpense(String token, UUID tripId, UUID payerId, double amount) throws Exception {
+        mockMvc.perform(post("/trips/{tripId}/expenses", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new CreateExpenseRequest()
+                                .amount(amount)
+                                .name("Gasto")
+                                .payerId(payerId)
+                                .beneficiaryIds(List.of(payerId)))))
+                .andExpect(status().isCreated());
     }
 
     private UUID createTripAndObtainId(String token, String tripName) throws Exception {
@@ -234,5 +256,50 @@ class TripE2ETest extends BaseE2ETest{
 
         assertEquals(tripId, detail.getId());
         assertEquals("Viaje a Tokyo", detail.getName());
+    }
+
+    // TripSummary fields: memberCount and totalSpent
+
+    @Test
+    @DisplayName("GET /trips: new trip has memberCount=1 and totalSpent=0")
+    void listTrips_newTrip_hasMemberCount1AndZeroTotalSpent() throws Exception {
+        String token = registerAndObtainToken("belen", "belen@example.com");
+        createTripAndObtainId(token, "Viaje a Berlín");
+
+        MvcResult result = mockMvc.perform(get("/trips")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        List<TripSummary> trips = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                objectMapper.getTypeFactory().constructCollectionType(List.class, TripSummary.class));
+
+        assertEquals(1, trips.size());
+        assertEquals(1, trips.getFirst().getMemberCount());
+        assertEquals(0.0, trips.getFirst().getTotalSpent(), 0.001);
+    }
+
+    @Test
+    @DisplayName("GET /trips: totalSpent reflects sum of all trip expenses")
+    void listTrips_afterAddingExpenses_totalSpentReflectsSum() throws Exception {
+        String token = registerAndObtainToken("carmela", "carmela@example.com");
+        UUID userId = extractUserIdFromToken(token);
+        UUID tripId = createTripAndObtainId(token, "Viaje a Lisboa");
+
+        createExpense(token, tripId, userId, 40.0);
+        createExpense(token, tripId, userId, 60.0);
+
+        MvcResult result = mockMvc.perform(get("/trips")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        List<TripSummary> trips = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                objectMapper.getTypeFactory().constructCollectionType(List.class, TripSummary.class));
+
+        TripSummary trip = trips.stream().filter(t -> tripId.equals(t.getId())).findFirst().orElseThrow();
+        assertEquals(100.0, trip.getTotalSpent(), 0.001);
     }
 }

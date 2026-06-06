@@ -4,6 +4,8 @@ schemas:
     required:
       - id
       - name
+      - memberCount
+      - totalSpent
     properties:
       id:
         type: string
@@ -11,6 +13,11 @@ schemas:
       name:
         type: string
         example: Viaje a Roma
+      memberCount:
+        type: integer
+      totalSpent:
+        type: number
+        format: double
 
   UserProfile:
     type: object

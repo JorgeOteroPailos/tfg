@@ -1,7 +1,7 @@
 import React, {
   createContext,
   use,
-  useEffect,
+  useCallback,
   useMemo,
   useState,
 } from 'react';
@@ -13,11 +13,14 @@ type ResolvedTheme = 'light' | 'dark';
 type ThemeContextType = {
   selectedTheme: AppTheme;
   themeName: ResolvedTheme;
-  isLoading: boolean;
   setThemePreference: (theme: AppTheme) => Promise<void>;
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+// Start loading immediately when the module is imported, not when the component mounts.
+// use() below suspends instead of rendering with a placeholder, eliminating the extra render.
+const _savedThemeProm = getSavedTheme().catch(() => 'system' as AppTheme);
 
 export const ThemeProvider = ({
   children,
@@ -25,21 +28,8 @@ export const ThemeProvider = ({
   children: React.ReactNode;
 }) => {
   const systemColorScheme = useColorScheme();
-  const [selectedTheme, setSelectedTheme] = useState<AppTheme>('system');
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadTheme = async () => {
-      try {
-        const savedTheme = await getSavedTheme();
-        setSelectedTheme(savedTheme);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadTheme();
-  }, []);
+  const initialTheme = use(_savedThemeProm);
+  const [selectedTheme, setSelectedTheme] = useState<AppTheme>(initialTheme);
 
   const themeName: ResolvedTheme =
     selectedTheme === 'system'
@@ -48,19 +38,18 @@ export const ThemeProvider = ({
         : 'light'
       : selectedTheme;
 
-  const setThemePreference = async (theme: AppTheme) => {
+  const setThemePreference = useCallback(async (theme: AppTheme) => {
     await saveTheme(theme);
     setSelectedTheme(theme);
-  };
+  }, []);
 
   const value = useMemo(
     () => ({
       selectedTheme,
       themeName,
-      isLoading,
       setThemePreference,
     }),
-    [selectedTheme, themeName, isLoading]
+    [selectedTheme, themeName, setThemePreference]
   );
 
   return (

@@ -80,7 +80,11 @@ const MiniCal = ({
 
       <View style={cal.grid}>
         {grid.map((day, idx) => {
-          if (day === null) return <View key={`p-${idx}`} style={cal.cell} />;
+          if (day === null) {
+            const col = idx % 7;
+            const row = Math.floor(idx / 7);
+            return <View key={`pad-r${row}c${col}`} style={cal.cell} />;
+          }
           const k = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           const isToday = isThisMonth && todayKey === k;
           const isSel = selectedKey === k;
@@ -318,6 +322,191 @@ function createReducer(state: CreateState, action: CreateAction): CreateState {
   }
 }
 
+// ── Modals ────────────────────────────────────────────────────────────────────
+
+type EventDetailModalProps = {
+  detail: DetailState;
+  onClose: () => void;
+  onDelete: () => void;
+};
+
+const EventDetailModal = React.memo(function EventDetailModal({ detail, onClose, onDelete }: EventDetailModalProps) {
+  const { t } = useTranslation();
+  const { themeName } = useAppTheme();
+  const theme = Colors[themeName] ?? Colors.light;
+
+  return (
+    <Modal visible={detail.visible} transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.overlay} onPress={onClose}>
+        <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
+          <ThemedText style={styles.modalTitle}>{t('trip.eventDetail')}</ThemedText>
+
+          {detail.event && (
+            <>
+              <ThemedText style={styles.detailName}>{detail.event.name}</ThemedText>
+              {detail.event.startTime && (
+                <View style={styles.detailRow}>
+                  <ThemedText style={styles.detailLabel}>{t('trip.startTime')}</ThemedText>
+                  <ThemedText style={styles.detailValue}>{formatDateTime(detail.event.startTime)}</ThemedText>
+                </View>
+              )}
+              <View style={styles.detailRow}>
+                <ThemedText style={styles.detailLabel}>{t('trip.duration')}</ThemedText>
+                <ThemedText style={styles.detailValue}>{formatDuration(detail.event.duration)}</ThemedText>
+              </View>
+              {detail.event.location && (
+                <>
+                  <ThemedText style={[styles.detailLabel, { marginTop: 12, marginBottom: 6 }]}>{t('trip.location')}</ThemedText>
+                  {detail.event.location.name && <ThemedText style={styles.locationDetail}>· {detail.event.location.name}</ThemedText>}
+                  {detail.event.location.address && <ThemedText style={styles.locationDetail}>· {detail.event.location.address}</ThemedText>}
+                  {detail.event.location.mapURL && (
+                    <ThemedText style={[styles.locationDetail, { color: theme.tint }]}>{detail.event.location.mapURL}</ThemedText>
+                  )}
+                </>
+              )}
+            </>
+          )}
+
+          {detail.error && <ThemedText style={styles.errorText}>{detail.error}</ThemedText>}
+
+          <View style={styles.modalButtons}>
+            <Pressable style={[styles.modalBtn, styles.deleteBtn]} onPress={onDelete} disabled={detail.deleting}>
+              {detail.deleting
+                ? <ActivityIndicator color="white" />
+                : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.delete')}</ThemedText>}
+            </Pressable>
+            <Pressable style={[styles.modalBtn, { backgroundColor: theme.tint }]} onPress={onClose}>
+              <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.close')}</ThemedText>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+});
+
+type EventCreateModalProps = {
+  create: CreateState;
+  createDispatch: React.Dispatch<CreateAction>;
+  todayKey: string;
+  formatSectionDate: (k: string) => string;
+  onConfirm: () => void;
+};
+
+const EventCreateModal = React.memo(function EventCreateModal({
+  create, createDispatch, todayKey, formatSectionDate, onConfirm,
+}: EventCreateModalProps) {
+  const { t } = useTranslation();
+  const { themeName } = useAppTheme();
+  const theme = Colors[themeName] ?? Colors.light;
+
+  return (
+    <Modal visible={create.visible} transparent animationType="slide" onRequestClose={() => createDispatch({ type: 'close' })}>
+      <View style={styles.overlay}>
+        <ScrollView
+          style={{ width: '100%' }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
+            <View style={styles.modalTitleRow}>
+              <ThemedText style={styles.modalTitle}>{t('trip.newEvent')}</ThemedText>
+              <Pressable onPress={() => createDispatch({ type: 'close' })} hitSlop={8}>
+                <Ionicons name="close" size={22} color={theme.icon} />
+              </Pressable>
+            </View>
+
+            <ThemedInput
+              style={[styles.input, { color: theme.text, borderColor: theme.tint }]}
+              placeholder={t('trip.eventName')}
+              placeholderTextColor={theme.icon}
+              value={create.evName}
+              onChangeText={value => createDispatch({ type: 'set_name', value })}
+              autoFocus
+            />
+
+            <Pressable style={[styles.dateBtn, { borderColor: theme.tint }]} onPress={() => createDispatch({ type: 'toggle_date_picker' })}>
+              <Ionicons name="calendar-outline" size={18} color={theme.tint} />
+              <ThemedText style={{ flex: 1, marginLeft: 8 }}>
+                {create.pickedDate ? formatSectionDate(create.pickedDate) : t('trip.chooseDate')}
+              </ThemedText>
+              <Ionicons name={create.datePickerOpen ? 'chevron-up' : 'chevron-down'} size={16} color={theme.icon} />
+            </Pressable>
+
+            {create.datePickerOpen && (
+              <View style={[styles.calPickerBox, { borderColor: create.datePickerOpen ? theme.tint + '40' : 'transparent' }]}>
+                <MiniCal
+                  year={create.pickerYear}
+                  month={create.pickerMonth}
+                  selectedKey={create.pickedDate}
+                  tint={theme.tint}
+                  todayKey={todayKey}
+                  onPrevMonth={() => createDispatch({ type: 'prev_picker_month' })}
+                  onNextMonth={() => createDispatch({ type: 'next_picker_month' })}
+                  onDayPress={(day) => {
+                    const k = `${create.pickerYear}-${String(create.pickerMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    createDispatch({ type: 'pick_date', key: k });
+                  }}
+                />
+              </View>
+            )}
+
+            {create.pickedDate && (
+              <>
+                <ThemedText style={styles.fieldLabel}>{t('trip.time')}</ThemedText>
+                <TimePicker
+                  hour={create.pickHour}
+                  minute={create.pickMinute}
+                  tint={theme.tint}
+                  onChange={(h, m) => createDispatch({ type: 'set_time', hour: h, minute: m })}
+                />
+              </>
+            )}
+
+            <ThemedInput
+              style={[styles.input, { color: theme.text, borderColor: theme.tint }]}
+              placeholder={t('trip.durationPlaceholder')}
+              placeholderTextColor={theme.icon}
+              value={create.duration}
+              onChangeText={value => createDispatch({ type: 'set_duration', value })}
+              keyboardType="numeric"
+            />
+
+            <ThemedText style={styles.fieldLabel}>{t('trip.locationOptional')}</ThemedText>
+            <ThemedInput
+              style={[styles.input, { color: theme.text, borderColor: theme.tint }]}
+              placeholder={t('trip.locationName')}
+              placeholderTextColor={theme.icon}
+              value={create.locationName}
+              onChangeText={value => createDispatch({ type: 'set_location_name', value })}
+            />
+            <ThemedInput
+              style={[styles.input, { color: theme.text, borderColor: theme.tint }]}
+              placeholder={t('trip.locationAddress')}
+              placeholderTextColor={theme.icon}
+              value={create.locationAddress}
+              onChangeText={value => createDispatch({ type: 'set_location_address', value })}
+            />
+
+            {create.error && <ThemedText style={styles.errorText}>{create.error}</ThemedText>}
+
+            <View style={styles.modalButtons}>
+              <Pressable style={[styles.modalBtn, styles.cancelBtn]} onPress={() => createDispatch({ type: 'close' })}>
+                <ThemedText>{t('common.cancel')}</ThemedText>
+              </Pressable>
+              <Pressable style={[styles.modalBtn, { backgroundColor: theme.tint }]} onPress={onConfirm} disabled={create.creating}>
+                {create.creating
+                  ? <ActivityIndicator color="white" />
+                  : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.create')}</ThemedText>}
+              </Pressable>
+            </View>
+          </Pressable>
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+});
+
 // ── Main screen ────────────────────────────────────────────────────────────────
 const EventsScreen = () => {
   const { t } = useTranslation();
@@ -452,6 +641,8 @@ const EventsScreen = () => {
     }
   };
 
+  const handleDetailClose = useCallback(() => detailDispatch({ type: 'close' }), []);
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
 
@@ -568,170 +759,19 @@ const EventsScreen = () => {
         </Pressable>
       )}
 
-      {/* ── Detail modal ── */}
-      <Modal visible={detail.visible} transparent animationType="fade" onRequestClose={() => detailDispatch({ type: 'close' })}>
-        <Pressable style={styles.overlay} onPress={() => detailDispatch({ type: 'close' })}>
-          <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
-            <ThemedText style={styles.modalTitle}>{t('trip.eventDetail')}</ThemedText>
+      <EventDetailModal
+        detail={detail}
+        onClose={handleDetailClose}
+        onDelete={handleDelete}
+      />
 
-            {detail.event && (
-              <>
-                <ThemedText style={styles.detailName}>{detail.event.name}</ThemedText>
-                {detail.event.startTime && (
-                  <View style={styles.detailRow}>
-                    <ThemedText style={styles.detailLabel}>{t('trip.startTime')}</ThemedText>
-                    <ThemedText style={styles.detailValue}>{formatDateTime(detail.event.startTime)}</ThemedText>
-                  </View>
-                )}
-                <View style={styles.detailRow}>
-                  <ThemedText style={styles.detailLabel}>{t('trip.duration')}</ThemedText>
-                  <ThemedText style={styles.detailValue}>{formatDuration(detail.event.duration)}</ThemedText>
-                </View>
-                {detail.event.location && (
-                  <>
-                    <ThemedText style={[styles.detailLabel, { marginTop: 12, marginBottom: 6 }]}>{t('trip.location')}</ThemedText>
-                    {detail.event.location.name && <ThemedText style={styles.locationDetail}>· {detail.event.location.name}</ThemedText>}
-                    {detail.event.location.address && <ThemedText style={styles.locationDetail}>· {detail.event.location.address}</ThemedText>}
-                    {detail.event.location.mapURL && (
-                      <ThemedText style={[styles.locationDetail, { color: theme.tint }]}>{detail.event.location.mapURL}</ThemedText>
-                    )}
-                  </>
-                )}
-              </>
-            )}
-
-            {detail.error && <ThemedText style={styles.errorText}>{detail.error}</ThemedText>}
-
-            <View style={styles.modalButtons}>
-              <Pressable style={[styles.modalBtn, styles.deleteBtn]} onPress={handleDelete} disabled={detail.deleting}>
-                {detail.deleting
-                  ? <ActivityIndicator color="white" />
-                  : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.delete')}</ThemedText>}
-              </Pressable>
-              <Pressable style={[styles.modalBtn, { backgroundColor: theme.tint }]} onPress={() => detailDispatch({ type: 'close' })}>
-                <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.close')}</ThemedText>
-              </Pressable>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
-
-      {/* ── Create modal ── */}
-      <Modal visible={create.visible} transparent animationType="slide" onRequestClose={() => createDispatch({ type: 'close' })}>
-        <View style={styles.overlay}>
-          <ScrollView
-            style={{ width: '100%' }}
-            contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
-            keyboardShouldPersistTaps="handled"
-          >
-            <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
-              <View style={styles.modalTitleRow}>
-                <ThemedText style={styles.modalTitle}>{t('trip.newEvent')}</ThemedText>
-                <Pressable onPress={() => createDispatch({ type: 'close' })} hitSlop={8}>
-                  <Ionicons name="close" size={22} color={theme.icon} />
-                </Pressable>
-              </View>
-
-              {/* Name */}
-              <ThemedInput
-                style={[styles.input, { color: theme.text, borderColor: theme.tint }]}
-                placeholder={t('trip.eventName')}
-                placeholderTextColor={theme.icon}
-                value={create.evName}
-                onChangeText={value => createDispatch({ type: 'set_name', value })}
-                autoFocus
-              />
-
-              {/* Date selector */}
-              <Pressable
-                style={[styles.dateBtn, { borderColor: theme.tint }]}
-                onPress={() => createDispatch({ type: 'toggle_date_picker' })}
-              >
-                <Ionicons name="calendar-outline" size={18} color={theme.tint} />
-                <ThemedText style={{ flex: 1, marginLeft: 8 }}>
-                  {create.pickedDate ? formatSectionDate(create.pickedDate) : t('trip.chooseDate')}
-                </ThemedText>
-                <Ionicons name={create.datePickerOpen ? 'chevron-up' : 'chevron-down'} size={16} color={theme.icon} />
-              </Pressable>
-
-              {create.datePickerOpen && (
-                <View style={[styles.calPickerBox, { borderColor: theme.tint + '40' }]}>
-                  <MiniCal
-                    year={create.pickerYear}
-                    month={create.pickerMonth}
-                    selectedKey={create.pickedDate}
-                    tint={theme.tint}
-                    todayKey={todayKey}
-                    onPrevMonth={() => createDispatch({ type: 'prev_picker_month' })}
-                    onNextMonth={() => createDispatch({ type: 'next_picker_month' })}
-                    onDayPress={(day) => {
-                      const k = `${create.pickerYear}-${String(create.pickerMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                      createDispatch({ type: 'pick_date', key: k });
-                    }}
-                  />
-                </View>
-              )}
-
-              {/* Time picker — only shown when a date is picked */}
-              {create.pickedDate && (
-                <>
-                  <ThemedText style={styles.fieldLabel}>{t('trip.time')}</ThemedText>
-                  <TimePicker
-                    hour={create.pickHour}
-                    minute={create.pickMinute}
-                    tint={theme.tint}
-                    onChange={(h, m) => createDispatch({ type: 'set_time', hour: h, minute: m })}
-                  />
-                </>
-              )}
-
-              {/* Duration */}
-              <ThemedInput
-                style={[styles.input, { color: theme.text, borderColor: theme.tint }]}
-                placeholder={t('trip.durationPlaceholder')}
-                placeholderTextColor={theme.icon}
-                value={create.duration}
-                onChangeText={value => createDispatch({ type: 'set_duration', value })}
-                keyboardType="numeric"
-              />
-
-              {/* Location */}
-              <ThemedText style={styles.fieldLabel}>{t('trip.locationOptional')}</ThemedText>
-              <ThemedInput
-                style={[styles.input, { color: theme.text, borderColor: theme.tint }]}
-                placeholder={t('trip.locationName')}
-                placeholderTextColor={theme.icon}
-                value={create.locationName}
-                onChangeText={value => createDispatch({ type: 'set_location_name', value })}
-              />
-              <ThemedInput
-                style={[styles.input, { color: theme.text, borderColor: theme.tint }]}
-                placeholder={t('trip.locationAddress')}
-                placeholderTextColor={theme.icon}
-                value={create.locationAddress}
-                onChangeText={value => createDispatch({ type: 'set_location_address', value })}
-              />
-
-              {create.error && <ThemedText style={styles.errorText}>{create.error}</ThemedText>}
-
-              <View style={styles.modalButtons}>
-                <Pressable style={[styles.modalBtn, styles.cancelBtn]} onPress={() => createDispatch({ type: 'close' })}>
-                  <ThemedText>{t('common.cancel')}</ThemedText>
-                </Pressable>
-                <Pressable
-                  style={[styles.modalBtn, { backgroundColor: theme.tint }]}
-                  onPress={handleCreate}
-                  disabled={create.creating}
-                >
-                  {create.creating
-                    ? <ActivityIndicator color="white" />
-                    : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.create')}</ThemedText>}
-                </Pressable>
-              </View>
-            </Pressable>
-          </ScrollView>
-        </View>
-      </Modal>
+      <EventCreateModal
+        create={create}
+        createDispatch={createDispatch}
+        todayKey={todayKey}
+        formatSectionDate={formatSectionDate}
+        onConfirm={handleCreate}
+      />
     </View>
   );
 };

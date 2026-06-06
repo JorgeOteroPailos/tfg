@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../src/theme';
@@ -49,26 +49,41 @@ const InvitationCard = React.memo(function InvitationCard({
   );
 });
 
+type InvState = { invitations: InvitationSummary[]; loading: boolean; error: string | null };
+type InvAction =
+  | { type: 'loading' }
+  | { type: 'loaded'; data: InvitationSummary[] }
+  | { type: 'error'; message: string }
+  | { type: 'remove'; id: string };
+
+function invReducer(state: InvState, action: InvAction): InvState {
+  switch (action.type) {
+    case 'loading': return { ...state, loading: true, error: null };
+    case 'loaded': return { invitations: action.data, loading: false, error: null };
+    case 'error': return { ...state, loading: false, error: action.message };
+    case 'remove': return { ...state, invitations: state.invitations.filter(inv => inv.id !== action.id) };
+    default: return state;
+  }
+}
+
+const INV_INITIAL: InvState = { invitations: [], loading: true, error: null };
+
 const InvitationsScreen = () => {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
   const { getMyInvitations, resolveInvitation } = useInvitations();
 
-  const [invitations, setInvitations] = useState<InvitationSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [{ invitations, loading, error }, dispatch] = useReducer(invReducer, INV_INITIAL);
   const [resolving, setResolving] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    dispatch({ type: 'loading' });
     try {
-      setError(null);
       const data = await getMyInvitations();
-      setInvitations(data);
+      dispatch({ type: 'loaded', data });
     } catch {
-      setError(t('invitations.loadError'));
-    } finally {
-      setLoading(false);
+      dispatch({ type: 'error', message: t('invitations.loadError') });
     }
   }, [getMyInvitations, t]);
 
@@ -78,9 +93,9 @@ const InvitationsScreen = () => {
     setResolving(id);
     try {
       await resolveInvitation(id, accepted);
-      setInvitations(prev => prev.filter(inv => inv.id !== id));
+      dispatch({ type: 'remove', id });
     } catch {
-      setError(accepted ? t('invitations.acceptError') : t('invitations.rejectError'));
+      dispatch({ type: 'error', message: accepted ? t('invitations.acceptError') : t('invitations.rejectError') });
     } finally {
       setResolving(null);
     }

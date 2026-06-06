@@ -178,7 +178,8 @@
     "uploadedAt": "Uploaded at",
     "uploadedBy": "Uploaded by",
     "downloadDocument": "Download",
-    "aiChatPlaceholder": "Write a message..."
+    "aiChatPlaceholder": "Write a message...",
+    "totalSpent": "Total spent"
   },
   "invitations": {
     "empty": "No pending invitations",

@@ -108,7 +108,7 @@ const Main = () => {
     try {
       modalDispatch({ type: 'start_creating' });
       const { id } = await createTrip({ name: modal.name.trim() });
-      dataDispatch({ type: 'trip_added', trip: { id, name: modal.name.trim() } });
+      dataDispatch({ type: 'trip_added', trip: { id, name: modal.name.trim(), memberCount: 1, totalSpent: 0 } });
       modalDispatch({ type: 'close' });
     } catch {
       /* ignore */
@@ -130,14 +130,23 @@ const Main = () => {
           <Ionicons name="airplane-outline" size={22} color={theme.tint} />
         </View>
 
-        <Text style={[styles.tripName, { color: theme.title }]} numberOfLines={1}>{item.name}</Text>
+        <View style={styles.tripInfo}>
+          <Text style={[styles.tripName, { color: theme.title }]} numberOfLines={1}>{item.name}</Text>
+          <View style={styles.tripStats}>
+            <View style={styles.tripStatLeft}>
+              <Ionicons name="people-outline" size={11} color={theme.text} style={{ opacity: 0.5 }} />
+              <Text style={[styles.tripStat, { color: theme.text }]}>{item.memberCount}</Text>
+            </View>
+            <Text style={[styles.tripStat, { color: theme.text }]}>{t('trip.totalSpent')}: {item.totalSpent.toFixed(2)}€</Text>
+          </View>
+        </View>
 
         <View style={[styles.tripChevron, { backgroundColor: theme.uiBackground }]}>
           <Ionicons name="chevron-forward" size={14} color={theme.tint} />
         </View>
       </Pressable>
     ),
-    [theme]
+    [theme, t]
   );
 
   return (
@@ -316,12 +325,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  tripInfo: { flex: 1 },
   tripName: {
-    flex: 1,
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.2,
   },
+  tripStats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 3 },
+  tripStatLeft: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  tripStat: { fontSize: 12, fontWeight: '500', opacity: 0.55 },
   tripChevron: {
     width: 28,
     height: 28,

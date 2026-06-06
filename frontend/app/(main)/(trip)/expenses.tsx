@@ -102,6 +102,178 @@ function createReducer(state: CreateState, action: CreateAction): CreateState {
 
 type BalanceFlatRow = { _kind: 'header'; title: string; mt?: number } | { _kind: 'balance'; userId: string; amount: number } | { _kind: 'settlement'; fromId: string; toId: string; amount: number } | { _kind: 'separator' } | { _kind: 'empty'; text: string };
 
+// ── Modals ─────────────────────────────────────────────────────────────────
+
+type ExpenseDetailModalProps = {
+  detail: DetailState;
+  confirmingDelete: boolean;
+  deleting: boolean;
+  usernameFor: (id: string) => string;
+  onClose: () => void;
+  onDelete: () => void;
+  setConfirmingDelete: (v: boolean) => void;
+};
+
+const ExpenseDetailModal = React.memo(function ExpenseDetailModal({
+  detail, confirmingDelete, deleting, usernameFor, onClose, onDelete, setConfirmingDelete,
+}: ExpenseDetailModalProps) {
+  const { t } = useTranslation();
+  const { themeName } = useAppTheme();
+  const theme = Colors[themeName] ?? Colors.light;
+
+  return (
+    <Modal visible={detail.visible} transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.overlay} onPress={onClose}>
+        <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
+          <Text style={[styles.modalTitle, { color: theme.title }]}>{t('trip.expenseDetail')}</Text>
+
+          {detail.loading && <ActivityIndicator color={theme.tint} style={{ marginVertical: 20 }} />}
+          {detail.error && <Text style={styles.errText}>{detail.error}</Text>}
+
+          {detail.expense && !detail.loading && (
+            <>
+              <Text style={[styles.detailName, { color: theme.title }]}>{detail.expense.name}</Text>
+              <View style={[styles.amountHero, { backgroundColor: `${theme.tint}12`, borderColor: `${theme.tint}28` }]}>
+                <Text style={[styles.amountHeroText, { color: theme.tint, textShadowColor: `${theme.tint}70`, textShadowRadius: 16 }]}>
+                  {detail.expense.amount?.toFixed(2)}€
+                </Text>
+              </View>
+              <View style={styles.detailPairRow}>
+                {[
+                  { label: t('trip.date'), val: new Date(detail.expense.datetime).toLocaleDateString() },
+                  { label: t('trip.createdBy'), val: usernameFor(detail.expense.creatorId) },
+                ].map(cell => (
+                  <View key={cell.label} style={[styles.detailCell, { backgroundColor: theme.uiBackground, borderColor: theme.border }]}>
+                    <Text style={[styles.detailLabel, { color: theme.icon }]}>{cell.label.toUpperCase()}</Text>
+                    <Text style={[styles.detailVal, { color: theme.title }]} numberOfLines={1}>{cell.val}</Text>
+                  </View>
+                ))}
+              </View>
+              <View style={[styles.detailGroup, { borderColor: theme.border }]}>
+                <View style={[styles.detailGroupSection, { borderBottomColor: theme.border }]}>
+                  <Text style={[styles.detailLabel, { color: theme.icon }]}>{t('trip.payer').toUpperCase()}</Text>
+                  <Text style={[styles.detailVal, { color: theme.title }]}>{usernameFor(detail.expense.payerId)}</Text>
+                </View>
+                <View style={styles.detailGroupSection}>
+                  <Text style={[styles.detailLabel, { color: theme.icon }]}>{t('trip.beneficiaries').toUpperCase()}</Text>
+                  <View style={styles.chips}>
+                    {detail.expense.beneficiaryIds.map(id => (
+                      <View key={id} style={[styles.chip, { backgroundColor: `${theme.tint}18`, borderColor: `${theme.tint}30` }]}>
+                        <Text style={[styles.chipText, { color: theme.tint }]}>{usernameFor(id)}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            </>
+          )}
+
+          {confirmingDelete ? (
+            <>
+              <Text style={[styles.detailLabel, { color: Colors.warning, textAlign: 'center', marginTop: 4 }]}>
+                {t('trip.deleteExpenseConfirm').toUpperCase()}
+              </Text>
+              <View style={styles.modalBtns}>
+                <Pressable style={[styles.modalBtn, { borderColor: theme.border, borderWidth: 1 }]} onPress={() => setConfirmingDelete(false)} disabled={deleting}>
+                  <Text style={{ color: theme.text, fontWeight: '700' }}>{t('common.cancel')}</Text>
+                </Pressable>
+                <Pressable style={[styles.modalBtn, { backgroundColor: Colors.warning, boxShadow: `0 0 20px ${Colors.warning}55` }]} onPress={onDelete} disabled={deleting}>
+                  {deleting
+                    ? <ActivityIndicator color="#fff" size="small" />
+                    : <Text style={{ color: '#fff', fontWeight: '800', letterSpacing: 1 }}>{t('common.delete').toUpperCase()}</Text>}
+                </Pressable>
+              </View>
+            </>
+          ) : (
+            <View style={styles.modalBtns}>
+              <Pressable
+                style={[styles.modalBtn, { backgroundColor: Colors.warning, boxShadow: `0 0 20px ${Colors.warning}55`, flexDirection: 'row', gap: 6, justifyContent: 'center' }]}
+                onPress={() => setConfirmingDelete(true)}
+                disabled={detail.loading || !detail.expense}
+              >
+                <Ionicons name="trash-outline" size={15} color="#fff" />
+                <Text style={{ color: '#fff', fontWeight: '800', letterSpacing: 1 }}>{t('common.delete').toUpperCase()}</Text>
+              </Pressable>
+              <Pressable style={[styles.modalBtn, { backgroundColor: theme.tint, boxShadow: `0 0 20px ${theme.tint}55` }]} onPress={onClose}>
+                <Text style={styles.closeBtnText}>{t('common.close').toUpperCase()}</Text>
+              </Pressable>
+            </View>
+          )}
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+});
+
+type CreateExpenseModalProps = {
+  createModal: CreateState;
+  createDispatch: React.Dispatch<CreateAction>;
+  members?: Array<{ id?: string | null; username?: string | null }>;
+  onConfirm: () => void;
+};
+
+const CreateExpenseModal = React.memo(function CreateExpenseModal({
+  createModal, createDispatch, members, onConfirm,
+}: CreateExpenseModalProps) {
+  const { t } = useTranslation();
+  const { themeName } = useAppTheme();
+  const theme = Colors[themeName] ?? Colors.light;
+
+  return (
+    <Modal visible={createModal.visible} transparent animationType="fade" onRequestClose={() => createDispatch({ type: 'close' })}>
+      <Pressable style={styles.overlay} onPress={() => createDispatch({ type: 'close' })}>
+        <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
+          <Text style={[styles.modalTitle, { color: theme.title }]}>{t('trip.newExpense')}</Text>
+
+          <ThemedInput placeholder={t('trip.description')} value={createModal.name} onChangeText={v => createDispatch({ type: 'set_name', value: v })} autoFocus />
+          <ThemedInput placeholder={t('trip.amount')} value={createModal.amount} onChangeText={v => createDispatch({ type: 'set_amount', value: v })} keyboardType="numeric" />
+
+          <Pressable style={[styles.dropdown, { backgroundColor: theme.uiBackground, borderColor: theme.border }]} onPress={() => createDispatch({ type: 'toggle_dropdown' })}>
+            <Text style={{ color: createModal.payerId ? theme.title : theme.icon, fontWeight: '600' }}>
+              {createModal.payerId ? members?.find(m => m.id === createModal.payerId)?.username : t('trip.selectPayer')}
+            </Text>
+            <Ionicons name={createModal.payerDropdownOpen ? 'chevron-up' : 'chevron-down'} size={16} color={theme.icon} />
+          </Pressable>
+
+          {createModal.payerDropdownOpen && (
+            <View style={[styles.dropList, { backgroundColor: theme.uiBackground, borderColor: theme.border }]}>
+              {members?.map(m => (
+                <Pressable key={m.id} style={[styles.dropItem, { borderBottomColor: theme.border }]} onPress={() => createDispatch({ type: 'set_payer', id: m.id ?? '' })}>
+                  <Text style={{ color: theme.title, fontWeight: '600' }}>{m.username}</Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
+
+          <Text style={[styles.detailLabel, { color: theme.icon, marginBottom: 6 }]}>{t('trip.beneficiaries').toUpperCase()}</Text>
+          <View style={[styles.dropList, { backgroundColor: theme.uiBackground, borderColor: theme.border }]}>
+            {members?.map(m => {
+              const sel = createModal.beneficiaryIds.includes(m.id ?? '');
+              return (
+                <Pressable key={m.id} style={[styles.dropItem, { borderBottomColor: theme.border }]} onPress={() => createDispatch({ type: 'toggle_beneficiary', id: m.id ?? '' })}>
+                  <Text style={{ color: theme.title, fontWeight: '600' }}>{m.username}</Text>
+                  <Ionicons name={sel ? 'checkbox' : 'square-outline'} size={20} color={sel ? theme.tint : theme.icon} />
+                </Pressable>
+              );
+            })}
+          </View>
+
+          {createModal.error && <Text style={styles.errText}>{createModal.error}</Text>}
+
+          <View style={styles.modalBtns}>
+            <Pressable style={[styles.modalBtn, { borderColor: theme.border, borderWidth: 1 }]} onPress={() => createDispatch({ type: 'close' })}>
+              <Text style={{ color: theme.text, fontWeight: '700' }}>{t('common.cancel')}</Text>
+            </Pressable>
+            <Pressable style={[styles.modalBtn, { backgroundColor: theme.tint, boxShadow: `0 0 20px ${theme.tint}55` }]} onPress={onConfirm} disabled={createModal.creating}>
+              {createModal.creating ? <ActivityIndicator color="#fff" size="small" /> : <Text style={{ color: '#fff', fontWeight: '800', letterSpacing: 1 }}>{t('common.create').toUpperCase()}</Text>}
+            </Pressable>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+});
+
 // ── Screen ─────────────────────────────────────────────────────────────────
 const ExpensesScreen = () => {
   const { t } = useTranslation();
@@ -199,6 +371,11 @@ const ExpensesScreen = () => {
       setConfirmingDelete(false);
     }
   }, [trip?.id, detailModal.expense, deleteExpense, list.expenses, t]);
+
+  const handleDetailClose = useCallback(() => {
+    setConfirmingDelete(false);
+    detailDispatch({ type: 'close' });
+  }, []);
 
   const handlePaySettlement = useCallback(async (fromId: string, toId: string, amount: number) => {
     if (!trip?.id) return;
@@ -378,156 +555,22 @@ const ExpensesScreen = () => {
         )
       )}
 
-      {/* Expense detail */}
-      <Modal visible={detailModal.visible} transparent animationType="fade" onRequestClose={() => detailDispatch({ type: 'close' })}>
-        <Pressable style={styles.overlay} onPress={() => detailDispatch({ type: 'close' })}>
-          <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
-            <Text style={[styles.modalTitle, { color: theme.title }]}>{t('trip.expenseDetail')}</Text>
+      <ExpenseDetailModal
+        detail={detailModal}
+        confirmingDelete={confirmingDelete}
+        deleting={deleting}
+        usernameFor={usernameFor}
+        onClose={handleDetailClose}
+        onDelete={handleDelete}
+        setConfirmingDelete={setConfirmingDelete}
+      />
 
-            {detailModal.loading && <ActivityIndicator color={theme.tint} style={{ marginVertical: 20 }} />}
-            {detailModal.error && <Text style={styles.errText}>{detailModal.error}</Text>}
-
-            {detailModal.expense && !detailModal.loading && (
-              <>
-                <Text style={[styles.detailName, { color: theme.title }]}>{detailModal.expense.name}</Text>
-
-                <View style={[styles.amountHero, { backgroundColor: `${theme.tint}12`, borderColor: `${theme.tint}28` }]}>
-                  <Text style={[styles.amountHeroText, { color: theme.tint, textShadowColor: `${theme.tint}70`, textShadowRadius: 16 }]}>
-                    {detailModal.expense.amount?.toFixed(2)}€
-                  </Text>
-                </View>
-
-                {/* Date + Created by — side by side */}
-                <View style={styles.detailPairRow}>
-                  {[
-                    { label: t('trip.date'), val: new Date(detailModal.expense.datetime).toLocaleDateString() },
-                    { label: t('trip.createdBy'), val: usernameFor(detailModal.expense.creatorId) },
-                  ].map(cell => (
-                    <View key={cell.label} style={[styles.detailCell, { backgroundColor: theme.uiBackground, borderColor: theme.border }]}>
-                      <Text style={[styles.detailLabel, { color: theme.icon }]}>{cell.label.toUpperCase()}</Text>
-                      <Text style={[styles.detailVal, { color: theme.title }]} numberOfLines={1}>{cell.val}</Text>
-                    </View>
-                  ))}
-                </View>
-
-                {/* Payer + Beneficiaries — grouped */}
-                <View style={[styles.detailGroup, { borderColor: theme.border }]}>
-                  <View style={[styles.detailGroupSection, { borderBottomColor: theme.border }]}>
-                    <Text style={[styles.detailLabel, { color: theme.icon }]}>{t('trip.payer').toUpperCase()}</Text>
-                    <Text style={[styles.detailVal, { color: theme.title }]}>{usernameFor(detailModal.expense.payerId)}</Text>
-                  </View>
-                  <View style={styles.detailGroupSection}>
-                    <Text style={[styles.detailLabel, { color: theme.icon }]}>{t('trip.beneficiaries').toUpperCase()}</Text>
-                    <View style={styles.chips}>
-                      {detailModal.expense.beneficiaryIds.map(id => (
-                        <View key={id} style={[styles.chip, { backgroundColor: `${theme.tint}18`, borderColor: `${theme.tint}30` }]}>
-                          <Text style={[styles.chipText, { color: theme.tint }]}>{usernameFor(id)}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-                </View>
-              </>
-            )}
-
-            {confirmingDelete ? (
-              <>
-                <Text style={[styles.detailLabel, { color: Colors.warning, textAlign: 'center', marginTop: 4 }]}>
-                  {t('trip.deleteExpenseConfirm').toUpperCase()}
-                </Text>
-                <View style={styles.modalBtns}>
-                  <Pressable
-                    style={[styles.modalBtn, { borderColor: theme.border, borderWidth: 1 }]}
-                    onPress={() => setConfirmingDelete(false)}
-                    disabled={deleting}
-                  >
-                    <Text style={{ color: theme.text, fontWeight: '700' }}>{t('common.cancel')}</Text>
-                  </Pressable>
-                  <Pressable
-                    style={[styles.modalBtn, { backgroundColor: Colors.warning, boxShadow: `0 0 20px ${Colors.warning}55` }]}
-                    onPress={handleDelete}
-                    disabled={deleting}
-                  >
-                    {deleting
-                      ? <ActivityIndicator color="#fff" size="small" />
-                      : <Text style={{ color: '#fff', fontWeight: '800', letterSpacing: 1 }}>{t('common.delete').toUpperCase()}</Text>}
-                  </Pressable>
-                </View>
-              </>
-            ) : (
-              <View style={styles.modalBtns}>
-                <Pressable
-                  style={[styles.modalBtn, { backgroundColor: Colors.warning, boxShadow: `0 0 20px ${Colors.warning}55`, flexDirection: 'row', gap: 6, justifyContent: 'center' }]}
-                  onPress={() => setConfirmingDelete(true)}
-                  disabled={detailModal.loading || !detailModal.expense}
-                >
-                  <Ionicons name="trash-outline" size={15} color="#fff" />
-                  <Text style={{ color: '#fff', fontWeight: '800', letterSpacing: 1 }}>{t('common.delete').toUpperCase()}</Text>
-                </Pressable>
-                <Pressable
-                  style={[styles.modalBtn, { backgroundColor: theme.tint, boxShadow: `0 0 20px ${theme.tint}55` }]}
-                  onPress={() => { setConfirmingDelete(false); detailDispatch({ type: 'close' }); }}
-                >
-                  <Text style={styles.closeBtnText}>{t('common.close').toUpperCase()}</Text>
-                </Pressable>
-              </View>
-            )}
-          </Pressable>
-        </Pressable>
-      </Modal>
-
-      {/* Create expense */}
-      <Modal visible={createModal.visible} transparent animationType="fade" onRequestClose={() => createDispatch({ type: 'close' })}>
-        <Pressable style={styles.overlay} onPress={() => createDispatch({ type: 'close' })}>
-          <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
-            <Text style={[styles.modalTitle, { color: theme.title }]}>{t('trip.newExpense')}</Text>
-
-            <ThemedInput placeholder={t('trip.description')} value={createModal.name} onChangeText={v => createDispatch({ type: 'set_name', value: v })} autoFocus />
-            <ThemedInput placeholder={t('trip.amount')} value={createModal.amount} onChangeText={v => createDispatch({ type: 'set_amount', value: v })} keyboardType="numeric" />
-
-            <Pressable style={[styles.dropdown, { backgroundColor: theme.uiBackground, borderColor: theme.border }]} onPress={() => createDispatch({ type: 'toggle_dropdown' })}>
-              <Text style={{ color: createModal.payerId ? theme.title : theme.icon, fontWeight: '600' }}>
-                {createModal.payerId ? trip?.members?.find(m => m.id === createModal.payerId)?.username : t('trip.selectPayer')}
-              </Text>
-              <Ionicons name={createModal.payerDropdownOpen ? 'chevron-up' : 'chevron-down'} size={16} color={theme.icon} />
-            </Pressable>
-
-            {createModal.payerDropdownOpen && (
-              <View style={[styles.dropList, { backgroundColor: theme.uiBackground, borderColor: theme.border }]}>
-                {trip?.members?.map(m => (
-                  <Pressable key={m.id} style={[styles.dropItem, { borderBottomColor: theme.border }]} onPress={() => createDispatch({ type: 'set_payer', id: m.id ?? '' })}>
-                    <Text style={{ color: theme.title, fontWeight: '600' }}>{m.username}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            )}
-
-            <Text style={[styles.detailLabel, { color: theme.icon, marginBottom: 6 }]}>{t('trip.beneficiaries').toUpperCase()}</Text>
-            <View style={[styles.dropList, { backgroundColor: theme.uiBackground, borderColor: theme.border }]}>
-              {trip?.members?.map(m => {
-                const sel = createModal.beneficiaryIds.includes(m.id ?? '');
-                return (
-                  <Pressable key={m.id} style={[styles.dropItem, { borderBottomColor: theme.border }]} onPress={() => createDispatch({ type: 'toggle_beneficiary', id: m.id ?? '' })}>
-                    <Text style={{ color: theme.title, fontWeight: '600' }}>{m.username}</Text>
-                    <Ionicons name={sel ? 'checkbox' : 'square-outline'} size={20} color={sel ? theme.tint : theme.icon} />
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            {createModal.error && <Text style={styles.errText}>{createModal.error}</Text>}
-
-            <View style={styles.modalBtns}>
-              <Pressable style={[styles.modalBtn, { borderColor: theme.border, borderWidth: 1 }]} onPress={() => createDispatch({ type: 'close' })}>
-                <Text style={{ color: theme.text, fontWeight: '700' }}>{t('common.cancel')}</Text>
-              </Pressable>
-              <Pressable style={[styles.modalBtn, { backgroundColor: theme.tint, boxShadow: `0 0 20px ${theme.tint}55` }]} onPress={handleCreate} disabled={createModal.creating}>
-                {createModal.creating ? <ActivityIndicator color="#fff" size="small" /> : <Text style={{ color: '#fff', fontWeight: '800', letterSpacing: 1 }}>{t('common.create').toUpperCase()}</Text>}
-              </Pressable>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+      <CreateExpenseModal
+        createModal={createModal}
+        createDispatch={createDispatch}
+        members={trip?.members}
+        onConfirm={handleCreate}
+      />
     </View>
   );
 };

@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Entity
@@ -53,7 +54,14 @@ public class Trip {
     }
 
     public TripSummary toTripSummary() {
-        return new TripSummary().id(this.id).name(this.name);
+        BigDecimal totalSpent = expenses.stream()
+                .map(Expense::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return new TripSummary()
+                .id(this.id)
+                .name(this.name)
+                .memberCount(members.size())
+                .totalSpent(totalSpent.doubleValue());
     }
 
     public void assertIsMember(UUID userId) {

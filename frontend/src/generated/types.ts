@@ -438,6 +438,8 @@ export interface components {
             id: string;
             /** @example Viaje a Roma */
             name: string;
+            memberCount: number;
+            totalSpent: number;
         };
         IdResponse: {
             /** Format: uuid */

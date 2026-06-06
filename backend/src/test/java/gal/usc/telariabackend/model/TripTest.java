@@ -5,6 +5,8 @@ import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -91,6 +93,40 @@ class TripTest {
         var summary = trip.toTripSummary();
 
         assertEquals("Viaje a Roma", summary.getName());
+    }
+
+    @Test
+    void toTripSummary_ShouldReturnMemberCount_EqualsOneForNewTrip() {
+        var summary = trip.toTripSummary();
+
+        assertEquals(1, summary.getMemberCount());
+    }
+
+    @Test
+    void toTripSummary_ShouldReturnMemberCount_WhenMultipleMembers() {
+        User extraMember = new User("lola", "lola@test.com", "encoded", UUID.randomUUID());
+        trip.getMembers().add(extraMember);
+
+        var summary = trip.toTripSummary();
+
+        assertEquals(2, summary.getMemberCount());
+    }
+
+    @Test
+    void toTripSummary_ShouldReturnZeroTotalSpent_WhenNoExpenses() {
+        var summary = trip.toTripSummary();
+
+        assertEquals(0.0, summary.getTotalSpent(), 0.001);
+    }
+
+    @Test
+    void toTripSummary_ShouldReturnTotalSpent_SumOfAllExpenses() {
+        trip.getExpenses().add(new Expense(trip, owner, BigDecimal.valueOf(30.0), "Taxi", owner, Set.of(owner)));
+        trip.getExpenses().add(new Expense(trip, owner, BigDecimal.valueOf(50.0), "Hotel", owner, Set.of(owner)));
+
+        var summary = trip.toTripSummary();
+
+        assertEquals(80.0, summary.getTotalSpent(), 0.001);
     }
 
     // equals y hashCode

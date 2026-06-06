@@ -1,7 +1,7 @@
 import { useAuth } from './auth';
 import type { components } from './generated/types';
 import { AppError, ErrorCode } from './AppError';
-import { createContext, use, useCallback, useEffect, useMemo, useState } from 'react';
+import { createContext, use, useCallback, useEffect, useMemo, useReducer } from 'react';
 
 type TripSummary = components['schemas']['TripSummary'];
 type TripDetail = components['schemas']['TripDetail'];
@@ -45,20 +45,33 @@ const TripContext = createContext<TripContextType>({
   reload: async () => {},
 });
 
+type TripState = { trip: TripDetail | null; loading: boolean };
+type TripAction =
+  | { type: 'loading' }
+  | { type: 'loaded'; data: TripDetail }
+  | { type: 'error' };
+
+function tripReducer(state: TripState, action: TripAction): TripState {
+  switch (action.type) {
+    case 'loading': return { ...state, loading: true };
+    case 'loaded': return { trip: action.data, loading: false };
+    case 'error': return { ...state, loading: false };
+    default: return state;
+  }
+}
+
 export const TripProvider = ({ tripId, children }: { tripId: string; children: React.ReactNode }) => {
   const { getTrip } = useTrips();
-  const [trip, setTrip] = useState<TripDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [{ trip, loading }, dispatch] = useReducer(tripReducer, { trip: null, loading: true });
 
   const load = useCallback(async () => {
+    dispatch({ type: 'loading' });
     try {
-      setLoading(true);
       const data = await getTrip(tripId);
-      setTrip(data);
+      dispatch({ type: 'loaded', data });
     } catch (e) {
       console.error('Error cargando viaje:', e);
-    } finally {
-      setLoading(false);
+      dispatch({ type: 'error' });
     }
   }, [getTrip, tripId]);
 

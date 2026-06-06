@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import '../i18n';
@@ -12,7 +12,7 @@ import { SidebarProvider } from '../src/sidebar';
 
 const RootNavigator = () => {
   const { ready } = useTranslation();
-  const { themeName, isLoading: themeLoading } = useAppTheme();
+  const { themeName } = useAppTheme();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   const theme = Colors[themeName] ?? Colors.light;
@@ -21,7 +21,7 @@ const RootNavigator = () => {
     applySavedLanguage();
   }, []);
 
-  if (!ready || themeLoading || authLoading) {
+  if (!ready || authLoading) {
     return (
       <View
         style={{
@@ -54,13 +54,15 @@ const RootNavigator = () => {
 
 const RootLayout = () => {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <SidebarProvider>
-          <RootNavigator />
-        </SidebarProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <Suspense fallback={<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator /></View>}>
+      <ThemeProvider>
+        <AuthProvider>
+          <SidebarProvider>
+            <RootNavigator />
+          </SidebarProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </Suspense>
   );
 };
 
