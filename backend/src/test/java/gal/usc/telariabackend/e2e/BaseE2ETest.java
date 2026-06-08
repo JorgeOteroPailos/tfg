@@ -10,8 +10,14 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.model.BucketAlreadyOwnedByYouException;
 
-import java.io.IOException;
+import java.net.URI;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -50,9 +56,19 @@ public abstract class BaseE2ETest {
     }
 
     @BeforeAll
-    static void createBucket() throws IOException, InterruptedException {
-        minio.execInContainer("mc", "alias", "set", "local",
-                "http://localhost:9000", "admin", "password123");
-        minio.execInContainer("mc", "mb", "local/telaria-document-sharing");
+    static void createBucket() {
+        try (S3Client s3 = S3Client.builder()
+                .endpointOverride(URI.create("http://localhost:" + minio.getMappedPort(9000)))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create("admin", "password123")))
+                .region(Region.US_EAST_1)
+                .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
+                .build()) {
+            try {
+                s3.createBucket(b -> b.bucket("telaria-document-sharing"));
+            } catch (BucketAlreadyOwnedByYouException ignored) {
+                // already created by a previous test class in this run
+            }
+        }
     }
 }

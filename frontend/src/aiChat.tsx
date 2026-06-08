@@ -6,6 +6,7 @@ import { AppError, ErrorCode } from './AppError';
 import { BASE_URL } from '../constants/constants';
 
 type AiChatMessage = components['schemas']['AiChatMessage'];
+type AiChatHistoryPage = components['schemas']['AiChatHistoryPage'];
 
 // react-native-sse never fires 'close' on natural stream end — only when close() is called.
 // This subclass fixes two things:
@@ -73,8 +74,14 @@ class OneShotEventSource extends EventSource {
 export function useAiChat() {
   const { callAuthenticated, accessToken } = useAuth();
 
-  const getHistory = useCallback(async (tripId: string): Promise<AiChatMessage[]> => {
-    const response = await callAuthenticated(`/trips/${tripId}/ai-chat`);
+  const getHistory = useCallback(async (
+    tripId: string,
+    before?: string
+  ): Promise<AiChatHistoryPage> => {
+    const url = before
+      ? `/trips/${tripId}/ai-chat?before=${encodeURIComponent(before)}`
+      : `/trips/${tripId}/ai-chat`;
+    const response = await callAuthenticated(url);
     if (!response.ok) throw new AppError(response.status as ErrorCode);
     return response.json();
   }, [callAuthenticated]);

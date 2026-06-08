@@ -58,6 +58,9 @@
     "title": "Profile",
     "username": "Username",
     "email": "Email",
+    "userId": "User ID",
+    "copyUserId": "Copy ID",
+    "userIdCopied": "User ID copied!",
     "logout": "Logout",
     "showQR": "Show QR Code",
     "qrTitle": "Your QR Code",
@@ -104,6 +107,8 @@
     "noName": "No name",
     "events": "Events",
     "chat": "Chat",
+    "groupChatPlaceholder": "Write a message...",
+    "unableLoadChat": "Unable to load messages",
     "more": "More",
     "leave": "Leave trip",
     "backHomeTitle": "Go back?",
@@ -189,6 +194,7 @@
     "uploadedBy": "Uploaded by",
     "downloadDocument": "Download",
     "aiChatPlaceholder": "Write a message...",
+    "loadOlderMessages": "Load older messages",
     "totalSpent": "Total spent"
   },
   "invitations": {

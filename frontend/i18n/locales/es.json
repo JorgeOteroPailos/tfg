@@ -58,6 +58,9 @@
     "title": "Perfil",
     "username": "Nombre de usuario",
     "email": "Correo electrónico",
+    "userId": "ID de usuario",
+    "copyUserId": "Copiar ID",
+    "userIdCopied": "¡ID de usuario copiado!",
     "logout": "Cerrar sesión",
     "showQR": "Mostrar Código QR",
     "qrTitle": "Tu Código QR",
@@ -104,6 +107,8 @@
     "noName": "Sin nombre",
     "events": "Eventos",
     "chat": "Chat",
+    "groupChatPlaceholder": "Escribe un mensaje...",
+    "unableLoadChat": "No se pudieron cargar los mensajes",
     "more": "Más",
     "leave": "Salir del viaje",
     "backHomeTitle": "¿Volver atrás?",
@@ -189,6 +194,7 @@
     "uploadedBy": "Subido por",
     "downloadDocument": "Descargar",
     "aiChatPlaceholder": "Escribe un mensaje...",
+    "loadOlderMessages": "Cargar mensajes anteriores",
     "totalSpent": "Total gastado"
   },
   "invitations": {

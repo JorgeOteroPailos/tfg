@@ -11,7 +11,7 @@ import jakarta.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,9 @@ import java.util.function.Consumer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import tools.jackson.databind.JsonNode;
@@ -32,6 +34,8 @@ public class AiChatService {
     private final AiChatMessageRepository chatMessageRepo;
     private final TripRepository tripRepo;
     private final UserRepository userRepo;
+    private final TransactionTemplate txReadOnly;
+    private final TransactionTemplate txWrite;
 
     @Value("${ollama.base-url:http://localhost:11434}")
     private String ollamaBaseUrl;
@@ -46,12 +50,16 @@ public class AiChatService {
         AiChatMessageRepository chatMessageRepo,
         TripRepository tripRepo,
         UserRepository userRepo,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        PlatformTransactionManager txManager
     ) {
         this.chatMessageRepo = chatMessageRepo;
         this.tripRepo = tripRepo;
         this.userRepo = userRepo;
         this.objectMapper = objectMapper;
+        this.txReadOnly = new TransactionTemplate(txManager);
+        this.txReadOnly.setReadOnly(true);
+        this.txWrite = new TransactionTemplate(txManager);
     }
 
     @PostConstruct
@@ -59,70 +67,83 @@ public class AiChatService {
         this.restClient = RestClient.builder().baseUrl(ollamaBaseUrl).build();
     }
 
-    public List<gal.usc.telariabackend.model.dto.AiChatMessage> getHistory(
+    public gal.usc.telariabackend.model.dto.AiChatHistoryPage getHistory(
         UUID tripId,
-        UUID userId
+        UUID userId,
+        OffsetDateTime before
     ) {
-        tripRepo
-            .findByIdAndMembersId(tripId, userId)
-            .orElseThrow(NotATripMemberException::new);
-        return chatMessageRepo
-            .findByTripIdAndUserIdOrderByTimestampAsc(tripId, userId)
-            .stream()
-            .map(AiChatMessage::toDto)
-            .toList();
+        return txReadOnly.execute(status -> {
+            tripRepo.findByIdAndMembersId(tripId, userId).orElseThrow(NotATripMemberException::new);
+
+            List<AiChatMessage> rows = before == null
+                ? chatMessageRepo.findTop51ByTripIdAndUserIdOrderByTimestampDesc(tripId, userId)
+                : chatMessageRepo.findTop51ByTripIdAndUserIdAndTimestampBeforeOrderByTimestampDesc(tripId, userId, before);
+
+            boolean hasMore = rows.size() == 51;
+            List<gal.usc.telariabackend.model.dto.AiChatMessage> messages = rows.stream()
+                .limit(50)
+                .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
+                .map(AiChatMessage::toDto)
+                .toList();
+
+            return new gal.usc.telariabackend.model.dto.AiChatHistoryPage()
+                .messages(messages)
+                .hasMore(hasMore);
+        });
     }
 
-    @Transactional
+    // Not @Transactional — transaction is split manually so the DB connection
+    // is NOT held open for the duration of the Ollama HTTP call.
     public void streamResponse(
         UUID tripId,
         UUID userId,
         String userMessage,
         SseEmitter emitter
     ) {
-        Trip trip = tripRepo
-            .findByIdAndMembersId(tripId, userId)
-            .orElseThrow(NotATripMemberException::new);
-        User user = userRepo.findById(userId).orElseThrow();
+        // Phase 1: permission check + context fetch (short read-only transaction)
+        record Context(String systemPrompt, List<AiChatMessage> history) {}
+        Context ctx = txReadOnly.execute(status -> {
+            Trip trip = tripRepo
+                .findByIdAndMembersId(tripId, userId)
+                .orElseThrow(NotATripMemberException::new);
+            List<AiChatMessage> history = chatMessageRepo
+                .findTop5ByTripIdAndUserIdOrderByTimestampDesc(tripId, userId)
+                .reversed();
+            return new Context(buildSystemPrompt(trip), history);
+        });
 
-        List<AiChatMessage> history = chatMessageRepo
-            .findTop5ByTripIdAndUserIdOrderByTimestampDesc(tripId, userId)
-            .reversed();
-
-        String systemPrompt = buildSystemPrompt(trip);
-
+        // Phase 2: stream from Ollama (no DB connection held)
         StringBuilder fullResponse = new StringBuilder();
+        boolean[] emitterAlive = {true};
 
         try {
-            callOllamaStream(systemPrompt, history, userMessage, chunk -> {
+            callOllamaStream(ctx.systemPrompt(), ctx.history(), userMessage, chunk -> {
                 fullResponse.append(chunk);
-                try {
-                    emitter.send(SseEmitter.event().data(chunk));
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
+                if (emitterAlive[0]) {
+                    try {
+                        emitter.send(SseEmitter.event().data(chunk));
+                    } catch (IOException e) {
+                        // Client disconnected — stop sending but keep accumulating
+                        // so the full response is still persisted in phase 3.
+                        emitterAlive[0] = false;
+                    }
                 }
             });
-
-            chatMessageRepo.save(
-                new AiChatMessage(
-                    trip,
-                    user,
-                    AiChatMessage.Role.USER,
-                    userMessage
-                )
-            );
-            chatMessageRepo.save(
-                new AiChatMessage(
-                    trip,
-                    user,
-                    AiChatMessage.Role.ASSISTANT,
-                    fullResponse.toString()
-                )
-            );
-            emitter.complete();
         } catch (Exception e) {
-            emitter.completeWithError(e);
+            if (emitterAlive[0]) emitter.completeWithError(e);
+            return;
         }
+
+        // Phase 3: persist both messages (short write transaction, always runs)
+        txWrite.execute(status -> {
+            Trip trip = tripRepo.findById(tripId).orElseThrow();
+            User user = userRepo.findById(userId).orElseThrow();
+            chatMessageRepo.save(new AiChatMessage(trip, user, AiChatMessage.Role.USER, userMessage));
+            chatMessageRepo.save(new AiChatMessage(trip, user, AiChatMessage.Role.ASSISTANT, fullResponse.toString()));
+            return null;
+        });
+
+        if (emitterAlive[0]) emitter.complete();
     }
 
     private String buildSystemPrompt(Trip trip) {

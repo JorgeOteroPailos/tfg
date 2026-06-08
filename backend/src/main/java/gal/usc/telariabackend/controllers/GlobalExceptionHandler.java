@@ -117,7 +117,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(DocumentNotFoundInStorageException.class)
     public ProblemDetail handle(DocumentNotFoundInStorageException e){
-        ProblemDetail error = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        ProblemDetail error = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         error.setTitle("Document not found in storage");
         error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
                 .pathSegment("error","document-not-found-in-storage").build().toUri());

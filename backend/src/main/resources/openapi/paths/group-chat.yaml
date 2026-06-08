@@ -1,0 +1,65 @@
+paths:
+  /trips/{tripId}/group-chat:
+    get:
+      summary: Get the group chat message history for a trip
+      operationId: getGroupChatHistory
+      tags:
+        - GroupChat
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Full message history ordered by timestamp ascending
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../schemas/group-chat.yaml#/schemas/TripChatMessage'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip
+        '404':
+          description: Trip not found
+
+    post:
+      summary: Send a message to the trip group chat
+      operationId: sendGroupChatMessage
+      tags:
+        - GroupChat
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/group-chat.yaml#/schemas/SendTripChatMessageRequest'
+      responses:
+        '201':
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/group-chat.yaml#/schemas/TripChatMessage'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip
+        '404':
+          description: Trip not found

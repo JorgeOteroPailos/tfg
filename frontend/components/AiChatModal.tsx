@@ -1,7 +1,7 @@
 import React, { useState, useReducer, useCallback, useRef, useEffect } from 'react';
 import {
   View, Modal, Pressable, TextInput, FlatList,
-  StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator,
+  StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, Text,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +14,7 @@ type Message = {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  timestamp?: string; // ISO 8601 — present for server messages, absent for optimistic ones
 };
 
 type AiChatModalProps = {
@@ -22,18 +23,27 @@ type AiChatModalProps = {
   tripId: string;
 };
 
+function toMessage(m: { id: string; role: string; content: string; timestamp: string }): Message {
+  return { id: m.id, role: m.role as Message['role'], content: m.content, timestamp: m.timestamp };
+}
+
 type ChatState = {
   messages: Message[];
   input: string;
   loading: boolean;
   streaming: boolean;
   streamingContent: string;
+  hasMore: boolean;
+  loadingMore: boolean;
 };
 
 type ChatAction =
   | { type: 'load_start' }
-  | { type: 'load_done'; messages: Message[] }
+  | { type: 'load_done'; messages: Message[]; hasMore: boolean }
   | { type: 'load_error' }
+  | { type: 'load_more_start' }
+  | { type: 'load_more_done'; olderMessages: Message[]; hasMore: boolean }
+  | { type: 'load_more_error' }
   | { type: 'send'; userMessage: Message }
   | { type: 'stream_token'; content: string }
   | { type: 'stream_done'; messages: Message[] }
@@ -46,9 +56,15 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
     case 'load_start':
       return { ...state, loading: true };
     case 'load_done':
-      return { ...state, loading: false, messages: action.messages };
+      return { ...state, loading: false, messages: action.messages, hasMore: action.hasMore };
     case 'load_error':
       return { ...state, loading: false };
+    case 'load_more_start':
+      return { ...state, loadingMore: true };
+    case 'load_more_done':
+      return { ...state, loadingMore: false, hasMore: action.hasMore, messages: [...action.olderMessages, ...state.messages] };
+    case 'load_more_error':
+      return { ...state, loadingMore: false };
     case 'send':
       return { ...state, messages: [...state.messages, action.userMessage], input: '', streaming: true, streamingContent: '' };
     case 'stream_token':
@@ -78,8 +94,10 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
     loading: false,
     streaming: false,
     streamingContent: '',
+    hasMore: false,
+    loadingMore: false,
   });
-  const { messages, input, loading, streaming, streamingContent } = state;
+  const { messages, input, loading, streaming, streamingContent, hasMore, loadingMore } = state;
 
   const scrollRef = useRef<FlatList<Message>>(null);
   const abortRef = useRef<(() => void) | null>(null);
@@ -88,13 +106,26 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
   const loadHistory = useCallback(async () => {
     dispatch({ type: 'load_start' });
     try {
-      const history = await getHistory(tripId);
-      dispatch({ type: 'load_done', messages: history.map(m => ({ id: m.id, role: m.role, content: m.content })) });
+      const { messages: msgs, hasMore } = await getHistory(tripId);
+      dispatch({ type: 'load_done', messages: msgs.map(toMessage), hasMore });
     } catch {
       // silent — empty chat is a valid state
       dispatch({ type: 'load_error' });
     }
   }, [getHistory, tripId]);
+
+  const loadOlder = useCallback(async () => {
+    if (!hasMore || loadingMore || messages.length === 0) return;
+    const oldest = messages[0];
+    if (!oldest.timestamp) return;
+    dispatch({ type: 'load_more_start' });
+    try {
+      const { messages: older, hasMore: more } = await getHistory(tripId, oldest.timestamp);
+      dispatch({ type: 'load_more_done', olderMessages: older.map(toMessage), hasMore: more });
+    } catch {
+      dispatch({ type: 'load_more_error' });
+    }
+  }, [hasMore, loadingMore, messages, getHistory, tripId]);
 
   useEffect(() => {
     if (visible) {
@@ -133,8 +164,8 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
         // so we reload from the server to get the correctly-spaced full text.
         streamingContentRef.current = '';
         try {
-          const history = await getHistory(tripId);
-          dispatch({ type: 'stream_done', messages: history.map(m => ({ id: m.id, role: m.role, content: m.content })) });
+          const { messages: hist } = await getHistory(tripId);
+          dispatch({ type: 'stream_done', messages: hist.map(toMessage) });
         } catch {
           dispatch({ type: 'stream_abort' });
         }
@@ -215,6 +246,14 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
               renderItem={renderMessage}
               keyExtractor={msg => msg.id}
               ListFooterComponent={streamingBubble}
+              ListHeaderComponent={hasMore ? (
+                <Pressable style={styles.loadOlderBtn} onPress={loadOlder} disabled={loadingMore}>
+                  {loadingMore
+                    ? <ActivityIndicator size="small" color={Colors.primary} />
+                    : <Text style={[styles.loadOlderText, { color: Colors.primary }]}>{t('trip.loadOlderMessages')}</Text>
+                  }
+                </Pressable>
+              ) : null}
             />
           )}
 
@@ -243,13 +282,13 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
   );
 };
 
-export const AiChatButton = ({ tripId }: { tripId: string }) => {
+export const AiChatButton = ({ tripId, isChatTab }: { tripId: string; isChatTab?: boolean }) => {
   const [visible, setVisible] = useState(false);
 
   return (
     <>
       <Pressable
-        style={[styles.fab, { backgroundColor: Colors.primary }]}
+        style={[styles.fab, { backgroundColor: Colors.primary }, isChatTab && styles.fabChatTab]}
         onPress={() => setVisible(true)}
       >
         <Ionicons name="sparkles-outline" size={24} color="#fff" />
@@ -316,6 +355,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  loadOlderBtn: {
+    alignSelf: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    marginBottom: 8,
+    minHeight: 32,
+    justifyContent: 'center',
+  },
+  loadOlderText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
   fab: {
     position: 'absolute',
     left: 20,
@@ -326,5 +377,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0 2px 4px rgba(0,0,0,0.25)',
+  },
+  fabChatTab: {
+    bottom: 195,
   },
 });

@@ -14,15 +14,20 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: before
+          in: query
+          required: false
+          description: Return messages sent before this timestamp (ISO 8601). Omit to get the most recent page.
+          schema:
+            type: string
+            format: date-time
       responses:
         '200':
-          description: Full message history for this trip's AI conversation
+          description: Up to 50 messages, ordered oldest-first. hasMore=true means older messages exist.
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '../schemas/ai-chat.yaml#/schemas/AiChatMessage'
+                $ref: '../schemas/ai-chat.yaml#/schemas/AiChatHistoryPage'
         '401':
           description: Not authenticated
         '403':

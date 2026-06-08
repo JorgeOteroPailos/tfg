@@ -1,4 +1,17 @@
 schemas:
+  AiChatHistoryPage:
+    type: object
+    required:
+      - messages
+      - hasMore
+    properties:
+      messages:
+        type: array
+        items:
+          $ref: '#/schemas/AiChatMessage'
+      hasMore:
+        type: boolean
+
   AiChatMessageRequest:
     type: object
     required:

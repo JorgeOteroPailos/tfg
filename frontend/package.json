@@ -8,12 +8,13 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "generate:types": "openapi-typescript ../backend/src/main/resources/openapi/api.yaml -o src/generated/types.ts",
-    "doctor": "npx react-doctor@latest"
+    "doctor": "react-doctor"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
     "expo": "~54.0.35",
     "expo-camera": "~17.0.10",
+    "expo-clipboard": "~8.0.8",
     "expo-constants": "~18.0.13",
     "expo-document-picker": "~14.0.8",
     "expo-linear-gradient": "~15.0.8",

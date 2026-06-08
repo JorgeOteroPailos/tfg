@@ -1,6 +1,9 @@
 spring:
   application:
     name: telaria-backend
+  mvc:
+    async:
+      request-timeout: -1
   datasource:
     url: jdbc:postgresql://localhost:5432/telaria
     driver-class-name: org.postgresql.Driver

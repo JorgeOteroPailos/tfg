@@ -245,8 +245,8 @@ class SharedDocumentE2ETest extends BaseE2ETest {
     }
 
     @Test
-    @DisplayName("Confirm upload: without uploading to Minio returns 409")
-    void confirmUpload_fileNotInMinio_returns409() throws Exception {
+    @DisplayName("Confirm upload: without uploading to Minio returns 500")
+    void confirmUpload_fileNotInMinio_returns500() throws Exception {
         String token = registerAndObtainToken("uploader");
         UUID tripId = createTrip(token, "Viaje a Amsterdam");
 
@@ -254,7 +254,7 @@ class SharedDocumentE2ETest extends BaseE2ETest {
 
         mockMvc.perform(post("/trips/{tripId}/documents/{documentId}/confirm", tripId, uploadResponse.getDocumentId())
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isConflict());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test

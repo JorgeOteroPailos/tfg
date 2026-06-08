@@ -24,6 +24,7 @@ const TripContent = () => {
     { name: 'events', icon: 'calendar-outline', label: t('trip.events') },
     { name: 'documents', icon: 'document-outline', label: t('trip.documents') },
     { name: 'members', icon: 'people-outline', label: t('trip.members') },
+    { name: 'chat', icon: 'chatbubbles-outline', label: t('trip.chat') },
   ] as const;
 
   return (
@@ -57,7 +58,7 @@ const TripContent = () => {
         <Slot />
       </View>
 
-      <AiChatButton tripId={tripId} />
+      <AiChatButton tripId={tripId} isChatTab={activeTab === 'chat'} />
 
       {/* ── Tab bar ───────────────────────────────────────── */}
       <View style={[styles.tabBar, { backgroundColor: theme.navBackground, borderTopColor: theme.border }]}>

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { StyleSheet, View, FlatList, ActivityIndicator, Pressable, Modal, Text, ScrollView } from 'react-native';
+import { StyleSheet, View, FlatList, ActivityIndicator, Pressable, Modal, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from 'expo-router';
 import { useAppTheme } from '../../../src/theme';
@@ -224,6 +224,27 @@ const ExpenseDetailModal = React.memo(function ExpenseDetailModal({
   );
 });
 
+const CategoryChip = React.memo(function CategoryChip({ categoryKey, selected, onSelect }: {
+  categoryKey: NonNullable<ExpenseCategory>;
+  selected: boolean;
+  onSelect: (key: NonNullable<ExpenseCategory>) => void;
+}) {
+  const { t } = useTranslation();
+  const { themeName } = useAppTheme();
+  const theme = Colors[themeName] ?? Colors.light;
+  const meta = CATEGORIES[categoryKey];
+  const handlePress = useCallback(() => onSelect(categoryKey), [onSelect, categoryKey]);
+  return (
+    <Pressable
+      style={[styles.categoryChip, { borderColor: selected ? theme.tint : theme.border, backgroundColor: selected ? `${theme.tint}18` : theme.uiBackground }]}
+      onPress={handlePress}
+    >
+      <Ionicons name={meta.icon} size={20} color={selected ? theme.tint : theme.icon} />
+      <Text style={[styles.categoryChipLabel, { color: selected ? theme.tint : theme.icon }]}>{t(meta.labelKey)}</Text>
+    </Pressable>
+  );
+});
+
 type CreateExpenseModalProps = {
   createModal: CreateState;
   createDispatch: React.Dispatch<CreateAction>;
@@ -237,6 +258,18 @@ const CreateExpenseModal = React.memo(function CreateExpenseModal({
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
+
+  const handleSelectCategory = useCallback((key: NonNullable<ExpenseCategory>) => {
+    createDispatch({ type: 'set_category', category: key });
+  }, [createDispatch]);
+
+  const renderCategoryItem = useCallback(({ item: key }: { item: NonNullable<ExpenseCategory> }) => (
+    <CategoryChip
+      categoryKey={key}
+      selected={createModal.category === key}
+      onSelect={handleSelectCategory}
+    />
+  ), [createModal.category, handleSelectCategory]);
 
   return (
     <Modal visible={createModal.visible} transparent animationType="fade" onRequestClose={() => createDispatch({ type: 'close' })}>
@@ -259,22 +292,14 @@ const CreateExpenseModal = React.memo(function CreateExpenseModal({
           </Pressable>
 
           {createModal.categoryOpen && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryRow}>
-              {(Object.keys(CATEGORIES) as NonNullable<ExpenseCategory>[]).map(key => {
-                const meta = CATEGORIES[key];
-                const selected = createModal.category === key;
-                return (
-                  <Pressable
-                    key={key}
-                    style={[styles.categoryChip, { borderColor: selected ? theme.tint : theme.border, backgroundColor: selected ? `${theme.tint}18` : theme.uiBackground }]}
-                    onPress={() => createDispatch({ type: 'set_category', category: key })}
-                  >
-                    <Ionicons name={meta.icon} size={20} color={selected ? theme.tint : theme.icon} />
-                    <Text style={[styles.categoryChipLabel, { color: selected ? theme.tint : theme.icon }]}>{t(meta.labelKey)}</Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
+            <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoryRow}
+              data={Object.keys(CATEGORIES) as NonNullable<ExpenseCategory>[]}
+              keyExtractor={key => key}
+              renderItem={renderCategoryItem}
+            />
           )}
 
           <Pressable style={[styles.dropdown, { backgroundColor: theme.uiBackground, borderColor: theme.border }]} onPress={() => createDispatch({ type: 'toggle_dropdown' })}>
@@ -320,6 +345,139 @@ const CreateExpenseModal = React.memo(function CreateExpenseModal({
         </Pressable>
       </Pressable>
     </Modal>
+  );
+});
+
+// ── Balances section ───────────────────────────────────────────────────────
+
+type BalancesSectionProps = {
+  bals: BalsState;
+  currentUserId: string | null | undefined;
+  usernameFor: (id: string) => string;
+  payingKey: string | null;
+  handlePaySettlement: (fromId: string, toId: string, amount: number) => Promise<void>;
+};
+
+const BalancesSection = React.memo(function BalancesSection({
+  bals, currentUserId, usernameFor, payingKey, handlePaySettlement,
+}: BalancesSectionProps) {
+  const { t } = useTranslation();
+  const { themeName } = useAppTheme();
+  const theme = Colors[themeName] ?? Colors.light;
+
+  const balanceRows = useMemo((): BalanceFlatRow[] => {
+    const rows: BalanceFlatRow[] = [];
+    const bl = bals.info?.balances ?? [];
+    const sl = bals.info?.settlements ?? [];
+    rows.push({ _kind: 'header', title: t('trip.balancePerMember') });
+    if (!bl.length) rows.push({ _kind: 'empty', text: t('trip.noBalances') });
+    else bl.forEach(b => rows.push({ _kind: 'balance', userId: b.userId, amount: b.amount }));
+    rows.push({ _kind: 'header', title: t('trip.settlements'), mt: 20 });
+    if (!sl.length) {
+      rows.push({ _kind: 'empty', text: t('trip.noSettlements') });
+    } else {
+      const mine = sl.filter(s => s.fromId === currentUserId);
+      const others = sl.filter(s => s.fromId !== currentUserId);
+      mine.forEach(s => rows.push({ _kind: 'settlement', fromId: s.fromId, toId: s.toId, amount: s.amount }));
+      if (mine.length && others.length) rows.push({ _kind: 'separator' });
+      others.forEach(s => rows.push({ _kind: 'settlement', fromId: s.fromId, toId: s.toId, amount: s.amount }));
+    }
+    return rows;
+  }, [bals.info, currentUserId, t]);
+
+  const renderRow = useCallback(({ item }: { item: BalanceFlatRow }) => {
+    switch (item._kind) {
+      case 'header':
+        return <Text style={[styles.sectionHeader, { color: theme.icon }, item.mt ? { marginTop: item.mt } : undefined]}>{item.title.toUpperCase()}</Text>;
+      case 'balance': {
+        const pos = item.amount >= 0;
+        const isMe = item.userId === currentUserId;
+        return (
+          <View style={[styles.balanceCard, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
+            <View style={[styles.balanceAvatar, { backgroundColor: `${theme.tint}18` }]}>
+              <Text style={[styles.balanceInitial, { color: theme.tint }]}>{usernameFor(item.userId).charAt(0).toUpperCase()}</Text>
+            </View>
+            <View style={styles.nameRow}>
+              <Text style={[styles.balanceName, { color: theme.title }, isMe && styles.meText]} numberOfLines={1}>{usernameFor(item.userId)}</Text>
+              {isMe && (
+                <View style={[styles.meTag, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
+                  <Text style={[styles.meTagText, { color: theme.tint }]}>{t('common.you').toUpperCase()}</Text>
+                </View>
+              )}
+            </View>
+            <View style={[styles.balancePill, { backgroundColor: pos ? 'rgba(76,175,80,0.15)' : 'rgba(239,68,68,0.15)', boxShadow: pos ? '0 0 10px rgba(76,175,80,0.3)' : '0 0 10px rgba(239,68,68,0.3)' }]}>
+              <Text style={[styles.balanceAmt, { color: pos ? '#4caf50' : Colors.warning }]}>{pos ? '+' : ''}{item.amount.toFixed(2)}€</Text>
+            </View>
+          </View>
+        );
+      }
+      case 'settlement': {
+        const fromMe = item.fromId === currentUserId;
+        const toMe = item.toId === currentUserId;
+        const key = `${item.fromId}-${item.toId}`;
+        const isPaying = payingKey === key;
+        return (
+          <View style={[styles.settlementCard, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
+            <View style={styles.settlementTop}>
+              <View style={[styles.nameRow, { flex: 0 }]}>
+                <Text style={[styles.settlementName, { color: theme.title }, fromMe && styles.meText]} numberOfLines={1}>{usernameFor(item.fromId)}</Text>
+                {fromMe && (
+                  <View style={[styles.meTag, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
+                    <Text style={[styles.meTagText, { color: theme.tint }]}>{t('common.you').toUpperCase()}</Text>
+                  </View>
+                )}
+              </View>
+              <View style={[styles.settlementArrow, { backgroundColor: `${theme.tint}20` }]}>
+                <Ionicons name="arrow-forward" size={13} color={theme.tint} />
+              </View>
+              <View style={[styles.nameRow, { flex: 1 }]}>
+                <Text style={[styles.settlementName, { color: theme.title }, toMe && styles.meText]} numberOfLines={1}>{usernameFor(item.toId)}</Text>
+                {toMe && (
+                  <View style={[styles.meTag, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
+                    <Text style={[styles.meTagText, { color: theme.tint }]}>{t('common.you').toUpperCase()}</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={[styles.settlementAmt, { color: theme.tint }]}>{item.amount.toFixed(2)}€</Text>
+            </View>
+            {fromMe && (
+              <Pressable
+                style={({ pressed }) => [styles.payBtn, { borderColor: theme.tint }, pressed && { opacity: 0.7 }]}
+                onPress={() => handlePaySettlement(item.fromId, item.toId, item.amount)}
+                disabled={isPaying}
+              >
+                {isPaying
+                  ? <ActivityIndicator size="small" color={theme.tint} />
+                  : <>
+                      <Ionicons name="checkmark-circle-outline" size={15} color={theme.tint} />
+                      <Text style={[styles.payBtnText, { color: theme.tint }]}>{t('trip.markAsPaid')}</Text>
+                    </>
+                }
+              </Pressable>
+            )}
+          </View>
+        );
+      }
+      case 'separator':
+        return <View style={[styles.separator, { borderBottomColor: theme.border }]} />;
+      case 'empty':
+        return <Text style={[styles.emptyText, { color: theme.icon }]}>{item.text}</Text>;
+      default:
+        return null;
+    }
+  }, [theme, usernameFor, currentUserId, payingKey, handlePaySettlement, t]);
+
+  if (bals.loading) return <ActivityIndicator size="large" color={theme.tint} style={styles.centered} />;
+  if (bals.error) return <Text style={[styles.emptyText, { color: theme.icon }]}>{bals.error}</Text>;
+
+  return (
+    <FlatList
+      data={balanceRows}
+      keyExtractor={(item, i) => item._kind === 'balance' ? item.userId : item._kind === 'settlement' ? `${item.fromId}-${item.toId}` : item._kind === 'separator' ? `sep-${i}` : `${item._kind}-${i}`}
+      contentContainerStyle={styles.list}
+      showsVerticalScrollIndicator={false}
+      renderItem={renderRow}
+    />
   );
 });
 
@@ -435,7 +593,7 @@ const ExpensesScreen = () => {
     }
     const payerName = members?.find(m => m.id === row.item.payerId)?.username ?? '?';
     return <ExpenseRow item={row.item} payerName={payerName} theme={theme} onPress={handleOpenDetail} />;
-  }, [members, theme, handleOpenDetail, t]);
+  }, [members, theme, handleOpenDetail]);
 
   const usernameFor = useCallback((id: string) => trip?.members?.find(m => m.id === id)?.username ?? '?', [trip?.members]);
 
@@ -478,108 +636,6 @@ const ExpensesScreen = () => {
       setPayingKey(null);
     }
   }, [trip?.id, paySettlement, getBalances, t]);
-
-  const balanceRows: BalanceFlatRow[] = (() => {
-    const rows: BalanceFlatRow[] = [];
-    const bl = bals.info?.balances ?? [];
-    const sl = bals.info?.settlements ?? [];
-    rows.push({ _kind: 'header', title: t('trip.balancePerMember') });
-    if (!bl.length) rows.push({ _kind: 'empty', text: t('trip.noBalances') });
-    else bl.forEach(b => rows.push({ _kind: 'balance', userId: b.userId, amount: b.amount }));
-    rows.push({ _kind: 'header', title: t('trip.settlements'), mt: 20 });
-    if (!sl.length) {
-      rows.push({ _kind: 'empty', text: t('trip.noSettlements') });
-    } else {
-      const mine = sl.filter(s => s.fromId === currentUserId);
-      const others = sl.filter(s => s.fromId !== currentUserId);
-      mine.forEach(s => rows.push({ _kind: 'settlement', fromId: s.fromId, toId: s.toId, amount: s.amount }));
-      if (mine.length && others.length) rows.push({ _kind: 'separator' });
-      others.forEach(s => rows.push({ _kind: 'settlement', fromId: s.fromId, toId: s.toId, amount: s.amount }));
-    }
-    return rows;
-  })();
-
-  const renderBalanceRow = useCallback(({ item }: { item: BalanceFlatRow }) => {
-    switch (item._kind) {
-      case 'header':
-        return <Text style={[styles.sectionHeader, { color: theme.icon }, item.mt ? { marginTop: item.mt } : undefined]}>{item.title.toUpperCase()}</Text>;
-      case 'balance': {
-        const pos = item.amount >= 0;
-        const isMe = item.userId === currentUserId;
-        return (
-          <View style={[styles.balanceCard, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
-            <View style={[styles.balanceAvatar, { backgroundColor: `${theme.tint}18` }]}>
-              <Text style={[styles.balanceInitial, { color: theme.tint }]}>{usernameFor(item.userId).charAt(0).toUpperCase()}</Text>
-            </View>
-            <View style={styles.nameRow}>
-              <Text style={[styles.balanceName, { color: theme.title }, isMe && styles.meText]} numberOfLines={1}>{usernameFor(item.userId)}</Text>
-              {isMe && (
-                <View style={[styles.meTag, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
-                  <Text style={[styles.meTagText, { color: theme.tint }]}>{t('common.you').toUpperCase()}</Text>
-                </View>
-              )}
-            </View>
-            <View style={[styles.balancePill, { backgroundColor: pos ? 'rgba(76,175,80,0.15)' : 'rgba(239,68,68,0.15)', boxShadow: pos ? '0 0 10px rgba(76,175,80,0.3)' : '0 0 10px rgba(239,68,68,0.3)' }]}>
-              <Text style={[styles.balanceAmt, { color: pos ? '#4caf50' : Colors.warning }]}>{pos ? '+' : ''}{item.amount.toFixed(2)}€</Text>
-            </View>
-          </View>
-        );
-      }
-      case 'settlement': {
-        const fromMe = item.fromId === currentUserId;
-        const toMe = item.toId === currentUserId;
-        const key = `${item.fromId}-${item.toId}`;
-        const isPaying = payingKey === key;
-        return (
-          <View style={[styles.settlementCard, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
-            <View style={styles.settlementTop}>
-              <View style={[styles.nameRow, { flex: 0 }]}>
-                <Text style={[styles.settlementName, { color: theme.title }, fromMe && styles.meText]} numberOfLines={1}>{usernameFor(item.fromId)}</Text>
-                {fromMe && (
-                  <View style={[styles.meTag, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
-                    <Text style={[styles.meTagText, { color: theme.tint }]}>{t('common.you').toUpperCase()}</Text>
-                  </View>
-                )}
-              </View>
-              <View style={[styles.settlementArrow, { backgroundColor: `${theme.tint}20` }]}>
-                <Ionicons name="arrow-forward" size={13} color={theme.tint} />
-              </View>
-              <View style={[styles.nameRow, { flex: 1 }]}>
-                <Text style={[styles.settlementName, { color: theme.title }, toMe && styles.meText]} numberOfLines={1}>{usernameFor(item.toId)}</Text>
-                {toMe && (
-                  <View style={[styles.meTag, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
-                    <Text style={[styles.meTagText, { color: theme.tint }]}>{t('common.you').toUpperCase()}</Text>
-                  </View>
-                )}
-              </View>
-              <Text style={[styles.settlementAmt, { color: theme.tint }]}>{item.amount.toFixed(2)}€</Text>
-            </View>
-            {fromMe && (
-              <Pressable
-                style={({ pressed }) => [styles.payBtn, { borderColor: theme.tint }, pressed && { opacity: 0.7 }]}
-                onPress={() => handlePaySettlement(item.fromId, item.toId, item.amount)}
-                disabled={isPaying}
-              >
-                {isPaying
-                  ? <ActivityIndicator size="small" color={theme.tint} />
-                  : <>
-                      <Ionicons name="checkmark-circle-outline" size={15} color={theme.tint} />
-                      <Text style={[styles.payBtnText, { color: theme.tint }]}>{t('trip.markAsPaid')}</Text>
-                    </>
-                }
-              </Pressable>
-            )}
-          </View>
-        );
-      }
-      case 'separator':
-        return <View style={[styles.separator, { borderBottomColor: theme.border }]} />;
-      case 'empty':
-        return <Text style={[styles.emptyText, { color: theme.icon }]}>{item.text}</Text>;
-      default:
-        return null;
-    }
-  }, [theme, usernameFor, currentUserId, payingKey, handlePaySettlement, t]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -626,16 +682,13 @@ const ExpensesScreen = () => {
       )}
 
       {activeTab === 'balances' && (
-        bals.loading ? <ActivityIndicator size="large" color={theme.tint} style={styles.centered} /> :
-        bals.error ? <Text style={[styles.emptyText, { color: theme.icon }]}>{bals.error}</Text> : (
-          <FlatList
-            data={balanceRows}
-            keyExtractor={(item, i) => item._kind === 'balance' ? item.userId : item._kind === 'settlement' ? `${item.fromId}-${item.toId}` : item._kind === 'separator' ? `sep-${i}` : `${item._kind}-${i}`}
-            contentContainerStyle={styles.list}
-            showsVerticalScrollIndicator={false}
-            renderItem={renderBalanceRow}
-          />
-        )
+        <BalancesSection
+          bals={bals}
+          currentUserId={currentUserId}
+          usernameFor={usernameFor}
+          payingKey={payingKey}
+          handlePaySettlement={handlePaySettlement}
+        />
       )}
 
       <ExpenseDetailModal

@@ -9,11 +9,9 @@ import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Entity
-@Table(name = "ai_chat_messages")
+@Table(name = "trip_chat_messages")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class AiChatMessage {
-
-    public enum Role { USER, ASSISTANT }
+public class TripChatMessage {
 
     @Getter
     @Id
@@ -32,11 +30,6 @@ public class AiChatMessage {
     private User user;
 
     @Getter
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
-
-    @Getter
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
@@ -44,22 +37,20 @@ public class AiChatMessage {
     @Column(nullable = false)
     private OffsetDateTime timestamp;
 
-    protected AiChatMessage() {}
+    protected TripChatMessage() {}
 
-    public AiChatMessage(Trip trip, User user, Role role, String content) {
+    public TripChatMessage(Trip trip, User user, String content) {
         this.trip = trip;
         this.user = user;
-        this.role = role;
         this.content = content;
         this.timestamp = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
-    public gal.usc.telariabackend.model.dto.AiChatMessage toDto() {
-        return new gal.usc.telariabackend.model.dto.AiChatMessage()
+    public gal.usc.telariabackend.model.dto.TripChatMessage toDto() {
+        return new gal.usc.telariabackend.model.dto.TripChatMessage()
                 .id(this.id)
-                .role(this.role == Role.USER
-                        ? gal.usc.telariabackend.model.dto.AiChatMessage.RoleEnum.USER
-                        : gal.usc.telariabackend.model.dto.AiChatMessage.RoleEnum.ASSISTANT)
+                .senderId(this.user.getId())
+                .senderUsername(this.user.getUsername())
                 .content(this.content)
                 .timestamp(this.timestamp);
     }

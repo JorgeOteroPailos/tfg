@@ -1,0 +1,33 @@
+schemas:
+  TripChatMessage:
+    type: object
+    required:
+      - id
+      - senderId
+      - senderUsername
+      - content
+      - timestamp
+    properties:
+      id:
+        type: string
+        format: uuid
+      senderId:
+        type: string
+        format: uuid
+      senderUsername:
+        type: string
+      content:
+        type: string
+      timestamp:
+        type: string
+        format: date-time
+
+  SendTripChatMessageRequest:
+    type: object
+    required:
+      - content
+    properties:
+      content:
+        type: string
+        minLength: 1
+        maxLength: 2000

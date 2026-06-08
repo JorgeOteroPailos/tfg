@@ -384,6 +384,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/trips/{tripId}/group-chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the group chat message history for a trip */
+        get: operations["getGroupChatHistory"];
+        put?: never;
+        /** Send a message to the trip group chat */
+        post: operations["sendGroupChatMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -666,6 +684,23 @@ export interface components {
             content: string;
             /** Format: date-time */
             timestamp: string;
+        };
+        AiChatHistoryPage: {
+            messages: components["schemas"]["AiChatMessage"][];
+            hasMore: boolean;
+        };
+        TripChatMessage: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            senderId: string;
+            senderUsername: string;
+            content: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        SendTripChatMessageRequest: {
+            content: string;
         };
     };
     responses: never;
@@ -1695,6 +1730,52 @@ export interface operations {
     };
     getAiChatHistory: {
         parameters: {
+            query?: {
+                /** @description Return messages sent before this timestamp (ISO 8601). Omit to get the most recent page. */
+                before?: string;
+            };
+            header?: never;
+            path: {
+                tripId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Up to 50 messages, ordered oldest-first. hasMore=true means older messages exist. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiChatHistoryPage"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Trip not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getGroupChatHistory: {
+        parameters: {
             query?: never;
             header?: never;
             path: {
@@ -1704,13 +1785,60 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Full message history for this trip's AI conversation */
+            /** @description Full message history ordered by timestamp ascending */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AiChatMessage"][];
+                    "application/json": components["schemas"]["TripChatMessage"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Trip not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    sendGroupChatMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendTripChatMessageRequest"];
+            };
+        };
+        responses: {
+            /** @description Message sent successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TripChatMessage"];
                 };
             };
             /** @description Not authenticated */
