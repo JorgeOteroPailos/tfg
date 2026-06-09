@@ -123,11 +123,6 @@ const Settings = () => {
             selected={selectedTheme === 'dark'}
             onPress={() => handleThemeChange('dark')}
           />
-          <OptionButton
-            label={t('settings.system')}
-            selected={selectedTheme === 'system'}
-            onPress={() => handleThemeChange('system')}
-          />
         </View>
       </View>
     </View>
@@ -187,12 +182,12 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   optionButton: {
+    flex: 1,
     borderWidth: 1,
     borderColor: '#888',
     borderRadius: 12,
     paddingVertical: 10,
     paddingHorizontal: 14,
-    minWidth: 90,
     alignItems: 'center',
   },
   optionButtonSelected: {

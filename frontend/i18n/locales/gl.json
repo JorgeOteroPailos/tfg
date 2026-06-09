@@ -43,10 +43,12 @@
       "username": "Nome de usuario",
       "email": "Correo electrónico",
       "password": "Contrasinal",
+      "confirmPassword": "Confirmar contrasinal",
       "button": "Rexistrarse",
       "alreadyHaveAccount": "¿Xa tes unha conta? ",
       "errors": {
         "allFieldsRequired": "Requírense todos os campos",
+        "passwordsDoNotMatch": "Os contrasinais non coinciden",
         "emailAlreadyInUse": "Este correo electrónico xa está en uso",
         "invalidData": "Datos de rexistro non válidos",
         "registration": "Erro ao rexistrar usuario",
@@ -73,8 +75,7 @@
     "theme": "Tema",
     "chooseTheme": "Selecciona o tema da aplicación",
     "light": "Claro",
-    "dark": "Escuro",
-    "system": "Sistema"
+    "dark": "Escuro"
   },
   "trip": {
     "new": "Nova viaxe",
@@ -116,7 +117,10 @@
     "backHomeConfirm": "Volver",
     "beneficiaries": "Beneficiarios",
     "addMember": "Engadir membro",
+    "tripId": "ID da viaxe",
+    "tripQrCode": "Código QR da viaxe",
     "tripQrHint": "Comparte este QR para que outros poidan unirse á viaxe",
+    "inviteByUserId": "Invitar por ID de usuario",
     "sendInvite": "Enviar invitación",
     "inviteSent": "¡Invitación enviada!",
     "inviteError": "Non se puido enviar a invitación",

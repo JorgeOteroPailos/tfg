@@ -278,7 +278,7 @@ type CreateState = {
   pickerMonth: number;
 };
 type CreateAction =
-  | { type: 'open' }
+  | { type: 'open'; key?: string }
   | { type: 'close' }
   | { type: 'set_name'; value: string }
   | { type: 'set_duration'; value: string }
@@ -295,7 +295,13 @@ type CreateAction =
 
 function createReducer(state: CreateState, action: CreateAction): CreateState {
   switch (action.type) {
-    case 'open': return { ...state, visible: true };
+    case 'open': {
+      if (action.key) {
+        const [y, m] = action.key.split('-').map(Number);
+        return { ...state, visible: true, pickedDate: action.key, pickerYear: y, pickerMonth: m - 1 };
+      }
+      return { ...state, visible: true };
+    }
     case 'close': return {
       ...state,
       visible: false, creating: false, error: null,
@@ -753,7 +759,7 @@ const EventsScreen = () => {
       {!evList.loading && !evList.error && (
         <Pressable
           style={[styles.fab, { backgroundColor: theme.tint }]}
-          onPress={() => createDispatch({ type: 'open' })}
+          onPress={() => createDispatch({ type: 'open', key: activeTab === 'calendar' ? calState.selectedKey : undefined })}
         >
           <Ionicons name="add" size={28} color="white" />
         </Pressable>

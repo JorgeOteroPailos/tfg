@@ -1,5 +1,5 @@
 import { StyleSheet, Alert, Text, View, Pressable } from 'react-native';
-import { useState } from 'react';
+import { useState, useReducer } from 'react';
 import ThemedInput from '../../components/ThemedInput';
 import ThemedButton from '../../components/ThemedButton';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,11 @@ import { AppError, ErrorCode } from '../../src/AppError';
 import { Ionicons } from '@expo/vector-icons';
 import { DotGrid } from '../../components/BackgroundTexture';
 
+type FormState = { username: string; email: string; password: string; confirmPassword: string };
+function formReducer(state: FormState, action: { field: keyof FormState; value: string }): FormState {
+  return { ...state, [action.field]: action.value };
+}
+
 const Register = () => {
   const { t } = useTranslation();
   const { register } = useAuth();
@@ -19,9 +24,7 @@ const Register = () => {
   const theme = Colors[themeName] ?? Colors.light;
   const isDark = themeName === 'dark';
 
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [form, formDispatch] = useReducer(formReducer, { username: '', email: '', password: '', confirmPassword: '' });
   const [isLoading, setIsLoading] = useState(false);
 
   const ERROR_MESSAGES: Partial<Record<ErrorCode, string>> = {
@@ -32,13 +35,17 @@ const Register = () => {
   };
 
   const handleRegister = async () => {
-    if (!username.trim() || !email.trim() || !password.trim()) {
+    if (!form.username.trim() || !form.email.trim() || !form.password.trim() || !form.confirmPassword.trim()) {
       Alert.alert(t('common.error'), t('auth.register.errors.allFieldsRequired'));
+      return;
+    }
+    if (form.password !== form.confirmPassword) {
+      Alert.alert(t('common.error'), t('auth.register.errors.passwordsDoNotMatch'));
       return;
     }
     try {
       setIsLoading(true);
-      await register(username.trim(), email.trim(), password);
+      await register(form.username.trim(), form.email.trim(), form.password);
       router.replace('/main');
     } catch (error) {
       const code = error instanceof AppError ? error.code : ErrorCode.SERVER_ERROR;
@@ -77,22 +84,30 @@ const Register = () => {
       <View style={[styles.card, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
         <ThemedInput
           placeholder={t('auth.register.username')}
-          value={username}
-          onChangeText={setUsername}
+          value={form.username}
+          onChangeText={value => formDispatch({ field: 'username', value })}
           autoCapitalize="none"
         />
         <ThemedInput
           placeholder={t('auth.register.email')}
-          value={email}
-          onChangeText={setEmail}
+          value={form.email}
+          onChangeText={value => formDispatch({ field: 'email', value })}
           autoCapitalize="none"
           keyboardType="email-address"
         />
         <ThemedInput
           placeholder={t('auth.register.password')}
-          value={password}
-          onChangeText={setPassword}
+          value={form.password}
+          onChangeText={value => formDispatch({ field: 'password', value })}
           secureTextEntry
+          autoCapitalize="none"
+        />
+        <ThemedInput
+          placeholder={t('auth.register.confirmPassword')}
+          value={form.confirmPassword}
+          onChangeText={value => formDispatch({ field: 'confirmPassword', value })}
+          secureTextEntry
+          autoCapitalize="none"
         />
 
         <ThemedButton onPress={handleRegister} disabled={isLoading} style={styles.btn}>

@@ -86,6 +86,7 @@ const Login = () => {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          autoCapitalize="none"
         />
 
         <ThemedButton onPress={handleLogin} disabled={isLoading} style={styles.btn}>

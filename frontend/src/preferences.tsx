@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../i18n';
 
 export type AppLanguage = 'es' | 'en' | 'gl';
-export type AppTheme = 'light' | 'dark' | 'system';
+export type AppTheme = 'light' | 'dark';
 
 const LANGUAGE_KEY = 'app_language';
 const THEME_KEY = 'app_theme';
@@ -37,9 +37,9 @@ export async function saveTheme(theme: AppTheme): Promise<void> {
 export async function getSavedTheme(): Promise<AppTheme> {
   const value = await AsyncStorage.getItem(THEME_KEY);
 
-  if (value === 'light' || value === 'dark' || value === 'system') {
+  if (value === 'light' || value === 'dark') {
     return value;
   }
 
-  return 'system';
+  return 'dark';
 }

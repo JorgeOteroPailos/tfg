@@ -223,11 +223,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     backgroundColor: '#ffffff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)',
   },
   qrHint: {
     textAlign: 'center',

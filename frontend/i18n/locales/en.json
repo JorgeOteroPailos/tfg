@@ -43,10 +43,12 @@
       "username": "Username",
       "email": "Email",
       "password": "Password",
+      "confirmPassword": "Confirm password",
       "button": "Register",
       "alreadyHaveAccount": "Already have an account? ",
       "errors": {
         "allFieldsRequired": "All fields are required",
+        "passwordsDoNotMatch": "Passwords do not match",
         "emailAlreadyInUse": "Email is already in use",
         "invalidData": "Invalid registration data",
         "registration": "Error registering user",
@@ -73,8 +75,7 @@
     "theme": "Theme",
     "chooseTheme": "Select the appearance of the application",
     "light": "Light",
-    "dark": "Dark",
-    "system": "System"
+    "dark": "Dark"
   },
   "trip": {
     "new": "New Trip",
@@ -116,7 +117,10 @@
     "backHomeConfirm": "Go back",
     "beneficiaries": "Beneficiaries",
     "addMember": "Add Member",
+    "tripId": "Trip ID",
+    "tripQrCode": "Trip QR Code",
     "tripQrHint": "Share this QR so others can join the trip",
+    "inviteByUserId": "Invite by user ID",
     "sendInvite": "Send Invite",
     "inviteSent": "Invitation sent!",
     "inviteError": "Could not send invitation",

@@ -13,13 +13,6 @@ import { useTrip } from '../../../src/trips';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '../../../components/ThemedText';
 
-function formatSize(bytes?: number | null): string {
-  if (!bytes) return '—';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 function formatDate(iso: string): string {
   try {
     return new Date(iso).toLocaleDateString(undefined, {
@@ -73,7 +66,7 @@ const DocCard = React.memo(function DocCard({ item, background, tint, icon, memb
       <View style={styles.docInfo}>
         <ThemedText style={styles.docName} numberOfLines={1}>{item.name}</ThemedText>
         <ThemedText style={styles.docMeta}>
-          {formatSize(item.size)} · {formatDate(item.uploadedAt)}
+          {formatDate(item.uploadedAt)}
         </ThemedText>
         {memberName && (
           <ThemedText style={styles.docUploader}>{memberName}</ThemedText>
@@ -185,7 +178,6 @@ const DocumentsScreen = () => {
       const { documentId, uploadUrl } = await initDocumentUpload(trip.id, {
         name: file.name,
         contentType,
-        size: file.size ?? undefined,
       });
 
       await uploadToUrl(uploadUrl, file.uri, contentType);
@@ -306,10 +298,6 @@ const DocumentsScreen = () => {
                   {detail.doc.name}
                 </ThemedText>
 
-                <View style={styles.detailRow}>
-                  <ThemedText style={styles.detailLabel}>{t('trip.fileSize')}</ThemedText>
-                  <ThemedText style={styles.detailValue}>{formatSize(detail.doc.size)}</ThemedText>
-                </View>
                 <View style={styles.detailRow}>
                   <ThemedText style={styles.detailLabel}>{t('trip.uploadedAt')}</ThemedText>
                   <ThemedText style={styles.detailValue}>{formatDate(detail.doc.uploadedAt)}</ThemedText>

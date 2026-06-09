@@ -109,28 +109,58 @@ const ChatScreen = () => {
     }
   }, [input, trip?.id, sending, sendMessage]);
 
-  const renderItem = useCallback(({ item }: { item: TripChatMessage }) => {
+  const renderItem = useCallback(({ item, index }: { item: TripChatMessage; index: number }) => {
     const isMe = item.senderId === userId;
+    const prev = messages[index - 1];
+    const sameMinute = (a: string, b: string) => {
+      const da = new Date(a), db = new Date(b);
+      return da.getFullYear() === db.getFullYear() &&
+        da.getMonth() === db.getMonth() &&
+        da.getDate() === db.getDate() &&
+        da.getHours() === db.getHours() &&
+        da.getMinutes() === db.getMinutes();
+    };
+    const isGrouped = !!prev && prev.senderId === item.senderId && sameMinute(prev.timestamp, item.timestamp);
+    const next = messages[index + 1];
+    const isLastInGroup = !next || next.senderId !== item.senderId || !sameMinute(item.timestamp, next.timestamp);
+
+    const CUT = 3;
+    const groupCornerStyle = (() => {
+      if (!isGrouped && isLastInGroup) return {}; // standalone — keep bubbleMe/bubbleOther defaults
+      if (isMe) {
+        if (!isGrouped)    return { borderBottomRightRadius: CUT };                               // first
+        if (!isLastInGroup) return { borderTopRightRadius: CUT, borderBottomRightRadius: CUT };   // middle
+        return { borderTopRightRadius: CUT, borderBottomRightRadius: 18 };                        // last
+      } else {
+        if (!isGrouped)    return { borderBottomLeftRadius: CUT };                                // first
+        if (!isLastInGroup) return { borderTopLeftRadius: CUT, borderBottomLeftRadius: CUT };     // middle
+        return { borderTopLeftRadius: CUT, borderBottomLeftRadius: 18 };                          // last
+      }
+    })();
+
     return (
-      <View style={[styles.row, isMe ? styles.rowMe : styles.rowOther]}>
-        {!isMe && (
+      <View style={[styles.row, isMe ? styles.rowMe : styles.rowOther, isGrouped ? styles.rowGrouped : styles.rowFirst]}>
+        {!isMe && !isGrouped && (
           <Text style={[styles.senderName, { color: theme.icon }]}>{item.senderUsername}</Text>
         )}
         <View style={[
           styles.bubble,
           isMe ? { backgroundColor: Colors.primary } : { backgroundColor: theme.uiBackground },
           isMe ? styles.bubbleMe : styles.bubbleOther,
+          groupCornerStyle,
         ]}>
           <Text style={[styles.bubbleText, { color: isMe ? '#fff' : theme.text }]}>
             {item.content}
           </Text>
         </View>
-        <Text style={[styles.timestamp, { color: theme.icon }]}>
-          {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </Text>
+        {isLastInGroup && (
+          <Text style={[styles.timestamp, { color: theme.icon }]}>
+            {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </Text>
+        )}
       </View>
     );
-  }, [userId, theme]);
+  }, [userId, theme, messages]);
 
   const canSend = input.trim().length > 0 && !sending;
 
@@ -151,6 +181,7 @@ const ChatScreen = () => {
           data={messages}
           renderItem={renderItem}
           keyExtractor={item => item.id}
+          extraData={messages}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
         />
@@ -187,11 +218,13 @@ const styles = StyleSheet.create({
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   errorText: { fontSize: 14, fontWeight: '500', opacity: 0.6, textAlign: 'center', paddingHorizontal: 24 },
 
-  list: { paddingHorizontal: 16, paddingVertical: 12, gap: 10 },
+  list: { paddingHorizontal: 16, paddingVertical: 12 },
 
   row: { maxWidth: '80%' },
   rowMe: { alignSelf: 'flex-end', alignItems: 'flex-end' },
   rowOther: { alignSelf: 'flex-start', alignItems: 'flex-start' },
+  rowFirst: { marginTop: 10 },
+  rowGrouped: { marginTop: 3 },
 
   senderName: { fontSize: 11, fontWeight: '600', marginBottom: 2, paddingHorizontal: 4 },
 

@@ -129,16 +129,6 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
 
   useEffect(() => {
     if (visible) {
-      loadHistory();
-    } else {
-      abortRef.current?.();
-      abortRef.current = null;
-      dispatch({ type: 'close' });
-    }
-  }, [visible, loadHistory]);
-
-  useEffect(() => {
-    if (visible) {
       const timer = setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
       return () => clearTimeout(timer);
     }
@@ -218,7 +208,7 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
   ) : null;
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={handleClose}>
+    <Modal visible={visible} animationType="slide" onRequestClose={handleClose} onShow={loadHistory}>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={[styles.header, { borderBottomColor: theme.border }]}>
           <Ionicons name="sparkles-outline" size={20} color={Colors.primary} />

@@ -643,22 +643,12 @@ export interface components {
             uploaderId: string;
             /** Format: date-time */
             uploadedAt: string;
-            /**
-             * @description File size in bytes
-             * @example 204800
-             */
-            size?: number;
         };
         DocumentUploadRequest: {
             /** @example billete_tren.pdf */
             name: string;
             /** @example application/pdf */
             contentType: string;
-            /**
-             * @description File size in bytes
-             * @example 204800
-             */
-            size?: number;
         };
         DocumentUploadResponse: {
             /** Format: uuid */

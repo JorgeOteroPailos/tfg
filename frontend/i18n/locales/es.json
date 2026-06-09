@@ -43,10 +43,12 @@
       "username": "Nombre de usuario",
       "email": "Correo electrónico",
       "password": "Contraseña",
+      "confirmPassword": "Confirmar contraseña",
       "button": "Registrarse",
       "alreadyHaveAccount": "¿Ya tienes una cuenta? ",
       "errors": {
         "allFieldsRequired": "Se requieren todos los campos",
+        "passwordsDoNotMatch": "Las contraseñas no coinciden",
         "emailAlreadyInUse": "Este correo electrónico ya está en uso",
         "invalidData": "Datos de registro no válidos",
         "registration": "Error al registrar usuario",
@@ -73,8 +75,7 @@
     "theme": "Tema",
     "chooseTheme": "Selecciona el tema de la aplicación",
     "light": "Claro",
-    "dark": "Oscuro",
-    "system": "Sistema"
+    "dark": "Oscuro"
   },
   "trip": {
     "new": "Nuevo Viaje",
@@ -116,7 +117,10 @@
     "backHomeConfirm": "Volver",
     "beneficiaries": "Beneficiarios",
     "addMember": "Añadir miembro",
+    "tripId": "ID del viaje",
+    "tripQrCode": "Código QR del viaje",
     "tripQrHint": "Comparte este QR para que otros puedan unirse al viaje",
+    "inviteByUserId": "Invitar por ID de usuario",
     "sendInvite": "Enviar invitación",
     "inviteSent": "¡Invitación enviada!",
     "inviteError": "No se pudo enviar la invitación",

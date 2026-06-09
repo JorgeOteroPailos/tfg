@@ -11,10 +11,6 @@ schemas:
       contentType:
         type: string
         example: application/pdf
-      size:
-        type: integer
-        description: File size in bytes
-        example: 204800
 
   DocumentUploadResponse:
     type: object
@@ -50,10 +46,6 @@ schemas:
       uploadedAt:
         type: string
         format: date-time
-      size:
-        type: integer
-        description: File size in bytes
-        example: 204800
 
   DocumentDownloadResponse:
     type: object
