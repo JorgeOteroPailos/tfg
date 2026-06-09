@@ -8,8 +8,10 @@ import gal.usc.telariabackend.model.dto.InvitationSummary;
 import gal.usc.telariabackend.model.exceptions.AlreadyDoneException;
 import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import gal.usc.telariabackend.model.exceptions.TripNotFoundException;
+import gal.usc.telariabackend.repository.AiChatMessageRepository;
 import gal.usc.telariabackend.repository.InvitationRepository;
 import gal.usc.telariabackend.repository.JoinRequestRepository;
+import gal.usc.telariabackend.repository.TripChatMessageRepository;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -27,12 +29,24 @@ public class MembershipService {
     private final JoinRequestRepository joinRequestRepo;
     private final TripRepository tripRepo;
     private final UserRepository userRepo;
+    private final SharedDocumentService sharedDocumentService;
+    private final TripChatMessageRepository tripChatMessageRepo;
+    private final AiChatMessageRepository aiChatMessageRepo;
 
-    public MembershipService(InvitationRepository invitationRepo, JoinRequestRepository joinRequestRepo, TripRepository tripRepo, UserRepository userRepo) {
+    public MembershipService(InvitationRepository invitationRepo,
+                             JoinRequestRepository joinRequestRepo,
+                             TripRepository tripRepo,
+                             UserRepository userRepo,
+                             SharedDocumentService sharedDocumentService,
+                             TripChatMessageRepository tripChatMessageRepo,
+                             AiChatMessageRepository aiChatMessageRepo) {
         this.invitationRepo = invitationRepo;
         this.joinRequestRepo = joinRequestRepo;
         this.tripRepo = tripRepo;
         this.userRepo = userRepo;
+        this.sharedDocumentService = sharedDocumentService;
+        this.tripChatMessageRepo = tripChatMessageRepo;
+        this.aiChatMessageRepo = aiChatMessageRepo;
     }
 
     @Transactional
@@ -69,6 +83,11 @@ public class MembershipService {
         trip.getMembers().remove(user);
         tripRepo.save(trip);
         if(trip.getMembers().isEmpty()){
+            sharedDocumentService.deleteAllForTrip(tripId);
+            invitationRepo.deleteAllByTripId(tripId);
+            joinRequestRepo.deleteAllByTripId(tripId);
+            tripChatMessageRepo.deleteAllByTripId(tripId);
+            aiChatMessageRepo.deleteAllByTripId(tripId);
             tripRepo.delete(trip);
         }
     }

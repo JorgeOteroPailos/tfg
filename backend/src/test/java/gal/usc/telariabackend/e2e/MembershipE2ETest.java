@@ -580,6 +580,65 @@ class MembershipE2ETest extends BaseE2ETest{
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    @DisplayName("Leave trip: last member leaving deletes the trip entirely")
+    void leaveTrip_lastMember_tripIsDeletedFromDatabase() throws Exception {
+        String ownerToken = registerAndObtainToken("owner", "owner.lvlast@test.com");
+        UUID tripId = createTrip(ownerToken, "Viaje solitario");
+
+        mockMvc.perform(delete("/trips/{tripId}/members/me", tripId)
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isOk());
+
+        MvcResult listResult = mockMvc.perform(get("/trips")
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = listResult.getResponse().getContentAsString();
+        assertFalse(json.contains(tripId.toString()),
+                "Deleted trip should no longer appear in the owner's trip list");
+    }
+
+    @Test
+    @DisplayName("Leave trip: last member leaving with pending requests and invitations succeeds (cascade)")
+    void leaveTrip_lastMemberWithDependentData_succeeds() throws Exception {
+        String ownerToken = registerAndObtainToken("owner", "owner.lvdep@test.com");
+        String guestToken = registerAndObtainToken("guest", "guest.lvdep@test.com");
+        String inviteeToken = registerAndObtainToken("invitee", "invitee.lvdep@test.com");
+        UUID guestId = extractUserIdFromToken(guestToken);
+        UUID inviteeId = extractUserIdFromToken(inviteeToken);
+        UUID tripId = createTrip(ownerToken, "Viaje con dependencias");
+
+        // create a pending join request
+        mockMvc.perform(post("/trips/{tripId}/join-requests", tripId)
+                        .header("Authorization", "Bearer " + guestToken))
+                .andExpect(status().isNoContent());
+
+        // create a pending invitation
+        invite(ownerToken, inviteeId, tripId);
+
+        // owner (last member) leaves — should cascade-delete join request, invitation, and the trip
+        mockMvc.perform(delete("/trips/{tripId}/members/me", tripId)
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isOk());
+
+        MvcResult listResult = mockMvc.perform(get("/trips")
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertFalse(listResult.getResponse().getContentAsString().contains(tripId.toString()));
+
+        // invitee should now have no pending invitations for this trip
+        MvcResult invResult = mockMvc.perform(get("/users/me/invitations")
+                        .header("Authorization", "Bearer " + inviteeToken))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertFalse(invResult.getResponse().getContentAsString().contains(tripId.toString()));
+    }
+
     // -------------------------------------------------------------------------
     // Complete flows
     // -------------------------------------------------------------------------

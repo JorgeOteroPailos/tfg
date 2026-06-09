@@ -41,6 +41,8 @@ const RootNavigator = () => {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: theme.background },
+        animation: 'fade',
+        animationDuration: 200,
       }}
     >
       {isAuthenticated ? (

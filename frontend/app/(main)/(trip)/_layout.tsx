@@ -1,12 +1,26 @@
 import { useState } from 'react';
 import { View, Pressable, StyleSheet, Modal, Text } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams, useSegments, Slot } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
-import { TripProvider, useTrip } from '../../../src/trips';
+import { TripProvider, useTrip, useTrips } from '../../../src/trips';
 import { Ionicons } from '@expo/vector-icons';
 import { AiChatButton } from '../../../components/AiChatModal';
+
+function nameToHue(name: string): number {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash) % 360;
+}
+
+function tripColor(name: string): string {
+  const hue = 200 + (nameToHue(name) % 110);
+  return `hsl(${hue}, 72%, 55%)`;
+}
 
 const TripContent = () => {
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
@@ -15,9 +29,12 @@ const TripContent = () => {
   const { t } = useTranslation();
   const [moreVisible, setMoreVisible] = useState(false);
   const [backConfirmVisible, setBackConfirmVisible] = useState(false);
+  const [leaveConfirmVisible, setLeaveConfirmVisible] = useState(false);
+  const [leaveLastMemberConfirmVisible, setLeaveLastMemberConfirmVisible] = useState(false);
   const segments = useSegments();
   const activeTab = segments[segments.length - 1];
   const { trip } = useTrip();
+  const { leaveTrip } = useTrips();
 
   const tabs = [
     { name: 'expenses', icon: 'receipt-outline', label: t('trip.expenses') },
@@ -60,8 +77,18 @@ const TripContent = () => {
 
       <AiChatButton tripId={tripId} isChatTab={activeTab === 'chat'} />
 
+      {/* ── Trip color strip ──────────────────────────────── */}
+      {trip?.name && (
+        <LinearGradient
+          colors={[tripColor(trip.name), theme.navBackground]}
+          style={styles.tripStrip}
+        >
+          <Text style={styles.tripStripText} numberOfLines={1}>{trip.name}</Text>
+        </LinearGradient>
+      )}
+
       {/* ── Tab bar ───────────────────────────────────────── */}
-      <View style={[styles.tabBar, { backgroundColor: theme.navBackground, borderTopColor: theme.border }]}>
+      <View style={[styles.tabBar, { backgroundColor: theme.navBackground }]}>
         {tabs.map(tab => {
           const isActive = tab.name === activeTab;
           return (
@@ -123,6 +150,78 @@ const TripContent = () => {
         </Pressable>
       </Modal>
 
+      {/* ── Leave-trip confirm ───────────────────────────── */}
+      <Modal visible={leaveConfirmVisible} transparent animationType="fade" onRequestClose={() => setLeaveConfirmVisible(false)}>
+        <Pressable style={styles.overlay} onPress={() => setLeaveConfirmVisible(false)}>
+          <Pressable onPress={() => {}} style={[styles.confirmBox, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
+            <View style={[styles.confirmIcon, { backgroundColor: 'rgba(239,68,68,0.12)', borderColor: 'rgba(239,68,68,0.25)' }]}>
+              <Ionicons name="exit-outline" size={30} color={Colors.warning} />
+            </View>
+            <Text style={[styles.confirmTitle, { color: theme.title }]}>{t('trip.leaveTitle')}</Text>
+            <Text style={[styles.confirmMsg, { color: theme.icon }]}>{t('trip.leaveMessage')}</Text>
+            <View style={styles.confirmBtns}>
+              <Pressable
+                style={[styles.confirmBtn, { borderColor: theme.border, borderWidth: 1 }]}
+                onPress={() => setLeaveConfirmVisible(false)}
+              >
+                <Text style={[styles.confirmBtnText, { color: theme.text }]}>{t('common.cancel')}</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.confirmBtn, { backgroundColor: Colors.warning, boxShadow: `0 0 20px rgba(239,68,68,0.5)` }]}
+                onPress={async () => {
+                  setLeaveConfirmVisible(false);
+                  try {
+                    await leaveTrip(tripId);
+                  } catch { /* best-effort */ }
+                  router.replace('/main');
+                }}
+              >
+                <Ionicons name="exit-outline" size={15} color="#fff" />
+                <Text style={[styles.confirmBtnText, { color: '#fff', letterSpacing: 1 }]}>
+                  {t('trip.leaveConfirm').toUpperCase()}
+                </Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* ── Leave-trip last-member confirm ───────────────── */}
+      <Modal visible={leaveLastMemberConfirmVisible} transparent animationType="fade" onRequestClose={() => setLeaveLastMemberConfirmVisible(false)}>
+        <Pressable style={styles.overlay} onPress={() => setLeaveLastMemberConfirmVisible(false)}>
+          <Pressable onPress={() => {}} style={[styles.confirmBox, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
+            <View style={[styles.confirmIcon, { backgroundColor: 'rgba(239,68,68,0.12)', borderColor: 'rgba(239,68,68,0.35)' }]}>
+              <Ionicons name="trash-outline" size={30} color={Colors.warning} />
+            </View>
+            <Text style={[styles.confirmTitle, { color: theme.title }]}>{t('trip.leaveLastMemberTitle')}</Text>
+            <Text style={[styles.confirmMsg, { color: theme.icon }]}>{t('trip.leaveLastMemberMessage')}</Text>
+            <View style={styles.confirmBtns}>
+              <Pressable
+                style={[styles.confirmBtn, { borderColor: theme.border, borderWidth: 1 }]}
+                onPress={() => setLeaveLastMemberConfirmVisible(false)}
+              >
+                <Text style={[styles.confirmBtnText, { color: theme.text }]}>{t('common.cancel')}</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.confirmBtn, { backgroundColor: Colors.warning, boxShadow: `0 0 20px rgba(239,68,68,0.5)` }]}
+                onPress={async () => {
+                  setLeaveLastMemberConfirmVisible(false);
+                  try {
+                    await leaveTrip(tripId);
+                  } catch { /* best-effort */ }
+                  router.replace('/main');
+                }}
+              >
+                <Ionicons name="trash-outline" size={15} color="#fff" />
+                <Text style={[styles.confirmBtnText, { color: '#fff', letterSpacing: 1 }]}>
+                  {t('trip.leaveLastMemberConfirm').toUpperCase()}
+                </Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       {/* ── More bottom sheet ─────────────────────────────── */}
       <Modal visible={moreVisible} transparent animationType="slide" onRequestClose={() => setMoreVisible(false)}>
         <Pressable style={styles.overlay} onPress={() => setMoreVisible(false)}>
@@ -132,7 +231,6 @@ const TripContent = () => {
             {[
               { icon: 'person-circle-outline' as const, label: t('nav.profile'), action: () => { setMoreVisible(false); router.push('/profile'); } },
               { icon: 'settings-outline' as const, label: t('nav.settings'), action: () => { setMoreVisible(false); router.push('/settings'); } },
-              { icon: 'mail-outline' as const, label: t('trip.requests'), action: () => { setMoreVisible(false); router.push({ pathname: '/join-requests', params: { tripId } }); } },
             ].map(item => (
               <Pressable
                 key={item.label}
@@ -149,10 +247,17 @@ const TripContent = () => {
 
             <Pressable
               style={({ pressed }) => [styles.sheetRow, { borderBottomWidth: 0 }, pressed && styles.pressed]}
-              onPress={() => { setMoreVisible(false); router.replace('/main'); }}
+              onPress={() => {
+                setMoreVisible(false);
+                if (trip?.members.length === 1) {
+                  setLeaveLastMemberConfirmVisible(true);
+                } else {
+                  setLeaveConfirmVisible(true);
+                }
+              }}
             >
               <View style={[styles.sheetIcon, { backgroundColor: 'rgba(239,68,68,0.14)' }]}>
-                <Ionicons name="arrow-back-outline" size={20} color={Colors.warning} />
+                <Ionicons name="exit-outline" size={20} color={Colors.warning} />
               </View>
               <Text style={[styles.sheetLabel, { color: Colors.warning }]}>{t('trip.leave')}</Text>
             </Pressable>
@@ -204,16 +309,32 @@ const styles = StyleSheet.create({
 
   content: { flex: 1 },
 
+  tripStrip: {
+    height: 16,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 1,
+  },
+  tripStripText: {
+    fontSize: 8,
+    fontWeight: '900',
+    color: '#fff',
+    letterSpacing: 5,
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+
   tabBar: {
     flexDirection: 'row',
-    borderTopWidth: 0.5,
     paddingBottom: 50,
     paddingTop: 4,
   },
   tab: {
     flex: 1,
     alignItems: 'center',
-    paddingTop: 8,
+    paddingTop: 4,
     gap: 3,
     position: 'relative',
   },

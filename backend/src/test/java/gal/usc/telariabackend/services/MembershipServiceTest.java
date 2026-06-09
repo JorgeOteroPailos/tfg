@@ -8,10 +8,13 @@ import gal.usc.telariabackend.model.dto.InvitationSummary;
 import gal.usc.telariabackend.model.exceptions.AlreadyDoneException;
 import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import gal.usc.telariabackend.model.exceptions.TripNotFoundException;
+import gal.usc.telariabackend.repository.AiChatMessageRepository;
 import gal.usc.telariabackend.repository.InvitationRepository;
 import gal.usc.telariabackend.repository.JoinRequestRepository;
+import gal.usc.telariabackend.repository.TripChatMessageRepository;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
+import gal.usc.telariabackend.services.SharedDocumentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,8 +23,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,6 +43,12 @@ class MembershipServiceTest {
     private TripRepository tripRepo;
     @Mock
     private UserRepository userRepo;
+    @Mock
+    private SharedDocumentService sharedDocumentService;
+    @Mock
+    private TripChatMessageRepository tripChatMessageRepo;
+    @Mock
+    private AiChatMessageRepository aiChatMessageRepo;
 
     private MembershipService membershipService;
 
@@ -48,7 +59,8 @@ class MembershipServiceTest {
 
     @BeforeEach
     void setUp() {
-        membershipService = new MembershipService(invitationRepo, joinRequestRepo, tripRepo, userRepo);
+        membershipService = new MembershipService(invitationRepo, joinRequestRepo, tripRepo, userRepo,
+                sharedDocumentService, tripChatMessageRepo, aiChatMessageRepo);
         userId = UUID.randomUUID();
         tripId = UUID.randomUUID();
         user = new User("pepe", "pepe@example.com", "encoded", userId);
@@ -141,15 +153,37 @@ class MembershipServiceTest {
     // leaveTrip
 
     @Test
-    void leaveTrip_WhenUserIsMember_ShouldRemoveUserAndSaveTrip() {
+    void leaveTrip_WhenUserIsMemberAndOthersRemain_ShouldRemoveUserSaveTripAndNotDeleteIt() {
+        User otherMember = new User("other", "other@example.com", "encoded", UUID.randomUUID());
+        Set<User> members = new HashSet<>(Set.of(user, otherMember));
         when(tripRepo.findById(tripId)).thenReturn(Optional.of(trip));
         when(userRepo.findById(userId)).thenReturn(Optional.of(user));
         doNothing().when(trip).assertIsMember(user);
+        when(trip.getMembers()).thenReturn(members);
 
         membershipService.leaveTrip(userId, tripId);
 
-        verify(trip, atLeastOnce()).getMembers();
         verify(tripRepo).save(trip);
+        verify(tripRepo, never()).delete(any());
+        verifyNoInteractions(sharedDocumentService, tripChatMessageRepo, aiChatMessageRepo);
+    }
+
+    @Test
+    void leaveTrip_WhenLastMemberLeaves_ShouldCleanUpAllTripDataAndDeleteTrip() {
+        Set<User> members = new HashSet<>(Set.of(user));
+        when(tripRepo.findById(tripId)).thenReturn(Optional.of(trip));
+        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
+        doNothing().when(trip).assertIsMember(user);
+        when(trip.getMembers()).thenReturn(members);
+
+        membershipService.leaveTrip(userId, tripId);
+
+        verify(sharedDocumentService).deleteAllForTrip(tripId);
+        verify(invitationRepo).deleteAllByTripId(tripId);
+        verify(joinRequestRepo).deleteAllByTripId(tripId);
+        verify(tripChatMessageRepo).deleteAllByTripId(tripId);
+        verify(aiChatMessageRepo).deleteAllByTripId(tripId);
+        verify(tripRepo).delete(trip);
     }
 
     @Test
@@ -160,6 +194,7 @@ class MembershipServiceTest {
                 () -> membershipService.leaveTrip(userId, tripId));
 
         verify(tripRepo, never()).save(any());
+        verify(tripRepo, never()).delete(any());
     }
 
     @Test
@@ -172,6 +207,7 @@ class MembershipServiceTest {
                 () -> membershipService.leaveTrip(userId, tripId));
 
         verify(tripRepo, never()).save(any());
+        verify(tripRepo, never()).delete(any());
     }
 
     // resolveInvitation

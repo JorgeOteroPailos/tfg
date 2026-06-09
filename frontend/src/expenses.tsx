@@ -6,6 +6,7 @@ import { AppError, ErrorCode } from './AppError';
 type ExpenseSummary = components['schemas']['ExpenseSummary'];
 type ExpenseDetail = components['schemas']['ExpenseDetail'];
 type BalancesInfo = components['schemas']['BalancesInfo'];
+type PastSettlement = components['schemas']['PastSettlement'];
 
 export function useExpenses() {
   const { callAuthenticated } = useAuth();
@@ -67,7 +68,13 @@ export function useExpenses() {
     if (!response.ok) throw new AppError(response.status as ErrorCode);
   }, [callAuthenticated]);
 
-  return { getExpenses, addExpense, getExpenseDetail, getBalances, paySettlement, deleteExpense };
+  const getPastSettlements = useCallback(async (tripId: string): Promise<PastSettlement[]> => {
+    const response = await callAuthenticated(`/trips/${tripId}/settlements`);
+    if (!response.ok) throw new AppError(response.status as ErrorCode);
+    return response.json();
+  }, [callAuthenticated]);
+
+  return { getExpenses, addExpense, getExpenseDetail, getBalances, paySettlement, deleteExpense, getPastSettlements };
 }
 
-export type { ExpenseSummary, ExpenseDetail, BalancesInfo };
+export type { ExpenseSummary, ExpenseDetail, BalancesInfo, PastSettlement };

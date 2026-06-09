@@ -167,7 +167,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** List past settlements for a trip */
+        get: operations["listSettlements"];
         put?: never;
         /** Pay a settlement */
         post: operations["createSettlement"];
@@ -577,6 +578,21 @@ export interface components {
         BalancesInfo: {
             settlements?: components["schemas"]["SettlementSuggestion"][];
             balances?: components["schemas"]["UserBalance"][];
+        };
+        PastSettlement: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            fromId: string;
+            /** Format: uuid */
+            toId: string;
+            /**
+             * Format: double
+             * @example 25
+             */
+            amount: number;
+            /** Format: date-time */
+            timestamp?: string;
         };
         CreateSettlementRequest: {
             /** Format: uuid */
@@ -1107,6 +1123,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BalancesInfo"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member of this trip */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listSettlements: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tripId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of recorded settlements */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PastSettlement"][];
                 };
             };
             /** @description Not authenticated */

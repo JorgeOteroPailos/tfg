@@ -30,7 +30,14 @@ export function useTrips() {
     return response.json();
   }, [callAuthenticated]);
 
-  return { listTrips, getTrip, createTrip };
+  const leaveTrip = useCallback(async (tripId: string): Promise<void> => {
+    const response = await callAuthenticated(`/trips/${tripId}/members/me`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new AppError(response.status as ErrorCode);
+  }, [callAuthenticated]);
+
+  return { listTrips, getTrip, createTrip, leaveTrip };
 }
 
 type TripContextType = {

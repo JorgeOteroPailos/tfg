@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { StyleSheet, View, FlatList, ActivityIndicator, Pressable, Modal, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useNavigation } from 'expo-router';
+import { useNavigation, router, useLocalSearchParams } from 'expo-router';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { useExpenses, type ExpenseSummary, type ExpenseDetail, type BalancesInfo } from '../../../src/expenses';
@@ -118,7 +118,7 @@ function createReducer(state: CreateState, action: CreateAction): CreateState {
 }
 
 type ExpenseFlatRow = { _kind: 'date'; label: string } | { _kind: 'expense'; item: ExpenseSummary };
-type BalanceFlatRow = { _kind: 'header'; title: string; mt?: number } | { _kind: 'balance'; userId: string; amount: number } | { _kind: 'settlement'; fromId: string; toId: string; amount: number } | { _kind: 'separator' } | { _kind: 'empty'; text: string };
+type BalanceFlatRow = { _kind: 'header'; title: string; mt?: number } | { _kind: 'balance'; userId: string; amount: number } | { _kind: 'settlement'; fromId: string; toId: string; amount: number } | { _kind: 'separator' } | { _kind: 'empty'; text: string } | { _kind: 'pastBtn' };
 
 // ── Modals ─────────────────────────────────────────────────────────────────
 
@@ -356,14 +356,16 @@ type BalancesSectionProps = {
   usernameFor: (id: string) => string;
   payingKey: string | null;
   handlePaySettlement: (fromId: string, toId: string, amount: number) => Promise<void>;
+  tripId: string;
 };
 
 const BalancesSection = React.memo(function BalancesSection({
-  bals, currentUserId, usernameFor, payingKey, handlePaySettlement,
+  bals, currentUserId, usernameFor, payingKey, handlePaySettlement, tripId,
 }: BalancesSectionProps) {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
+  const [confirmingPayKey, setConfirmingPayKey] = useState<string | null>(null);
 
   const balanceRows = useMemo((): BalanceFlatRow[] => {
     const rows: BalanceFlatRow[] = [];
@@ -373,6 +375,7 @@ const BalancesSection = React.memo(function BalancesSection({
     if (!bl.length) rows.push({ _kind: 'empty', text: t('trip.noBalances') });
     else bl.forEach(b => rows.push({ _kind: 'balance', userId: b.userId, amount: b.amount }));
     rows.push({ _kind: 'header', title: t('trip.settlements'), mt: 20 });
+    rows.push({ _kind: 'pastBtn' } as BalanceFlatRow);
     if (!sl.length) {
       rows.push({ _kind: 'empty', text: t('trip.noSettlements') });
     } else {
@@ -441,19 +444,35 @@ const BalancesSection = React.memo(function BalancesSection({
               <Text style={[styles.settlementAmt, { color: theme.tint }]}>{item.amount.toFixed(2)}€</Text>
             </View>
             {fromMe && (
-              <Pressable
-                style={({ pressed }) => [styles.payBtn, { borderColor: theme.tint }, pressed && { opacity: 0.7 }]}
-                onPress={() => handlePaySettlement(item.fromId, item.toId, item.amount)}
-                disabled={isPaying}
-              >
-                {isPaying
-                  ? <ActivityIndicator size="small" color={theme.tint} />
-                  : <>
-                      <Ionicons name="checkmark-circle-outline" size={15} color={theme.tint} />
-                      <Text style={[styles.payBtnText, { color: theme.tint }]}>{t('trip.markAsPaid')}</Text>
-                    </>
-                }
-              </Pressable>
+              isPaying ? (
+                <View style={[styles.payBtn, { borderColor: theme.tint }]}>
+                  <ActivityIndicator size="small" color={theme.tint} />
+                </View>
+              ) : confirmingPayKey === key ? (
+                <View style={[styles.payConfirmRow, { borderTopColor: theme.border }]}>
+                  <Pressable
+                    style={[styles.payConfirmBtn, { borderColor: theme.border, borderWidth: 1 }]}
+                    onPress={() => setConfirmingPayKey(null)}
+                  >
+                    <Text style={{ color: theme.text, fontWeight: '700', fontSize: 12 }}>{t('common.cancel')}</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.payConfirmBtn, { backgroundColor: theme.tint }]}
+                    onPress={() => { setConfirmingPayKey(null); handlePaySettlement(item.fromId, item.toId, item.amount); }}
+                  >
+                    <Ionicons name="checkmark-circle-outline" size={14} color="#fff" />
+                    <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12, letterSpacing: 0.5 }}>{t('trip.markAsPaid').toUpperCase()}</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <Pressable
+                  style={({ pressed }) => [styles.payBtn, { borderColor: theme.tint }, pressed && { opacity: 0.7 }]}
+                  onPress={() => setConfirmingPayKey(key)}
+                >
+                  <Ionicons name="checkmark-circle-outline" size={15} color={theme.tint} />
+                  <Text style={[styles.payBtnText, { color: theme.tint }]}>{t('trip.markAsPaid')}</Text>
+                </Pressable>
+              )
             )}
           </View>
         );
@@ -462,10 +481,21 @@ const BalancesSection = React.memo(function BalancesSection({
         return <View style={[styles.separator, { borderBottomColor: theme.border }]} />;
       case 'empty':
         return <Text style={[styles.emptyText, { color: theme.icon }]}>{item.text}</Text>;
+      case 'pastBtn':
+        return (
+          <Pressable
+            style={({ pressed }) => [styles.pastSettlementsBtn, { borderColor: theme.border }, pressed && { opacity: 0.7 }]}
+            onPress={() => router.push({ pathname: '/past-settlements', params: { tripId } })}
+          >
+            <Ionicons name="time-outline" size={15} color={theme.icon} />
+            <Text style={[styles.pastSettlementsBtnText, { color: theme.icon }]}>{t('trip.viewPastSettlements')}</Text>
+            <Ionicons name="chevron-forward" size={14} color={theme.icon} style={{ opacity: 0.4, marginLeft: 'auto' }} />
+          </Pressable>
+        );
       default:
         return null;
     }
-  }, [theme, usernameFor, currentUserId, payingKey, handlePaySettlement, t]);
+  }, [theme, usernameFor, currentUserId, payingKey, confirmingPayKey, setConfirmingPayKey, handlePaySettlement, tripId, t]);
 
   if (bals.loading) return <ActivityIndicator size="large" color={theme.tint} style={styles.centered} />;
   if (bals.error) return <Text style={[styles.emptyText, { color: theme.icon }]}>{bals.error}</Text>;
@@ -486,6 +516,7 @@ const ExpensesScreen = () => {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
+  const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const { trip } = useTrip();
   const { getExpenses, addExpense, getExpenseDetail, getBalances, paySettlement, deleteExpense } = useExpenses();
   const { userId: currentUserId } = useAuth();
@@ -668,7 +699,7 @@ const ExpensesScreen = () => {
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={<Text style={[styles.emptyText, { color: theme.icon }]}>{t('trip.noExpenses')}</Text>}
             renderItem={renderExpenseRow}
-            ListFooterComponent={
+            ListHeaderComponent={
               <Pressable
                 style={({ pressed }) => [styles.addBtn, { backgroundColor: theme.tint, boxShadow: `0 0 28px ${theme.tint}55` }, pressed && { opacity: 0.8 }]}
                 onPress={() => createDispatch({ type: 'open' })}
@@ -688,6 +719,7 @@ const ExpensesScreen = () => {
           usernameFor={usernameFor}
           payingKey={payingKey}
           handlePaySettlement={handlePaySettlement}
+          tripId={tripId ?? ''}
         />
       )}
 
@@ -742,7 +774,7 @@ const styles = StyleSheet.create({
   expenseAmount: { fontSize: 16, fontWeight: '800' },
   expenseRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
 
-  addBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 17, borderRadius: 18, marginTop: 8 },
+  addBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 17, borderRadius: 18, marginBottom: 8 },
   addBtnText: { color: '#fff', fontWeight: '900', fontSize: 13, letterSpacing: 2 },
 
   balanceCard: { flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 18, borderWidth: 1, gap: 12 },
@@ -759,7 +791,11 @@ const styles = StyleSheet.create({
   settlementArrow: { width: 28, height: 28, borderRadius: 9, justifyContent: 'center', alignItems: 'center' },
   settlementAmt: { fontSize: 14, fontWeight: '800' },
   payBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderTopWidth: 0.5, minHeight: 38 },
+  pastSettlementsBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 11, borderRadius: 14, borderWidth: 0.5, marginBottom: 4 },
+  pastSettlementsBtnText: { fontSize: 13, fontWeight: '600' },
   payBtnText: { fontSize: 12, fontWeight: '800', letterSpacing: 0.5 },
+  payConfirmRow: { flexDirection: 'row', borderTopWidth: 0.5 },
+  payConfirmBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, paddingVertical: 10 },
   separator: { borderBottomWidth: 0.5, marginVertical: 4 },
   meText: { fontWeight: '900' },
   meTag: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, borderWidth: 1 },

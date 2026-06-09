@@ -34,7 +34,7 @@ export const Colors: ColorsType = {
     uiBackground: "#0e0b1f",
     iconColor: "#a890d8",
     iconColorFocused: "#ffffff",
-    tabBackground: "#0b0919",
+    tabBackground: "#160f2b",
     tabIconDefault: "#a890d8",
     tint: "#a855f7",
     border: "#2b1650",

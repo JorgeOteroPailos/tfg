@@ -168,3 +168,28 @@ schemas:
         type: array
         items:
           $ref: '#/schemas/UserBalance'
+
+  PastSettlement:
+    type: object
+    required:
+      - id
+      - fromId
+      - toId
+      - amount
+    properties:
+      id:
+        type: string
+        format: uuid
+      fromId:
+        type: string
+        format: uuid
+      toId:
+        type: string
+        format: uuid
+      amount:
+        type: number
+        format: double
+        example: 25.00
+      timestamp:
+        type: string
+        format: date-time

@@ -103,6 +103,19 @@ public class ExpenseService {
         return s.getId();
     }
 
+    public List<PastSettlement> listSettlements(UUID tripId, UUID userId) {
+        tripRepo.findByIdAndMembersId(tripId, userId)
+                .orElseThrow(NotATripMemberException::new);
+        return settlementRepo.findByTrip_IdOrderByTimestampDesc(tripId).stream()
+                .map(s -> new PastSettlement()
+                        .id(s.getId())
+                        .fromId(s.getPayer().getId())
+                        .toId(s.getReceiver().getId())
+                        .amount(s.getAmount().setScale(2, RoundingMode.HALF_UP).doubleValue())
+                        .timestamp(s.getTimestamp()))
+                .toList();
+    }
+
     public ExpenseDetail getExpense(UUID tripId, UUID expenseId, UUID userId) {
         if(!tripRepo.existsByIdAndMembersId(tripId, userId)){
             throw new NotATripMemberException();

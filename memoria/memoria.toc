@@ -1,2 +1,27 @@
 \babel@toc {galician}{}\relax 
-\contentsline {section}{\numberline {1}Introducción}{2}{section.1}%
+\contentsline {section}{\numberline {1}Resumo}{2}{section.1}%
+\contentsline {section}{\numberline {2}Introdución}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Obxectivos xerais}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Relación da documentación que conforma a memoria}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Descrición do sistema}{3}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Información adicional de interese}{4}{subsection.2.4}%
+\contentsline {section}{\numberline {3}Especificación de Requisitos}{5}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Descrición xeral}{5}{subsection.3.1}%
+\contentsline {subsubsection}{\numberline {3.1.1}Perspectiva do produto}{5}{subsubsection.3.1.1}%
+\contentsline {subsubsection}{\numberline {3.1.2}Funcionalidade do produto}{5}{subsubsection.3.1.2}%
+\contentsline {subsubsection}{\numberline {3.1.3}Características dos usuarios}{5}{subsubsection.3.1.3}%
+\contentsline {subsubsection}{\numberline {3.1.4}Restriccións}{5}{subsubsection.3.1.4}%
+\contentsline {subsubsection}{\numberline {3.1.5}Suposicións e dependencias}{5}{subsubsection.3.1.5}%
+\contentsline {subsection}{\numberline {3.2}Interfaces con outros sistemas}{5}{subsection.3.2}%
+\contentsline {subsubsection}{\numberline {3.2.1}Interface de usuario}{5}{subsubsection.3.2.1}%
+\contentsline {subsubsection}{\numberline {3.2.2}Interfaces de hardware}{6}{subsubsection.3.2.2}%
+\contentsline {subsubsection}{\numberline {3.2.3}Interfaces de software}{6}{subsubsection.3.2.3}%
+\contentsline {subsubsection}{\numberline {3.2.4}Interfaces de comunicación}{6}{subsubsection.3.2.4}%
+\contentsline {subsection}{\numberline {3.3}Requisitos funcionais}{6}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Requisitos non funcionais}{7}{subsection.3.4}%
+\contentsline {subsubsection}{\numberline {3.4.1}Seguridade}{7}{subsubsection.3.4.1}%
+\contentsline {subsubsection}{\numberline {3.4.2}Rendemento}{7}{subsubsection.3.4.2}%
+\contentsline {subsubsection}{\numberline {3.4.3}Usabilidade}{7}{subsubsection.3.4.3}%
+\contentsline {subsubsection}{\numberline {3.4.4}Portabilidade e despregamento}{7}{subsubsection.3.4.4}%
+\contentsline {subsubsection}{\numberline {3.4.5}Fiabilidade}{7}{subsubsection.3.4.5}%
+\contentsline {subsection}{\numberline {3.5}Información que o sistema debe almacenar}{7}{subsection.3.5}%

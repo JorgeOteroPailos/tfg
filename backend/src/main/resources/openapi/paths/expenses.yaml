@@ -147,6 +147,34 @@ paths:
           description: Not a member of this trip
 
   /trips/{tripId}/settlements:
+    get:
+      summary: List past settlements for a trip
+      operationId: listSettlements
+      tags:
+        - Expenses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of recorded settlements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../schemas/expenses.yaml#/schemas/PastSettlement'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not a member of this trip
+
     post:
       summary: Pay a settlement
       operationId: createSettlement

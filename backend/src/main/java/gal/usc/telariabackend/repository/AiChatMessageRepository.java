@@ -5,6 +5,10 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface AiChatMessageRepository
     extends JpaRepository<AiChatMessage, UUID>
@@ -26,4 +30,14 @@ public interface AiChatMessageRepository
         UUID userId,
         OffsetDateTime before
     );
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM AiChatMessage a WHERE a.trip.id = :tripId")
+    void deleteAllByTripId(@Param("tripId") UUID tripId);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM AiChatMessage a WHERE a.timestamp < :cutoff")
+    void deleteByTimestampBefore(@Param("cutoff") OffsetDateTime cutoff);
 }

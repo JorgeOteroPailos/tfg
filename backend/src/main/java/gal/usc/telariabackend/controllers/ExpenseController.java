@@ -53,4 +53,9 @@ public class ExpenseController implements ExpensesApi{
         List<ExpenseSummary> response=expenseService.listExpenses(tripId, securityHelper.getUserId());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<List<PastSettlement>> listSettlements(UUID tripId) {
+        return new ResponseEntity<>(expenseService.listSettlements(tripId, securityHelper.getUserId()), HttpStatus.OK);
+    }
 }

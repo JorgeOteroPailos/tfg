@@ -48,9 +48,10 @@ export default function MainLayout() {
         <Stack.Screen name="main" options={{ title: t('nav.home') }} />
         <Stack.Screen name="invitations" options={{ title: t('nav.invitations') }} />
         <Stack.Screen name="join-trip" options={{ headerShown: false }} />
-<Stack.Screen name="settings" options={{ title: t('settings.title') }} />
+        <Stack.Screen name="scan-qr" options={{ title: t('trip.scanQr'), headerRight: () => null }} />
+        <Stack.Screen name="settings" options={{ title: t('settings.title') }} />
         <Stack.Screen name="(profile)/profile" options={{ title: t('nav.profile') }} />
-        <Stack.Screen name="(trip)" options={{ headerShown: false }} />
+        <Stack.Screen name="(trip)" options={{ headerShown: false, animation: 'fade', animationDuration: 200 }} />
       </Stack>
       <Sidebar />
     </View>

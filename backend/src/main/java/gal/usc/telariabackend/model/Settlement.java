@@ -33,6 +33,9 @@ public class Settlement{
 
     @Getter
     private BigDecimal amount;
+
+    @Getter
+    @Column(name = "paid_at")
     private OffsetDateTime timestamp;
 
     public Settlement() {
@@ -43,5 +46,6 @@ public class Settlement{
         this.payer = payer;
         this.receiver = receiver;
         this.amount = amount;
+        this.timestamp = OffsetDateTime.now();
     }
 }

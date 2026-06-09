@@ -123,6 +123,19 @@ public class SharedDocumentService {
         return new DocumentDownloadResponse().downloadUrl(s3Presigner.presignGetObject(presignRequest).url().toString());
     }
 
+    public void deleteAllForTrip(UUID tripId) {
+        List<SharedDocument> docs = documentRepository.findByTripId(tripId);
+        for (SharedDocument doc : docs) {
+            try {
+                s3Client.deleteObject(DeleteObjectRequest.builder()
+                        .bucket(minioConfig.getBucket())
+                        .key(doc.getObjectKey())
+                        .build());
+            } catch (Exception ignored) {}
+        }
+        documentRepository.deleteAll(docs);
+    }
+
     public void deleteDocument(UUID tripId, UUID documentId, UUID requesterId) {
         SharedDocument document = documentRepository.findByIdAndTripId(documentId, tripId)
                 .orElseThrow(DocumentNotFoundException::new);
