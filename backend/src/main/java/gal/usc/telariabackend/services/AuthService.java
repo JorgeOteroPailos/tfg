@@ -16,6 +16,7 @@ import java.util.Base64;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -121,6 +122,23 @@ public class AuthService {
     @Transactional
     public void logout(UUID id) {
         refreshTokenRepository.deleteAllByUserId(id);
+    }
+
+    @Transactional
+    public LoginResponse changePassword(UUID userId, String currentPassword, String newPassword) {
+        User u = userRepository.findById(userId).orElseThrow();
+
+        if (!passwordEncoder.matches(currentPassword, u.getPassword())) {
+            throw new BadCredentialsException("Current password is incorrect");
+        }
+
+        u.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(u);
+
+        // Revoke every session; login() below issues a fresh pair for the current device
+        refreshTokenRepository.deleteAllByUserId(userId);
+
+        return login(new LoginRequest(u.getEmail(), newPassword));
     }
 
     @Transactional

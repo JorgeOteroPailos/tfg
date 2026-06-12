@@ -1,12 +1,11 @@
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useReducer } from 'react';
 import { StyleSheet, View, Pressable, FlatList, Modal, ActivityIndicator, Text } from 'react-native';
 import { router, useFocusEffect, useNavigation } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../src/theme';
 import { Colors } from '../../constants/Colors';
-import { useAuth } from '../../src/auth';
-import { useTrips } from '../../src/trips';
-import { useInvitations } from '../../src/invitations';
+import { useCreateTripMutation, useTripsQuery } from '../../src/trips';
+import { useInvitationsQuery } from '../../src/invitations';
 import { components } from '../../src/generated/types';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -32,38 +31,19 @@ function tripInitials(name: string): string {
   return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
 }
 
-type DataState = { trips: TripSummary[]; invitationCount: number };
-type DataAction =
-  | { type: 'loaded'; trips: TripSummary[]; invitationCount: number }
-  | { type: 'trip_added'; trip: TripSummary };
-
-const DATA_INITIAL: DataState = { trips: [], invitationCount: 0 };
-
-function dataReducer(state: DataState, action: DataAction): DataState {
-  switch (action.type) {
-    case 'loaded': return { trips: action.trips, invitationCount: action.invitationCount };
-    case 'trip_added': return { ...state, trips: [...state.trips, action.trip] };
-    default: return state;
-  }
-}
-
-type ModalState = { visible: boolean; name: string; creating: boolean };
+type ModalState = { visible: boolean; name: string };
 type ModalAction =
   | { type: 'open' }
   | { type: 'close' }
-  | { type: 'set_name'; name: string }
-  | { type: 'start_creating' }
-  | { type: 'done_creating' };
+  | { type: 'set_name'; name: string };
 
-const MODAL_INITIAL: ModalState = { visible: false, name: '', creating: false };
+const MODAL_INITIAL: ModalState = { visible: false, name: '' };
 
 function modalReducer(state: ModalState, action: ModalAction): ModalState {
   switch (action.type) {
     case 'open': return { ...state, visible: true };
     case 'close': return MODAL_INITIAL;
     case 'set_name': return { ...state, name: action.name };
-    case 'start_creating': return { ...state, creating: true };
-    case 'done_creating': return { ...state, creating: false };
     default: return state;
   }
 }
@@ -75,63 +55,51 @@ const Main = () => {
   const isDark = themeName === 'dark';
   const navigation = useNavigation();
 
-  const [data, dataDispatch] = useReducer(dataReducer, DATA_INITIAL);
   const [modal, modalDispatch] = useReducer(modalReducer, MODAL_INITIAL);
 
-  const { listTrips, createTrip } = useTrips();
-  const { getMyInvitations } = useInvitations();
-  const initialLoadDone = useRef(false);
+  const tripsQuery = useTripsQuery();
+  const invitationsQuery = useInvitationsQuery();
+  const createTripMutation = useCreateTripMutation();
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [tripsData, invitationsData] = await Promise.all([listTrips(), getMyInvitations()]);
-        dataDispatch({ type: 'loaded', trips: tripsData, invitationCount: invitationsData.length });
-      } catch {
-        router.replace('/login');
-      }
-    };
-    load();
-    initialLoadDone.current = true;
-  }, [listTrips, getMyInvitations]);
+  const trips = tripsQuery.data ?? [];
+  const invitationCount = invitationsQuery.data?.length ?? 0;
 
   useFocusEffect(
     useCallback(() => {
-      if (!initialLoadDone.current) return;
-      Promise.all([listTrips(), getMyInvitations()])
-        .then(([tripsData, invitationsData]) => {
-          dataDispatch({ type: 'loaded', trips: tripsData, invitationCount: invitationsData.length });
-        })
-        .catch(() => {});
-    }, [listTrips, getMyInvitations])
+      tripsQuery.refetch();
+      invitationsQuery.refetch();
+    }, [tripsQuery.refetch, invitationsQuery.refetch])
   );
 
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <Pressable style={styles.invBtn} onPress={() => router.push('/invitations')}>
-          <Ionicons name="mail-outline" size={22} color={theme.title} />
-          {data.invitationCount > 0 && (
+        <Pressable
+          onPress={() => router.push('/invitations')}
+          style={({ pressed }) => [
+            styles.invBtn,
+            { backgroundColor: theme.uiBackground, borderColor: theme.border },
+            pressed && { opacity: 0.6 },
+          ]}
+        >
+          <Ionicons name="mail-outline" size={20} color={theme.icon} />
+          {invitationCount > 0 && (
             <View style={[styles.badge, { backgroundColor: Colors.warning }]}>
-              <Text style={styles.badgeText}>{data.invitationCount}</Text>
+              <Text style={styles.badgeText}>{invitationCount}</Text>
             </View>
           )}
         </Pressable>
       ),
     });
-  }, [data.invitationCount, theme, navigation]);
+  }, [invitationCount, theme, navigation]);
 
   const handleCreateTrip = async () => {
     if (!modal.name.trim()) return;
     try {
-      modalDispatch({ type: 'start_creating' });
-      const { id } = await createTrip({ name: modal.name.trim() });
-      dataDispatch({ type: 'trip_added', trip: { id, name: modal.name.trim(), memberCount: 1, totalSpent: 0 } });
+      await createTripMutation.mutateAsync({ name: modal.name.trim() });
       modalDispatch({ type: 'close' });
     } catch {
       /* ignore */
-    } finally {
-      modalDispatch({ type: 'done_creating' });
     }
   };
 
@@ -204,30 +172,36 @@ const Main = () => {
           </Pressable>
         </View>
 
-        {data.trips.length > 0 && (
+        {trips.length > 0 && (
           <Text style={[styles.sectionLabel, { color: theme.icon }]}>
             {t('nav.trips', 'TRIPS')}
           </Text>
         )}
 
         <FlatList
-          data={data.trips}
+          data={trips}
           keyExtractor={item => item.id ?? ''}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           renderItem={renderTripItem}
           ListEmptyComponent={
-            <View style={styles.empty}>
-              <View style={[styles.emptyIcon, { borderColor: `${theme.tint}30`, backgroundColor: `${theme.tint}0a` }]}>
-                <Ionicons name="map-outline" size={36} color={theme.tint} style={{ opacity: 0.5 }} />
+            tripsQuery.isLoading ? (
+              <View style={styles.empty}>
+                <ActivityIndicator color={theme.tint} />
               </View>
-              <Text style={[styles.emptyText, { color: theme.icon }]}>
-                {t('trip.noTrips', 'No trips yet')}
-              </Text>
-              <Text style={[styles.emptyHint, { color: theme.icon }]}>
-                Create one to get started
-              </Text>
-            </View>
+            ) : (
+              <View style={styles.empty}>
+                <View style={[styles.emptyIcon, { borderColor: `${theme.tint}30`, backgroundColor: `${theme.tint}0a` }]}>
+                  <Ionicons name="map-outline" size={36} color={theme.tint} style={{ opacity: 0.5 }} />
+                </View>
+                <Text style={[styles.emptyText, { color: theme.icon }]}>
+                  {t('trip.noTrips', 'No trips yet')}
+                </Text>
+                <Text style={[styles.emptyHint, { color: theme.icon }]}>
+                  Create one to get started
+                </Text>
+              </View>
+            )
           }
         />
       </View>
@@ -262,9 +236,9 @@ const Main = () => {
               <Pressable
                 style={[styles.modalBtn, { backgroundColor: theme.tint, boxShadow: `0 0 20px ${theme.tint}55` }]}
                 onPress={handleCreateTrip}
-                disabled={modal.creating || !modal.name.trim()}
+                disabled={createTripMutation.isPending || !modal.name.trim()}
               >
-                {modal.creating
+                {createTripMutation.isPending
                   ? <ActivityIndicator color="#fff" size="small" />
                   : <Text style={[styles.modalBtnText, { color: '#fff', fontWeight: '800', letterSpacing: 1 }]}>{t('common.create').toUpperCase()}</Text>
                 }
@@ -379,11 +353,19 @@ const styles = StyleSheet.create({
   emptyText: { fontSize: 16, fontWeight: '700', letterSpacing: 0.3 },
   emptyHint: { fontSize: 13, fontWeight: '500', opacity: 0.5 },
 
-  invBtn: { paddingHorizontal: 8, paddingTop: 4 },
+  invBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    borderWidth: 0.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 4,
+  },
   badge: {
     position: 'absolute',
-    top: 0,
-    right: 0,
+    top: -4,
+    right: -4,
     minWidth: 16,
     height: 16,
     borderRadius: 8,

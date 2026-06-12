@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     paddingHorizontal: 12,
     paddingTop: 12,
-    paddingBottom: 60,
+    paddingBottom: 12,
     borderTopWidth: 0.5,
     gap: 10,
   },

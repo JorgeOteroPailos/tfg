@@ -24,12 +24,16 @@ schemas:
     required:
       - id
       - username
+      - hasAvatar
     properties:
       id:
         type: string
         format: uuid
       username:
         type: string
+      hasAvatar:
+        type: boolean
+        description: Whether the user has a profile picture stored
 
   JoinRequestSummary:
     type: object

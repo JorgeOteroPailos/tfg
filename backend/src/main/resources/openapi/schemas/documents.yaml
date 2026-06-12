@@ -46,6 +46,10 @@ schemas:
       uploadedAt:
         type: string
         format: date-time
+      previewUrl:
+        type: string
+        description: Presigned GET URL for a downscaled preview, only present for image documents with a generated thumbnail (expires in 15 minutes)
+        example: http://localhost:9000/telaria/uuid-key.thumb.jpg?X-Amz-Signature=...
 
   DocumentDownloadResponse:
     type: object

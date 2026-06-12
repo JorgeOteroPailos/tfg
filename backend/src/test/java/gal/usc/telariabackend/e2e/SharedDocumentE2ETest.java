@@ -97,9 +97,13 @@ class SharedDocumentE2ETest extends BaseE2ETest {
     }
 
     private DocumentUploadResponse initUpload(String token, UUID tripId, String fileName) throws Exception {
+        return initUpload(token, tripId, fileName, "application/pdf");
+    }
+
+    private DocumentUploadResponse initUpload(String token, UUID tripId, String fileName, String contentType) throws Exception {
         DocumentUploadRequest body = new DocumentUploadRequest()
                 .name(fileName)
-                .contentType("application/pdf");
+                .contentType(contentType);
 
         MvcResult result = mockMvc.perform(post("/trips/{tripId}/documents", tripId)
                         .header("Authorization", "Bearer " + token)
@@ -118,12 +122,14 @@ class SharedDocumentE2ETest extends BaseE2ETest {
     }
 
     private void uploadFileToMinio(String uploadUrl) throws Exception {
-        byte[] minimalPdf = "%PDF-1.4 1 0 obj<</Type/Catalog>>endobj".getBytes();
+        uploadBytesToMinio(uploadUrl, "%PDF-1.4 1 0 obj<</Type/Catalog>>endobj".getBytes());
+    }
 
+    private void uploadBytesToMinio(String uploadUrl, byte[] bytes) throws Exception {
         try (java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient()) {
             java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
                     .uri(URI.create(uploadUrl))
-                    .PUT(java.net.http.HttpRequest.BodyPublishers.ofByteArray(minimalPdf))
+                    .PUT(java.net.http.HttpRequest.BodyPublishers.ofByteArray(bytes))
                     .build();
 
             java.net.http.HttpResponse<String> response = client.send(request,
@@ -132,6 +138,28 @@ class SharedDocumentE2ETest extends BaseE2ETest {
             if (response.statusCode() >= 400) {
                 throw new RuntimeException("Minio upload failed: " + response.statusCode() + "\nBody: " + response.body());
             }
+        }
+    }
+
+    private static byte[] pngBytes(int width, int height) throws Exception {
+        java.awt.image.BufferedImage image =
+                new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        java.awt.Graphics2D g = image.createGraphics();
+        g.setColor(java.awt.Color.ORANGE);
+        g.fillRect(0, 0, width, height);
+        g.dispose();
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+        javax.imageio.ImageIO.write(image, "png", out);
+        return out.toByteArray();
+    }
+
+    private byte[] httpGetBytes(String url) throws Exception {
+        try (java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient()) {
+            java.net.http.HttpResponse<byte[]> response = client.send(
+                    java.net.http.HttpRequest.newBuilder().uri(URI.create(url)).GET().build(),
+                    java.net.http.HttpResponse.BodyHandlers.ofByteArray());
+            assertEquals(200, response.statusCode());
+            return response.body();
         }
     }
 
@@ -245,8 +273,8 @@ class SharedDocumentE2ETest extends BaseE2ETest {
     }
 
     @Test
-    @DisplayName("Confirm upload: without uploading to Minio returns 500")
-    void confirmUpload_fileNotInMinio_returns500() throws Exception {
+    @DisplayName("Confirm upload: without uploading to Minio returns 409")
+    void confirmUpload_fileNotInMinio_returns409() throws Exception {
         String token = registerAndObtainToken("uploader");
         UUID tripId = createTrip(token, "Viaje a Amsterdam");
 
@@ -254,7 +282,7 @@ class SharedDocumentE2ETest extends BaseE2ETest {
 
         mockMvc.perform(post("/trips/{tripId}/documents/{documentId}/confirm", tripId, uploadResponse.getDocumentId())
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isConflict());
     }
 
     @Test
@@ -509,6 +537,107 @@ class SharedDocumentE2ETest extends BaseE2ETest {
                 result.getResponse().getContentAsString(), DocumentResponse[].class);
 
         assertEquals(0, documents.length);
+    }
+
+    // -------------------------------------------------------------------------
+    // Image previews (thumbnails)
+    // -------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("Preview: image document gets a downscaled previewUrl in the list")
+    void preview_imageDocument_listIncludesPreviewUrl() throws Exception {
+        String token = registerAndObtainToken("uploader");
+        UUID tripId = createTrip(token, "Viaje a Roma con fotos");
+
+        DocumentUploadResponse uploadResponse = initUpload(token, tripId, "foto.png", "image/png");
+        uploadBytesToMinio(uploadResponse.getUploadUrl(), pngBytes(1200, 800));
+        confirmUpload(token, tripId, uploadResponse.getDocumentId());
+
+        MvcResult result = mockMvc.perform(get("/trips/{tripId}/documents", tripId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        DocumentResponse[] documents = objectMapper.readValue(
+                result.getResponse().getContentAsString(), DocumentResponse[].class);
+
+        assertEquals(1, documents.length);
+        assertNotNull(documents[0].getPreviewUrl());
+
+        byte[] thumbBytes = httpGetBytes(documents[0].getPreviewUrl());
+        java.awt.image.BufferedImage thumb = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(thumbBytes));
+        assertNotNull(thumb);
+        assertEquals(512, thumb.getWidth());
+        assertTrue(thumb.getHeight() <= 512);
+    }
+
+    @Test
+    @DisplayName("Preview: non-image document has no previewUrl")
+    void preview_pdfDocument_hasNoPreviewUrl() throws Exception {
+        String token = registerAndObtainToken("uploader");
+        UUID tripId = createTrip(token, "Viaje a Milán");
+
+        uploadDocumentCompletely(token, tripId, "billete.pdf");
+
+        MvcResult result = mockMvc.perform(get("/trips/{tripId}/documents", tripId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        DocumentResponse[] documents = objectMapper.readValue(
+                result.getResponse().getContentAsString(), DocumentResponse[].class);
+
+        assertEquals(1, documents.length);
+        assertNull(documents[0].getPreviewUrl());
+    }
+
+    @Test
+    @DisplayName("Preview: corrupt image still confirms but has no previewUrl")
+    void preview_corruptImage_confirmsWithoutPreview() throws Exception {
+        String token = registerAndObtainToken("uploader");
+        UUID tripId = createTrip(token, "Viaje a Turín");
+
+        DocumentUploadResponse uploadResponse = initUpload(token, tripId, "rota.png", "image/png");
+        uploadBytesToMinio(uploadResponse.getUploadUrl(), "esto no es un png".getBytes());
+        confirmUpload(token, tripId, uploadResponse.getDocumentId());
+
+        MvcResult result = mockMvc.perform(get("/trips/{tripId}/documents", tripId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        DocumentResponse[] documents = objectMapper.readValue(
+                result.getResponse().getContentAsString(), DocumentResponse[].class);
+
+        assertEquals(1, documents.length);
+        assertNull(documents[0].getPreviewUrl());
+    }
+
+    @Test
+    @DisplayName("Preview: deleting an image document removes its thumbnail from storage")
+    void preview_deleteImageDocument_removesThumbnailObject() throws Exception {
+        String token = registerAndObtainToken("uploader");
+        UUID tripId = createTrip(token, "Viaje a Génova");
+
+        DocumentUploadResponse uploadResponse = initUpload(token, tripId, "foto.png", "image/png");
+        uploadBytesToMinio(uploadResponse.getUploadUrl(), pngBytes(1200, 800));
+        confirmUpload(token, tripId, uploadResponse.getDocumentId());
+
+        mockMvc.perform(delete("/trips/{tripId}/documents/{documentId}", tripId, uploadResponse.getDocumentId())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+
+        try (software.amazon.awssdk.services.s3.S3Client s3 = software.amazon.awssdk.services.s3.S3Client.builder()
+                .endpointOverride(URI.create("http://localhost:" + minio.getMappedPort(9000)))
+                .credentialsProvider(software.amazon.awssdk.auth.credentials.StaticCredentialsProvider.create(
+                        software.amazon.awssdk.auth.credentials.AwsBasicCredentials.create("admin", "password123")))
+                .region(software.amazon.awssdk.regions.Region.US_EAST_1)
+                .serviceConfiguration(software.amazon.awssdk.services.s3.S3Configuration.builder()
+                        .pathStyleAccessEnabled(true).build())
+                .build()) {
+            var objects = s3.listObjectsV2(b -> b.bucket("telaria-document-sharing").prefix(tripId + "/"));
+            assertEquals(0, objects.keyCount(), "expected no objects (original + thumbnail) left for the trip");
+        }
     }
 
     // -------------------------------------------------------------------------

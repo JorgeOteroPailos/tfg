@@ -7,6 +7,7 @@ import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { useTrip } from '../../../src/trips';
 import { useAuth } from '../../../src/auth';
+import UserAvatar from '../../../components/UserAvatar';
 
 const MembersScreen = () => {
   const { t } = useTranslation();
@@ -18,16 +19,21 @@ const MembersScreen = () => {
   const requestCount = trip?.pendingRequests?.length ?? 0;
 
   const renderMemberItem = useCallback(
-    ({ item }: { item: { id?: string; username: string } }) => {
+    ({ item }: { item: { id?: string; username: string; hasAvatar?: boolean } }) => {
       const initial = item.username.charAt(0).toUpperCase();
       const isMe = item.id === currentUserId;
       return (
         <View style={[styles.card, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
           {/* left stripe */}
           <View style={[styles.stripe, { backgroundColor: theme.tint, opacity: isMe ? 1 : 0.4, boxShadow: isMe ? `0 0 8px ${theme.tint}` : undefined }]} />
-          <View style={[styles.avatar, { backgroundColor: `${theme.tint}${isMe ? '28' : '12'}` }]}>
-            <Text style={[styles.initial, { color: theme.tint, opacity: isMe ? 1 : 0.7 }]}>{initial}</Text>
-          </View>
+          <UserAvatar
+            userId={item.id}
+            initials={initial}
+            size={42}
+            hasAvatar={item.hasAvatar}
+            style={{ backgroundColor: `${theme.tint}${isMe ? '28' : '12'}` }}
+            textStyle={[styles.initial, { color: theme.tint, opacity: isMe ? 1 : 0.7 }]}
+          />
           <Text style={[styles.memberName, { color: theme.title }]} numberOfLines={1}>{item.username}</Text>
           {isMe && (
             <View style={[styles.meTag, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
@@ -119,13 +125,6 @@ const styles = StyleSheet.create({
     width: 3,
     alignSelf: 'stretch',
     borderRadius: 2,
-  },
-  avatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   initial: { fontSize: 18, fontWeight: '800' },
   memberName: { flex: 1, fontSize: 15, fontWeight: '700' },

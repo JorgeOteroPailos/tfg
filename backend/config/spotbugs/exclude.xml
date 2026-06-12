@@ -1,0 +1,6 @@
+<FindBugsFilter>
+    <!-- OpenAPI-generated DTOs and interfaces -->
+    <Match>
+        <Package name="~gal\.usc\.telariabackend\.model\.dto.*" />
+    </Match>
+</FindBugsFilter>

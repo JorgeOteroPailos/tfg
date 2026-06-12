@@ -115,9 +115,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error;
     }
 
+    @ExceptionHandler(AvatarNotFoundException.class)
+    public ProblemDetail handleAvatarNotFoundException(AvatarNotFoundException e) {
+        ProblemDetail error = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        error.setTitle("Avatar not found");
+        error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
+                .pathSegment("error", "avatar-not-found").build().toUri());
+        error.setDetail(e.getMessage());
+        return error;
+    }
+
     @ExceptionHandler(DocumentNotFoundInStorageException.class)
     public ProblemDetail handle(DocumentNotFoundInStorageException e){
-        ProblemDetail error = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        ProblemDetail error = ProblemDetail.forStatus(HttpStatus.CONFLICT);
         error.setTitle("Document not found in storage");
         error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
                 .pathSegment("error","document-not-found-in-storage").build().toUri());

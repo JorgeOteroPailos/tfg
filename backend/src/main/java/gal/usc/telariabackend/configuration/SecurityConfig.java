@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.expression.ExpressionException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -106,7 +106,7 @@ public class SecurityConfig {
             var u = userRepository
                 .findByEmail(username)
                 .orElseThrow(() ->
-                    new ExpressionException("User not found")
+                    new UsernameNotFoundException("User not found")
                 );
 
             return org.springframework.security.core.userdetails.User.withUsername(

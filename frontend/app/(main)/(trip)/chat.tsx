@@ -1,9 +1,7 @@
-import React, { useCallback, useEffect, useReducer, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -16,54 +14,11 @@ import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { useTrip } from '../../../src/trips';
 import { useAuth } from '../../../src/auth';
-import { useGroupChat } from '../../../src/groupChat';
+import { useTripChat } from '../../../src/groupChat';
+import UserAvatar from '../../../components/UserAvatar';
 import type { components } from '../../../src/generated/types';
 
 type TripChatMessage = components['schemas']['TripChatMessage'];
-
-type State = {
-  messages: TripChatMessage[];
-  loading: boolean;
-  error: string | null;
-  input: string;
-  sending: boolean;
-};
-
-type Action =
-  | { type: 'loading' }
-  | { type: 'loaded'; messages: TripChatMessage[] }
-  | { type: 'error'; error: string }
-  | { type: 'set_input'; value: string }
-  | { type: 'sending' }
-  | { type: 'sent'; message: TripChatMessage }
-  | { type: 'send_error' }
-  | { type: 'received'; message: TripChatMessage };
-
-const initialState: State = { messages: [], loading: true, error: null, input: '', sending: false };
-
-function reducer(state: State, action: Action): State {
-  switch (action.type) {
-    case 'loading':
-      return { ...state, loading: true, error: null };
-    case 'loaded':
-      return { ...state, loading: false, messages: action.messages };
-    case 'error':
-      return { ...state, loading: false, error: action.error };
-    case 'set_input':
-      return { ...state, input: action.value };
-    case 'sending':
-      return { ...state, sending: true };
-    case 'sent':
-      return { ...state, sending: false, input: '', messages: [...state.messages, action.message] };
-    case 'send_error':
-      return { ...state, sending: false };
-    case 'received':
-      if (state.messages.some(m => m.id === action.message.id)) return state;
-      return { ...state, messages: [...state.messages, action.message] };
-    default:
-      return state;
-  }
-}
 
 const ChatScreen = () => {
   const { t } = useTranslation();
@@ -71,26 +26,24 @@ const ChatScreen = () => {
   const theme = Colors[themeName] ?? Colors.light;
   const { trip } = useTrip();
   const { userId } = useAuth();
-  const { getHistory, sendMessage, openStream } = useGroupChat();
-  const [{ messages, loading, error, input, sending }, dispatch] = useReducer(reducer, initialState);
+  const { messages, loading, error, sending, send, setViewing } = useTripChat();
+  const [input, setInput] = useState('');
   const flatListRef = useRef<FlatList<TripChatMessage>>(null);
 
+  const memberHasAvatar = React.useMemo(() => {
+    const map: Record<string, boolean> = {};
+    for (const m of trip?.members ?? []) {
+      if (m.id) map[m.id] = m.hasAvatar ?? false;
+    }
+    return map;
+  }, [trip?.members]);
+
+  // Mark the chat as actively viewed while this screen is mounted, so incoming
+  // messages don't accumulate as unread and the tab badge clears on entry.
   useEffect(() => {
-    if (!trip?.id) return;
-
-    dispatch({ type: 'loading' });
-    getHistory(trip.id)
-      .then(msgs => dispatch({ type: 'loaded', messages: msgs }))
-      .catch(() => dispatch({ type: 'error', error: t('trip.unableLoadChat') }));
-
-    const closeStream = openStream(
-      trip.id,
-      (msg) => dispatch({ type: 'received', message: msg }),
-      (err) => console.warn('[groupChat] SSE error:', err),
-    );
-
-    return closeStream;
-  }, [trip?.id, getHistory, t, openStream]);
+    setViewing(true);
+    return () => setViewing(false);
+  }, [setViewing]);
 
   useEffect(() => {
     if (messages.length === 0) return;
@@ -99,15 +52,16 @@ const ChatScreen = () => {
   }, [messages.length]);
 
   const handleSend = useCallback(async () => {
-    if (!input.trim() || !trip?.id || sending) return;
-    dispatch({ type: 'sending' });
+    if (!input.trim() || sending) return;
+    const content = input.trim();
+    setInput('');
     try {
-      const msg = await sendMessage(trip.id, input.trim());
-      dispatch({ type: 'sent', message: msg });
+      await send(content);
     } catch {
-      dispatch({ type: 'send_error' });
+      // restore the draft so the user can retry
+      setInput(content);
     }
-  }, [input, trip?.id, sending, sendMessage]);
+  }, [input, sending, send]);
 
   const renderItem = useCallback(({ item, index }: { item: TripChatMessage; index: number }) => {
     const isMe = item.senderId === userId;
@@ -141,7 +95,17 @@ const ChatScreen = () => {
     return (
       <View style={[styles.row, isMe ? styles.rowMe : styles.rowOther, isGrouped ? styles.rowGrouped : styles.rowFirst]}>
         {!isMe && !isGrouped && (
-          <Text style={[styles.senderName, { color: theme.icon }]}>{item.senderUsername}</Text>
+          <View style={styles.senderRow}>
+            <UserAvatar
+              userId={item.senderId}
+              initials={item.senderUsername.charAt(0).toUpperCase()}
+              size={20}
+              hasAvatar={memberHasAvatar[item.senderId]}
+              style={{ backgroundColor: `${theme.tint}28` }}
+              textStyle={{ color: theme.tint }}
+            />
+            <Text style={[styles.senderName, { color: theme.icon }]}>{item.senderUsername}</Text>
+          </View>
         )}
         <View style={[
           styles.bubble,
@@ -160,39 +124,38 @@ const ChatScreen = () => {
         )}
       </View>
     );
-  }, [userId, theme, messages]);
+  }, [userId, theme, messages, memberHasAvatar]);
 
   const canSend = input.trim().length > 0 && !sending;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {loading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator color={theme.tint} size="large" />
-        </View>
-      ) : error ? (
-        <View style={styles.centered}>
-          <Ionicons name="alert-circle-outline" size={40} color={theme.icon} style={{ opacity: 0.4 }} />
-          <Text style={[styles.errorText, { color: theme.icon }]}>{error}</Text>
-        </View>
-      ) : (
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          renderItem={renderItem}
-          keyExtractor={item => item.id}
-          extraData={messages}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+          <View style={styles.centered}>
+            <ActivityIndicator color={theme.tint} size="large" />
+          </View>
+        ) : error ? (
+          <View style={styles.centered}>
+            <Ionicons name="alert-circle-outline" size={40} color={theme.icon} style={{ opacity: 0.4 }} />
+            <Text style={[styles.errorText, { color: theme.icon }]}>{error}</Text>
+          </View>
+        ) : (
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            renderItem={renderItem}
+            keyExtractor={item => item.id}
+            extraData={messages}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={[styles.inputRow, { backgroundColor: theme.navBackground, borderTopColor: theme.border }]}>
           <TextInput
             style={[styles.input, { color: theme.text, backgroundColor: theme.uiBackground, borderColor: theme.border }]}
             value={input}
-            onChangeText={v => dispatch({ type: 'set_input', value: v })}
+            onChangeText={setInput}
             placeholder={t('trip.groupChatPlaceholder')}
             placeholderTextColor={theme.icon}
             multiline
@@ -205,8 +168,7 @@ const ChatScreen = () => {
           >
             <Ionicons name="send" size={16} color="#fff" />
           </Pressable>
-        </View>
-      </KeyboardAvoidingView>
+      </View>
     </View>
   );
 };
@@ -226,7 +188,8 @@ const styles = StyleSheet.create({
   rowFirst: { marginTop: 10 },
   rowGrouped: { marginTop: 3 },
 
-  senderName: { fontSize: 11, fontWeight: '600', marginBottom: 2, paddingHorizontal: 4 },
+  senderRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 2 },
+  senderName: { fontSize: 11, fontWeight: '600' },
 
   bubble: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 18 },
   bubbleMe: { borderBottomRightRadius: 4 },

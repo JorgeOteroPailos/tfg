@@ -368,6 +368,95 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the authenticated user's profile */
+        get: operations["getMyProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update the authenticated user's profile (username and/or email) */
+        patch: operations["updateMyProfile"];
+        trace?: never;
+    };
+    "/users/me/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Change the authenticated user's password
+         * @description Requires the current password. On success all refresh tokens are revoked (sessions on other devices are logged out) and a fresh token pair is returned for the current device.
+         */
+        put: operations["changeMyPassword"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/me/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request a presigned upload URL for the profile picture */
+        post: operations["initAvatarUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/me/avatar/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm that the avatar upload to Minio completed successfully */
+        post: operations["confirmAvatarUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{userId}/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a presigned download URL for a user's profile picture */
+        get: operations["getAvatarDownloadUrl"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/trips/{tripId}/ai-chat": {
         parameters: {
             query?: never;
@@ -486,6 +575,8 @@ export interface components {
             /** Format: uuid */
             id: string;
             username: string;
+            /** @description Whether the user has a profile picture stored */
+            hasAvatar: boolean;
         };
         JoinRequestSummary: {
             /** Format: uuid */
@@ -659,6 +750,11 @@ export interface components {
             uploaderId: string;
             /** Format: date-time */
             uploadedAt: string;
+            /**
+             * @description Presigned GET URL for a downscaled preview, only present for image documents with a generated thumbnail (expires in 15 minutes)
+             * @example http://localhost:9000/telaria/uuid-key.thumb.jpg?X-Amz-Signature=...
+             */
+            previewUrl?: string;
         };
         DocumentUploadRequest: {
             /** @example billete_tren.pdf */
@@ -679,6 +775,55 @@ export interface components {
             /**
              * @description Presigned GET URL to download the file directly from Minio (expires in 15 minutes)
              * @example http://localhost:9000/telaria/uuid-key?X-Amz-Signature=...
+             */
+            downloadUrl: string;
+        };
+        OwnProfile: {
+            /** Format: uuid */
+            id: string;
+            username: string;
+            /** Format: email */
+            email: string;
+            /** @description Whether the user has a profile picture stored */
+            hasAvatar: boolean;
+        };
+        /** @description At least one field should be provided; omitted fields are left unchanged. */
+        UpdateProfileRequest: {
+            /** @example juanperez */
+            username?: string;
+            /**
+             * Format: email
+             * @example juan@example.com
+             */
+            email?: string;
+        };
+        ChangePasswordRequest: {
+            /**
+             * Format: password
+             * @example secreto123
+             */
+            currentPassword: string;
+            /**
+             * Format: password
+             * @example nuevoSecreto456
+             */
+            newPassword: string;
+        };
+        AvatarUploadRequest: {
+            /** @example image/jpeg */
+            contentType: string;
+        };
+        AvatarUploadResponse: {
+            /**
+             * @description Presigned PUT URL to upload the avatar directly to Minio (expires in 15 minutes)
+             * @example http://localhost:9000/telaria/avatars/uuid?X-Amz-Signature=...
+             */
+            uploadUrl: string;
+        };
+        AvatarDownloadResponse: {
+            /**
+             * @description Presigned GET URL to download the avatar directly from Minio (expires in 15 minutes)
+             * @example http://localhost:9000/telaria/avatars/uuid?X-Amz-Signature=...
              */
             downloadUrl: string;
         };
@@ -1762,6 +1907,222 @@ export interface operations {
                 content?: never;
             };
             /** @description Document not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Profile of the authenticated user */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnProfile"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description Profile updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnProfile"];
+                };
+            };
+            /** @description Invalid profile data */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Email already in use by another account */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    changeMyPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Password changed, new token pair issued */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            /** @description Invalid password data */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated or current password incorrect */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    initAvatarUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AvatarUploadRequest"];
+            };
+        };
+        responses: {
+            /** @description Presigned upload URL generated, avatar pending confirmation */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvatarUploadResponse"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    confirmAvatarUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Avatar confirmed and set as the user's profile picture */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No pending avatar upload */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File not found in storage (Minio verification failed) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getAvatarDownloadUrl: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Presigned download URL (expires in 15 minutes) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvatarDownloadResponse"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User not found or has no profile picture */
             404: {
                 headers: {
                     [name: string]: unknown;

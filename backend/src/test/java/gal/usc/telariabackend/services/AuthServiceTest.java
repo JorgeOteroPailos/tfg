@@ -326,6 +326,77 @@ class AuthServiceTest {
                 .deleteAllByUserId(userId);
     }
 
+    //###################/CHANGE PASSWORD##############
+    @Test
+    void changePassword_WhenCurrentPasswordIsCorrect_ShouldUpdatePasswordRevokeTokensAndReturnNewPair() {
+        UUID userId = UUID.randomUUID();
+        User user = new User("userName", "test@test.com", "encoded-old-password", userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("old-password", "encoded-old-password")).thenReturn(true);
+        when(passwordEncoder.encode("new-password")).thenReturn("encoded-new-password");
+
+        LoginResponse expectedResponse = new LoginResponse()
+                .accessToken("fake-access-token")
+                .refreshToken("fake-refresh-token")
+                .username("userName");
+
+        AuthService spyService = spy(authService);
+        doReturn(expectedResponse).when(spyService).login(any(LoginRequest.class));
+
+        LoginResponse result = spyService.changePassword(userId, "old-password", "new-password");
+
+        assertNotNull(result);
+        assertEquals("fake-access-token", result.getAccessToken());
+        assertEquals("fake-refresh-token", result.getRefreshToken());
+        assertEquals("encoded-new-password", user.getPassword());
+
+        verify(userRepository).save(user);
+        verify(refreshTokenRepository).deleteAllByUserId(userId);
+
+        ArgumentCaptor<LoginRequest> loginRequestCaptor = ArgumentCaptor.forClass(LoginRequest.class);
+        verify(spyService).login(loginRequestCaptor.capture());
+        assertEquals("test@test.com", loginRequestCaptor.getValue().getEmail());
+        assertEquals("new-password", loginRequestCaptor.getValue().getPassword());
+    }
+
+    @Test
+    void changePassword_ShouldRevokeAllRefreshTokensBeforeIssuingTheNewPair() {
+        UUID userId = UUID.randomUUID();
+        User user = new User("userName", "test@test.com", "encoded-old-password", userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("old-password", "encoded-old-password")).thenReturn(true);
+        when(passwordEncoder.encode("new-password")).thenReturn("encoded-new-password");
+        when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+
+        authService.changePassword(userId, "old-password", "new-password");
+
+        var inOrder = inOrder(refreshTokenRepository);
+        inOrder.verify(refreshTokenRepository).deleteAllByUserId(userId);
+        inOrder.verify(refreshTokenRepository).save(any(RefreshToken.class));
+    }
+
+    @Test
+    void changePassword_WhenCurrentPasswordIsWrong_ShouldThrowAndNotChangeAnything() {
+        UUID userId = UUID.randomUUID();
+        User user = new User("userName", "test@test.com", "encoded-old-password", userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrong-password", "encoded-old-password")).thenReturn(false);
+
+        assertThrows(
+                BadCredentialsException.class,
+                () -> authService.changePassword(userId, "wrong-password", "new-password")
+        );
+
+        assertEquals("encoded-old-password", user.getPassword());
+        verify(userRepository, never()).save(any(User.class));
+        verify(passwordEncoder, never()).encode(anyString());
+        verifyNoInteractions(refreshTokenRepository);
+    }
+
     //###################/REFRESH##############
     @Test
     void refresh_WhenTokenIsValid_ShouldInvalidateOldTokenAndReturnNewPair() {

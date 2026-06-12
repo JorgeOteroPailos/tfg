@@ -14,6 +14,7 @@ import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -34,6 +35,7 @@ public class ExpenseService {
         this.settlementRepo = settlementRepo;
     }
 
+    @Transactional
     public UUID createExpense(UUID tripId, UUID creatorId, CreateExpenseRequest request) {
         User creator = userRepo.findById(creatorId).orElseThrow();
 
@@ -70,6 +72,7 @@ public class ExpenseService {
     }
 
 
+    @Transactional
     public void deleteExpense(UUID tripId, UUID expenseId, UUID userId) {
         tripRepo.findByIdAndMembersId(tripId, userId)
                 .orElseThrow(NotATripMemberException::new);
@@ -93,11 +96,16 @@ public class ExpenseService {
         return t.getExpenses().stream().map(Expense::toExpenseSummary).toList();
     }
 
+    @Transactional
     public UUID createSettlement(UUID tripId, UUID payerId, CreateSettlementRequest request) {
         User payer = userRepo.findById(payerId).orElseThrow();
         Trip trip = tripRepo.findByIdAndMembersContaining(tripId, payer)
                 .orElseThrow(NotATripMemberException::new);
         User receiver = userRepo.findById(request.getToId()).orElseThrow();
+        Set<UUID> memberIds = trip.getMembers().stream().map(User::getId).collect(Collectors.toSet());
+        if (!memberIds.contains(receiver.getId())) {
+            throw new NotATripMemberException("Receiver is not a member of this trip");
+        }
         Settlement s = new Settlement(trip, payer, receiver, BigDecimal.valueOf(request.getAmount()));
         settlementRepo.save(s);
         return s.getId();

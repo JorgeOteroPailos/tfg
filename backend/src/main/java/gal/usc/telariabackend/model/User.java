@@ -1,5 +1,6 @@
 package gal.usc.telariabackend.model;
 
+import gal.usc.telariabackend.model.dto.OwnProfile;
 import gal.usc.telariabackend.model.dto.RegisterRequest;
 import gal.usc.telariabackend.model.dto.UserProfile;
 import jakarta.persistence.*;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
 
+    @Setter
     private String username;
 
     @Id
@@ -22,11 +24,18 @@ public class User {
     @EqualsAndHashCode.Include
     private UUID id;
 
+    @Setter
     @Column(unique=true)
     private String email;
 
     @Setter
     private String password;
+
+    @Setter
+    private String avatarObjectKey;
+
+    @Setter
+    private String pendingAvatarObjectKey;
 
     public User() {
 
@@ -52,7 +61,15 @@ public class User {
     }
 
     public UserProfile toUserProfile() {
-        return new UserProfile().id(this.id).username(this.username);
+        return new UserProfile().id(this.id).username(this.username).hasAvatar(this.avatarObjectKey != null);
+    }
+
+    public OwnProfile toOwnProfile() {
+        return new OwnProfile()
+                .id(this.id)
+                .username(this.username)
+                .email(this.email)
+                .hasAvatar(this.avatarObjectKey != null);
     }
 
 }

@@ -78,6 +78,9 @@ type AuthContextType = {
   logout: () => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
   callAuthenticated: (url: string, options?: RequestInit) => Promise<Response>;
+  applyTokens: (accessToken: string, refreshToken: string) => Promise<void>;
+  updateStoredUsername: (username: string) => Promise<void>;
+  updateStoredEmail: (email: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -94,7 +97,9 @@ type AuthAction =
   | { type: 'session_restored'; accessToken: string | null; userEmail: string | null; username: string | null }
   | { type: 'session_cleared' }
   | { type: 'loading_done' }
-  | { type: 'token_refreshed'; accessToken: string };
+  | { type: 'token_refreshed'; accessToken: string }
+  | { type: 'username_updated'; username: string }
+  | { type: 'email_updated'; userEmail: string };
 
 const initialAuthState: AuthState = {
   isAuthenticated: false,
@@ -114,6 +119,10 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return { ...state, isLoading: false };
     case 'token_refreshed':
       return { ...state, accessToken: action.accessToken };
+    case 'username_updated':
+      return { ...state, username: action.username };
+    case 'email_updated':
+      return { ...state, userEmail: action.userEmail };
     default:
       return state;
   }
@@ -293,6 +302,21 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       });
     }, [doRefresh]);
 
+    const applyTokens = useCallback(async (accessToken: string, refreshToken: string) => {
+      await Promise.all([saveAccessToken(accessToken), saveRefreshToken(refreshToken)]);
+      dispatch({ type: 'token_refreshed', accessToken });
+    }, []);
+
+    const updateStoredUsername = useCallback(async (username: string) => {
+      await saveUserName(username);
+      dispatch({ type: 'username_updated', username });
+    }, []);
+
+    const updateStoredEmail = useCallback(async (email: string) => {
+      await saveUserEmail(email);
+      dispatch({ type: 'email_updated', userEmail: email });
+    }, []);
+
     const userId = useMemo(() => {
       if (!accessToken) return null;
       try {
@@ -303,8 +327,8 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
     }, [accessToken]);
 
     const value = useMemo(
-      () => ({ isAuthenticated, isLoading, accessToken, userEmail, username, userId, login, logout, register, callAuthenticated }),
-      [isAuthenticated, isLoading, accessToken, userEmail, username, userId, login, logout, register, callAuthenticated]
+      () => ({ isAuthenticated, isLoading, accessToken, userEmail, username, userId, login, logout, register, callAuthenticated, applyTokens, updateStoredUsername, updateStoredEmail }),
+      [isAuthenticated, isLoading, accessToken, userEmail, username, userId, login, logout, register, callAuthenticated, applyTokens, updateStoredUsername, updateStoredEmail]
     );
 
     return (

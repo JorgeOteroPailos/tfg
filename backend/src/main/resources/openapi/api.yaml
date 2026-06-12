@@ -51,6 +51,16 @@ paths:
     $ref: './paths/documents.yaml#/paths/~1trips~1{tripId}~1documents'
   /trips/{tripId}/documents/{documentId}:
     $ref: './paths/documents.yaml#/paths/~1trips~1{tripId}~1documents~1{documentId}'
+  /users/me:
+    $ref: './paths/users.yaml#/paths/~1users~1me'
+  /users/me/password:
+    $ref: './paths/users.yaml#/paths/~1users~1me~1password'
+  /users/me/avatar:
+    $ref: './paths/users.yaml#/paths/~1users~1me~1avatar'
+  /users/me/avatar/confirm:
+    $ref: './paths/users.yaml#/paths/~1users~1me~1avatar~1confirm'
+  /users/{userId}/avatar:
+    $ref: './paths/users.yaml#/paths/~1users~1{userId}~1avatar'
   /trips/{tripId}/ai-chat:
     $ref: './paths/ai-chat.yaml#/paths/~1trips~1{tripId}~1ai-chat'
   /trips/{tripId}/group-chat:

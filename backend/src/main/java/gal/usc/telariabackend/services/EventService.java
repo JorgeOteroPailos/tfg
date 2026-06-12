@@ -10,6 +10,7 @@ import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import gal.usc.telariabackend.repository.EventRepository;
 import gal.usc.telariabackend.repository.TripRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -25,6 +26,7 @@ public class EventService {
         this.eventRepo = eventRepo;
     }
 
+    @Transactional
     public UUID createEvent(UUID tripId, UUID userId, CreateEventRequest request) {
         Trip trip = tripRepo.findByIdAndMembersId(tripId, userId)
                 .orElseThrow(NotATripMemberException::new);
@@ -46,6 +48,7 @@ public class EventService {
         return event.getId();
     }
 
+    @Transactional
     public void deleteEvent(UUID tripId, UUID eventId, UUID userId) {
         tripRepo.findByIdAndMembersId(tripId, userId)
                 .orElseThrow(NotATripMemberException::new);

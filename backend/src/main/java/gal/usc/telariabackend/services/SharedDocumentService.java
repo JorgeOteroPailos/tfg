@@ -1,5 +1,6 @@
 package gal.usc.telariabackend.services;
 
+import gal.usc.telariabackend.configuration.ImageProperties;
 import gal.usc.telariabackend.configuration.MinioConfig;
 import gal.usc.telariabackend.model.SharedDocument;
 import gal.usc.telariabackend.model.Trip;
@@ -14,8 +15,11 @@ import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import gal.usc.telariabackend.repository.SharedDocumentRepository;
 import gal.usc.telariabackend.repository.TripRepository;
 import gal.usc.telariabackend.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -29,25 +33,33 @@ import java.util.UUID;
 @Service
 public class SharedDocumentService {
 
+    private static final Logger log = LoggerFactory.getLogger(SharedDocumentService.class);
+
     private final SharedDocumentRepository documentRepository;
     private final TripRepository tripRepository;
     private final UserRepository userRepository;
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
     private final MinioConfig minioConfig;
+    private final ImageService imageService;
+    private final ImageProperties imageProperties;
 
     public SharedDocumentService(SharedDocumentRepository documentRepository,
                                  TripRepository tripRepository,
                                  UserRepository userRepository,
                                  S3Client s3Client,
                                  S3Presigner s3Presigner,
-                                 MinioConfig minioConfig) {
+                                 MinioConfig minioConfig,
+                                 ImageService imageService,
+                                 ImageProperties imageProperties) {
         this.documentRepository = documentRepository;
         this.tripRepository = tripRepository;
         this.userRepository = userRepository;
         this.s3Client = s3Client;
         this.s3Presigner = s3Presigner;
         this.minioConfig = minioConfig;
+        this.imageService = imageService;
+        this.imageProperties = imageProperties;
     }
 
     public DocumentUploadResponse initUpload(UUID tripId, UUID uploaderId, DocumentUploadRequest request) {
@@ -60,7 +72,7 @@ public class SharedDocumentService {
 
         String objectKey = tripId + "/" + UUID.randomUUID() + "-" + request.getName();
 
-        SharedDocument document = new SharedDocument(trip, uploader, request.getName(), objectKey, false);
+        SharedDocument document = new SharedDocument(trip, uploader, request.getName(), objectKey, request.getContentType(), false);
         documentRepository.save(document);
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
@@ -90,7 +102,34 @@ public class SharedDocumentService {
         }
 
         document.confirmUpload();
+        generateThumbnail(document);
         documentRepository.save(document);
+    }
+
+    private void generateThumbnail(SharedDocument document) {
+        if (!imageService.isSupportedImage(document.getContentType(), document.getFileName())) {
+            return;
+        }
+        try {
+            byte[] original = s3Client.getObjectAsBytes(GetObjectRequest.builder()
+                    .bucket(minioConfig.getBucket())
+                    .key(document.getObjectKey())
+                    .build()).asByteArray();
+
+            imageService.downscaleToJpeg(original, imageProperties.getThumbnailMaxDimension())
+                    .ifPresent(thumb -> {
+                        String thumbKey = document.getObjectKey() + ".thumb.jpg";
+                        s3Client.putObject(PutObjectRequest.builder()
+                                        .bucket(minioConfig.getBucket())
+                                        .key(thumbKey)
+                                        .contentType("image/jpeg")
+                                        .build(),
+                                RequestBody.fromBytes(thumb));
+                        document.setThumbnailObjectKey(thumbKey);
+                    });
+        } catch (Exception e) {
+            log.warn("Thumbnail generation failed for document {}: {}", document.getId(), e.getMessage());
+        }
     }
 
     public List<DocumentResponse> listDocuments(UUID tripId, UUID requesterId) {
@@ -101,8 +140,25 @@ public class SharedDocumentService {
 
         return documentRepository.findByTripId(tripId).stream()
                 .filter(d -> d.isUploaded() || d.getCreator().getId().equals(requesterId))
-                .map(SharedDocument::toDocumentResponse)
+                .map(d -> {
+                    DocumentResponse response = d.toDocumentResponse();
+                    if (d.getThumbnailObjectKey() != null) {
+                        response.previewUrl(presignGet(d.getThumbnailObjectKey()));
+                    }
+                    return response;
+                })
                 .toList();
+    }
+
+    private String presignGet(String objectKey) {
+        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(minioConfig.getPresignedUrlExpirationMinutes()))
+                .getObjectRequest(GetObjectRequest.builder()
+                        .bucket(minioConfig.getBucket())
+                        .key(objectKey)
+                        .build())
+                .build();
+        return s3Presigner.presignGetObject(presignRequest).url().toString();
     }
 
     public DocumentDownloadResponse getDownloadUrl(UUID tripId, UUID documentId, UUID requesterId) {
@@ -112,15 +168,7 @@ public class SharedDocumentService {
             throw new NotATripMemberException();
         }
 
-        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                .signatureDuration(Duration.ofMinutes(minioConfig.getPresignedUrlExpirationMinutes()))
-                .getObjectRequest(GetObjectRequest.builder()
-                        .bucket(minioConfig.getBucket())
-                        .key(document.getObjectKey())
-                        .build())
-                .build();
-
-        return new DocumentDownloadResponse().downloadUrl(s3Presigner.presignGetObject(presignRequest).url().toString());
+        return new DocumentDownloadResponse().downloadUrl(presignGet(document.getObjectKey()));
     }
 
     public void deleteAllForTrip(UUID tripId) {
@@ -131,7 +179,10 @@ public class SharedDocumentService {
                         .bucket(minioConfig.getBucket())
                         .key(doc.getObjectKey())
                         .build());
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                log.warn("Failed to delete S3 object '{}' for trip {}: {}", doc.getObjectKey(), tripId, e.getMessage());
+            }
+            deleteThumbnail(doc);
         }
         documentRepository.deleteAll(docs);
     }
@@ -149,7 +200,24 @@ public class SharedDocumentService {
                 .key(document.getObjectKey())
                 .build());
 
+        deleteThumbnail(document);
+
         documentRepository.delete(document);
+    }
+
+    private void deleteThumbnail(SharedDocument document) {
+        if (document.getThumbnailObjectKey() == null) {
+            return;
+        }
+        try {
+            s3Client.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(minioConfig.getBucket())
+                    .key(document.getThumbnailObjectKey())
+                    .build());
+        } catch (Exception e) {
+            log.warn("Failed to delete thumbnail '{}' for document {}: {}",
+                    document.getThumbnailObjectKey(), document.getId(), e.getMessage());
+        }
     }
 
 

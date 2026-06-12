@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
-  StyleSheet, View, FlatList, ActivityIndicator,
-  Pressable, Modal, ScrollView, TextInput,
+  StyleSheet, View, ActivityIndicator,
+  Pressable, Modal, ScrollView, TextInput, PanResponder,
+  type NativeScrollEvent, type NativeSyntheticEvent,
 } from 'react-native';
 import MapView, { Marker, Region, type MapStyleElement } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -9,13 +10,12 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from 'expo-router';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
-import { useEvents, type EventSummary } from '../../../src/events';
+import { useQuery } from '@tanstack/react-query';
+import { useEventsQuery, useAddEventMutation, useDeleteEventMutation, type EventSummary } from '../../../src/events';
 import { useTrip } from '../../../src/trips';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '../../../components/ThemedText';
 import ThemedInput from '../../../components/ThemedInput';
-
-type Tab = 'calendar' | 'list';
 
 function dateKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -34,6 +34,17 @@ function buildGrid(year: number, month: number): (number | null)[] {
   while (cells.length % 7 !== 0) cells.push(null);
   return cells;
 }
+// Monday-based week (7 dates) containing the given anchor date.
+function weekDates(anchor: Date): Date[] {
+  const offset = anchor.getDay() === 0 ? 6 : anchor.getDay() - 1;
+  const monday = new Date(anchor);
+  monday.setDate(anchor.getDate() - offset);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
+}
 
 const EMPTY_EVENT_DOTS: Record<string, number> = {};
 
@@ -45,19 +56,53 @@ type MiniCalProps = {
   eventDots?: Record<string, number>;
   tint: string;
   todayKey: string;
+  collapsed?: boolean;
   onPrevMonth: () => void;
   onNextMonth: () => void;
-  onDayPress: (day: number) => void;
+  onDayPress: (key: string) => void;
 };
 const MiniCal = ({
-  year, month, selectedKey, eventDots = EMPTY_EVENT_DOTS, tint, todayKey,
+  year, month, selectedKey, eventDots = EMPTY_EVENT_DOTS, tint, todayKey, collapsed = false,
   onPrevMonth, onNextMonth, onDayPress,
 }: MiniCalProps) => {
   const { t } = useTranslation();
   const weekDays = t('trip.weekDays', { returnObjects: true }) as string[];
   const monthNames = t('trip.monthNames', { returnObjects: true }) as string[];
-  const isThisMonth = todayKey.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`);
   const grid = useMemo(() => buildGrid(year, month), [year, month]);
+  // In collapsed mode, show only the week around the selected day (or today).
+  const week = useMemo(
+    () => (collapsed ? weekDates(new Date(`${selectedKey ?? todayKey}T00:00:00`)) : null),
+    [collapsed, selectedKey, todayKey],
+  );
+
+  const renderCell = (key: string, day: number, inMonth: boolean) => {
+    const isToday = todayKey === key;
+    const isSel = selectedKey === key;
+    const dots = Math.min(eventDots[key] ?? 0, 3);
+    return (
+      <Pressable
+        key={key}
+        style={({ pressed }) => [cal.cell, isSel && { backgroundColor: tint, borderRadius: 8 }, { opacity: pressed ? 0.6 : 1 }]}
+        onPress={() => onDayPress(key)}
+      >
+        <ThemedText style={[
+          cal.dayNum,
+          !inMonth && { opacity: 0.35 },
+          isToday && !isSel && { color: tint, fontWeight: '700' },
+          isSel && { color: 'white', fontWeight: '700' },
+        ]}>
+          {day}
+        </ThemedText>
+        {dots > 0 && (
+          <View style={cal.dotRow}>
+            {Array.from({ length: dots }).map((_, di) => (
+              <View key={di} style={[cal.dot, { backgroundColor: isSel ? 'white' : tint }]} />
+            ))}
+          </View>
+        )}
+      </Pressable>
+    );
+  };
 
   return (
     <View>
@@ -77,41 +122,23 @@ const MiniCal = ({
         ))}
       </View>
 
-      <View style={cal.grid}>
-        {grid.map((day, idx) => {
-          if (day === null) {
-            const col = idx % 7;
-            const row = Math.floor(idx / 7);
-            return <View key={`pad-r${row}c${col}`} style={cal.cell} />;
-          }
-          const k = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-          const isToday = isThisMonth && todayKey === k;
-          const isSel = selectedKey === k;
-          const dots = Math.min(eventDots[k] ?? 0, 3);
-          return (
-            <Pressable
-              key={k}
-              style={({ pressed }) => [cal.cell, isSel && { backgroundColor: tint, borderRadius: 8 }, { opacity: pressed ? 0.6 : 1 }]}
-              onPress={() => onDayPress(day)}
-            >
-              <ThemedText style={[
-                cal.dayNum,
-                isToday && !isSel && { color: tint, fontWeight: '700' },
-                isSel && { color: 'white', fontWeight: '700' },
-              ]}>
-                {day}
-              </ThemedText>
-              {dots > 0 && (
-                <View style={cal.dotRow}>
-                  {Array.from({ length: dots }).map((_, di) => (
-                    <View key={di} style={[cal.dot, { backgroundColor: isSel ? 'white' : tint }]} />
-                  ))}
-                </View>
-              )}
-            </Pressable>
-          );
-        })}
-      </View>
+      {week ? (
+        <View style={cal.grid}>
+          {week.map(d => renderCell(dateKey(d), d.getDate(), d.getMonth() === month))}
+        </View>
+      ) : (
+        <View style={cal.grid}>
+          {grid.map((day, idx) => {
+            if (day === null) {
+              const col = idx % 7;
+              const row = Math.floor(idx / 7);
+              return <View key={`pad-r${row}c${col}`} style={cal.cell} />;
+            }
+            const k = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            return renderCell(k, day, true);
+          })}
+        </View>
+      )}
     </View>
   );
 };
@@ -154,6 +181,7 @@ const TimePicker = ({ hour, minute, tint, onChange }: TimePickerProps) => {
 type EventCardProps = {
   ev: EventSummary;
   showDate?: boolean;
+  isPast?: boolean;
   theme: typeof Colors.light;
   formatTime: (iso: string) => string;
   formatDateTime: (iso: string) => string;
@@ -161,7 +189,8 @@ type EventCardProps = {
   onPress: (ev: EventSummary) => void;
 };
 
-const EventCard = ({ ev, showDate = false, theme, formatTime, formatDateTime, formatDuration, onPress }: EventCardProps) => (
+const EventCard = ({ ev, showDate = false, isPast = false, theme, formatTime, formatDateTime, formatDuration, onPress }: EventCardProps) => (
+  <View style={isPast ? { opacity: 0.45 } : undefined}>
   <Pressable
     style={({ pressed }) => [styles.eventCard, { backgroundColor: theme.tabBackground }, { opacity: pressed ? 0.75 : 1 }]}
     onPress={() => onPress(ev)}
@@ -185,6 +214,7 @@ const EventCard = ({ ev, showDate = false, theme, formatTime, formatDateTime, fo
       <Ionicons name="chevron-forward" size={18} color={theme.icon} />
     </View>
   </Pressable>
+  </View>
 );
 
 function formatTime(iso: string) {
@@ -204,30 +234,20 @@ function formatDuration(mins: number) {
 
 // ── Reducers ───────────────────────────────────────────────────────────────────
 
-type EventsListState = { events: EventSummary[] | null; loading: boolean; error: string | null };
-type EventsListAction =
-  | { type: 'loading' }
-  | { type: 'loaded'; events: EventSummary[] }
-  | { type: 'error'; error: string }
-  | { type: 'add'; event: EventSummary }
-  | { type: 'remove'; id: string };
-
-function evListReducer(state: EventsListState, action: EventsListAction): EventsListState {
-  switch (action.type) {
-    case 'loading': return { ...state, loading: true, error: null };
-    case 'loaded': return { events: action.events, loading: false, error: null };
-    case 'error': return { ...state, loading: false, error: action.error };
-    case 'add': return { ...state, events: state.events ? [action.event, ...state.events] : [action.event] };
-    case 'remove': return { ...state, events: state.events ? state.events.filter(e => e.id !== action.id) : state.events };
-    default: return state;
-  }
-}
-
-type CalState = { year: number; month: number; selectedKey: string };
+type CalState = { year: number; month: number; selectedKey: string; collapsed: boolean };
 type CalAction =
   | { type: 'prev_month' }
   | { type: 'next_month' }
-  | { type: 'select_day'; key: string };
+  | { type: 'prev_week' }
+  | { type: 'next_week' }
+  | { type: 'select_day'; key: string }
+  | { type: 'set_collapsed'; value: boolean };
+
+function shiftWeek(state: CalState, days: number): CalState {
+  const d = new Date(`${state.selectedKey}T00:00:00`);
+  d.setDate(d.getDate() + days);
+  return { ...state, year: d.getFullYear(), month: d.getMonth(), selectedKey: dateKey(d) };
+}
 
 function calReducer(state: CalState, action: CalAction): CalState {
   switch (action.type) {
@@ -237,23 +257,30 @@ function calReducer(state: CalState, action: CalAction): CalState {
     case 'next_month':
       if (state.month === 11) return { ...state, year: state.year + 1, month: 0 };
       return { ...state, month: state.month + 1 };
+    case 'prev_week': return shiftWeek(state, -7);
+    case 'next_week': return shiftWeek(state, 7);
     case 'select_day': return { ...state, selectedKey: action.key };
+    case 'set_collapsed': return { ...state, collapsed: action.value };
     default: return state;
   }
 }
 
-type DetailState = { visible: boolean; event: EventSummary | null; deleting: boolean; error: string | null };
+type DetailState = { visible: boolean; event: EventSummary | null; confirming: boolean; deleting: boolean; error: string | null };
 type DetailAction =
   | { type: 'open'; event: EventSummary }
   | { type: 'close' }
+  | { type: 'start_confirm' }
+  | { type: 'cancel_confirm' }
   | { type: 'start_delete' }
   | { type: 'end_delete' }
   | { type: 'set_error'; error: string };
 
 function detailReducer(state: DetailState, action: DetailAction): DetailState {
   switch (action.type) {
-    case 'open': return { visible: true, event: action.event, deleting: false, error: null };
-    case 'close': return { visible: false, event: null, deleting: false, error: null };
+    case 'open': return { visible: true, event: action.event, confirming: false, deleting: false, error: null };
+    case 'close': return { visible: false, event: null, confirming: false, deleting: false, error: null };
+    case 'start_confirm': return { ...state, confirming: true, error: null };
+    case 'cancel_confirm': return { ...state, confirming: false };
     case 'start_delete': return { ...state, deleting: true, error: null };
     case 'end_delete': return { ...state, deleting: false };
     case 'set_error': return { ...state, error: action.error };
@@ -556,10 +583,12 @@ const MapPickerModal = React.memo(function MapPickerModal({ visible, tint, hintR
 type EventDetailModalProps = {
   detail: DetailState;
   onClose: () => void;
+  onStartConfirm: () => void;
+  onCancelConfirm: () => void;
   onDelete: () => void;
 };
 
-const EventDetailModal = React.memo(function EventDetailModal({ detail, onClose, onDelete }: EventDetailModalProps) {
+const EventDetailModal = React.memo(function EventDetailModal({ detail, onClose, onStartConfirm, onCancelConfirm, onDelete }: EventDetailModalProps) {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
@@ -616,16 +645,30 @@ const EventDetailModal = React.memo(function EventDetailModal({ detail, onClose,
 
           {detail.error && <ThemedText style={styles.errorText}>{detail.error}</ThemedText>}
 
-          <View style={styles.modalButtons}>
-            <Pressable style={[styles.modalBtn, styles.deleteBtn]} onPress={onDelete} disabled={detail.deleting}>
-              {detail.deleting
-                ? <ActivityIndicator color="white" />
-                : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.delete')}</ThemedText>}
-            </Pressable>
-            <Pressable style={[styles.modalBtn, { backgroundColor: theme.tint }]} onPress={onClose}>
-              <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.close')}</ThemedText>
-            </Pressable>
-          </View>
+          {detail.confirming ? (
+            <>
+              <ThemedText style={styles.confirmText}>{t('trip.deleteEventConfirm')}</ThemedText>
+              <View style={styles.modalButtons}>
+                <Pressable style={[styles.modalBtn, styles.cancelBtn]} onPress={onCancelConfirm} disabled={detail.deleting}>
+                  <ThemedText style={{ fontWeight: '600' }}>{t('common.cancel')}</ThemedText>
+                </Pressable>
+                <Pressable style={[styles.modalBtn, styles.deleteBtn]} onPress={onDelete} disabled={detail.deleting}>
+                  {detail.deleting
+                    ? <ActivityIndicator color="white" />
+                    : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.delete')}</ThemedText>}
+                </Pressable>
+              </View>
+            </>
+          ) : (
+            <View style={styles.modalButtons}>
+              <Pressable style={[styles.modalBtn, styles.deleteBtn]} onPress={onStartConfirm}>
+                <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.delete')}</ThemedText>
+              </Pressable>
+              <Pressable style={[styles.modalBtn, { backgroundColor: theme.tint }]} onPress={onClose}>
+                <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.close')}</ThemedText>
+              </Pressable>
+            </View>
+          )}
         </Pressable>
       </Pressable>
     </Modal>
@@ -633,33 +676,35 @@ const EventDetailModal = React.memo(function EventDetailModal({ detail, onClose,
 });
 
 function useLocationSearch(query: string, biasLat: number | null, biasLon: number | null) {
-  const [rawSuggestions, setRawSuggestions] = useState<NominatimResult[]>([]);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const skipRef = useRef(false);
 
   useEffect(() => {
     if (skipRef.current) { skipRef.current = false; return; }
-    const q = query.trim();
-    if (q.length < 3) return;
-    const controller = new AbortController();
-    const timer = setTimeout(async () => {
-      try {
-        const viewbox = biasLat != null && biasLon != null
-          ? `&viewbox=${biasLon - 1},${biasLat - 1},${biasLon + 1},${biasLat + 1}&bounded=0`
-          : '';
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&addressdetails=1&limit=5${viewbox}`,
-          { headers: { 'User-Agent': 'Telaria-TFG/1.0' }, signal: controller.signal },
-        );
-        if (!controller.signal.aborted) setRawSuggestions(await res.json());
-      } catch { setRawSuggestions([]); }
-    }, 600);
-    return () => { clearTimeout(timer); controller.abort(); };
-  }, [query, biasLat, biasLon]);
+    const timer = setTimeout(() => setDebouncedQuery(query), 600);
+    return () => clearTimeout(timer);
+  }, [query]);
 
-  // Derived during render — no state-in-effect adjustment needed
-  const suggestions = query.trim().length < 3 ? [] : rawSuggestions;
-  const skipNext = useCallback(() => { skipRef.current = true; setRawSuggestions([]); }, []);
-  const clearSuggestions = useCallback(() => setRawSuggestions([]), []);
+  const effectiveQuery = debouncedQuery.trim();
+  const { data } = useQuery<NominatimResult[]>({
+    queryKey: ['locationSearch', effectiveQuery, biasLat, biasLon],
+    queryFn: async ({ signal }) => {
+      const viewbox = biasLat != null && biasLon != null
+        ? `&viewbox=${biasLon - 1},${biasLat - 1},${biasLon + 1},${biasLat + 1}&bounded=0`
+        : '';
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(effectiveQuery)}&format=json&addressdetails=1&limit=5${viewbox}`,
+        { headers: { 'User-Agent': 'Telaria-TFG/1.0' }, signal },
+      );
+      return res.json();
+    },
+    enabled: effectiveQuery.length >= 3,
+    staleTime: 30_000,
+  });
+
+  const suggestions = query.trim().length < 3 ? [] : (data ?? []);
+  const skipNext = useCallback(() => { skipRef.current = true; setDebouncedQuery(''); }, []);
+  const clearSuggestions = useCallback(() => setDebouncedQuery(''), []);
   return { suggestions, skipNext, clearSuggestions };
 }
 
@@ -733,10 +778,7 @@ const EventCreateModal = React.memo(function EventCreateModal({
                   todayKey={todayKey}
                   onPrevMonth={() => createDispatch({ type: 'prev_picker_month' })}
                   onNextMonth={() => createDispatch({ type: 'next_picker_month' })}
-                  onDayPress={(day) => {
-                    const k = `${create.pickerYear}-${String(create.pickerMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                    createDispatch({ type: 'pick_date', key: k });
-                  }}
+                  onDayPress={(key) => createDispatch({ type: 'pick_date', key })}
                 />
               </View>
             )}
@@ -840,22 +882,144 @@ const EventCreateModal = React.memo(function EventCreateModal({
   );
 });
 
+// ── Calendar tab ──────────────────────────────────────────────────────────────
+type CalendarTabProps = {
+  calState: CalState;
+  calDispatch: React.Dispatch<CalAction>;
+  isLoading: boolean;
+  eventsByDay: Record<string, EventSummary[]>;
+  agendaDays: { upcoming: string[]; past: string[] };
+  unscheduled: EventSummary[];
+  todayKey: string;
+  theme: typeof Colors.light;
+  formatSectionDate: (k: string) => string;
+  t: (key: string) => string;
+  onEventPress: (ev: EventSummary) => void;
+};
+const CalendarTab = React.memo(function CalendarTab({
+  calState, calDispatch, isLoading, eventsByDay, agendaDays, unscheduled,
+  todayKey, theme, formatSectionDate, t, onEventPress,
+}: CalendarTabProps) {
+  const { collapsed } = calState;
+  const setCollapsed = useCallback((value: boolean) => {
+    calDispatch({ type: 'set_collapsed', value });
+  }, [calDispatch]);
+  const panResponder = useMemo(() => PanResponder.create({
+    onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 6 && Math.abs(g.dy) > Math.abs(g.dx),
+    onPanResponderRelease: (_, g) => {
+      if (g.dy < -12) setCollapsed(true);
+      else if (g.dy > 12) setCollapsed(false);
+    },
+  }), [setCollapsed]);
+
+  // Pull past the top of the list while collapsed → expand back to the month view.
+  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (collapsed && e.nativeEvent.contentOffset.y < -40) setCollapsed(false);
+  }, [collapsed, setCollapsed]);
+
+  return (
+    <ScrollView
+      contentContainerStyle={{ paddingBottom: 100 }}
+      onScroll={onScroll}
+      scrollEventThrottle={16}
+      alwaysBounceVertical
+      overScrollMode="always"
+    >
+      <MiniCal
+        year={calState.year}
+        month={calState.month}
+        selectedKey={calState.selectedKey}
+        eventDots={isLoading ? EMPTY_EVENT_DOTS : Object.fromEntries(Object.entries(eventsByDay).map(([k, v]) => [k, v.length]))}
+        tint={theme.tint}
+        todayKey={todayKey}
+        collapsed={collapsed}
+        onPrevMonth={() => calDispatch({ type: collapsed ? 'prev_week' : 'prev_month' })}
+        onNextMonth={() => calDispatch({ type: collapsed ? 'next_week' : 'next_month' })}
+        onDayPress={(key) => calDispatch({ type: 'select_day', key })}
+      />
+
+      {/* Drag handle: swipe up / tap to collapse the calendar to the current week */}
+      <View style={cal.handleWrap} {...panResponder.panHandlers}>
+        <Pressable
+          style={cal.handleHit}
+          hitSlop={10}
+          onPress={() => setCollapsed(!collapsed)}
+        >
+          <View style={[cal.handleBar, { backgroundColor: theme.icon }]} />
+          <Ionicons name={collapsed ? 'chevron-down' : 'chevron-up'} size={16} color={theme.icon} />
+        </Pressable>
+      </View>
+
+      <View style={styles.agenda}>
+        {isLoading ? (
+          <ActivityIndicator size="small" color={theme.tint} style={{ marginTop: 12 }} />
+        ) : agendaDays.upcoming.length === 0 && agendaDays.past.length === 0 && unscheduled.length === 0 ? (
+          <ThemedText style={styles.emptyText}>{t('trip.noEvents')}</ThemedText>
+        ) : (
+          <>
+            {agendaDays.upcoming.map(k => (
+              <View key={k}>
+                <View style={[styles.agendaDayHeader, k === calState.selectedKey && { borderLeftColor: theme.tint, borderLeftWidth: 3 }]}>
+                  <ThemedText style={[styles.agendaDayText, k === calState.selectedKey && { color: theme.tint }]}>
+                    {formatSectionDate(k)}
+                  </ThemedText>
+                </View>
+                <View style={{ gap: 8 }}>
+                  {eventsByDay[k].map(ev => (
+                    <EventCard key={ev.id} ev={ev} theme={theme} formatTime={formatTime} formatDateTime={formatDateTime} formatDuration={formatDuration} onPress={onEventPress} />
+                  ))}
+                </View>
+              </View>
+            ))}
+            {unscheduled.length > 0 && (
+              <View>
+                <View style={styles.agendaDayHeader}>
+                  <ThemedText style={styles.agendaDayText}>{t('trip.unscheduled')}</ThemedText>
+                </View>
+                <View style={{ gap: 8 }}>
+                  {unscheduled.map(ev => (
+                    <EventCard key={ev.id} ev={ev} theme={theme} formatTime={formatTime} formatDateTime={formatDateTime} formatDuration={formatDuration} onPress={onEventPress} />
+                  ))}
+                </View>
+              </View>
+            )}
+            {agendaDays.past.map(k => (
+              <View key={k}>
+                <View style={[styles.agendaDayHeader, k === calState.selectedKey && { borderLeftColor: theme.tint, borderLeftWidth: 3 }]}>
+                  <ThemedText style={[styles.agendaDayText, k === calState.selectedKey && { color: theme.tint }]}>
+                    {formatSectionDate(k)}
+                  </ThemedText>
+                </View>
+                <View style={{ gap: 8 }}>
+                  {eventsByDay[k].map(ev => (
+                    <EventCard key={ev.id} ev={ev} isPast theme={theme} formatTime={formatTime} formatDateTime={formatDateTime} formatDuration={formatDuration} onPress={onEventPress} />
+                  ))}
+                </View>
+              </View>
+            ))}
+          </>
+        )}
+      </View>
+    </ScrollView>
+  );
+});
+
 // ── Main screen ────────────────────────────────────────────────────────────────
 const EventsScreen = () => {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
   const { trip } = useTrip();
-  const { getEvents, addEvent, deleteEvent } = useEvents();
+  const eventsQuery = useEventsQuery(trip?.id ?? '');
+  const addEventMutation = useAddEventMutation(trip?.id ?? '');
+  const deleteEventMutation = useDeleteEventMutation(trip?.id ?? '');
   const navigation = useNavigation();
 
-  const [activeTab, setActiveTab] = useState<Tab>('calendar');
-  const [evList, evListDispatch] = useReducer(evListReducer, { events: null, loading: false, error: null });
   const [calState, calDispatch] = useReducer(calReducer, undefined, () => {
     const now = new Date();
-    return { year: now.getFullYear(), month: now.getMonth(), selectedKey: dateKey(now) };
+    return { year: now.getFullYear(), month: now.getMonth(), selectedKey: dateKey(now), collapsed: false };
   });
-  const [detail, detailDispatch] = useReducer(detailReducer, { visible: false, event: null, deleting: false, error: null });
+  const [detail, detailDispatch] = useReducer(detailReducer, { visible: false, event: null, confirming: false, deleting: false, error: null });
   const [create, createDispatch] = useReducer(createReducer, undefined, () => {
     const now = new Date();
     return {
@@ -876,21 +1040,9 @@ const EventsScreen = () => {
     if (trip?.name) navigation.setOptions({ title: trip.name });
   }, [trip?.name, navigation]);
 
-  useEffect(() => {
-    if (!trip?.id || evList.events !== null) return;
-    (async () => {
-      evListDispatch({ type: 'loading' });
-      try {
-        evListDispatch({ type: 'loaded', events: await getEvents(trip.id!) });
-      } catch {
-        evListDispatch({ type: 'error', error: t('trip.unableLoadEvents') });
-      }
-    })();
-  }, [trip?.id, evList.events, getEvents, t]);
-
   const eventsByDay = useMemo(() => {
     const map: Record<string, EventSummary[]> = {};
-    for (const ev of evList.events ?? []) {
+    for (const ev of eventsQuery.data ?? []) {
       if (!ev.startTime) continue;
       const k = dateKey(new Date(ev.startTime));
       (map[k] ??= []).push(ev);
@@ -899,19 +1051,19 @@ const EventsScreen = () => {
       map[k].sort((a, b) => a.startTime!.localeCompare(b.startTime!));
     }
     return map;
-  }, [evList.events]);
+  }, [eventsQuery.data]);
 
   const agendaDays = useMemo(() => {
     const all = Object.keys(eventsByDay).sort();
-    const after = all.filter(d => d >= calState.selectedKey);
-    const before = all.filter(d => d < calState.selectedKey).reverse();
-    return [...after, ...before];
-  }, [eventsByDay, calState.selectedKey]);
+    const upcoming = all.filter(d => d >= todayKey);
+    const past = all.filter(d => d < todayKey).reverse();
+    return { upcoming, past };
+  }, [eventsByDay, todayKey]);
 
-  const unscheduled = useMemo(() => (evList.events ?? []).filter(e => !e.startTime), [evList.events]);
+  const unscheduled = useMemo(() => (eventsQuery.data ?? []).filter(e => !e.startTime), [eventsQuery.data]);
 
   const hintRegion = useMemo((): Region | null => {
-    const withCoords = (evList.events ?? []).filter(e => e.location?.latitude != null && e.location?.longitude != null);
+    const withCoords = (eventsQuery.data ?? []).filter(e => e.location?.latitude != null && e.location?.longitude != null);
     if (withCoords.length === 0) return null;
     const sorted = [...withCoords].sort((a, b) => {
       if (!a.startTime && !b.startTime) return 0;
@@ -921,7 +1073,7 @@ const EventsScreen = () => {
     });
     const ev = sorted[0];
     return { latitude: ev.location!.latitude!, longitude: ev.location!.longitude!, latitudeDelta: 0.05, longitudeDelta: 0.05 };
-  }, [evList.events]);
+  }, [eventsQuery.data]);
 
   const formatSectionDate = (k: string) => {
     const tomorrow = dateKey(new Date(today.getTime() + 86_400_000));
@@ -936,7 +1088,7 @@ const EventsScreen = () => {
     if (!create.evName.trim()) { createDispatch({ type: 'set_error', error: t('trip.fillAllRequiredFields') }); return; }
     createDispatch({ type: 'start_creating' });
     try {
-      const payload: Parameters<typeof addEvent>[1] = { name: create.evName.trim() };
+      const payload: Parameters<typeof addEventMutation.mutateAsync>[0] = { name: create.evName.trim() };
       if (create.pickedDate) {
         const d = new Date(`${create.pickedDate}T00:00:00`);
         d.setHours(create.pickHour, create.pickMinute, 0, 0);
@@ -953,8 +1105,7 @@ const EventsScreen = () => {
           payload.location.mapURL = `https://maps.google.com/?q=${create.latitude},${create.longitude}`;
         }
       }
-      const newEvent = await addEvent(trip.id, payload);
-      evListDispatch({ type: 'add', event: newEvent });
+      await addEventMutation.mutateAsync(payload);
       createDispatch({ type: 'close' });
     } catch {
       createDispatch({ type: 'set_error', error: t('trip.createEventError') });
@@ -967,24 +1118,11 @@ const EventsScreen = () => {
     detailDispatch({ type: 'open', event: ev });
   }, []);
 
-  const renderEventCard = useCallback(({ item }: { item: EventSummary }) => (
-    <EventCard
-      ev={item}
-      showDate
-      theme={theme}
-      formatTime={formatTime}
-      formatDateTime={formatDateTime}
-      formatDuration={formatDuration}
-      onPress={handleEventPress}
-    />
-  ), [theme, handleEventPress]);
-
   const handleDelete = async () => {
     if (!trip?.id || !detail.event) return;
     detailDispatch({ type: 'start_delete' });
     try {
-      await deleteEvent(trip.id, detail.event.id);
-      evListDispatch({ type: 'remove', id: detail.event.id });
+      await deleteEventMutation.mutateAsync(detail.event.id);
       detailDispatch({ type: 'close' });
     } catch {
       detailDispatch({ type: 'set_error', error: t('trip.deleteEventError') });
@@ -994,122 +1132,35 @@ const EventsScreen = () => {
   };
 
   const handleDetailClose = useCallback(() => detailDispatch({ type: 'close' }), []);
+  const handleStartConfirm = useCallback(() => detailDispatch({ type: 'start_confirm' }), []);
+  const handleCancelConfirm = useCallback(() => detailDispatch({ type: 'cancel_confirm' }), []);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
 
-      {/* Tab bar */}
-      <View style={[styles.tabBar, { backgroundColor: theme.tabBackground }]}>
-        {(['calendar', 'list'] as Tab[]).map(tab => (
-          <Pressable
-            key={tab}
-            style={[styles.tabPill, activeTab === tab && { backgroundColor: theme.tint }]}
-            onPress={() => setActiveTab(tab)}
-          >
-            <ThemedText style={[styles.tabLabel, activeTab === tab && styles.tabLabelActive]}>
-              {t(tab === 'calendar' ? 'trip.events' : 'trip.eventList')}
-            </ThemedText>
-          </Pressable>
-        ))}
-      </View>
-
-      {evList.error ? (
-        <ThemedText style={styles.emptyText}>{evList.error}</ThemedText>
+      {eventsQuery.isError ? (
+        <ThemedText style={styles.emptyText}>{t('trip.unableLoadEvents')}</ThemedText>
       ) : (
-        <>
-          {/* ── Calendar tab ── */}
-          {activeTab === 'calendar' && (
-            <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-              <MiniCal
-                year={calState.year}
-                month={calState.month}
-                selectedKey={calState.selectedKey}
-                eventDots={evList.loading ? EMPTY_EVENT_DOTS : Object.fromEntries(Object.entries(eventsByDay).map(([k, v]) => [k, v.length]))}
-                tint={theme.tint}
-                todayKey={todayKey}
-                onPrevMonth={() => calDispatch({ type: 'prev_month' })}
-                onNextMonth={() => calDispatch({ type: 'next_month' })}
-                onDayPress={(day) => {
-                  const k = `${calState.year}-${String(calState.month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                  calDispatch({ type: 'select_day', key: k });
-                }}
-              />
-
-              {/* Agenda list */}
-              <View style={styles.agenda}>
-                {evList.loading ? (
-                  <ActivityIndicator size="small" color={theme.tint} style={{ marginTop: 12 }} />
-                ) : agendaDays.length === 0 && unscheduled.length === 0 ? (
-                  <ThemedText style={styles.emptyText}>{t('trip.noEvents')}</ThemedText>
-                ) : (
-                  <>
-                    {agendaDays.map(k => (
-                      <View key={k}>
-                        <View style={[styles.agendaDayHeader, k === calState.selectedKey && { borderLeftColor: theme.tint, borderLeftWidth: 3 }]}>
-                          <ThemedText style={[styles.agendaDayText, k === calState.selectedKey && { color: theme.tint }]}>
-                            {formatSectionDate(k)}
-                          </ThemedText>
-                        </View>
-                        <View style={{ gap: 8 }}>
-                          {eventsByDay[k].map(ev => <EventCard
-                            key={ev.id}
-                            ev={ev}
-                            theme={theme}
-                            formatTime={formatTime}
-                            formatDateTime={formatDateTime}
-                            formatDuration={formatDuration}
-                            onPress={(ev) => detailDispatch({ type: 'open', event: ev })}
-                          />)}
-                        </View>
-                      </View>
-                    ))}
-                    {unscheduled.length > 0 && (
-                      <View>
-                        <View style={styles.agendaDayHeader}>
-                          <ThemedText style={styles.agendaDayText}>{t('trip.unscheduled')}</ThemedText>
-                        </View>
-                        <View style={{ gap: 8 }}>
-                          {unscheduled.map(ev => <EventCard
-                            key={ev.id}
-                            ev={ev}
-                            theme={theme}
-                            formatTime={formatTime}
-                            formatDateTime={formatDateTime}
-                            formatDuration={formatDuration}
-                            onPress={(ev) => detailDispatch({ type: 'open', event: ev })}
-                          />
-                          )}
-                        </View>
-                      </View>
-                    )}
-                  </>
-                )}
-              </View>
-            </ScrollView>
-          )}
-
-          {/* ── List tab ── */}
-          {activeTab === 'list' && (
-            evList.loading ? (
-              <ActivityIndicator size="large" color={theme.tint} style={styles.centered} />
-            ) : (
-              <FlatList
-                data={evList.events ?? []}
-                keyExtractor={(item, i) => item.id ?? `${i}`}
-                contentContainerStyle={styles.list}
-                ListEmptyComponent={<ThemedText style={styles.emptyText}>{t('trip.noEvents')}</ThemedText>}
-                renderItem={renderEventCard}
-              />
-            )
-          )}
-        </>
+        <CalendarTab
+          calState={calState}
+          calDispatch={calDispatch}
+          isLoading={eventsQuery.isLoading}
+          eventsByDay={eventsByDay}
+          agendaDays={agendaDays}
+          unscheduled={unscheduled}
+          todayKey={todayKey}
+          theme={theme}
+          formatSectionDate={formatSectionDate}
+          t={t}
+          onEventPress={handleEventPress}
+        />
       )}
 
       {/* FAB */}
-      {!evList.error && (
+      {!eventsQuery.isError && (
         <Pressable
           style={[styles.fab, { backgroundColor: theme.tint }]}
-          onPress={() => createDispatch({ type: 'open', key: activeTab === 'calendar' ? calState.selectedKey : undefined })}
+          onPress={() => createDispatch({ type: 'open', key: calState.selectedKey })}
         >
           <Ionicons name="add" size={28} color="white" />
         </Pressable>
@@ -1118,6 +1169,8 @@ const EventsScreen = () => {
       <EventDetailModal
         detail={detail}
         onClose={handleDetailClose}
+        onStartConfirm={handleStartConfirm}
+        onCancelConfirm={handleCancelConfirm}
         onDelete={handleDelete}
       />
 
@@ -1147,6 +1200,9 @@ const cal = StyleSheet.create({
   dayNum: { fontSize: 14 },
   dotRow: { flexDirection: 'row', gap: 3 },
   dot: { width: 5, height: 5, borderRadius: 3 },
+  handleWrap: { alignItems: 'center', paddingTop: 6, paddingBottom: 2 },
+  handleHit: { alignItems: 'center', gap: 4, paddingHorizontal: 40, paddingVertical: 4 },
+  handleBar: { width: 36, height: 4, borderRadius: 2, opacity: 0.4 },
 });
 
 // ── Time picker sub-styles ─────────────────────────────────────────────────────
@@ -1161,11 +1217,6 @@ const tp = StyleSheet.create({
 // ── Screen styles ──────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  centered: { flex: 1 },
-  tabBar: { flexDirection: 'row', margin: 12, borderRadius: 10, padding: 4 },
-  tabPill: { flex: 1, paddingVertical: 8, borderRadius: 8, alignItems: 'center' },
-  tabLabel: { fontSize: 14, fontWeight: '500', opacity: 0.6 },
-  tabLabelActive: { color: 'white', opacity: 1, fontWeight: '600' },
 
   agenda: { paddingHorizontal: 16, paddingTop: 8, gap: 16 },
   agendaDayHeader: {
@@ -1177,7 +1228,6 @@ const styles = StyleSheet.create({
   },
   agendaDayText: { fontSize: 13, fontWeight: '700', opacity: 0.55, textTransform: 'uppercase', letterSpacing: 0.5 },
 
-  list: { padding: 16, gap: 10, paddingBottom: 100 },
   emptyText: { textAlign: 'center', marginTop: 20, fontSize: 15, opacity: 0.6 },
 
   eventCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderRadius: 12 },
@@ -1219,6 +1269,7 @@ const styles = StyleSheet.create({
   cancelBtn: { borderWidth: 1, borderColor: '#ccc' },
   deleteBtn: { backgroundColor: '#d9534f' },
   errorText: { color: '#d9534f', marginBottom: 8, textAlign: 'center' },
+  confirmText: { textAlign: 'center', fontWeight: '600', marginBottom: 12, marginTop: 4 },
 
   detailName: { fontSize: 18, fontWeight: '700', marginBottom: 16 },
   detailRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },

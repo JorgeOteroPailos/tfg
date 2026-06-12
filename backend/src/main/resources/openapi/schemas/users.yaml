@@ -1,0 +1,80 @@
+schemas:
+  OwnProfile:
+    type: object
+    required:
+      - id
+      - username
+      - email
+      - hasAvatar
+    properties:
+      id:
+        type: string
+        format: uuid
+      username:
+        type: string
+      email:
+        type: string
+        format: email
+      hasAvatar:
+        type: boolean
+        description: Whether the user has a profile picture stored
+
+  UpdateProfileRequest:
+    type: object
+    description: At least one field should be provided; omitted fields are left unchanged.
+    properties:
+      username:
+        type: string
+        minLength: 1
+        example: juanperez
+      email:
+        type: string
+        format: email
+        minLength: 1
+        example: juan@example.com
+
+  ChangePasswordRequest:
+    type: object
+    required:
+      - currentPassword
+      - newPassword
+    properties:
+      currentPassword:
+        type: string
+        format: password
+        minLength: 1
+        example: secreto123
+      newPassword:
+        type: string
+        format: password
+        minLength: 1
+        example: nuevoSecreto456
+
+  AvatarUploadRequest:
+    type: object
+    required:
+      - contentType
+    properties:
+      contentType:
+        type: string
+        example: image/jpeg
+
+  AvatarUploadResponse:
+    type: object
+    required:
+      - uploadUrl
+    properties:
+      uploadUrl:
+        type: string
+        description: Presigned PUT URL to upload the avatar directly to Minio (expires in 15 minutes)
+        example: http://localhost:9000/telaria/avatars/uuid?X-Amz-Signature=...
+
+  AvatarDownloadResponse:
+    type: object
+    required:
+      - downloadUrl
+    properties:
+      downloadUrl:
+        type: string
+        description: Presigned GET URL to download the avatar directly from Minio (expires in 15 minutes)
+        example: http://localhost:9000/telaria/avatars/uuid?X-Amz-Signature=...

@@ -1,26 +1,15 @@
-import { useState } from 'react';
-import { View, Pressable, StyleSheet, Modal, Text } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useState, useEffect, useRef } from 'react';
+import { Animated, Keyboard, View, Pressable, StyleSheet, Modal, Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams, useSegments, Slot } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { TripProvider, useTrip, useTrips } from '../../../src/trips';
+import { GroupChatProvider, useTripChat } from '../../../src/groupChat';
 import { Ionicons } from '@expo/vector-icons';
 import { AiChatButton } from '../../../components/AiChatModal';
 
-function nameToHue(name: string): number {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return Math.abs(hash) % 360;
-}
-
-function tripColor(name: string): string {
-  const hue = 200 + (nameToHue(name) % 110);
-  return `hsl(${hue}, 72%, 55%)`;
-}
 
 const TripContent = () => {
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
@@ -34,7 +23,28 @@ const TripContent = () => {
   const segments = useSegments();
   const activeTab = segments[segments.length - 1];
   const { trip } = useTrip();
+  const { unreadCount } = useTripChat();
   const { leaveTrip } = useTrips();
+  const { bottom: safeBottom } = useSafeAreaInsets();
+
+  const keyboardHeightRef = useRef<Animated.Value | null>(null);
+  if (keyboardHeightRef.current === null) keyboardHeightRef.current = new Animated.Value(0);
+  const keyboardHeight = keyboardHeightRef.current;
+  const tabBarHeightRef = useRef(0);
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', e => {
+      // endCoordinates.height = keyboard only (no gesture bar).
+      // Keyboard visual top = endCoordinates.height + safeBottom from screen bottom.
+      // Content area ends tabBarHeight above screen bottom (tabBarHeight includes safeBottom padding).
+      // Net overlap = endCoordinates.height + safeBottom - tabBarHeight.
+      const target = Math.max(0, e.endCoordinates.height + safeBottom - tabBarHeightRef.current);
+      Animated.timing(keyboardHeight, { toValue: target, duration: 200, useNativeDriver: false }).start();
+    });
+    const hide = Keyboard.addListener('keyboardDidHide', () => {
+      Animated.timing(keyboardHeight, { toValue: 0, duration: 150, useNativeDriver: false }).start();
+    });
+    return () => { show.remove(); hide.remove(); };
+  }, [keyboardHeight, safeBottom]);
 
   const tabs = [
     { name: 'expenses', icon: 'receipt-outline', label: t('trip.expenses') },
@@ -70,27 +80,18 @@ const TripContent = () => {
         </Pressable>
       </View>
 
-      {/* ── Screen content ────────────────────────────────── */}
-      <View style={styles.content}>
+      {/* ── Screen content ──────────────────────────────── */}
+      <Animated.View style={[styles.content, { paddingBottom: keyboardHeight }]}>
         <Slot />
-      </View>
+      </Animated.View>
 
       <AiChatButton tripId={tripId} isChatTab={activeTab === 'chat'} />
 
-      {/* ── Trip color strip ──────────────────────────────── */}
-      {trip?.name && (
-        <LinearGradient
-          colors={[tripColor(trip.name), theme.navBackground]}
-          style={styles.tripStrip}
-        >
-          <Text style={styles.tripStripText} numberOfLines={1}>{trip.name}</Text>
-        </LinearGradient>
-      )}
-
-      {/* ── Tab bar ───────────────────────────────────────── */}
-      <View style={[styles.tabBar, { backgroundColor: theme.navBackground }]}>
+      {/* ── Tab bar ─────────────────────────────────────── */}
+      <View onLayout={e => { tabBarHeightRef.current = e.nativeEvent.layout.height; }} style={[styles.tabBar, { backgroundColor: theme.navBackground }]}>
         {tabs.map(tab => {
           const isActive = tab.name === activeTab;
+          const showBadge = tab.name === 'chat' && !isActive && unreadCount > 0;
           return (
             <Pressable
               key={tab.name}
@@ -103,11 +104,20 @@ const TripContent = () => {
                   { backgroundColor: `${theme.tint}18`, boxShadow: `0 0 12px ${theme.tint}50` },
                 ]} />
               )}
-              <Ionicons
-                name={tab.icon}
-                size={isActive ? 26 : 22}
-                color={isActive ? theme.tint : theme.icon}
-              />
+              <View>
+                <Ionicons
+                  name={tab.icon}
+                  size={isActive ? 26 : 22}
+                  color={isActive ? theme.tint : theme.icon}
+                />
+                {showBadge && (
+                  <View style={[styles.badge, { backgroundColor: Colors.primary, borderColor: theme.navBackground }]}>
+                    <Text style={styles.badgeText} numberOfLines={1}>
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </Text>
+                  </View>
+                )}
+              </View>
               <Text style={[
                 styles.tabLabel,
                 { color: isActive ? theme.tint : theme.icon },
@@ -272,7 +282,9 @@ const TripLayout = () => {
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   return (
     <TripProvider tripId={tripId}>
-      <TripContent />
+      <GroupChatProvider tripId={tripId}>
+        <TripContent />
+      </GroupChatProvider>
     </TripProvider>
   );
 };
@@ -309,23 +321,6 @@ const styles = StyleSheet.create({
 
   content: { flex: 1 },
 
-  tripStrip: {
-    height: 16,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 1,
-  },
-  tripStripText: {
-    fontSize: 8,
-    fontWeight: '900',
-    color: '#fff',
-    letterSpacing: 5,
-    textShadowColor: 'rgba(0,0,0,0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-
   tabBar: {
     flexDirection: 'row',
     paddingBottom: 50,
@@ -344,6 +339,23 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
+  },
+  badge: {
+    position: 'absolute',
+    top: -5,
+    right: -8,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    paddingHorizontal: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: '800',
   },
   tabLabel: {
     fontSize: 9,

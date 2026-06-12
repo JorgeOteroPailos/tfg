@@ -9,10 +9,13 @@ import { useNavigation } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
-import { useDocuments, type DocumentResponse } from '../../../src/documents';
+import { useDocuments, useDocumentsQuery, useDocumentDownloadQuery, useUploadDocumentMutation, useDeleteDocumentMutation, type DocumentResponse } from '../../../src/documents';
 import { useTrip } from '../../../src/trips';
+import { uploadToUrl } from '../../../src/upload';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '../../../components/ThemedText';
+
+const EMPTY_DOCS: DocumentResponse[] = [];
 
 function formatDate(iso: string): string {
   try {
@@ -32,23 +35,6 @@ function fileIcon(name: string): React.ComponentProps<typeof Ionicons>['name'] {
   return 'document-outline';
 }
 
-function uploadToUrl(uploadUrl: string, fileUri: string, contentType: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('PUT', uploadUrl, true);
-    xhr.setRequestHeader('Content-Type', contentType);
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) resolve();
-      else reject(new Error(`XHR status ${xhr.status}: ${xhr.responseText}`));
-    };
-    xhr.onerror = () => {
-      console.error('[upload] XHR network error');
-      reject(new Error('Network error'));
-    };
-    xhr.send({ uri: fileUri, type: contentType, name: 'file' } as any);
-  });
-}
-
 interface DocCardProps {
   item: DocumentResponse;
   background: string;
@@ -58,24 +44,17 @@ interface DocCardProps {
   onPress: (item: DocumentResponse) => void;
 }
 const IMAGE_EXTS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic']);
-const imageUrlCache = new Map<string, string>();
 
 function isImageFile(name: string) {
   return IMAGE_EXTS.has(name.split('.').pop()?.toLowerCase() ?? '');
 }
 
 const DocGridCard = React.memo(function DocGridCard({ item, background, tint, onPress }: Pick<DocCardProps, 'item' | 'background' | 'tint' | 'onPress'>) {
-  const { getDocumentDownloadUrl } = useDocuments();
   const { trip } = useTrip();
   const isImage = isImageFile(item.name);
-  const [imageUri, setImageUri] = useState<string | null>(() => imageUrlCache.get(item.id) ?? null);
-
-  useEffect(() => {
-    if (!isImage || !trip?.id || imageUri) return;
-    getDocumentDownloadUrl(trip.id, item.id)
-      .then(url => { imageUrlCache.set(item.id, url); setImageUri(url); })
-      .catch(() => {});
-  }, [isImage, trip?.id, item.id, getDocumentDownloadUrl, imageUri]);
+  // Full image only as fallback when there is no server-generated thumbnail (old docs, heic, failed generation)
+  const { data: fallbackUri } = useDocumentDownloadQuery(trip?.id ?? '', item.id, { enabled: isImage && !item.previewUrl && !!trip?.id });
+  const imageUri = item.previewUrl ?? fallbackUri;
 
   return (
     <Pressable
@@ -120,24 +99,6 @@ const DocCard = React.memo(function DocCard({ item, background, tint, icon, memb
     </Pressable>
   );
 });
-
-// --- Document list state ---
-type ListState = { documents: DocumentResponse[] | null; loading: boolean; error: string | null };
-type ListAction =
-  | { type: 'loading' }
-  | { type: 'loaded'; documents: DocumentResponse[] }
-  | { type: 'error'; error: string }
-  | { type: 'remove'; id: string };
-
-function listReducer(state: ListState, action: ListAction): ListState {
-  switch (action.type) {
-    case 'loading': return { ...state, loading: true, error: null };
-    case 'loaded': return { documents: action.documents, loading: false, error: null };
-    case 'error': return { ...state, loading: false, error: action.error };
-    case 'remove': return { ...state, documents: state.documents ? state.documents.filter(d => d.id !== action.id) : state.documents };
-    default: return state;
-  }
-}
 
 // --- Detail modal state ---
 type DetailState = { visible: boolean; doc: DocumentResponse | null; downloading: boolean; deleting: boolean; error: string | null };
@@ -188,7 +149,6 @@ type UIState = {
   sortOrder: 'desc' | 'asc';
   showFilters: boolean;
   viewMode: 'list' | 'grid';
-  detailImageUrl: string | null;
 };
 type UIAction =
   | { type: 'upload_start' }
@@ -198,10 +158,9 @@ type UIAction =
   | { type: 'set_filter_ext'; ext: string | null }
   | { type: 'toggle_sort' }
   | { type: 'toggle_filters' }
-  | { type: 'set_view_mode'; mode: 'list' | 'grid' }
-  | { type: 'set_detail_image'; url: string | null };
+  | { type: 'set_view_mode'; mode: 'list' | 'grid' };
 
-const UI_INITIAL: UIState = { upload: { uploading: false, error: null }, filterExt: null, sortOrder: 'desc', showFilters: false, viewMode: 'grid', detailImageUrl: null };
+const UI_INITIAL: UIState = { upload: { uploading: false, error: null }, filterExt: null, sortOrder: 'desc', showFilters: false, viewMode: 'grid' };
 
 function uiReducer(s: UIState, a: UIAction): UIState {
   switch (a.type) {
@@ -213,7 +172,6 @@ function uiReducer(s: UIState, a: UIAction): UIState {
     case 'toggle_sort': return { ...s, sortOrder: s.sortOrder === 'desc' ? 'asc' : 'desc' };
     case 'toggle_filters': return { ...s, showFilters: !s.showFilters };
     case 'set_view_mode': return { ...s, viewMode: a.mode };
-    case 'set_detail_image': return { ...s, detailImageUrl: a.url };
     default: return s;
   }
 }
@@ -339,13 +297,12 @@ const DocumentsScreen = () => {
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
   const { trip } = useTrip();
-  const {
-    listDocuments, initDocumentUpload, confirmDocumentUpload,
-    getDocumentDownloadUrl, deleteDocument,
-  } = useDocuments();
+  const { getDocumentDownloadUrl } = useDocuments();
+  const documentsQuery = useDocumentsQuery(trip?.id ?? '');
+  const uploadMutation = useUploadDocumentMutation(trip?.id ?? '');
+  const deleteMutation = useDeleteDocumentMutation(trip?.id ?? '');
   const navigation = useNavigation();
 
-  const [list, listDispatch] = useReducer(listReducer, { documents: null, loading: false, error: null });
   const [ui, uiDispatch] = useReducer(uiReducer, UI_INITIAL);
   const [detail, detailDispatch] = useReducer(detailReducer, DETAIL_INITIAL);
 
@@ -355,41 +312,37 @@ const DocumentsScreen = () => {
     return map;
   }, [trip?.members]);
 
+  const { data: detailImageUrl } = useDocumentDownloadQuery(
+    trip?.id ?? '',
+    detail.doc?.id ?? '',
+    { enabled: !!detail.doc && isImageFile(detail.doc.name) },
+  );
+
+  const docs = documentsQuery.data ?? EMPTY_DOCS;
+
   const availableExtensions = useMemo(() => {
     const exts = new Set<string>();
-    for (const doc of list.documents ?? []) {
+    for (const doc of docs) {
       const ext = doc.name.split('.').pop()?.toLowerCase();
       if (ext) exts.add(ext);
     }
     return Array.from(exts).sort();
-  }, [list.documents]);
+  }, [docs]);
 
   const filteredDocuments = useMemo(() => {
-    let docs = list.documents ?? [];
-    if (ui.filterExt !== null) docs = docs.filter(d => d.name.split('.').pop()?.toLowerCase() === ui.filterExt);
-    return [...docs].sort((a, b) => {
+    let filtered = docs;
+    if (ui.filterExt !== null) filtered = filtered.filter(d => d.name.split('.').pop()?.toLowerCase() === ui.filterExt);
+    return [...filtered].sort((a, b) => {
       const diff = new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime();
       return ui.sortOrder === 'asc' ? diff : -diff;
     });
-  }, [list.documents, ui.filterExt, ui.sortOrder]);
+  }, [docs, ui.filterExt, ui.sortOrder]);
 
   const isFiltered = ui.filterExt !== null || ui.sortOrder !== 'desc';
 
   useEffect(() => {
     if (trip?.name) navigation.setOptions({ title: trip.name });
   }, [trip?.name, navigation]);
-
-  useEffect(() => {
-    if (!trip?.id || list.documents !== null) return;
-    (async () => {
-      listDispatch({ type: 'loading' });
-      try {
-        listDispatch({ type: 'loaded', documents: await listDocuments(trip.id!) });
-      } catch {
-        listDispatch({ type: 'error', error: t('trip.unableLoadDocuments') });
-      }
-    })();
-  }, [trip?.id, list.documents, listDocuments, t]);
 
   useEffect(() => {
     if (!ui.upload.error) return;
@@ -408,14 +361,12 @@ const DocumentsScreen = () => {
 
     uiDispatch({ type: 'upload_start' });
     try {
-      const { documentId, uploadUrl } = await initDocumentUpload(trip.id, {
-        name: file.name,
+      await uploadMutation.mutateAsync({
+        request: { name: file.name, contentType },
+        fileUri: file.uri,
         contentType,
+        uploadToUrl,
       });
-      // Sequential by necessity: upload must complete before confirm, confirm before list refresh
-      await uploadToUrl(uploadUrl, file.uri, contentType);
-      await confirmDocumentUpload(trip.id, documentId);
-      listDispatch({ type: 'loaded', documents: await listDocuments(trip.id) });
     } catch {
       uiDispatch({ type: 'upload_error', error: t('trip.uploadError') });
     } finally {
@@ -437,11 +388,10 @@ const DocumentsScreen = () => {
   };
 
   const handleDelete = async () => {
-    if (!trip?.id || !detail.doc) return;
+    if (!detail.doc) return;
     detailDispatch({ type: 'start_delete' });
     try {
-      await deleteDocument(trip.id, detail.doc.id);
-      listDispatch({ type: 'remove', id: detail.doc.id });
+      await deleteMutation.mutateAsync(detail.doc.id);
       detailDispatch({ type: 'close' });
     } catch {
       detailDispatch({ type: 'set_error', error: t('trip.deleteDocumentError') });
@@ -452,13 +402,7 @@ const DocumentsScreen = () => {
 
   const openDetail = useCallback((doc: DocumentResponse) => {
     detailDispatch({ type: 'open', doc });
-    uiDispatch({ type: 'set_detail_image', url: imageUrlCache.get(doc.id) ?? null });
-    if (isImageFile(doc.name) && !imageUrlCache.has(doc.id) && trip?.id) {
-      getDocumentDownloadUrl(trip.id, doc.id)
-        .then(url => { imageUrlCache.set(doc.id, url); uiDispatch({ type: 'set_detail_image', url }); })
-        .catch(() => {});
-    }
-  }, [trip?.id, getDocumentDownloadUrl]);
+  }, []);
 
   const handleFilterChipPress = useCallback((ext: string) => {
     uiDispatch({ type: 'set_filter_ext', ext: ui.filterExt === ext ? null : ext });
@@ -476,13 +420,13 @@ const DocumentsScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {list.loading ? (
+      {documentsQuery.isLoading ? (
         <ActivityIndicator size="large" color={theme.tint} style={styles.centered} />
-      ) : list.error ? (
-        <ThemedText style={styles.emptyText}>{list.error}</ThemedText>
+      ) : documentsQuery.isError ? (
+        <ThemedText style={styles.emptyText}>{t('trip.unableLoadDocuments')}</ThemedText>
       ) : (
         <>
-          {list.documents && list.documents.length > 0 && (
+          {docs.length > 0 && (
             <View style={[styles.filterBar, { backgroundColor: theme.background, zIndex: 10 }]}>
               <View style={styles.filterLeft}>
                 <Pressable style={styles.toolbarBtn} onPress={() => uiDispatch({ type: 'toggle_filters' })}>
@@ -549,7 +493,7 @@ const DocumentsScreen = () => {
         </>
       )}
 
-      {!list.loading && !list.error && (
+      {!documentsQuery.isLoading && !documentsQuery.isError && (
         <Pressable
           style={[styles.fab, { backgroundColor: ui.upload.uploading ? theme.icon : theme.tint }]}
           onPress={handleUpload}
@@ -570,7 +514,7 @@ const DocumentsScreen = () => {
       <DocumentDetailModal
         detail={detail}
         detailDispatch={detailDispatch}
-        detailImageUrl={ui.detailImageUrl}
+        detailImageUrl={detailImageUrl ?? null}
         memberMap={memberMap}
         onDownload={handleDownload}
         onDelete={handleDelete}

@@ -1,14 +1,11 @@
-import { View, Pressable, StyleSheet, Text, Platform } from 'react-native';
+import { View, Pressable, StyleSheet, Text, Modal } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSidebar } from '../src/sidebar';
 import { useAuth } from '../src/auth';
 import { useAppTheme } from '../src/theme';
 import { Colors } from '../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-
-const TOOLBAR_HEIGHT = Platform.OS === 'ios' ? 44 : 56;
 
 const Sidebar = () => {
   const { open, setOpen } = useSidebar();
@@ -16,9 +13,6 @@ const Sidebar = () => {
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
   const { t } = useTranslation();
-  const { top: safeTop } = useSafeAreaInsets();
-
-  if (!open) return null;
 
   const handleLogout = async () => {
     setOpen(false);
@@ -32,91 +26,81 @@ const Sidebar = () => {
     { icon: 'mail-outline' as const, label: t('nav.invitations'), href: '/invitations' as const },
   ] as const;
 
-  const panelTop = safeTop + TOOLBAR_HEIGHT;
-
   return (
-    <>
-      <Pressable style={styles.overlay} onPress={() => setOpen(false)} />
+    <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
+      <Pressable style={styles.overlay} onPress={() => setOpen(false)}>
+        <Pressable onPress={() => {}} style={[styles.sheet, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
+          <View style={[styles.sheetHandle, { backgroundColor: theme.tint, boxShadow: `0 0 8px ${theme.tint}` }]} />
 
-      <View style={[styles.panel, { top: panelTop, backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
-        <View style={[styles.handle, { backgroundColor: theme.tint, boxShadow: `0 0 6px ${theme.tint}` }]} />
+          {items.map(item => (
+            <Pressable
+              key={item.label}
+              style={({ pressed }) => [styles.sheetRow, { borderBottomColor: theme.border }, pressed && styles.pressed]}
+              onPress={() => { setOpen(false); router.push(item.href); }}
+            >
+              <View style={[styles.sheetIcon, { backgroundColor: `${theme.tint}18` }]}>
+                <Ionicons name={item.icon} size={20} color={theme.tint} />
+              </View>
+              <Text style={[styles.sheetLabel, { color: theme.title }]}>{item.label}</Text>
+              <Ionicons name="chevron-forward" size={15} color={theme.icon} style={{ opacity: 0.4 }} />
+            </Pressable>
+          ))}
 
-        {items.map(item => (
           <Pressable
-            key={item.label}
-            style={({ pressed }) => [styles.row, { borderBottomColor: theme.border }, pressed && styles.pressed]}
-            onPress={() => { setOpen(false); router.push(item.href); }}
+            style={({ pressed }) => [styles.sheetRow, { borderBottomWidth: 0 }, pressed && styles.pressed]}
+            onPress={handleLogout}
           >
-            <View style={[styles.iconBox, { backgroundColor: `${theme.tint}18` }]}>
-              <Ionicons name={item.icon} size={19} color={theme.tint} />
+            <View style={[styles.sheetIcon, { backgroundColor: 'rgba(239,68,68,0.14)' }]}>
+              <Ionicons name="log-out-outline" size={20} color={Colors.warning} />
             </View>
-            <Text style={[styles.label, { color: theme.title }]}>{item.label}</Text>
-            <Ionicons name="chevron-forward" size={14} color={theme.icon} style={{ opacity: 0.35 }} />
+            <Text style={[styles.sheetLabel, { color: Colors.warning }]}>{t('profile.logout')}</Text>
           </Pressable>
-        ))}
-
-        <Pressable
-          style={({ pressed }) => [styles.row, { borderBottomWidth: 0 }, pressed && styles.pressed]}
-          onPress={handleLogout}
-        >
-          <View style={[styles.iconBox, { backgroundColor: 'rgba(239,68,68,0.14)' }]}>
-            <Ionicons name="log-out-outline" size={19} color={Colors.warning} />
-          </View>
-          <Text style={[styles.label, { color: Colors.warning }]}>{t('profile.logout')}</Text>
         </Pressable>
-      </View>
-    </>
+      </Pressable>
+    </Modal>
   );
 };
 
 export default Sidebar;
 
 const styles = StyleSheet.create({
+  pressed: { opacity: 0.7, transform: [{ scale: 0.97 }] },
+
   overlay: {
-    position: 'absolute',
-    top: 0, left: 0, right: 0, bottom: 0,
-    zIndex: 99,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'flex-end',
   },
-  panel: {
-    position: 'absolute',
-    right: 0,
-    width: 235,
-    zIndex: 100,
-    borderRadius: 20,
-    margin: 10,
-    overflow: 'hidden',
+  sheet: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingTop: 10,
+    paddingBottom: 40,
     borderWidth: 1,
-    boxShadow: '0 0 40px rgba(0,0,0,0.4), 0 0 20px rgba(168,85,247,0.1)',
+    borderBottomWidth: 0,
+    boxShadow: '0 -8px 40px rgba(0,0,0,0.4)',
   },
-  handle: {
-    width: 36,
+  sheetHandle: {
+    width: 40,
     height: 3,
     borderRadius: 2,
     alignSelf: 'center',
-    marginTop: 10,
-    marginBottom: 8,
-    opacity: 0.7,
+    marginBottom: 14,
   },
-  pressed: { opacity: 0.65 },
-  row: {
+  sheetRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 13,
-    paddingHorizontal: 16,
+    gap: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
     borderBottomWidth: 0.5,
   },
-  iconBox: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
+  sheetIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 11,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  label: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '700',
-  },
+  sheetLabel: { flex: 1, fontSize: 15, fontWeight: '700' },
 });

@@ -81,8 +81,13 @@ const ScanQrScreen = () => {
     ? 'person-add-outline'
     : 'airplane-outline';
 
-  const scanAnim = useRef(new Animated.Value(0)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const scanAnimRef = useRef<Animated.Value | null>(null);
+  if (scanAnimRef.current === null) scanAnimRef.current = new Animated.Value(0);
+  const scanAnim = scanAnimRef.current;
+
+  const pulseAnimRef = useRef<Animated.Value | null>(null);
+  if (pulseAnimRef.current === null) pulseAnimRef.current = new Animated.Value(1);
+  const pulseAnim = pulseAnimRef.current;
 
   useEffect(() => {
     navigation.setOptions({ title: screenTitle });

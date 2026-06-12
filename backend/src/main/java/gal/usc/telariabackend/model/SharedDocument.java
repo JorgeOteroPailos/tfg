@@ -3,6 +3,7 @@ package gal.usc.telariabackend.model;
 import gal.usc.telariabackend.model.dto.DocumentResponse;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -33,6 +34,13 @@ public class SharedDocument {
     private String objectKey;
 
     @Getter
+    private String contentType;
+
+    @Getter
+    @Setter
+    private String thumbnailObjectKey;
+
+    @Getter
     private OffsetDateTime createdAt;
 
     @Getter
@@ -40,11 +48,12 @@ public class SharedDocument {
 
     public SharedDocument() {}
 
-    public SharedDocument(Trip trip, User creator, String fileName, String objectKey, boolean uploaded) {
+    public SharedDocument(Trip trip, User creator, String fileName, String objectKey, String contentType, boolean uploaded) {
         this.trip = trip;
         this.creator = creator;
         this.fileName = fileName;
         this.objectKey = objectKey;
+        this.contentType = contentType;
         this.createdAt = OffsetDateTime.now();
         this.uploaded = uploaded;
     }

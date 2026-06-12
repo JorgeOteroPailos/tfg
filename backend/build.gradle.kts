@@ -4,6 +4,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     jacoco
     id("org.openapi.generator") version "7.16.0"
+    id("com.github.spotbugs") version "6.1.11"
 }
 
 group = "gal.usc"
@@ -76,6 +77,10 @@ dependencies {
     // MinIO / AWS S3
     implementation("software.amazon.awssdk:s3:2.31.43")
 
+    // Image downscaling (thumbnails / avatars)
+    implementation("net.coobird:thumbnailator:0.4.20")
+    runtimeOnly("com.twelvemonkeys.imageio:imageio-webp:3.12.0")
+
     //TestContainers
     testImplementation("org.testcontainers:testcontainers:1.20.4")
     testImplementation("org.testcontainers:junit-jupiter:1.20.4")
@@ -102,6 +107,9 @@ openApiGenerate {
 
 tasks.withType<JavaCompile> {
     dependsOn(tasks.openApiGenerate)
+    // Target Java 21 bytecode so SpotBugs (ASM 9.7) can read the class files.
+    // Remove if you start using Java 22+ language features.
+    options.release.set(22)
 }
 
 tasks.named("openApiGenerate") {
@@ -115,6 +123,19 @@ sourceSets {
         java {
             srcDir(layout.buildDirectory.dir("generated/src/main/java"))
         }
+    }
+}
+
+spotbugs {
+    toolVersion = "4.9.3"
+    ignoreFailures = true
+    excludeFilter = file("config/spotbugs/exclude.xml")
+}
+
+tasks.withType<com.github.spotbugs.snom.SpotBugsTask> {
+    reports.create("html") {
+        required = true
+        outputLocation = layout.buildDirectory.file("reports/spotbugs/${name}.html")
     }
 }
 

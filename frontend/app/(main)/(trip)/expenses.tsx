@@ -1,14 +1,26 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { StyleSheet, View, FlatList, ActivityIndicator, Pressable, Modal, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, router, useLocalSearchParams } from 'expo-router';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
-import { useExpenses, type ExpenseSummary, type ExpenseDetail, type BalancesInfo } from '../../../src/expenses';
+import {
+  useExpensesQuery,
+  useBalancesQuery,
+  useExpenseDetailQuery,
+  useAddExpenseMutation,
+  useDeleteExpenseMutation,
+  usePaySettlementMutation,
+  type ExpenseSummary,
+  type ExpenseDetail,
+  type BalancesInfo,
+} from '../../../src/expenses';
 import { useTrip } from '../../../src/trips';
 import { useAuth } from '../../../src/auth';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedInput from '../../../components/ThemedInput';
+import SegmentedControl from '../../../components/SegmentedControl';
+import UserAvatar from '../../../components/UserAvatar';
 import type { components } from '../../../src/generated/types';
 
 type ExpenseCategory = components['schemas']['ExpenseCategory'];
@@ -59,46 +71,10 @@ const ExpenseRow = React.memo(function ExpenseRow({ item, payerName, theme, onPr
   );
 });
 
-// ── Reducers (logic unchanged) ─────────────────────────────────────────────
-type ListState = { expenses: ExpenseSummary[] | null; loading: boolean; error: string | null };
-type ListAction = { type: 'loading' } | { type: 'loaded'; expenses: ExpenseSummary[] } | { type: 'error'; error: string } | { type: 'add'; expense: ExpenseSummary };
-function listReducer(state: ListState, action: ListAction): ListState {
-  switch (action.type) {
-    case 'loading': return { ...state, loading: true, error: null };
-    case 'loaded': return { expenses: action.expenses, loading: false, error: null };
-    case 'error': return { ...state, loading: false, error: action.error };
-    case 'add': return { ...state, expenses: state.expenses ? [action.expense, ...state.expenses] : [action.expense] };
-    default: return state;
-  }
-}
-
-type BalsState = { info: BalancesInfo | null; loading: boolean; error: string | null };
-type BalsAction = { type: 'loading' } | { type: 'loaded'; info: BalancesInfo } | { type: 'error'; error: string } | { type: 'invalidate' };
-function balsReducer(state: BalsState, action: BalsAction): BalsState {
-  switch (action.type) {
-    case 'loading': return { ...state, loading: true, error: null };
-    case 'loaded': return { info: action.info, loading: false, error: null };
-    case 'error': return { ...state, loading: false, error: action.error };
-    case 'invalidate': return { ...state, info: null };
-    default: return state;
-  }
-}
-
-type DetailState = { visible: boolean; expense: ExpenseDetail | null; loading: boolean; error: string | null };
-type DetailAction = { type: 'open' } | { type: 'close' } | { type: 'loaded'; expense: ExpenseDetail } | { type: 'error'; error: string };
-function detailReducer(state: DetailState, action: DetailAction): DetailState {
-  switch (action.type) {
-    case 'open': return { visible: true, expense: null, loading: true, error: null };
-    case 'close': return { visible: false, expense: null, loading: false, error: null };
-    case 'loaded': return { ...state, expense: action.expense, loading: false };
-    case 'error': return { ...state, loading: false, error: action.error };
-    default: return state;
-  }
-}
-
-type CreateState = { visible: boolean; creating: boolean; error: string | null; name: string; amount: string; payerId: string; beneficiaryIds: string[]; payerDropdownOpen: boolean; category: NonNullable<ExpenseCategory>; categoryOpen: boolean };
-type CreateAction = { type: 'open' } | { type: 'close' } | { type: 'set_name'; value: string } | { type: 'set_amount'; value: string } | { type: 'set_payer'; id: string } | { type: 'toggle_beneficiary'; id: string } | { type: 'toggle_dropdown' } | { type: 'toggle_category' } | { type: 'start_creating' } | { type: 'done_creating' } | { type: 'set_error'; error: string | null } | { type: 'set_category'; category: NonNullable<ExpenseCategory> };
-const CREATE_INITIAL: CreateState = { visible: false, creating: false, error: null, name: '', amount: '', payerId: '', beneficiaryIds: [], payerDropdownOpen: false, category: 'GENERAL', categoryOpen: false };
+// ── Create modal state ─────────────────────────────────────────────────────
+type CreateState = { visible: boolean; error: string | null; name: string; amount: string; payerId: string; beneficiaryIds: string[]; payerDropdownOpen: boolean; category: NonNullable<ExpenseCategory> };
+type CreateAction = { type: 'open' } | { type: 'close' } | { type: 'set_name'; value: string } | { type: 'set_amount'; value: string } | { type: 'set_payer'; id: string } | { type: 'toggle_beneficiary'; id: string } | { type: 'toggle_dropdown' } | { type: 'set_error'; error: string | null } | { type: 'set_category'; category: NonNullable<ExpenseCategory> };
+const CREATE_INITIAL: CreateState = { visible: false, error: null, name: '', amount: '', payerId: '', beneficiaryIds: [], payerDropdownOpen: false, category: 'GENERAL' };
 function createReducer(state: CreateState, action: CreateAction): CreateState {
   switch (action.type) {
     case 'open': return { ...CREATE_INITIAL, visible: true };
@@ -108,10 +84,7 @@ function createReducer(state: CreateState, action: CreateAction): CreateState {
     case 'set_payer': return { ...state, payerId: action.id, payerDropdownOpen: false };
     case 'toggle_beneficiary': return { ...state, beneficiaryIds: state.beneficiaryIds.includes(action.id) ? state.beneficiaryIds.filter(id => id !== action.id) : [...state.beneficiaryIds, action.id] };
     case 'toggle_dropdown': return { ...state, payerDropdownOpen: !state.payerDropdownOpen };
-    case 'toggle_category': return { ...state, categoryOpen: !state.categoryOpen };
-    case 'set_category': return { ...state, category: action.category, categoryOpen: false };
-    case 'start_creating': return { ...state, creating: true, error: null };
-    case 'done_creating': return { ...state, creating: false };
+    case 'set_category': return { ...state, category: action.category };
     case 'set_error': return { ...state, error: action.error };
     default: return state;
   }
@@ -123,7 +96,10 @@ type BalanceFlatRow = { _kind: 'header'; title: string; mt?: number } | { _kind:
 // ── Modals ─────────────────────────────────────────────────────────────────
 
 type ExpenseDetailModalProps = {
-  detail: DetailState;
+  visible: boolean;
+  expense: ExpenseDetail | null | undefined;
+  isLoading: boolean;
+  error: string | null;
   confirmingDelete: boolean;
   deleting: boolean;
   usernameFor: (id: string) => string;
@@ -133,34 +109,34 @@ type ExpenseDetailModalProps = {
 };
 
 const ExpenseDetailModal = React.memo(function ExpenseDetailModal({
-  detail, confirmingDelete, deleting, usernameFor, onClose, onDelete, setConfirmingDelete,
+  visible, expense, isLoading, error, confirmingDelete, deleting, usernameFor, onClose, onDelete, setConfirmingDelete,
 }: ExpenseDetailModalProps) {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
 
   return (
-    <Modal visible={detail.visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
         <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
           <Text style={[styles.modalTitle, { color: theme.title }]}>{t('trip.expenseDetail')}</Text>
 
-          {detail.loading && <ActivityIndicator color={theme.tint} style={{ marginVertical: 20 }} />}
-          {detail.error && <Text style={styles.errText}>{detail.error}</Text>}
+          {isLoading && <ActivityIndicator color={theme.tint} style={{ marginVertical: 20 }} />}
+          {error && <Text style={styles.errText}>{error}</Text>}
 
-          {detail.expense && !detail.loading && (
+          {expense && !isLoading && (
             <>
-              <Text style={[styles.detailName, { color: theme.title }]}>{detail.expense.name}</Text>
+              <Text style={[styles.detailName, { color: theme.title }]}>{expense.name}</Text>
               <View style={[styles.amountHero, { backgroundColor: `${theme.tint}12`, borderColor: `${theme.tint}28` }]}>
                 <Text style={[styles.amountHeroText, { color: theme.tint, textShadowColor: `${theme.tint}70`, textShadowRadius: 16 }]}>
-                  {detail.expense.amount?.toFixed(2)}€
+                  {expense.amount?.toFixed(2)}€
                 </Text>
               </View>
               <View style={styles.detailPairRow}>
                 {[
-                  { label: t('trip.date'), val: new Date(detail.expense.datetime).toLocaleDateString() },
-                  { label: t('trip.createdBy'), val: usernameFor(detail.expense.creatorId) },
-                  { label: t('trip.category'), val: t(CATEGORIES[detail.expense.category ?? 'GENERAL'].labelKey) },
+                  { label: t('trip.date'), val: new Date(expense.datetime).toLocaleDateString() },
+                  { label: t('trip.createdBy'), val: usernameFor(expense.creatorId) },
+                  { label: t('trip.category'), val: t(CATEGORIES[expense.category ?? 'GENERAL'].labelKey) },
                 ].map(cell => (
                   <View key={cell.label} style={[styles.detailCell, { backgroundColor: theme.uiBackground, borderColor: theme.border }]}>
                     <Text style={[styles.detailLabel, { color: theme.icon }]}>{cell.label.toUpperCase()}</Text>
@@ -171,12 +147,12 @@ const ExpenseDetailModal = React.memo(function ExpenseDetailModal({
               <View style={[styles.detailGroup, { borderColor: theme.border }]}>
                 <View style={[styles.detailGroupSection, { borderBottomColor: theme.border }]}>
                   <Text style={[styles.detailLabel, { color: theme.icon }]}>{t('trip.payer').toUpperCase()}</Text>
-                  <Text style={[styles.detailVal, { color: theme.title }]}>{usernameFor(detail.expense.payerId)}</Text>
+                  <Text style={[styles.detailVal, { color: theme.title }]}>{usernameFor(expense.payerId)}</Text>
                 </View>
                 <View style={styles.detailGroupSection}>
                   <Text style={[styles.detailLabel, { color: theme.icon }]}>{t('trip.beneficiaries').toUpperCase()}</Text>
                   <View style={styles.chips}>
-                    {detail.expense.beneficiaryIds.map(id => (
+                    {expense.beneficiaryIds.map(id => (
                       <View key={id} style={[styles.chip, { backgroundColor: `${theme.tint}18`, borderColor: `${theme.tint}30` }]}>
                         <Text style={[styles.chipText, { color: theme.tint }]}>{usernameFor(id)}</Text>
                       </View>
@@ -208,7 +184,7 @@ const ExpenseDetailModal = React.memo(function ExpenseDetailModal({
               <Pressable
                 style={[styles.modalBtn, { backgroundColor: Colors.warning, boxShadow: `0 0 20px ${Colors.warning}55`, flexDirection: 'row', gap: 6, justifyContent: 'center' }]}
                 onPress={() => setConfirmingDelete(true)}
-                disabled={detail.loading || !detail.expense}
+                disabled={isLoading || !expense}
               >
                 <Ionicons name="trash-outline" size={15} color="#fff" />
                 <Text style={{ color: '#fff', fontWeight: '800', letterSpacing: 1 }}>{t('common.delete').toUpperCase()}</Text>
@@ -248,12 +224,13 @@ const CategoryChip = React.memo(function CategoryChip({ categoryKey, selected, o
 type CreateExpenseModalProps = {
   createModal: CreateState;
   createDispatch: React.Dispatch<CreateAction>;
+  isPending: boolean;
   members?: Array<{ id?: string | null; username?: string | null }>;
   onConfirm: () => void;
 };
 
 const CreateExpenseModal = React.memo(function CreateExpenseModal({
-  createModal, createDispatch, members, onConfirm,
+  createModal, createDispatch, isPending, members, onConfirm,
 }: CreateExpenseModalProps) {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
@@ -280,27 +257,14 @@ const CreateExpenseModal = React.memo(function CreateExpenseModal({
           <ThemedInput placeholder={t('trip.description')} value={createModal.name} onChangeText={v => createDispatch({ type: 'set_name', value: v })} autoFocus />
           <ThemedInput placeholder={t('trip.amount')} value={createModal.amount} onChangeText={v => createDispatch({ type: 'set_amount', value: v })} keyboardType="numeric" />
 
-          <Pressable
-            style={[styles.dropdown, { backgroundColor: theme.uiBackground, borderColor: theme.border }]}
-            onPress={() => createDispatch({ type: 'toggle_category' })}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <Ionicons name={CATEGORIES[createModal.category].icon} size={18} color={theme.tint} />
-              <Text style={{ color: theme.title, fontWeight: '600' }}>{t(CATEGORIES[createModal.category].labelKey)}</Text>
-            </View>
-            <Ionicons name={createModal.categoryOpen ? 'chevron-up' : 'chevron-down'} size={16} color={theme.icon} />
-          </Pressable>
-
-          {createModal.categoryOpen && (
-            <FlatList
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryRow}
-              data={Object.keys(CATEGORIES) as NonNullable<ExpenseCategory>[]}
-              keyExtractor={key => key}
-              renderItem={renderCategoryItem}
-            />
-          )}
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoryRow}
+            data={Object.keys(CATEGORIES) as NonNullable<ExpenseCategory>[]}
+            keyExtractor={key => key}
+            renderItem={renderCategoryItem}
+          />
 
           <Pressable style={[styles.dropdown, { backgroundColor: theme.uiBackground, borderColor: theme.border }]} onPress={() => createDispatch({ type: 'toggle_dropdown' })}>
             <Text style={{ color: createModal.payerId ? theme.title : theme.icon, fontWeight: '600' }}>
@@ -338,8 +302,8 @@ const CreateExpenseModal = React.memo(function CreateExpenseModal({
             <Pressable style={[styles.modalBtn, { borderColor: theme.border, borderWidth: 1 }]} onPress={() => createDispatch({ type: 'close' })}>
               <Text style={{ color: theme.text, fontWeight: '700' }}>{t('common.cancel')}</Text>
             </Pressable>
-            <Pressable style={[styles.modalBtn, { backgroundColor: theme.tint, boxShadow: `0 0 20px ${theme.tint}55` }]} onPress={onConfirm} disabled={createModal.creating}>
-              {createModal.creating ? <ActivityIndicator color="#fff" size="small" /> : <Text style={{ color: '#fff', fontWeight: '800', letterSpacing: 1 }}>{t('common.create').toUpperCase()}</Text>}
+            <Pressable style={[styles.modalBtn, { backgroundColor: theme.tint, boxShadow: `0 0 20px ${theme.tint}55` }]} onPress={onConfirm} disabled={isPending}>
+              {isPending ? <ActivityIndicator color="#fff" size="small" /> : <Text style={{ color: '#fff', fontWeight: '800', letterSpacing: 1 }}>{t('common.create').toUpperCase()}</Text>}
             </Pressable>
           </View>
         </Pressable>
@@ -351,16 +315,18 @@ const CreateExpenseModal = React.memo(function CreateExpenseModal({
 // ── Balances section ───────────────────────────────────────────────────────
 
 type BalancesSectionProps = {
-  bals: BalsState;
+  info: BalancesInfo | undefined;
+  isLoading: boolean;
+  error: string | null;
   currentUserId: string | null | undefined;
   usernameFor: (id: string) => string;
   payingKey: string | null;
-  handlePaySettlement: (fromId: string, toId: string, amount: number) => Promise<void>;
+  handlePaySettlement: (fromId: string, toId: string, amount: number) => void;
   tripId: string;
 };
 
 const BalancesSection = React.memo(function BalancesSection({
-  bals, currentUserId, usernameFor, payingKey, handlePaySettlement, tripId,
+  info, isLoading, error, currentUserId, usernameFor, payingKey, handlePaySettlement, tripId,
 }: BalancesSectionProps) {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
@@ -369,8 +335,8 @@ const BalancesSection = React.memo(function BalancesSection({
 
   const balanceRows = useMemo((): BalanceFlatRow[] => {
     const rows: BalanceFlatRow[] = [];
-    const bl = bals.info?.balances ?? [];
-    const sl = bals.info?.settlements ?? [];
+    const bl = info?.balances ?? [];
+    const sl = info?.settlements ?? [];
     rows.push({ _kind: 'header', title: t('trip.balancePerMember') });
     if (!bl.length) rows.push({ _kind: 'empty', text: t('trip.noBalances') });
     else bl.forEach(b => rows.push({ _kind: 'balance', userId: b.userId, amount: b.amount }));
@@ -386,7 +352,7 @@ const BalancesSection = React.memo(function BalancesSection({
       others.forEach(s => rows.push({ _kind: 'settlement', fromId: s.fromId, toId: s.toId, amount: s.amount }));
     }
     return rows;
-  }, [bals.info, currentUserId, t]);
+  }, [info, currentUserId, t]);
 
   const renderRow = useCallback(({ item }: { item: BalanceFlatRow }) => {
     switch (item._kind) {
@@ -397,9 +363,13 @@ const BalancesSection = React.memo(function BalancesSection({
         const isMe = item.userId === currentUserId;
         return (
           <View style={[styles.balanceCard, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
-            <View style={[styles.balanceAvatar, { backgroundColor: `${theme.tint}18` }]}>
-              <Text style={[styles.balanceInitial, { color: theme.tint }]}>{usernameFor(item.userId).charAt(0).toUpperCase()}</Text>
-            </View>
+            <UserAvatar
+              userId={item.userId}
+              initials={usernameFor(item.userId).charAt(0).toUpperCase()}
+              size={40}
+              style={{ backgroundColor: `${theme.tint}18` }}
+              textStyle={[styles.balanceInitial, { color: theme.tint }]}
+            />
             <View style={styles.nameRow}>
               <Text style={[styles.balanceName, { color: theme.title }, isMe && styles.meText]} numberOfLines={1}>{usernameFor(item.userId)}</Text>
               {isMe && (
@@ -497,8 +467,8 @@ const BalancesSection = React.memo(function BalancesSection({
     }
   }, [theme, usernameFor, currentUserId, payingKey, confirmingPayKey, setConfirmingPayKey, handlePaySettlement, tripId, t]);
 
-  if (bals.loading) return <ActivityIndicator size="large" color={theme.tint} style={styles.centered} />;
-  if (bals.error) return <Text style={[styles.emptyText, { color: theme.icon }]}>{bals.error}</Text>;
+  if (isLoading) return <ActivityIndicator size="large" color={theme.tint} style={styles.centered} />;
+  if (error) return <Text style={[styles.emptyText, { color: theme.icon }]}>{error}</Text>;
 
   return (
     <FlatList
@@ -518,78 +488,80 @@ const ExpensesScreen = () => {
   const theme = Colors[themeName] ?? Colors.light;
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const { trip } = useTrip();
-  const { getExpenses, addExpense, getExpenseDetail, getBalances, paySettlement, deleteExpense } = useExpenses();
   const { userId: currentUserId } = useAuth();
   const navigation = useNavigation();
 
   const [activeTab, setActiveTab] = useState<Tab>('expenses');
-  const [list, listDispatch] = useReducer(listReducer, { expenses: null, loading: false, error: null });
-  const [bals, balsDispatch] = useReducer(balsReducer, { info: null, loading: false, error: null });
-  const [detailModal, detailDispatch] = useReducer(detailReducer, { visible: false, expense: null, loading: false, error: null });
+  const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [createModal, createDispatch] = useReducer(createReducer, CREATE_INITIAL);
   const [payingKey, setPayingKey] = useState<string | null>(null);
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    if (!detailModal.visible) setConfirmingDelete(false);
-  }, [detailModal.visible]);
-  const expensesLoadedRef = useRef<string | null>(null);
+  const expensesQuery = useExpensesQuery(trip?.id ?? '');
+  const balancesQuery = useBalancesQuery(trip?.id ?? '', { enabled: activeTab === 'balances' });
+  const detailQuery = useExpenseDetailQuery(trip?.id ?? '', selectedExpenseId ?? '', { enabled: !!selectedExpenseId });
+  const addExpenseMutation = useAddExpenseMutation(trip?.id ?? '');
+  const deleteExpenseMutation = useDeleteExpenseMutation(trip?.id ?? '');
+  const paySettlementMutation = usePaySettlementMutation(trip?.id ?? '');
 
   useEffect(() => {
     if (trip?.name) navigation.setOptions({ title: trip.name });
   }, [trip?.name, navigation]);
 
-  useEffect(() => {
-    if (!trip?.id || expensesLoadedRef.current === trip.id) return;
-    expensesLoadedRef.current = trip.id;
-    const load = async () => {
-      listDispatch({ type: 'loading' });
-      try { listDispatch({ type: 'loaded', expenses: await getExpenses(trip.id!) }); }
-      catch { listDispatch({ type: 'error', error: t('trip.unableLoadExpenses') }); }
-    };
-    load();
-  }, [trip?.id, getExpenses, t]);
-
-  const loadBalances = async () => {
-    if (!trip?.id || bals.info !== null) return;
-    balsDispatch({ type: 'loading' });
-    try { balsDispatch({ type: 'loaded', info: await getBalances(trip.id!) }); }
-    catch { balsDispatch({ type: 'error', error: t('trip.unableLoadBalances') }); }
-  };
-
-  const handleTabChange = (tab: Tab) => { setActiveTab(tab); if (tab === 'balances') loadBalances(); };
+  const handleTabChange = (tab: Tab) => setActiveTab(tab);
 
   const handleCreate = async () => {
     if (!trip?.id) return;
-    const amountValue = Number(createModal.amount);
+    const amountValue = Number(createModal.amount.replace(',', '.'));
     if (!createModal.name.trim() || !amountValue || !createModal.payerId || createModal.beneficiaryIds.length === 0) {
       createDispatch({ type: 'set_error', error: t('trip.fillAllRequiredFields') }); return;
     }
-    createDispatch({ type: 'start_creating' });
     try {
-      const newExpense = await addExpense(trip.id, { name: createModal.name.trim(), amount: amountValue, payerId: createModal.payerId, beneficiaryIds: createModal.beneficiaryIds, category: createModal.category });
-      listDispatch({ type: 'add', expense: newExpense });
-      balsDispatch({ type: 'invalidate' });
+      await addExpenseMutation.mutateAsync({
+        name: createModal.name.trim(),
+        amount: amountValue,
+        payerId: createModal.payerId,
+        beneficiaryIds: createModal.beneficiaryIds,
+        category: createModal.category,
+      });
       createDispatch({ type: 'close' });
     } catch {
       createDispatch({ type: 'set_error', error: t('trip.createExpenseError') });
-    } finally {
-      createDispatch({ type: 'done_creating' });
     }
   };
 
-  const handleOpenDetail = useCallback(async (item: ExpenseSummary) => {
-    if (!trip?.id) return;
-    detailDispatch({ type: 'open' });
-    try { detailDispatch({ type: 'loaded', expense: await getExpenseDetail(trip.id, item.id) }); }
-    catch { detailDispatch({ type: 'error', error: t('trip.loadExpenseDetailError') }); }
-  }, [trip?.id, getExpenseDetail, t]);
+  const handleOpenDetail = useCallback((item: ExpenseSummary) => {
+    setSelectedExpenseId(item.id);
+  }, []);
+
+  const handleDetailClose = useCallback(() => {
+    setConfirmingDelete(false);
+    setSelectedExpenseId(null);
+  }, []);
+
+  const handleDelete = useCallback(async () => {
+    if (!selectedExpenseId) return;
+    try {
+      await deleteExpenseMutation.mutateAsync(selectedExpenseId);
+      setConfirmingDelete(false);
+      setSelectedExpenseId(null);
+    } catch {
+      /* error visible via detailQuery.error would be stale; no-op is fine */
+    }
+  }, [selectedExpenseId, deleteExpenseMutation]);
+
+  const handlePaySettlement = useCallback((fromId: string, toId: string, amount: number) => {
+    const key = `${fromId}-${toId}`;
+    setPayingKey(key);
+    paySettlementMutation.mutate({ fromId, toId, amount }, {
+      onSettled: () => setPayingKey(null),
+    });
+  }, [paySettlementMutation]);
 
   const members = trip?.members;
 
   const expenseRows = useMemo((): ExpenseFlatRow[] => {
-    const sorted = [...(list.expenses ?? [])].sort(
+    const sorted = [...(expensesQuery.data ?? [])].sort(
       (a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime()
     );
     const todayStr = new Date().toDateString();
@@ -610,7 +582,7 @@ const ExpensesScreen = () => {
       rows.push({ _kind: 'expense', item });
     }
     return rows;
-  }, [list.expenses, t]);
+  }, [expensesQuery.data, t]);
 
   const renderExpenseRow = useCallback(({ item: row }: { item: ExpenseFlatRow }) => {
     if (row._kind === 'date') {
@@ -628,70 +600,29 @@ const ExpensesScreen = () => {
 
   const usernameFor = useCallback((id: string) => trip?.members?.find(m => m.id === id)?.username ?? '?', [trip?.members]);
 
-  const handleDelete = useCallback(async () => {
-    if (!trip?.id || !detailModal.expense) return;
-    setDeleting(true);
-    try {
-      await deleteExpense(trip.id, detailModal.expense.id);
-      listDispatch({ type: 'loaded', expenses: (list.expenses ?? []).filter(e => e.id !== detailModal.expense!.id) });
-      balsDispatch({ type: 'invalidate' });
-      detailDispatch({ type: 'close' });
-    } catch {
-      detailDispatch({ type: 'error', error: t('trip.deleteExpenseError') });
-    } finally {
-      setDeleting(false);
-      setConfirmingDelete(false);
-    }
-  }, [trip?.id, detailModal.expense, deleteExpense, list.expenses, t]);
-
-  const handleDetailClose = useCallback(() => {
-    setConfirmingDelete(false);
-    detailDispatch({ type: 'close' });
-  }, []);
-
-  const handlePaySettlement = useCallback(async (fromId: string, toId: string, amount: number) => {
-    if (!trip?.id) return;
-    const key = `${fromId}-${toId}`;
-    setPayingKey(key);
-    try {
-      await paySettlement(trip.id, fromId, toId, amount);
-      balsDispatch({ type: 'invalidate' });
-      await (async () => {
-        balsDispatch({ type: 'loading' });
-        try { balsDispatch({ type: 'loaded', info: await getBalances(trip.id!) }); }
-        catch { balsDispatch({ type: 'error', error: t('trip.unableLoadBalances') }); }
-      })();
-    } catch {
-      /* ignore — could add a toast here */
-    } finally {
-      setPayingKey(null);
-    }
-  }, [trip?.id, paySettlement, getBalances, t]);
-
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
 
       {/* Segmented control */}
-      <View style={[styles.segmentWrap, { backgroundColor: theme.uiBackground }]}>
-        {(['expenses', 'balances'] as Tab[]).map(tab => (
-          <Pressable
-            key={tab}
-            style={[
-              styles.segment,
-              activeTab === tab && { backgroundColor: theme.tabBackground, boxShadow: `0 0 16px ${theme.tint}35` },
-            ]}
-            onPress={() => handleTabChange(tab)}
-          >
-            <Text style={[styles.segmentLabel, { color: activeTab === tab ? theme.tint : theme.icon }, activeTab === tab && styles.segmentLabelActive]}>
-              {t(tab === 'expenses' ? 'trip.expenses' : 'trip.balances').toUpperCase()}
-            </Text>
-          </Pressable>
-        ))}
+      <View style={styles.segmentRow}>
+        <SegmentedControl
+          options={[
+            { value: 'expenses', label: t('trip.expenses').toUpperCase() },
+            { value: 'balances', label: t('trip.balances').toUpperCase() },
+          ]}
+          value={activeTab}
+          onChange={(v) => handleTabChange(v as Tab)}
+          containerBackground={theme.uiBackground}
+          thumbBackground={theme.tabBackground}
+          activeColor={theme.tint}
+          inactiveColor={theme.icon}
+          glowColor={`${theme.tint}35`}
+        />
       </View>
 
       {activeTab === 'expenses' && (
-        list.loading ? <ActivityIndicator size="large" color={theme.tint} style={styles.centered} /> :
-        list.error ? <Text style={[styles.emptyText, { color: theme.icon }]}>{list.error}</Text> : (
+        expensesQuery.isLoading ? <ActivityIndicator size="large" color={theme.tint} style={styles.centered} /> :
+        expensesQuery.isError ? <Text style={[styles.emptyText, { color: theme.icon }]}>{t('trip.unableLoadExpenses')}</Text> : (
           <FlatList
             data={expenseRows}
             keyExtractor={(row, i) => row._kind === 'expense' ? (row.item.id ?? `e-${i}`) : `d-${row.label}-${i}`}
@@ -714,7 +645,9 @@ const ExpensesScreen = () => {
 
       {activeTab === 'balances' && (
         <BalancesSection
-          bals={bals}
+          info={balancesQuery.data}
+          isLoading={balancesQuery.isLoading}
+          error={balancesQuery.isError ? t('trip.unableLoadBalances') : null}
           currentUserId={currentUserId}
           usernameFor={usernameFor}
           payingKey={payingKey}
@@ -724,9 +657,12 @@ const ExpensesScreen = () => {
       )}
 
       <ExpenseDetailModal
-        detail={detailModal}
+        visible={!!selectedExpenseId}
+        expense={detailQuery.data}
+        isLoading={detailQuery.isLoading}
+        error={detailQuery.isError ? t('trip.loadExpenseDetailError') : null}
         confirmingDelete={confirmingDelete}
-        deleting={deleting}
+        deleting={deleteExpenseMutation.isPending}
         usernameFor={usernameFor}
         onClose={handleDetailClose}
         onDelete={handleDelete}
@@ -736,6 +672,7 @@ const ExpensesScreen = () => {
       <CreateExpenseModal
         createModal={createModal}
         createDispatch={createDispatch}
+        isPending={addExpenseMutation.isPending}
         members={trip?.members}
         onConfirm={handleCreate}
       />
@@ -749,10 +686,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { flex: 1 },
 
-  segmentWrap: { flexDirection: 'row', margin: 16, borderRadius: 16, padding: 4 },
-  segment: { flex: 1, paddingVertical: 11, borderRadius: 12, alignItems: 'center' },
-  segmentLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 1.5, opacity: 0.55 },
-  segmentLabelActive: { opacity: 1 },
+  segmentRow: { margin: 16 },
 
   list: { padding: 16, gap: 10, paddingBottom: 28 },
   emptyText: { textAlign: 'center', marginTop: 28, fontSize: 14, fontWeight: '600', opacity: 0.6 },
@@ -778,7 +712,6 @@ const styles = StyleSheet.create({
   addBtnText: { color: '#fff', fontWeight: '900', fontSize: 13, letterSpacing: 2 },
 
   balanceCard: { flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 18, borderWidth: 1, gap: 12 },
-  balanceAvatar: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
   balanceInitial: { fontSize: 16, fontWeight: '800' },
   balanceName: { fontSize: 15, fontWeight: '700' },
   nameRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 },
