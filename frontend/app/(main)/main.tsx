@@ -1,15 +1,14 @@
-import React, { useCallback, useEffect, useReducer } from 'react';
-import { StyleSheet, View, Pressable, FlatList, Modal, ActivityIndicator, Text } from 'react-native';
+import React, { useCallback, useEffect } from 'react';
+import { StyleSheet, View, Pressable, FlatList, ActivityIndicator, Text } from 'react-native';
 import { router, useFocusEffect, useNavigation } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../src/theme';
 import { Colors } from '../../constants/Colors';
-import { useCreateTripMutation, useTripsQuery } from '../../src/trips';
+import { useTripsQuery } from '../../src/trips';
 import { useInvitationsQuery } from '../../src/invitations';
 import { components } from '../../src/generated/types';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import ThemedInput from '../../components/ThemedInput';
 import { AmbientBlobs, DotGrid } from '../../components/BackgroundTexture';
 
 type TripSummary = components['schemas']['TripSummary'];
@@ -31,37 +30,63 @@ function tripInitials(name: string): string {
   return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
 }
 
-type ModalState = { visible: boolean; name: string };
-type ModalAction =
-  | { type: 'open' }
-  | { type: 'close' }
-  | { type: 'set_name'; name: string };
+// ── TripCard ──────────────────────────────────────────────────────────────────
 
-const MODAL_INITIAL: ModalState = { visible: false, name: '' };
-
-function modalReducer(state: ModalState, action: ModalAction): ModalState {
-  switch (action.type) {
-    case 'open': return { ...state, visible: true };
-    case 'close': return MODAL_INITIAL;
-    case 'set_name': return { ...state, name: action.name };
-    default: return state;
-  }
-}
-
-const Main = () => {
+const TripCard = React.memo(({ item }: { item: TripSummary }) => {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
-  const isDark = themeName === 'dark';
-  const navigation = useNavigation();
 
-  const [modal, modalDispatch] = useReducer(modalReducer, MODAL_INITIAL);
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.tripCard,
+        { backgroundColor: theme.tabBackground, borderColor: theme.border },
+        pressed && styles.pressed,
+      ]}
+      onPress={() => router.push({ pathname: '/expenses', params: { tripId: item.id } })}
+    >
+      <View style={[styles.tripStripe, { backgroundColor: theme.tint, boxShadow: `0 0 10px ${theme.tint}` }]} />
+
+      <LinearGradient colors={tripGradient(item.name)} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.tripIconWrap}>
+        <Text style={styles.tripInitials}>{tripInitials(item.name)}</Text>
+      </LinearGradient>
+
+      <View style={styles.tripInfo}>
+        <Text style={[styles.tripName, { color: theme.title }]} numberOfLines={1}>{item.name}</Text>
+        <View style={styles.tripStats}>
+          <View style={styles.tripStatLeft}>
+            <Ionicons name="people-outline" size={11} color={theme.text} style={{ opacity: 0.5 }} />
+            <Text style={[styles.tripStat, { color: theme.text }]}>{item.memberCount}</Text>
+          </View>
+          <Text style={[styles.tripStat, { color: theme.text }]}>{t('trip.totalSpent')}: {item.totalSpent.toFixed(2)}€</Text>
+        </View>
+      </View>
+
+      <View style={[styles.tripChevron, { backgroundColor: theme.uiBackground }]}>
+        <Ionicons name="chevron-forward" size={14} color={theme.tint} />
+      </View>
+    </Pressable>
+  );
+});
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+
+const Main = () => {
+  const { themeName } = useAppTheme();
+  const theme = Colors[themeName] ?? Colors.light;
+  const isDark = themeName === 'dark';
+  const { t } = useTranslation();
+  const navigation = useNavigation();
 
   const tripsQuery = useTripsQuery();
   const invitationsQuery = useInvitationsQuery();
-  const createTripMutation = useCreateTripMutation();
 
-  const trips = tripsQuery.data ?? [];
+  const trips = [...(tripsQuery.data ?? [])].sort((a, b) => {
+    if (!a.creationDate) return 1;
+    if (!b.creationDate) return -1;
+    return new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime();
+  });
   const invitationCount = invitationsQuery.data?.length ?? 0;
 
   useFocusEffect(
@@ -93,46 +118,9 @@ const Main = () => {
     });
   }, [invitationCount, theme, navigation]);
 
-  const handleCreateTrip = async () => {
-    if (!modal.name.trim()) return;
-    try {
-      await createTripMutation.mutateAsync({ name: modal.name.trim() });
-      modalDispatch({ type: 'close' });
-    } catch {
-      /* ignore */
-    }
-  };
-
   const renderTripItem = useCallback(
-    ({ item }: { item: TripSummary }) => (
-      <Pressable
-        style={({ pressed }) => [styles.tripCard, { backgroundColor: theme.tabBackground, borderColor: theme.border }, pressed && styles.pressed]}
-        onPress={() => router.push({ pathname: '/expenses', params: { tripId: item.id } })}
-      >
-        {/* left glow stripe */}
-        <View style={[styles.tripStripe, { backgroundColor: theme.tint, boxShadow: `0 0 10px ${theme.tint}` }]} />
-
-        <LinearGradient colors={tripGradient(item.name)} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.tripIconWrap}>
-          <Text style={styles.tripInitials}>{tripInitials(item.name)}</Text>
-        </LinearGradient>
-
-        <View style={styles.tripInfo}>
-          <Text style={[styles.tripName, { color: theme.title }]} numberOfLines={1}>{item.name}</Text>
-          <View style={styles.tripStats}>
-            <View style={styles.tripStatLeft}>
-              <Ionicons name="people-outline" size={11} color={theme.text} style={{ opacity: 0.5 }} />
-              <Text style={[styles.tripStat, { color: theme.text }]}>{item.memberCount}</Text>
-            </View>
-            <Text style={[styles.tripStat, { color: theme.text }]}>{t('trip.totalSpent')}: {item.totalSpent.toFixed(2)}€</Text>
-          </View>
-        </View>
-
-        <View style={[styles.tripChevron, { backgroundColor: theme.uiBackground }]}>
-          <Ionicons name="chevron-forward" size={14} color={theme.tint} />
-        </View>
-      </Pressable>
-    ),
-    [theme, t]
+    ({ item }: { item: TripSummary }) => <TripCard item={item} />,
+    []
   );
 
   return (
@@ -141,7 +129,6 @@ const Main = () => {
       <AmbientBlobs tint={theme.tint} secondary={Colors.secondary} />
 
       <View style={styles.content}>
-        {/* Action row */}
         <View style={styles.actionRow}>
           <Pressable
             style={({ pressed }) => [
@@ -149,7 +136,7 @@ const Main = () => {
               { backgroundColor: theme.tint, boxShadow: `0 0 28px ${theme.tint}55` },
               pressed && styles.pressed,
             ]}
-            onPress={() => modalDispatch({ type: 'open' })}
+            onPress={() => router.push('/create-trip')}
           >
             <View style={styles.actionIconRing}>
               <Ionicons name="add" size={24} color="#fff" />
@@ -166,7 +153,7 @@ const Main = () => {
             onPress={() => router.push('/join-trip')}
           >
             <View style={[styles.actionIconRing, { backgroundColor: `${theme.tint}22` }]}>
-              <Ionicons name="enter-outline" size={24} color={theme.tint} />
+              <Ionicons name="qr-code-outline" size={24} color={theme.tint} />
             </View>
             <Text style={[styles.actionLabel, { color: theme.tint }]}>{t('trip.join').toUpperCase()}</Text>
           </Pressable>
@@ -205,48 +192,6 @@ const Main = () => {
           }
         />
       </View>
-
-      {/* Create trip modal */}
-      <Modal visible={modal.visible} transparent animationType="fade" onRequestClose={() => modalDispatch({ type: 'close' })}>
-        <Pressable style={styles.overlay} onPress={() => modalDispatch({ type: 'close' })}>
-          <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
-            <View style={styles.modalTop}>
-              <View style={[styles.modalIcon, { backgroundColor: `${theme.tint}20`, borderColor: `${theme.tint}40` }]}>
-                <Ionicons name="airplane-outline" size={24} color={theme.tint} />
-              </View>
-              <Text style={[styles.modalTitle, { color: theme.title }]}>{t('trip.new')}</Text>
-            </View>
-
-            <ThemedInput
-              style={{ borderColor: theme.tint, borderWidth: 1.5 }}
-              placeholder={t('trip.tripName')}
-              value={modal.name}
-              onChangeText={name => modalDispatch({ type: 'set_name', name })}
-              autoFocus
-              onSubmitEditing={handleCreateTrip}
-            />
-
-            <View style={styles.modalBtns}>
-              <Pressable
-                style={[styles.modalBtn, { borderColor: theme.border, borderWidth: 1 }]}
-                onPress={() => modalDispatch({ type: 'close' })}
-              >
-                <Text style={[styles.modalBtnText, { color: theme.text }]}>{t('common.cancel')}</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.modalBtn, { backgroundColor: theme.tint, boxShadow: `0 0 20px ${theme.tint}55` }]}
-                onPress={handleCreateTrip}
-                disabled={createTripMutation.isPending || !modal.name.trim()}
-              >
-                {createTripMutation.isPending
-                  ? <ActivityIndicator color="#fff" size="small" />
-                  : <Text style={[styles.modalBtnText, { color: '#fff', fontWeight: '800', letterSpacing: 1 }]}>{t('common.create').toUpperCase()}</Text>
-                }
-              </Pressable>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
     </View>
   );
 };
@@ -374,33 +319,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: 3,
   },
   badgeText: { color: '#fff', fontSize: 10, fontWeight: '800' },
-
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  modalBox: {
-    width: '100%',
-    borderRadius: 24,
-    padding: 24,
-    gap: 16,
-    borderWidth: 1,
-    boxShadow: '0 0 60px rgba(168,85,247,0.2), 0 16px 40px rgba(0,0,0,0.4)',
-  },
-  modalTop: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  modalIcon: {
-    width: 46,
-    height: 46,
-    borderRadius: 14,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalTitle: { fontSize: 22, fontWeight: '800', letterSpacing: 0.3 },
-  modalBtns: { flexDirection: 'row', gap: 10 },
-  modalBtn: { flex: 1, paddingVertical: 15, borderRadius: 14, alignItems: 'center' },
-  modalBtnText: { fontSize: 14, fontWeight: '700' },
 });

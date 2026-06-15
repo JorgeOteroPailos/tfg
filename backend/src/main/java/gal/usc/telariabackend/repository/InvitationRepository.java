@@ -22,4 +22,9 @@ public interface InvitationRepository extends JpaRepository<Invitation, UUID> {
     @Modifying
     @Query("DELETE FROM Invitation i WHERE i.trip.id = :tripId")
     void deleteAllByTripId(@Param("tripId") UUID tripId);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM Invitation i WHERE i.user.id = :userId")
+    void deleteAllByUserId(@Param("userId") UUID userId);
 }

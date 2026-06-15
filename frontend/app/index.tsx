@@ -1,15 +1,32 @@
 import { Redirect } from 'expo-router';
 import { useAuth } from '../src/auth';
-import { ActivityIndicator, View } from 'react-native';
+import { getLastTripId } from '../src/lastTrip';
+import { View } from 'react-native';
+import { useState, useEffect } from 'react';
 
 export default function Index() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [lastTripId, setLastTripId] = useState<string | null | undefined>(undefined);
 
-  console.log('Index -> isLoading:', isLoading, 'isAuthenticated:', isAuthenticated);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLastTripId(null);
+      return;
+    }
+    getLastTripId().then(id => setLastTripId(id ?? null));
+  }, [isAuthenticated]);
 
-  if (isLoading) {
+  if (isLoading || lastTripId === undefined) {
     return <View style={{ flex: 1 }} />;
   }
 
-  return <Redirect href={isAuthenticated ? '/main' : '/login'} />;
+  if (!isAuthenticated) {
+    return <Redirect href="/login" />;
+  }
+
+  if (lastTripId) {
+    return <Redirect href={{ pathname: '/expenses', params: { tripId: lastTripId } }} />;
+  }
+
+  return <Redirect href="/main" />;
 }

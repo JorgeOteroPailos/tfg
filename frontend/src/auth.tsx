@@ -3,6 +3,7 @@ import { BASE_URL } from '../constants/constants';
 import { AppError, ErrorCode } from './AppError';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { components } from '../src/generated/types';
+import { clearLastTripId } from './lastTrip';
 import React, {
   createContext,
   use,
@@ -62,6 +63,7 @@ async function clearSession() {
     SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY),
     AsyncStorage.removeItem(USER_EMAIL_KEY),
     AsyncStorage.removeItem(USER_NAME_KEY),
+    clearLastTripId(),
   ]);
   //TODO cerrar sesión en el servidor
 }

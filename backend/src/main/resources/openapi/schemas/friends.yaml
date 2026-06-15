@@ -1,0 +1,20 @@
+schemas:
+  ResolveFriendRequest:
+    type: object
+    required:
+      - accepted
+    properties:
+      accepted:
+        type: boolean
+
+  FriendRequestSummary:
+    type: object
+    required:
+      - id
+      - sender
+    properties:
+      id:
+        type: string
+        format: uuid
+      sender:
+        $ref: '../schemas/trips.yaml#/schemas/UserProfile'

@@ -285,6 +285,8 @@ class MembershipServiceTest {
         JoinRequest request = mock(JoinRequest.class);
 
         when(joinRequestRepo.findById(any())).thenReturn(Optional.of(request));
+        when(request.getTrip()).thenReturn(trip);
+        when(trip.getId()).thenReturn(tripId);
         when(tripRepo.findById(tripId)).thenReturn(Optional.of(trip));
         when(userRepo.findById(userId)).thenReturn(Optional.of(user));
         when(request.getUser()).thenReturn(requester);
@@ -304,6 +306,8 @@ class MembershipServiceTest {
         JoinRequest request = mock(JoinRequest.class);
 
         when(joinRequestRepo.findById(any())).thenReturn(Optional.of(request));
+        when(request.getTrip()).thenReturn(trip);
+        when(trip.getId()).thenReturn(tripId);
         when(tripRepo.findById(tripId)).thenReturn(Optional.of(trip));
         when(userRepo.findById(userId)).thenReturn(Optional.of(user));
         when(request.getUser()).thenReturn(requester);
@@ -321,6 +325,8 @@ class MembershipServiceTest {
         JoinRequest request = mock(JoinRequest.class);
 
         when(joinRequestRepo.findById(any())).thenReturn(Optional.of(request));
+        when(request.getTrip()).thenReturn(trip);
+        when(trip.getId()).thenReturn(tripId);
         when(tripRepo.findById(tripId)).thenReturn(Optional.of(trip));
         when(userRepo.findById(userId)).thenReturn(Optional.of(user));
         doThrow(NotATripMemberException.class).when(trip).assertIsMember(user);
@@ -338,6 +344,8 @@ class MembershipServiceTest {
         JoinRequest request = mock(JoinRequest.class);
 
         when(joinRequestRepo.findById(any())).thenReturn(Optional.of(request));
+        when(request.getTrip()).thenReturn(trip);
+        when(trip.getId()).thenReturn(tripId);
         when(tripRepo.findById(tripId)).thenReturn(Optional.of(trip));
         when(userRepo.findById(userId)).thenReturn(Optional.of(user));
         when(request.getUser()).thenReturn(requester);

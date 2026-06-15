@@ -6,11 +6,12 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useAppTheme } from '../../src/theme';
 import { Colors } from '../../constants/Colors';
 import { useInvitations } from '../../src/invitations';
+import { useFriends } from '../../src/friends';
 import { AppError, ErrorCode } from '../../src/AppError';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '../../components/ThemedText';
 
-type Mode = 'invite' | 'join';
+type Mode = 'invite' | 'join' | 'add-friend';
 type ScanState = 'scanning' | 'loading' | 'success' | 'error';
 
 const VIEWFINDER_SIZE = 240;
@@ -18,11 +19,11 @@ const CORNER_SIZE = 28;
 const CORNER_THICKNESS = 4;
 const OVERLAY_BG = 'rgba(0,0,0,0.58)';
 
-function resolveErrorMessage(e: unknown, isInvite: boolean, t: (key: string) => string): string {
+function resolveErrorMessage(e: unknown, mode: Mode, t: (key: string) => string): string {
   if (e instanceof AppError) {
     switch (e.code) {
       case ErrorCode.CONFLICT:
-        return t(isInvite ? 'trip.scanErrorConflictInvite' : 'trip.scanErrorConflictJoin');
+        return t(mode === 'invite' ? 'trip.scanErrorConflictInvite' : mode === 'add-friend' ? 'friends.scanErrorConflict' : 'trip.scanErrorConflictJoin');
       case ErrorCode.FORBIDDEN:
         return t('trip.scanErrorForbidden');
       case ErrorCode.BAD_REQUEST:
@@ -31,7 +32,7 @@ function resolveErrorMessage(e: unknown, isInvite: boolean, t: (key: string) => 
         return t('trip.scanErrorUnauthorized');
     }
   }
-  return t(isInvite ? 'trip.inviteError' : 'trip.joinRequestError');
+  return t(mode === 'invite' ? 'trip.inviteError' : mode === 'add-friend' ? 'friends.requestError' : 'trip.joinRequestError');
 }
 
 type CornerPos = 'tl' | 'tr' | 'bl' | 'br';
@@ -68,6 +69,7 @@ const ScanQrScreen = () => {
   const theme = Colors[themeName] ?? Colors.light;
   const { mode, tripId } = useLocalSearchParams<{ mode: Mode; tripId?: string }>();
   const { inviteUser, createJoinRequest } = useInvitations();
+  const { sendFriendRequestById } = useFriends();
   const navigation = useNavigation();
 
   const [permission, requestPermission] = useCameraPermissions();
@@ -75,9 +77,10 @@ const ScanQrScreen = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const isInvite = mode === 'invite';
-  const screenTitle = isInvite ? t('trip.scanMemberQr') : t('trip.scanTripQr');
-  const hint = isInvite ? t('trip.scanHintInvite') : t('trip.scanHintJoin');
-  const modeIcon: React.ComponentProps<typeof Ionicons>['name'] = isInvite
+  const isAddFriend = mode === 'add-friend';
+  const screenTitle = isInvite ? t('trip.scanMemberQr') : isAddFriend ? t('friends.scanTitle') : t('trip.scanTripQr');
+  const hint = isInvite ? t('trip.scanHintInvite') : isAddFriend ? t('friends.scanHint') : t('trip.scanHintJoin');
+  const modeIcon: React.ComponentProps<typeof Ionicons>['name'] = isInvite || isAddFriend
     ? 'person-add-outline'
     : 'airplane-outline';
 
@@ -127,13 +130,15 @@ const ScanQrScreen = () => {
     try {
       if (isInvite) {
         await inviteUser(data, tripId!);
+      } else if (isAddFriend) {
+        await sendFriendRequestById(data);
       } else {
         await createJoinRequest(data);
       }
       setScanState('success');
       setTimeout(() => router.back(), 1500);
     } catch (e) {
-      const msg = resolveErrorMessage(e, isInvite, t);
+      const msg = resolveErrorMessage(e, mode, t);
       setErrorMessage(msg);
       setScanState('error');
     }
@@ -215,7 +220,7 @@ const ScanQrScreen = () => {
             <>
               <Ionicons name="checkmark-circle" size={72} color="#4caf50" />
               <ThemedText style={styles.resultText}>
-                {isInvite ? t('trip.inviteSent') : t('trip.joinRequestSent')}
+                {isInvite ? t('trip.inviteSent') : isAddFriend ? t('friends.requestSent') : t('trip.joinRequestSent')}
               </ThemedText>
             </>
           )}

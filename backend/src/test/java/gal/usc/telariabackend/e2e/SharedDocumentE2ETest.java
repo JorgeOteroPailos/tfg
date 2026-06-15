@@ -187,7 +187,7 @@ class SharedDocumentE2ETest extends BaseE2ETest {
                         .header("Authorization", "Bearer " + ownerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new ResolveJoinRequest().accepted(true))))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
     }
 

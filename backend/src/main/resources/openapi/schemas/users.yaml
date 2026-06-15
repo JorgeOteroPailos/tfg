@@ -50,6 +50,18 @@ schemas:
         minLength: 1
         example: nuevoSecreto456
 
+  DeleteAccountRequest:
+    type: object
+    required:
+      - password
+    properties:
+      password:
+        type: string
+        format: password
+        minLength: 1
+        description: The account's current password, re-entered to confirm the deletion
+        example: secreto123
+
   AvatarUploadRequest:
     type: object
     required:

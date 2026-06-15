@@ -30,6 +30,7 @@ public class Expense {
     @JoinColumn(name = "payer_id")
     private User payer;
 
+    @Getter
     @ManyToOne(optional = false)
     @JoinColumn(name = "creator_id")
     private User creator;
@@ -48,6 +49,7 @@ public class Expense {
     private BigDecimal amount;
     @Getter
     private String name;
+    @Getter
     private OffsetDateTime timestamp;
 
     @Getter

@@ -6,6 +6,7 @@ export type AppTheme = 'light' | 'dark';
 
 const LANGUAGE_KEY = 'app_language';
 const THEME_KEY = 'app_theme';
+const DATA_SAVER_KEY = 'app_data_saver';
 
 export async function saveLanguage(language: AppLanguage): Promise<void> {
   await AsyncStorage.setItem(LANGUAGE_KEY, language);
@@ -42,4 +43,13 @@ export async function getSavedTheme(): Promise<AppTheme> {
   }
 
   return 'dark';
+}
+
+export async function saveDataSaver(enabled: boolean): Promise<void> {
+  await AsyncStorage.setItem(DATA_SAVER_KEY, enabled ? '1' : '0');
+}
+
+export async function getSavedDataSaver(): Promise<boolean> {
+  const value = await AsyncStorage.getItem(DATA_SAVER_KEY);
+  return value === '1';
 }

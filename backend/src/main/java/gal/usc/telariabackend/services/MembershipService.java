@@ -21,6 +21,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
@@ -109,7 +110,8 @@ public class MembershipService {
 
     @Transactional
     public void resolveJoinRequest(UUID requestId, UUID tripId, UUID userId, @NotNull Boolean accepted){
-        JoinRequest request=joinRequestRepo.findById(requestId).orElseThrow(IllegalStateException::new);
+        JoinRequest request=joinRequestRepo.findById(requestId).orElseThrow(NoSuchElementException::new);
+        if(!request.getTrip().getId().equals(tripId)){throw new NoSuchElementException("Join request not found for this trip");}
         Trip trip=tripRepo.findById(tripId).orElseThrow(TripNotFoundException::new);
         User user=userRepo.findById(userId).orElseThrow(IllegalStateException::new);
         trip.assertIsMember(user);

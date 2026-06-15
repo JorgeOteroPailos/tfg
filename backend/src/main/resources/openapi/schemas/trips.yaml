@@ -18,6 +18,9 @@ schemas:
       totalSpent:
         type: number
         format: double
+      creationDate:
+        type: string
+        format: date-time
 
   UserProfile:
     type: object

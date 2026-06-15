@@ -7,8 +7,12 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @Entity
@@ -24,6 +28,11 @@ public class Trip {
 
     @Getter
     private String name;
+
+    @Getter
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime creationDate;
 
     @Getter
     @ManyToMany
@@ -61,7 +70,8 @@ public class Trip {
                 .id(this.id)
                 .name(this.name)
                 .memberCount(members.size())
-                .totalSpent(totalSpent.doubleValue());
+                .totalSpent(totalSpent.doubleValue())
+                .creationDate(this.creationDate != null ? this.creationDate.atOffset(ZoneOffset.UTC) : null);
     }
 
     public void assertIsMember(UUID userId) {

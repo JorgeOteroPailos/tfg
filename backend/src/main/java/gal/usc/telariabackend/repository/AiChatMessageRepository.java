@@ -40,4 +40,9 @@ public interface AiChatMessageRepository
     @Modifying
     @Query("DELETE FROM AiChatMessage a WHERE a.timestamp < :cutoff")
     void deleteByTimestampBefore(@Param("cutoff") OffsetDateTime cutoff);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM AiChatMessage a WHERE a.user.id = :userId")
+    void deleteAllByUserId(@Param("userId") UUID userId);
 }

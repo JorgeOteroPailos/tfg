@@ -18,8 +18,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AlreadyDoneException.class)
     public ProblemDetail handle(AlreadyDoneException e){
         ProblemDetail error = ProblemDetail.forStatus(HttpStatus.CONFLICT);
-        error.setTitle("User already exists");
-        error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class).pathSegment("error","user-already-exists").build().toUri());
+        error.setTitle("Conflict");
+        error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class).pathSegment("error","conflict").build().toUri());
         error.setDetail(e.getMessage());
         return error;
     }

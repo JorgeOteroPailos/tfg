@@ -283,6 +283,7 @@ const Profile = () => {
             initials={initials}
             size={80}
             hasAvatar={myProfile.data ? myProfile.data.hasAvatar : undefined}
+            forceShow
             style={styles.avatarCircle}
             textStyle={styles.avatarText}
           />

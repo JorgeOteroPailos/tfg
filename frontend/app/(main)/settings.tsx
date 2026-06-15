@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Alert, View, ScrollView, Text, ActivityIndicator } from 'react-native';
+import { StyleSheet, Alert, View, ScrollView, Text, ActivityIndicator, Modal, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 
 import { AmbientBlobs, DotGrid } from '../../components/BackgroundTexture';
 import SegmentedControl from '../../components/SegmentedControl';
+import ThemedInput from '../../components/ThemedInput';
 
 import {
   saveLanguage,
@@ -14,7 +16,99 @@ import {
   type AppTheme,
 } from '../../src/preferences';
 import { useAppTheme } from '../../src/theme';
+import { useDataSaver } from '../../src/dataSaver';
+import { useAuth } from '../../src/auth';
+import { useDeleteAccountMutation } from '../../src/users';
+import { AppError, ErrorCode } from '../../src/AppError';
 import { Colors } from '../../constants/Colors';
+
+const DELETE_COUNTDOWN_SECONDS = 3;
+
+const DeleteAccountModal = ({ onClose }: { onClose: () => void }) => {
+  const { t } = useTranslation();
+  const { themeName } = useAppTheme();
+  const { logout } = useAuth();
+  const theme = Colors[themeName] ?? Colors.light;
+  const deleteAccount = useDeleteAccountMutation();
+
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState(DELETE_COUNTDOWN_SECONDS);
+
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [countdown]);
+
+  const handleConfirm = async () => {
+    if (!password.trim()) {
+      setError(t('settings.deleteAccountPasswordRequired'));
+      return;
+    }
+    try {
+      await deleteAccount.mutateAsync({ password });
+      await logout();
+      router.replace('/login');
+    } catch (err) {
+      if (err instanceof AppError && err.code === ErrorCode.UNAUTHORIZED) {
+        setError(t('settings.wrongPassword'));
+      } else {
+        setError(t('settings.deleteAccountError'));
+      }
+    }
+  };
+
+  const confirmDisabled = countdown > 0 || deleteAccount.isPending;
+
+  return (
+    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.overlay} onPress={onClose}>
+        <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
+          <Text style={[styles.modalTitle, { color: theme.title }]}>{t('settings.deleteAccount')}</Text>
+
+          <View style={styles.dangerBox}>
+            <Ionicons name="warning-outline" size={18} color={Colors.warning} />
+            <Text style={[styles.dangerText, { color: theme.text }]}>{t('settings.deleteAccountWarning')}</Text>
+          </View>
+
+          <ThemedInput
+            placeholder={t('settings.deleteAccountPassword')}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoFocus
+          />
+
+          {error && <Text style={styles.errorText}>{error}</Text>}
+
+          <View style={styles.modalButtons}>
+            <Pressable
+              style={[styles.modalBtn, { borderColor: theme.icon + '55', borderWidth: 1 }]}
+              onPress={onClose}
+              disabled={deleteAccount.isPending}
+            >
+              <Text style={{ color: theme.title, fontWeight: '600' }}>{t('common.cancel')}</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.modalBtn, { backgroundColor: Colors.warning, opacity: confirmDisabled ? 0.5 : 1 }]}
+              onPress={handleConfirm}
+              disabled={confirmDisabled}
+            >
+              {deleteAccount.isPending ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text style={{ color: 'white', fontWeight: '600' }}>
+                  {countdown > 0 ? `${t('settings.deleteAccountConfirm')} (${countdown})` : t('settings.deleteAccountConfirm')}
+                </Text>
+              )}
+            </Pressable>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+};
 
 const LANGUAGES: { value: AppLanguage; label: string }[] = [
   { value: 'es', label: 'Español' },
@@ -25,11 +119,13 @@ const LANGUAGES: { value: AppLanguage; label: string }[] = [
 const Settings = () => {
   const { t, i18n } = useTranslation();
   const { selectedTheme, setThemePreference, themeName } = useAppTheme();
+  const { dataSaver, setDataSaver } = useDataSaver();
   const theme = Colors[themeName] ?? Colors.light;
   const isDark = themeName === 'dark';
 
   const [selectedLanguage, setSelectedLanguage] = useState<AppLanguage>('es');
   const [isLoading, setIsLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     const loadPreferences = async () => {
@@ -68,6 +164,14 @@ const Settings = () => {
       await setThemePreference(newTheme);
     } catch {
       Alert.alert('Error', 'No se pudo cambiar el tema');
+    }
+  };
+
+  const handleDataSaverChange = async (enabled: boolean) => {
+    try {
+      await setDataSaver(enabled);
+    } catch {
+      Alert.alert('Error', 'No se pudo cambiar el modo de ahorro de datos');
     }
   };
 
@@ -148,8 +252,58 @@ const Settings = () => {
               glowColor={`${theme.tint}35`}
             />
           </View>
+
+          {/* Data saver card */}
+          <View style={[styles.card, { backgroundColor: theme.uiBackground, borderColor: theme.border }]}>
+            <View style={styles.cardHeader}>
+              <View style={[styles.cardIconBadge, { backgroundColor: `${theme.tint}20` }]}>
+                <Ionicons name="cellular-outline" size={18} color={theme.tint} />
+              </View>
+              <View style={styles.cardHeaderText}>
+                <Text style={[styles.cardTitle, { color: theme.title }]}>{t('settings.dataSaver')}</Text>
+                <Text style={[styles.cardSubtitle, { color: theme.text }]}>{t('settings.chooseDataSaver')}</Text>
+              </View>
+            </View>
+
+            <SegmentedControl
+              options={[
+                { value: 'on',  label: t('settings.on').toUpperCase() },
+                { value: 'off', label: t('settings.off').toUpperCase() },
+              ]}
+              value={dataSaver ? 'on' : 'off'}
+              onChange={(v) => handleDataSaverChange(v === 'on')}
+              containerBackground={theme.background}
+              thumbBackground={theme.tabBackground}
+              activeColor={theme.tint}
+              inactiveColor={theme.icon}
+              glowColor={`${theme.tint}35`}
+            />
+          </View>
+
+          {/* Danger zone card */}
+          <View style={[styles.card, { backgroundColor: theme.uiBackground, borderColor: `${Colors.warning}55` }]}>
+            <View style={styles.cardHeader}>
+              <View style={[styles.cardIconBadge, { backgroundColor: `${Colors.warning}20` }]}>
+                <Ionicons name="trash-outline" size={18} color={Colors.warning} />
+              </View>
+              <View style={styles.cardHeaderText}>
+                <Text style={[styles.cardTitle, { color: theme.title }]}>{t('settings.account')}</Text>
+                <Text style={[styles.cardSubtitle, { color: theme.text }]}>{t('settings.deleteAccountSubtitle')}</Text>
+              </View>
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [styles.deleteButton, { borderColor: Colors.warning, opacity: pressed ? 0.7 : 1 }]}
+              onPress={() => setShowDeleteModal(true)}
+            >
+              <Ionicons name="trash-outline" size={16} color={Colors.warning} />
+              <Text style={[styles.deleteButtonText, { color: Colors.warning }]}>{t('settings.deleteAccount')}</Text>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
+
+      {showDeleteModal && <DeleteAccountModal onClose={() => setShowDeleteModal(false)} />}
     </View>
   );
 };
@@ -220,5 +374,36 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     opacity: 0.6,
   },
+
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  deleteButtonText: {
+    fontWeight: '700',
+    fontSize: 14,
+  },
+
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: 24 },
+  modalBox: { borderRadius: 16, padding: 20 },
+  modalTitle: { fontSize: 20, fontWeight: '700', marginBottom: 16 },
+  modalButtons: { flexDirection: 'row', gap: 8, marginTop: 16 },
+  modalBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
+  dangerBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 14,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: 'rgba(239,68,68,0.12)',
+  },
+  dangerText: { flex: 1, fontSize: 13, opacity: 0.85 },
+  errorText: { color: '#d9534f', marginTop: 10, textAlign: 'center' },
 
 });

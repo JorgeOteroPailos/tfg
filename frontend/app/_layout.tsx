@@ -8,6 +8,7 @@ import '../i18n';
 import { Colors } from '../constants/Colors';
 import { AuthProvider, useAuth } from '../src/auth';
 import { ThemeProvider, useAppTheme } from '../src/theme';
+import { DataSaverProvider } from '../src/dataSaver';
 import { applySavedLanguage } from '../src/preferences';
 import { SidebarProvider } from '../src/sidebar';
 
@@ -64,11 +65,13 @@ const RootLayout = () => {
     <Suspense fallback={<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator /></View>}>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <AuthProvider>
-            <SidebarProvider>
-              <RootNavigator />
-            </SidebarProvider>
-          </AuthProvider>
+          <DataSaverProvider>
+            <AuthProvider>
+              <SidebarProvider>
+                <RootNavigator />
+              </SidebarProvider>
+            </AuthProvider>
+          </DataSaverProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </Suspense>

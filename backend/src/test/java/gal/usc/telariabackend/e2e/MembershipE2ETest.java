@@ -99,7 +99,7 @@ class MembershipE2ETest extends BaseE2ETest{
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     private void invite(String inviterToken, UUID guestUserId, UUID tripId) throws Exception {
@@ -132,7 +132,7 @@ class MembershipE2ETest extends BaseE2ETest{
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     // -------------------------------------------------------------------------
@@ -208,7 +208,7 @@ class MembershipE2ETest extends BaseE2ETest{
 
     @Test
     @DisplayName("Resolve join request: member can accept a pending request")
-    void resolveJoinRequest_accept_returns200() throws Exception {
+    void resolveJoinRequest_accept_returns204() throws Exception {
         String ownerToken = registerAndObtainToken("owner", "owner.rjra@test.com");
         String guestToken = registerAndObtainToken("guest", "guest.rjra@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Amsterdam");
@@ -220,12 +220,12 @@ class MembershipE2ETest extends BaseE2ETest{
                         .header("Authorization", "Bearer " + ownerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
     @DisplayName("Resolve join request: member can reject a pending request")
-    void resolveJoinRequest_reject_returns200() throws Exception {
+    void resolveJoinRequest_reject_returns204() throws Exception {
         String ownerToken = registerAndObtainToken("owner", "owner.rjrr@test.com");
         String guestToken = registerAndObtainToken("guest", "guest.rjrr@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Praga");
@@ -237,7 +237,7 @@ class MembershipE2ETest extends BaseE2ETest{
                         .header("Authorization", "Bearer " + ownerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -276,7 +276,7 @@ class MembershipE2ETest extends BaseE2ETest{
 
     @Test
     @DisplayName("Resolve join request: any member (not just creator) can accept")
-    void resolveJoinRequest_secondMemberCanAccept_returns200() throws Exception {
+    void resolveJoinRequest_secondMemberCanAccept_returns204() throws Exception {
         String ownerToken = registerAndObtainToken("owner", "owner.rjr2@test.com");
         String member2Token = registerAndObtainToken("member2", "member2.rjr2@test.com");
         String guestToken = registerAndObtainToken("guest", "guest.rjr2@test.com");
@@ -292,7 +292,7 @@ class MembershipE2ETest extends BaseE2ETest{
                         .header("Authorization", "Bearer " + member2Token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     // -------------------------------------------------------------------------
@@ -436,7 +436,7 @@ class MembershipE2ETest extends BaseE2ETest{
 
     @Test
     @DisplayName("Resolve invitation: user can accept their invitation")
-    void resolveInvitation_accept_returns200() throws Exception {
+    void resolveInvitation_accept_returns204() throws Exception {
         String ownerToken = registerAndObtainToken("owner", "owner.ria@test.com");
         String guestToken = registerAndObtainToken("guest", "guest.ria@test.com");
         UUID guestId = extractUserIdFromToken(guestToken);
@@ -450,12 +450,12 @@ class MembershipE2ETest extends BaseE2ETest{
                         .header("Authorization", "Bearer " + guestToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
     @DisplayName("Resolve invitation: user can reject their invitation")
-    void resolveInvitation_reject_returns200() throws Exception {
+    void resolveInvitation_reject_returns204() throws Exception {
         String ownerToken = registerAndObtainToken("owner", "owner.rir@test.com");
         String guestToken = registerAndObtainToken("guest", "guest.rir@test.com");
         UUID guestId = extractUserIdFromToken(guestToken);
@@ -469,7 +469,7 @@ class MembershipE2ETest extends BaseE2ETest{
                         .header("Authorization", "Bearer " + guestToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -526,7 +526,7 @@ class MembershipE2ETest extends BaseE2ETest{
 
     @Test
     @DisplayName("Leave trip: member can leave a trip")
-    void leaveTrip_asMember_returns200() throws Exception {
+    void leaveTrip_asMember_returns204() throws Exception {
         String ownerToken = registerAndObtainToken("owner", "owner.lv@test.com");
         String guestToken = registerAndObtainToken("guest", "guest.lv@test.com");
         UUID tripId = createTrip(ownerToken, "Viaje a Atenas");
@@ -536,7 +536,7 @@ class MembershipE2ETest extends BaseE2ETest{
 
         mockMvc.perform(delete("/trips/{tripId}/members/me", tripId)
                         .header("Authorization", "Bearer " + guestToken))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -573,7 +573,7 @@ class MembershipE2ETest extends BaseE2ETest{
 
         mockMvc.perform(delete("/trips/{tripId}/members/me", tripId)
                         .header("Authorization", "Bearer " + guestToken))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/trips/{tripId}", tripId)
                         .header("Authorization", "Bearer " + guestToken))
@@ -588,7 +588,7 @@ class MembershipE2ETest extends BaseE2ETest{
 
         mockMvc.perform(delete("/trips/{tripId}/members/me", tripId)
                         .header("Authorization", "Bearer " + ownerToken))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         MvcResult listResult = mockMvc.perform(get("/trips")
                         .header("Authorization", "Bearer " + ownerToken))
@@ -621,7 +621,7 @@ class MembershipE2ETest extends BaseE2ETest{
         // owner (last member) leaves — should cascade-delete join request, invitation, and the trip
         mockMvc.perform(delete("/trips/{tripId}/members/me", tripId)
                         .header("Authorization", "Bearer " + ownerToken))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         MvcResult listResult = mockMvc.perform(get("/trips")
                         .header("Authorization", "Bearer " + ownerToken))
@@ -663,7 +663,7 @@ class MembershipE2ETest extends BaseE2ETest{
 
         mockMvc.perform(delete("/trips/{tripId}/members/me", tripId)
                         .header("Authorization", "Bearer " + guestToken))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/trips/{tripId}", tripId)
                         .header("Authorization", "Bearer " + guestToken))

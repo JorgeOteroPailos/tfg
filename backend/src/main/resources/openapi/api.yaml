@@ -65,6 +65,16 @@ paths:
     $ref: './paths/ai-chat.yaml#/paths/~1trips~1{tripId}~1ai-chat'
   /trips/{tripId}/group-chat:
     $ref: './paths/group-chat.yaml#/paths/~1trips~1{tripId}~1group-chat'
+  /users/{userId}/friend-requests:
+    $ref: './paths/friends.yaml#/paths/~1users~1{userId}~1friend-requests'
+  /users/me/friend-requests:
+    $ref: './paths/friends.yaml#/paths/~1users~1me~1friend-requests'
+  /users/me/friend-requests/{requestId}:
+    $ref: './paths/friends.yaml#/paths/~1users~1me~1friend-requests~1{requestId}'
+  /users/me/friends:
+    $ref: './paths/friends.yaml#/paths/~1users~1me~1friends'
+  /users/me/friends/{friendId}:
+    $ref: './paths/friends.yaml#/paths/~1users~1me~1friends~1{friendId}'
 
 components:
   securitySchemes:

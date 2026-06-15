@@ -50,18 +50,18 @@ public class MembershipController implements MembershipApi{
     @Override
     public ResponseEntity<Void> leaveTrip(UUID tripId) {
         membershipService.leaveTrip(securityHelper.getUserId(),tripId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     public ResponseEntity<Void> resolveInvitation(UUID invitationId, ResolveJoinRequest resolveJoinRequest) {
         membershipService.resolveInvitation(invitationId, securityHelper.getUserId(), resolveJoinRequest.getAccepted());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     public ResponseEntity<Void> resolveJoinRequest(UUID tripId, UUID requestId, ResolveJoinRequest resolveJoinRequest) {
         membershipService.resolveJoinRequest(requestId, tripId, securityHelper.getUserId(), resolveJoinRequest.getAccepted());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

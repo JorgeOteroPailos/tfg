@@ -21,4 +21,9 @@ public interface JoinRequestRepository extends JpaRepository<JoinRequest, UUID> 
     @Modifying
     @Query("DELETE FROM JoinRequest j WHERE j.trip.id = :tripId")
     void deleteAllByTripId(@Param("tripId") UUID tripId);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM JoinRequest j WHERE j.user.id = :userId")
+    void deleteAllByUserId(@Param("userId") UUID userId);
 }

@@ -90,7 +90,7 @@ function createReducer(state: CreateState, action: CreateAction): CreateState {
   }
 }
 
-type ExpenseFlatRow = { _kind: 'date'; label: string } | { _kind: 'expense'; item: ExpenseSummary };
+type ExpenseFlatRow = { _kind: 'date'; label: string; total: number } | { _kind: 'expense'; item: ExpenseSummary };
 type BalanceFlatRow = { _kind: 'header'; title: string; mt?: number } | { _kind: 'balance'; userId: string; amount: number } | { _kind: 'settlement'; fromId: string; toId: string; amount: number } | { _kind: 'separator' } | { _kind: 'empty'; text: string } | { _kind: 'pastBtn' };
 
 // ── Modals ─────────────────────────────────────────────────────────────────
@@ -102,6 +102,7 @@ type ExpenseDetailModalProps = {
   error: string | null;
   confirmingDelete: boolean;
   deleting: boolean;
+  currentUserId: string | null | undefined;
   usernameFor: (id: string) => string;
   onClose: () => void;
   onDelete: () => void;
@@ -109,11 +110,27 @@ type ExpenseDetailModalProps = {
 };
 
 const ExpenseDetailModal = React.memo(function ExpenseDetailModal({
-  visible, expense, isLoading, error, confirmingDelete, deleting, usernameFor, onClose, onDelete, setConfirmingDelete,
+  visible, expense, isLoading, error, confirmingDelete, deleting, currentUserId, usernameFor, onClose, onDelete, setConfirmingDelete,
 }: ExpenseDetailModalProps) {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
+
+  const impactMsg = useMemo(() => {
+    if (!expense || !currentUserId) return null;
+    const isIAmPayer = expense.payerId === currentUserId;
+    const isIAmBeneficiary = expense.beneficiaryIds.includes(currentUserId);
+    const n = expense.beneficiaryIds.length;
+    const total = expense.amount ?? 0;
+    const myShare = n > 0 ? total / n : 0;
+    if (isIAmPayer && isIAmBeneficiary)
+      return t('trip.impactPayerBeneficiary', { total: total.toFixed(2), net: (total - myShare).toFixed(2) });
+    if (isIAmPayer)
+      return t('trip.impactPayerOnly', { total: total.toFixed(2) });
+    if (isIAmBeneficiary)
+      return t('trip.impactBeneficiaryOnly', { share: myShare.toFixed(2), payer: usernameFor(expense.payerId) });
+    return t('trip.impactNotInvolved');
+  }, [expense, currentUserId, usernameFor, t]);
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -160,6 +177,12 @@ const ExpenseDetailModal = React.memo(function ExpenseDetailModal({
                   </View>
                 </View>
               </View>
+              {impactMsg && (
+                <View style={[styles.impactRow, { backgroundColor: `${theme.tint}10`, borderColor: `${theme.tint}25` }]}>
+                  <Ionicons name="information-circle-outline" size={15} color={theme.icon} />
+                  <Text style={[styles.impactText, { color: theme.icon }]}>{impactMsg}</Text>
+                </View>
+              )}
             </>
           )}
 
@@ -566,6 +589,11 @@ const ExpensesScreen = () => {
     );
     const todayStr = new Date().toDateString();
     const yesterdayStr = new Date(Date.now() - 86_400_000).toDateString();
+    const totalsPerDay = new Map<string, number>();
+    for (const item of sorted) {
+      const dateKey = new Date(item.datetime).toDateString();
+      totalsPerDay.set(dateKey, (totalsPerDay.get(dateKey) ?? 0) + (item.amount ?? 0));
+    }
     const rows: ExpenseFlatRow[] = [];
     let lastDateKey: string | null = null;
     for (const item of sorted) {
@@ -576,7 +604,7 @@ const ExpensesScreen = () => {
         if (dateKey === todayStr) label = t('trip.today');
         else if (dateKey === yesterdayStr) label = t('trip.yesterday');
         else label = d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-        rows.push({ _kind: 'date', label });
+        rows.push({ _kind: 'date', label, total: totalsPerDay.get(dateKey) ?? 0 });
         lastDateKey = dateKey;
       }
       rows.push({ _kind: 'expense', item });
@@ -589,7 +617,11 @@ const ExpensesScreen = () => {
       return (
         <View style={styles.dateSeparator}>
           <View style={[styles.dateLine, { backgroundColor: theme.border }]} />
-          <Text style={[styles.dateLabel, { color: theme.icon }]}>{row.label}</Text>
+          <View style={styles.dateLabelGroup}>
+            <Text style={[styles.dateLabel, { color: theme.icon }]}>{row.label}</Text>
+            <Text style={[styles.dateLabel, { color: theme.icon }]}>·</Text>
+            <Text style={[styles.dateTotalInline, { color: theme.icon }]}>{row.total.toFixed(2)}€</Text>
+          </View>
           <View style={[styles.dateLine, { backgroundColor: theme.border }]} />
         </View>
       );
@@ -663,6 +695,7 @@ const ExpensesScreen = () => {
         error={detailQuery.isError ? t('trip.loadExpenseDetailError') : null}
         confirmingDelete={confirmingDelete}
         deleting={deleteExpenseMutation.isPending}
+        currentUserId={currentUserId}
         usernameFor={usernameFor}
         onClose={handleDetailClose}
         onDelete={handleDelete}
@@ -767,13 +800,18 @@ const styles = StyleSheet.create({
   chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
   chipText: { fontSize: 13, fontWeight: '700' },
 
+  impactRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 12, borderRadius: 12, borderWidth: 1 },
+  impactText: { flex: 1, fontSize: 12, fontWeight: '600', lineHeight: 17 },
+
   closeBtn: { paddingVertical: 15, borderRadius: 14, alignItems: 'center', marginTop: 10 },
   closeBtnText: { color: '#fff', fontWeight: '900', fontSize: 13, letterSpacing: 2 },
   errText: { color: Colors.warning, fontSize: 13, fontWeight: '600', textAlign: 'center' },
 
   dateSeparator: { flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 4 },
   dateLine: { flex: 1, height: StyleSheet.hairlineWidth },
+  dateLabelGroup: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   dateLabel: { fontSize: 11, fontWeight: '500', letterSpacing: 0.3 },
+  dateTotalInline: { fontSize: 11, fontWeight: '700' },
 
   categoryRow: { flexDirection: 'row', gap: 8, paddingBottom: 4 },
   categoryChip: { alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 14, borderWidth: 1.5, minWidth: 68 },

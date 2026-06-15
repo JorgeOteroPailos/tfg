@@ -44,7 +44,7 @@ public class AiChatController implements AiChatApi {
     /**
      * Streams an AI assistant response for the given trip as Server-Sent Events.
      * The assistant has context of the trip's events and expenses.
-     * Message history (last 10 messages) is included in each request to Ollama.
+     * Message history (last 5 messages) is included in each request to Ollama.
      * The user message and assistant response are persisted after the stream completes.
      *
      * @param tripId  the trip to chat about

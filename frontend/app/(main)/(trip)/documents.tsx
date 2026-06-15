@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import { useAppTheme } from '../../../src/theme';
+import { useDataSaver } from '../../../src/dataSaver';
 import { Colors } from '../../../constants/Colors';
 import { useDocuments, useDocumentsQuery, useDocumentDownloadQuery, useUploadDocumentMutation, useDeleteDocumentMutation, type DocumentResponse } from '../../../src/documents';
 import { useTrip } from '../../../src/trips';
@@ -51,10 +52,12 @@ function isImageFile(name: string) {
 
 const DocGridCard = React.memo(function DocGridCard({ item, background, tint, onPress }: Pick<DocCardProps, 'item' | 'background' | 'tint' | 'onPress'>) {
   const { trip } = useTrip();
+  const { dataSaver } = useDataSaver();
   const isImage = isImageFile(item.name);
   // Full image only as fallback when there is no server-generated thumbnail (old docs, heic, failed generation)
-  const { data: fallbackUri } = useDocumentDownloadQuery(trip?.id ?? '', item.id, { enabled: isImage && !item.previewUrl && !!trip?.id });
-  const imageUri = item.previewUrl ?? fallbackUri;
+  const { data: fallbackUri } = useDocumentDownloadQuery(trip?.id ?? '', item.id, { enabled: isImage && !item.previewUrl && !!trip?.id && !dataSaver });
+  // In data-saver mode the grid shows the file icon instead of fetching previews.
+  const imageUri = dataSaver ? undefined : (item.previewUrl ?? fallbackUri);
 
   return (
     <Pressable
@@ -312,11 +315,12 @@ const DocumentsScreen = () => {
     return map;
   }, [trip?.members]);
 
-  const { data: detailImageUrl } = useDocumentDownloadQuery(
+  const { data: detailFallbackUrl } = useDocumentDownloadQuery(
     trip?.id ?? '',
     detail.doc?.id ?? '',
-    { enabled: !!detail.doc && isImageFile(detail.doc.name) },
+    { enabled: !!detail.doc && isImageFile(detail.doc.name) && !detail.doc.previewUrl },
   );
+  const detailImageUrl = detail.doc?.previewUrl ?? detailFallbackUrl ?? null;
 
   const docs = documentsQuery.data ?? EMPTY_DOCS;
 

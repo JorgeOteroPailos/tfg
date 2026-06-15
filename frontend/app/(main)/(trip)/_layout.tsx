@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { TripProvider, useTrip, useTrips } from '../../../src/trips';
+import { saveLastTripId, clearLastTripId } from '../../../src/lastTrip';
 import { GroupChatProvider, useTripChat } from '../../../src/groupChat';
 import { Ionicons } from '@expo/vector-icons';
 import { AiChatButton } from '../../../components/AiChatModal';
@@ -23,6 +24,7 @@ const TripContent = () => {
   const segments = useSegments();
   const activeTab = segments[segments.length - 1];
   const { trip } = useTrip();
+  const pendingRequestCount = trip?.pendingRequests?.length ?? 0;
   const { unreadCount } = useTripChat();
   const { leaveTrip } = useTrips();
   const { bottom: safeBottom } = useSafeAreaInsets();
@@ -45,6 +47,10 @@ const TripContent = () => {
     });
     return () => { show.remove(); hide.remove(); };
   }, [keyboardHeight, safeBottom]);
+
+  useEffect(() => {
+    if (tripId) saveLastTripId(tripId);
+  }, [tripId]);
 
   const tabs = [
     { name: 'expenses', icon: 'receipt-outline', label: t('trip.expenses') },
@@ -91,7 +97,11 @@ const TripContent = () => {
       <View onLayout={e => { tabBarHeightRef.current = e.nativeEvent.layout.height; }} style={[styles.tabBar, { backgroundColor: theme.navBackground }]}>
         {tabs.map(tab => {
           const isActive = tab.name === activeTab;
-          const showBadge = tab.name === 'chat' && !isActive && unreadCount > 0;
+          const showChatBadge = tab.name === 'chat' && !isActive && unreadCount > 0;
+          const showMembersBadge = tab.name === 'members' && !isActive && pendingRequestCount > 0;
+          const showBadge = showChatBadge || showMembersBadge;
+          const badgeCount = showChatBadge ? unreadCount : pendingRequestCount;
+          const badgeColor = showChatBadge ? Colors.primary : Colors.warning;
           return (
             <Pressable
               key={tab.name}
@@ -111,9 +121,9 @@ const TripContent = () => {
                   color={isActive ? theme.tint : theme.icon}
                 />
                 {showBadge && (
-                  <View style={[styles.badge, { backgroundColor: Colors.primary, borderColor: theme.navBackground }]}>
+                  <View style={[styles.badge, { backgroundColor: badgeColor, borderColor: theme.navBackground }]}>
                     <Text style={styles.badgeText} numberOfLines={1}>
-                      {unreadCount > 99 ? '99+' : unreadCount}
+                      {badgeCount > 99 ? '99+' : badgeCount}
                     </Text>
                   </View>
                 )}
@@ -183,6 +193,7 @@ const TripContent = () => {
                   try {
                     await leaveTrip(tripId);
                   } catch { /* best-effort */ }
+                  await clearLastTripId();
                   router.replace('/main');
                 }}
               >
@@ -219,6 +230,7 @@ const TripContent = () => {
                   try {
                     await leaveTrip(tripId);
                   } catch { /* best-effort */ }
+                  await clearLastTripId();
                   router.replace('/main');
                 }}
               >

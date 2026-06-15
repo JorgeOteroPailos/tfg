@@ -9,6 +9,7 @@ type UserProfile = components['schemas']['UserProfile'];
 type OwnProfile = components['schemas']['OwnProfile'];
 type UpdateProfileRequest = components['schemas']['UpdateProfileRequest'];
 type ChangePasswordRequest = components['schemas']['ChangePasswordRequest'];
+type DeleteAccountRequest = components['schemas']['DeleteAccountRequest'];
 type LoginResponse = components['schemas']['LoginResponse'];
 type AvatarUploadResponse = components['schemas']['AvatarUploadResponse'];
 type AvatarDownloadResponse = components['schemas']['AvatarDownloadResponse'];
@@ -80,6 +81,24 @@ export function useChangePasswordMutation() {
     onSuccess: async ({ accessToken, refreshToken }) => {
       // the backend revoked every refresh token; keep this device logged in
       await applyTokens(accessToken, refreshToken);
+    },
+  });
+}
+
+export function useDeleteAccountMutation() {
+  const { callAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (request: DeleteAccountRequest): Promise<void> => {
+      const response = await callAuthenticated('/users/me', {
+        method: 'DELETE',
+        body: JSON.stringify(request),
+      });
+      if (!response.ok) throw new AppError(response.status as ErrorCode);
+    },
+    onSuccess: () => {
+      // The account no longer exists; drop every cached query. The caller clears the session.
+      queryClient.clear();
     },
   });
 }

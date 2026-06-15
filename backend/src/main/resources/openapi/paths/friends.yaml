@@ -1,0 +1,119 @@
+paths:
+  /users/{userId}/friend-requests:
+    post:
+      summary: Send a friend request to a user by their ID (e.g. from QR scan)
+      operationId: sendFriendRequestById
+      tags:
+        - Friends
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Friend request sent successfully
+        '401':
+          description: Not authenticated
+        '404':
+          description: User not found
+        '409':
+          description: Already friends or request already pending
+
+  /users/me/friend-requests:
+    get:
+      summary: Get my pending received friend requests
+      operationId: getMyFriendRequests
+      tags:
+        - Friends
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of pending friend requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../schemas/friends.yaml#/schemas/FriendRequestSummary'
+        '401':
+          description: Not authenticated
+
+  /users/me/friend-requests/{requestId}:
+    delete:
+      summary: Accept or reject a friend request
+      operationId: resolveFriendRequest
+      tags:
+        - Friends
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/friends.yaml#/schemas/ResolveFriendRequest'
+      responses:
+        '204':
+          description: Friend request resolved
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not your friend request
+        '404':
+          description: Friend request not found
+
+  /users/me/friends:
+    get:
+      summary: Get my friends list
+      operationId: getMyFriends
+      tags:
+        - Friends
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of friends
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../schemas/trips.yaml#/schemas/UserProfile'
+        '401':
+          description: Not authenticated
+
+  /users/me/friends/{friendId}:
+    delete:
+      summary: Remove a friend
+      operationId: removeFriend
+      tags:
+        - Friends
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: friendId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Friend removed
+        '401':
+          description: Not authenticated
+        '404':
+          description: Friendship not found

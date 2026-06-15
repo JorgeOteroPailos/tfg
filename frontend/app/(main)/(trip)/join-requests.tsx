@@ -1,10 +1,12 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Pressable, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { useTrip } from '../../../src/trips';
+import { tripKeys } from '../../../src/queryKeys';
 import { useInvitations } from '../../../src/invitations';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '../../../components/ThemedText';
@@ -58,8 +60,11 @@ const JoinRequestsScreen = () => {
   const { resolveJoinRequest } = useInvitations();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
 
+  const queryClient = useQueryClient();
   const [resolving, setResolving] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => { reload(); }, [reload]);
 
   const handleResolve = useCallback(async (requestId: string, accepted: boolean) => {
     if (!trip) return;
@@ -68,12 +73,13 @@ const JoinRequestsScreen = () => {
     try {
       await resolveJoinRequest(trip.id, requestId, accepted);
       await reload();
+      if (accepted) queryClient.invalidateQueries({ queryKey: tripKeys.lists() });
     } catch {
       setError(t('trip.resolveRequestError'));
     } finally {
       setResolving(null);
     }
-  }, [resolveJoinRequest, reload, t, trip]);
+  }, [resolveJoinRequest, reload, queryClient, t, trip]);
 
   const handleAccept = useCallback((id: string) => handleResolve(id, true), [handleResolve]);
   const handleReject = useCallback((id: string) => handleResolve(id, false), [handleResolve]);

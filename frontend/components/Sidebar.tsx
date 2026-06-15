@@ -6,6 +6,7 @@ import { useAuth } from '../src/auth';
 import { useAppTheme } from '../src/theme';
 import { Colors } from '../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
+import { useFriendRequestsQuery } from '../src/friends';
 
 const Sidebar = () => {
   const { open, setOpen } = useSidebar();
@@ -13,6 +14,8 @@ const Sidebar = () => {
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
   const { t } = useTranslation();
+  const friendRequestsQuery = useFriendRequestsQuery();
+  const pendingFriendRequests = friendRequestsQuery.data?.length ?? 0;
 
   const handleLogout = async () => {
     setOpen(false);
@@ -21,9 +24,10 @@ const Sidebar = () => {
   };
 
   const items = [
-    { icon: 'person-circle-outline' as const, label: t('nav.profile'), href: '/profile' as const },
-    { icon: 'settings-outline' as const, label: t('settings.title'), href: '/settings' as const },
-    { icon: 'mail-outline' as const, label: t('nav.invitations'), href: '/invitations' as const },
+    { icon: 'person-circle-outline' as const, label: t('nav.profile'), href: '/profile' as const, badge: 0 },
+    { icon: 'settings-outline' as const, label: t('settings.title'), href: '/settings' as const, badge: 0 },
+    { icon: 'mail-outline' as const, label: t('nav.invitations'), href: '/invitations' as const, badge: 0 },
+    { icon: 'people-outline' as const, label: t('nav.friends'), href: '/friends' as const, badge: pendingFriendRequests },
   ] as const;
 
   return (
@@ -42,6 +46,11 @@ const Sidebar = () => {
                 <Ionicons name={item.icon} size={20} color={theme.tint} />
               </View>
               <Text style={[styles.sheetLabel, { color: theme.title }]}>{item.label}</Text>
+              {item.badge > 0 && (
+                <View style={[styles.badge, { backgroundColor: Colors.warning }]}>
+                  <Text style={styles.badgeText}>{item.badge}</Text>
+                </View>
+              )}
               <Ionicons name="chevron-forward" size={15} color={theme.icon} style={{ opacity: 0.4 }} />
             </Pressable>
           ))}
@@ -103,4 +112,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sheetLabel: { flex: 1, fontSize: 15, fontWeight: '700' },
+  badge: {
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 5,
+    marginRight: 6,
+  },
+  badgeText: { color: '#fff', fontSize: 11, fontWeight: '800' },
 });

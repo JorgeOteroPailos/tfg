@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface SettlementRepository extends JpaRepository<Settlement, UUID>{
     List<Settlement> findByTrip_IdOrderByTimestampDesc(UUID tripId);
+
+    List<Settlement> findByTripId(UUID tripId);
 }

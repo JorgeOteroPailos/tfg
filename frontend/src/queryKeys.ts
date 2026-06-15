@@ -28,6 +28,11 @@ export const invitationKeys = {
   list: () => ['invitations'] as const,
 };
 
+export const friendKeys = {
+  list: () => ['friends'] as const,
+  requests: () => ['friends', 'requests'] as const,
+};
+
 const memberKeys = {
   list: (tripId: string) => ['trips', tripId, 'members'] as const,
   joinRequests: (tripId: string) => ['trips', tripId, 'join-requests'] as const,

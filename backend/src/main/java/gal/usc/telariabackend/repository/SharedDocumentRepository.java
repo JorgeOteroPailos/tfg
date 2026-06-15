@@ -14,6 +14,8 @@ public interface SharedDocumentRepository extends JpaRepository<SharedDocument, 
 
     List<SharedDocument> findByTripId(UUID tripId);
 
+    List<SharedDocument> findByCreatorId(UUID creatorId);
+
     Optional<SharedDocument> findByIdAndTripId(UUID id, UUID tripId);
 
     void deleteAllByTripId(UUID tripId);

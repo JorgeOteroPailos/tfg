@@ -379,7 +379,11 @@ export interface paths {
         get: operations["getMyProfile"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Permanently delete the authenticated user's account
+         * @description Requires the current password. Deletes the user along with all data tied to them: memberships (trips left empty are deleted entirely), their expenses, settlements, chat messages and uploaded documents in shared trips, friendships, pending invitations and join requests, refresh tokens and avatar. This action is irreversible.
+         */
+        delete: operations["deleteMyAccount"];
         options?: never;
         head?: never;
         /** Update the authenticated user's profile (username and/or email) */
@@ -492,6 +496,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users/{userId}/friend-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a friend request to a user by their ID (e.g. from QR scan) */
+        post: operations["sendFriendRequestById"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/me/friend-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get my pending received friend requests */
+        get: operations["getMyFriendRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/me/friend-requests/{requestId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Accept or reject a friend request */
+        delete: operations["resolveFriendRequest"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/me/friends": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get my friends list */
+        get: operations["getMyFriends"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/me/friends/{friendId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a friend */
+        delete: operations["removeFriend"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -566,6 +655,8 @@ export interface components {
             memberCount: number;
             /** Format: double */
             totalSpent: number;
+            /** Format: date-time */
+            creationDate?: string;
         };
         IdResponse: {
             /** Format: uuid */
@@ -787,6 +878,14 @@ export interface components {
             /** @description Whether the user has a profile picture stored */
             hasAvatar: boolean;
         };
+        DeleteAccountRequest: {
+            /**
+             * Format: password
+             * @description The account's current password, re-entered to confirm the deletion
+             * @example secreto123
+             */
+            password: string;
+        };
         /** @description At least one field should be provided; omitted fields are left unchanged. */
         UpdateProfileRequest: {
             /** @example juanperez */
@@ -852,6 +951,14 @@ export interface components {
         };
         SendTripChatMessageRequest: {
             content: string;
+        };
+        FriendRequestSummary: {
+            /** Format: uuid */
+            id: string;
+            sender: components["schemas"]["UserProfile"];
+        };
+        ResolveFriendRequest: {
+            accepted: boolean;
         };
     };
     responses: never;
@@ -1942,6 +2049,35 @@ export interface operations {
             };
         };
     };
+    deleteMyAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAccountRequest"];
+            };
+        };
+        responses: {
+            /** @description Account deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated or password incorrect */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     updateMyProfile: {
         parameters: {
             query?: never;
@@ -2259,6 +2395,180 @@ export interface operations {
                 content?: never;
             };
             /** @description Trip not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    sendFriendRequestById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Friend request sent successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Already friends or request already pending */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getMyFriendRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of pending friend requests */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FriendRequestSummary"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    resolveFriendRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                requestId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveFriendRequest"];
+            };
+        };
+        responses: {
+            /** @description Friend request resolved */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not your friend request */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Friend request not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getMyFriends: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of friends */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserProfile"][];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    removeFriend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                friendId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Friend removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Friendship not found */
             404: {
                 headers: {
                     [name: string]: unknown;

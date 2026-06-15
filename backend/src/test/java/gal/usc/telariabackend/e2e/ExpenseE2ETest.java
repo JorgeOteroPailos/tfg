@@ -136,7 +136,7 @@ class ExpenseE2ETest extends BaseE2ETest{
                         .header("Authorization", "Bearer " + memberToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new ResolveJoinRequest().accepted(true))))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     // POST /trips/{tripId}/expenses

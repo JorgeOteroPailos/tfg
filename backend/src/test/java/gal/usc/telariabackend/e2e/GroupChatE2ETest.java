@@ -297,7 +297,7 @@ class GroupChatE2ETest extends BaseE2ETest {
                         .header("Authorization", "Bearer " + bob)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new ResolveJoinRequest().accepted(true))))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         // Both send a message
         sendChatMessage(alice, tripId, "Hey Bob!");

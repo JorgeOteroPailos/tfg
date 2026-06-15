@@ -138,8 +138,20 @@ public class SharedDocumentService {
 
         t.assertIsMember(requesterId);
 
-        return documentRepository.findByTripId(tripId).stream()
+        List<SharedDocument> docs = documentRepository.findByTripId(tripId).stream()
                 .filter(d -> d.isUploaded() || d.getCreator().getId().equals(requesterId))
+                .toList();
+
+        for (SharedDocument doc : docs) {
+            if (doc.isUploaded() && doc.getThumbnailObjectKey() == null) {
+                generateThumbnail(doc);
+                if (doc.getThumbnailObjectKey() != null) {
+                    documentRepository.save(doc);
+                }
+            }
+        }
+
+        return docs.stream()
                 .map(d -> {
                     DocumentResponse response = d.toDocumentResponse();
                     if (d.getThumbnailObjectKey() != null) {
@@ -181,6 +193,26 @@ public class SharedDocumentService {
                         .build());
             } catch (Exception e) {
                 log.warn("Failed to delete S3 object '{}' for trip {}: {}", doc.getObjectKey(), tripId, e.getMessage());
+            }
+            deleteThumbnail(doc);
+        }
+        documentRepository.deleteAll(docs);
+    }
+
+    /**
+     * Deletes every document uploaded by the given user (across all trips), removing the
+     * stored object and thumbnail from Minio. Used when a user deletes their account.
+     */
+    public void deleteAllForUser(UUID userId) {
+        List<SharedDocument> docs = documentRepository.findByCreatorId(userId);
+        for (SharedDocument doc : docs) {
+            try {
+                s3Client.deleteObject(DeleteObjectRequest.builder()
+                        .bucket(minioConfig.getBucket())
+                        .key(doc.getObjectKey())
+                        .build());
+            } catch (Exception e) {
+                log.warn("Failed to delete S3 object '{}' for user {}: {}", doc.getObjectKey(), userId, e.getMessage());
             }
             deleteThumbnail(doc);
         }

@@ -24,4 +24,9 @@ public interface TripChatMessageRepository extends JpaRepository<TripChatMessage
     @Modifying
     @Query("DELETE FROM TripChatMessage m WHERE m.timestamp < :cutoff")
     void deleteByTimestampBefore(@Param("cutoff") OffsetDateTime cutoff);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM TripChatMessage m WHERE m.user.id = :userId")
+    void deleteAllByUserId(@Param("userId") UUID userId);
 }

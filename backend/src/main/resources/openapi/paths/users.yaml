@@ -44,6 +44,30 @@ paths:
         '409':
           description: Email already in use by another account
 
+    delete:
+      summary: Permanently delete the authenticated user's account
+      description: >
+        Requires the current password. Deletes the user along with all data tied to them:
+        memberships (trips left empty are deleted entirely), their expenses, settlements,
+        chat messages and uploaded documents in shared trips, friendships, pending
+        invitations and join requests, refresh tokens and avatar. This action is irreversible.
+      operationId: deleteMyAccount
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/users.yaml#/schemas/DeleteAccountRequest'
+      responses:
+        '204':
+          description: Account deleted
+        '401':
+          description: Not authenticated or password incorrect
+
   /users/me/password:
     put:
       summary: Change the authenticated user's password

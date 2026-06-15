@@ -1,6 +1,7 @@
 package gal.usc.telariabackend.services;
 
 import gal.usc.telariabackend.model.AiChatMessage;
+import gal.usc.telariabackend.model.Location;
 import gal.usc.telariabackend.model.Trip;
 import gal.usc.telariabackend.model.User;
 import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
@@ -11,7 +12,9 @@ import jakarta.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +33,9 @@ import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class AiChatService {
+
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final AiChatMessageRepository chatMessageRepo;
     private final TripRepository tripRepo;
@@ -149,35 +155,38 @@ public class AiChatService {
     private String buildSystemPrompt(Trip trip) {
         StringBuilder sb = new StringBuilder();
         sb.append("Eres un asistente experto en viajes. ");
+        sb.append("Hoy es ").append(LocalDate.now().format(DATE_FMT)).append(".\n");
         sb.append("El usuario está en un viaje llamado \"")
             .append(trip.getName())
             .append("\".\n\n");
 
         sb.append("EVENTOS:\n");
-        trip.getEvents().forEach(e ->
-            sb
-                .append("- ")
-                .append(e.getName())
-                .append(" (")
-                .append(e.getStartTime())
-                .append(")")
-                .append(" en ")
-                .append(e.getLocation().getName())
-                .append("\n")
-        );
+        trip.getEvents().forEach(e -> {
+            sb.append("- ").append(e.getName());
+            if (e.getStartTime() != null) {
+                sb.append(" (").append(e.getStartTime().format(DATETIME_FMT)).append(")");
+            }
+            Location loc = e.getLocation();
+            if (loc != null && loc.getName() != null) {
+                sb.append(" en ").append(loc.getName());
+            }
+            sb.append("\n");
+        });
 
         sb.append("\nGASTOS:\n");
-        trip.getExpenses().forEach(e ->
-            sb
-                .append("- ")
+        trip.getExpenses().forEach(e -> {
+            sb.append("- ")
                 .append(e.getName())
+                .append(" [").append(e.getCategory()).append("]")
                 .append(": ")
                 .append(e.getAmount())
                 .append("€")
-                .append(" (pagado por ")
-                .append(e.getPayer().getUsername())
-                .append(")\n")
-        );
+                .append(" (pagado por ").append(e.getPayer().getUsername());
+            if (e.getTimestamp() != null) {
+                sb.append(", el ").append(e.getTimestamp().format(DATE_FMT));
+            }
+            sb.append(")\n");
+        });
 
         sb.append("\nResponde en el idioma en que te escriba el usuario.");
         return sb.toString();
