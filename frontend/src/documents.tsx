@@ -69,6 +69,23 @@ export function useDocumentsQuery(tripId: string) {
   });
 }
 
+export function useDocumentsByDateQuery(tripId: string, date: string | null) {
+  const { callAuthenticated } = useAuth();
+  // Device offset so the backend can window the calendar day in the user's timezone
+  // (matches the local dateKey the caller builds), rather than assuming UTC.
+  const tzOffsetMinutes = new Date().getTimezoneOffset();
+  return useQuery({
+    queryKey: documentKeys.byDate(tripId, date ?? '', tzOffsetMinutes),
+    queryFn: async (): Promise<DocumentResponse[]> => {
+      const params = new URLSearchParams({ date: date ?? '', tzOffsetMinutes: String(tzOffsetMinutes) });
+      const response = await callAuthenticated(`/trips/${tripId}/documents?${params.toString()}`);
+      if (!response.ok) throw new AppError(response.status as ErrorCode);
+      return response.json();
+    },
+    enabled: !!tripId && !!date,
+  });
+}
+
 export function useDocumentDownloadQuery(tripId: string, documentId: string, options?: { enabled?: boolean }) {
   const { callAuthenticated } = useAuth();
   return useQuery({

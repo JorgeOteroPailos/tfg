@@ -35,6 +35,7 @@ type ChatState = {
   streamingContent: string;
   hasMore: boolean;
   loadingMore: boolean;
+  error: boolean; // the last stream failed (e.g. AI backend unreachable)
 };
 
 type ChatAction =
@@ -47,14 +48,16 @@ type ChatAction =
   | { type: 'send'; userMessage: Message }
   | { type: 'stream_token'; content: string }
   | { type: 'stream_done'; messages: Message[] }
+  | { type: 'stream_done_local'; assistantMessage: Message }
   | { type: 'stream_abort' }
+  | { type: 'stream_error' }
   | { type: 'set_input'; input: string }
   | { type: 'close' };
 
 function chatReducer(state: ChatState, action: ChatAction): ChatState {
   switch (action.type) {
     case 'load_start':
-      return { ...state, loading: true };
+      return { ...state, loading: true, error: false };
     case 'load_done':
       return { ...state, loading: false, messages: action.messages, hasMore: action.hasMore };
     case 'load_error':
@@ -66,17 +69,21 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
     case 'load_more_error':
       return { ...state, loadingMore: false };
     case 'send':
-      return { ...state, messages: [...state.messages, action.userMessage], input: '', streaming: true, streamingContent: '' };
+      return { ...state, messages: [...state.messages, action.userMessage], input: '', streaming: true, streamingContent: '', error: false };
     case 'stream_token':
       return { ...state, streamingContent: action.content };
     case 'stream_done':
       return { ...state, streaming: false, streamingContent: '', messages: action.messages };
+    case 'stream_done_local':
+      return { ...state, streaming: false, streamingContent: '', messages: [...state.messages, action.assistantMessage] };
     case 'stream_abort':
       return { ...state, streaming: false, streamingContent: '' };
+    case 'stream_error':
+      return { ...state, streaming: false, streamingContent: '', error: true };
     case 'set_input':
       return { ...state, input: action.input };
     case 'close':
-      return { ...state, streaming: false, streamingContent: '' };
+      return { ...state, streaming: false, streamingContent: '', error: false };
     default:
       return state;
   }
@@ -96,8 +103,9 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
     streamingContent: '',
     hasMore: false,
     loadingMore: false,
+    error: false,
   });
-  const { messages, input, loading, streaming, streamingContent, hasMore, loadingMore } = state;
+  const { messages, input, loading, streaming, streamingContent, hasMore, loadingMore, error } = state;
 
   const scrollRef = useRef<FlatList<Message>>(null);
   const abortRef = useRef<(() => void) | null>(null);
@@ -152,17 +160,27 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
       async () => {
         // SSE strips the leading space from tokens like " este" → "este",
         // so we reload from the server to get the correctly-spaced full text.
+        const streamed = streamingContentRef.current;
         streamingContentRef.current = '';
         try {
           const { messages: hist } = await getHistory(tripId);
           dispatch({ type: 'stream_done', messages: hist.map(toMessage) });
         } catch {
-          dispatch({ type: 'stream_abort' });
+          // Reload failed — keep the answer we already streamed rather than
+          // dropping it, so the user isn't left with a question and no reply.
+          if (streamed) {
+            dispatch({
+              type: 'stream_done_local',
+              assistantMessage: { id: `a-${Date.now()}`, role: 'assistant', content: streamed },
+            });
+          } else {
+            dispatch({ type: 'stream_error' });
+          }
         }
       },
       () => {
         streamingContentRef.current = '';
-        dispatch({ type: 'stream_abort' });
+        dispatch({ type: 'stream_error' });
       }
     );
 
@@ -207,6 +225,15 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
     </View>
   ) : null;
 
+  const errorBubble = error ? (
+    <View style={[styles.messageRow, styles.rowAssistant]}>
+      <View style={[styles.bubble, styles.bubbleAssistant, styles.bubbleError]}>
+        <Ionicons name="alert-circle-outline" size={16} color={Colors.warning} />
+        <ThemedText style={[styles.bubbleText, styles.bubbleErrorText]}>{t('trip.aiChatError')}</ThemedText>
+      </View>
+    </View>
+  ) : null;
+
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={handleClose} onShow={loadHistory}>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -235,7 +262,7 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
               data={messages}
               renderItem={renderMessage}
               keyExtractor={msg => msg.id}
-              ListFooterComponent={streamingBubble}
+              ListFooterComponent={streamingBubble ?? errorBubble}
               ListHeaderComponent={hasMore ? (
                 <Pressable style={styles.loadOlderBtn} onPress={loadOlder} disabled={loadingMore}>
                   {loadingMore
@@ -319,6 +346,13 @@ const styles = StyleSheet.create({
   bubble: { maxWidth: '80%', borderRadius: 18, paddingHorizontal: 14, paddingVertical: 10 },
   bubbleUser: { borderBottomRightRadius: 4 },
   bubbleAssistant: { borderBottomLeftRadius: 4 },
+  bubbleError: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(239,68,68,0.12)',
+  },
+  bubbleErrorText: { color: Colors.warning },
   bubbleText: { fontSize: 15, lineHeight: 22 },
   bubbleTextUser: { color: '#fff' },
   inputRow: {

@@ -90,3 +90,5 @@ paths:
           description: Not authenticated
         '403':
           description: Not a member of this trip
+        '404':
+          description: Event not found in this trip

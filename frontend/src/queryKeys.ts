@@ -16,6 +16,7 @@ export const eventKeys = {
 
 export const documentKeys = {
   list: (tripId: string) => ['trips', tripId, 'documents'] as const,
+  byDate: (tripId: string, date: string, tzOffsetMinutes: number) => ['trips', tripId, 'documents', 'by-date', date, tzOffsetMinutes] as const,
   downloadUrl: (tripId: string, docId: string) => ['trips', tripId, 'documents', docId, 'url'] as const,
 };
 

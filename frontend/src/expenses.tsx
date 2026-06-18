@@ -49,10 +49,10 @@ export function useExpenses() {
     return response.json();
   }, [callAuthenticated]);
 
-  const paySettlement = useCallback(async (tripId: string, fromId: string, toId: string, amount: number): Promise<void> => {
+  const paySettlement = useCallback(async (tripId: string, toId: string, amount: number): Promise<void> => {
     const response = await callAuthenticated(`/trips/${tripId}/settlements`, {
       method: 'POST',
-      body: JSON.stringify({ fromId, toId, amount }),
+      body: JSON.stringify({ toId, amount }),
     });
     if (!response.ok) throw new AppError(response.status as ErrorCode);
   }, [callAuthenticated]);
@@ -170,10 +170,10 @@ export function usePaySettlementMutation(tripId: string) {
   const { callAuthenticated } = useAuth();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ fromId, toId, amount }: { fromId: string; toId: string; amount: number }): Promise<void> => {
+    mutationFn: async ({ toId, amount }: { toId: string; amount: number }): Promise<void> => {
       const response = await callAuthenticated(`/trips/${tripId}/settlements`, {
         method: 'POST',
-        body: JSON.stringify({ fromId, toId, amount }),
+        body: JSON.stringify({ toId, amount }),
       });
       if (!response.ok) throw new AppError(response.status as ErrorCode);
     },

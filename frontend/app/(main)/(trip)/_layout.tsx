@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { TripProvider, useTrip, useTrips } from '../../../src/trips';
-import { saveLastTripId, clearLastTripId } from '../../../src/lastTrip';
+import { saveLastTripId, saveLastTripTab, clearLastTripId } from '../../../src/lastTrip';
 import { GroupChatProvider, useTripChat } from '../../../src/groupChat';
 import { Ionicons } from '@expo/vector-icons';
 import { AiChatButton } from '../../../components/AiChatModal';
@@ -51,6 +51,10 @@ const TripContent = () => {
   useEffect(() => {
     if (tripId) saveLastTripId(tripId);
   }, [tripId]);
+
+  useEffect(() => {
+    saveLastTripTab(activeTab);
+  }, [activeTab]);
 
   const tabs = [
     { name: 'expenses', icon: 'receipt-outline', label: t('trip.expenses') },

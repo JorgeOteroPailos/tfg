@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1781000085.42554 "memoria.tex" "memoria.pdf" "memoria" 1781000085.85044 0
+["pdflatex"] 1781813079.82887 "/home/jorge/Documentos/universidad/cuarto/tfg/memoria/memoria.tex" "memoria.pdf" "memoria" 1781813080.24471 0
   "/etc/texmf/web2c/texmf.cnf" 1770728380.43519 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1000.600pk" 1770739871.14476 25396 179f692b62f7b2053251f7398f5fbc63 ""
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1200.600pk" 1780995166.79442 31928 7f12b2cea174eec7a4643aa4a6383c10 ""
@@ -9,6 +9,7 @@
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1000.600pk" 1770739870.0058 23784 4e88b087bf5fd25ba1e0a8d1b84e9e1e ""
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1200.600pk" 1770739873.56768 28416 180ae57721c4a135c729bf6ac478c0a4 ""
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1000.600pk" 1780965489.63911 31872 d3102e2158933ad76d9e97ab05688bcb ""
+  "/home/jorge/Documentos/universidad/cuarto/tfg/memoria/memoria.tex" 1781813079.56147 22892 4518d5a765bb27ba1376cf1a9ec041aa ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecbx1000.tfm" 1136768653 3584 2d666ecf6d466d8b007246bc2f94d9da ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecbx1200.tfm" 1136768653 3584 402da0b29eafbad07963b1224b222f18 ""
@@ -82,10 +83,10 @@
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1770729823.40751 128028 f533b797fba58d231669ea19e894e23e ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1770729944 6822886 8a59dbb4f14592574ac5e5ef4fbf3a36 ""
   "assets/usc/logo_usc.pdf" 1780999811.85767 21986 bf2329a23c54155805efc4a34863fd86 ""
-  "memoria.aux" 1781000085.77978 4038 cc6785ba06bc0d019485bba4746e50c7 "pdflatex"
-  "memoria.out" 1781000085.78078 4615 f9d9047c3f861228e4454aafed342fa7 "pdflatex"
-  "memoria.tex" 1781000081.15432 19670 1bfae6302b0c3dd384b177a1762df646 ""
-  "memoria.toc" 1781000085.7823 2439 2fa23e33b294d4ef1245909bb81cf4d7 "pdflatex"
+  "memoria.aux" 1781813080.19144 4039 2e8e1c1c76cd9b80d0cd5de3b2eedaaf "pdflatex"
+  "memoria.out" 1781813080.19244 4615 f9d9047c3f861228e4454aafed342fa7 "pdflatex"
+  "memoria.tex" 1781813079.56147 22892 4518d5a765bb27ba1376cf1a9ec041aa ""
+  "memoria.toc" 1781813080.19344 2439 86dc5b54d5320105313f6490c697d449 "pdflatex"
   (generated)
   "memoria.aux"
   "memoria.log"

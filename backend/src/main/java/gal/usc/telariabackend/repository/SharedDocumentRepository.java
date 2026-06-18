@@ -21,4 +21,9 @@ public interface SharedDocumentRepository extends JpaRepository<SharedDocument, 
     void deleteAllByTripId(UUID tripId);
 
     List<SharedDocument> findByUploadedFalseAndCreatedAtBefore(OffsetDateTime cutoff);
+
+    List<SharedDocument> findByUploadedTrueAndThumbnailObjectKeyIsNull();
+
+    List<SharedDocument> findByTripIdAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(
+            UUID tripId, OffsetDateTime start, OffsetDateTime endExclusive);
 }

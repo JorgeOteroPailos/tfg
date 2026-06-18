@@ -23,7 +23,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -44,8 +43,6 @@ public class SecurityConfig {
                 auth
                     .requestMatchers("/auth/register", "/auth/login", "/auth/refresh")
                     .permitAll()
-                    .requestMatchers("/h2-console/**")
-                    .permitAll()
                     .anyRequest()
                     .authenticated()
             )
@@ -55,12 +52,7 @@ public class SecurityConfig {
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            .csrf(AbstractHttpConfigurer::disable)
-            .headers(headers ->
-                headers.frameOptions(
-                    HeadersConfigurer.FrameOptionsConfig::sameOrigin
-                )
-            );
+            .csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

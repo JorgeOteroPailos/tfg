@@ -44,6 +44,7 @@ const EditFieldModal = ({ field, initialValue, onClose }: {
   const theme = Colors[themeName] ?? Colors.light;
   const updateProfile = useUpdateProfileMutation();
   const [value, setValue] = useState(initialValue);
+  const [currentPassword, setCurrentPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const labels = FIELD_LABELS[field];
 
@@ -53,11 +54,20 @@ const EditFieldModal = ({ field, initialValue, onClose }: {
       setError(t(labels.required));
       return;
     }
+    // Changing the email is sensitive: the backend requires the current password.
+    if (field === 'email' && !currentPassword.trim()) {
+      setError(t('profile.currentPasswordRequired'));
+      return;
+    }
     try {
-      await updateProfile.mutateAsync({ [field]: trimmed });
+      await updateProfile.mutateAsync(
+        field === 'email' ? { email: trimmed, currentPassword } : { [field]: trimmed }
+      );
       onClose(true);
     } catch (err) {
-      if (field === 'email' && err instanceof AppError && err.code === ErrorCode.CONFLICT) {
+      if (field === 'email' && err instanceof AppError && err.code === ErrorCode.UNAUTHORIZED) {
+        setError(t('profile.wrongCurrentPassword'));
+      } else if (field === 'email' && err instanceof AppError && err.code === ErrorCode.CONFLICT) {
         setError(t('auth.register.errors.emailAlreadyInUse'));
       } else if (field === 'email' && err instanceof AppError && err.code === ErrorCode.BAD_REQUEST) {
         setError(t('profile.emailInvalid'));
@@ -80,6 +90,17 @@ const EditFieldModal = ({ field, initialValue, onClose }: {
             keyboardType={field === 'email' ? 'email-address' : 'default'}
             autoCapitalize={field === 'email' ? 'none' : 'sentences'}
           />
+          {field === 'email' && (
+            <View style={styles.emailPasswordField}>
+              <ThemedInput
+                placeholder={t('profile.currentPassword')}
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                secureTextEntry
+                autoCapitalize="none"
+              />
+            </View>
+          )}
           {error && <ThemedText style={styles.errorText}>{error}</ThemedText>}
           <View style={styles.modalButtons}>
             <Pressable
@@ -574,6 +595,7 @@ const styles = StyleSheet.create({
   modalButtons: { flexDirection: 'row', gap: 8, marginTop: 16 },
   modalBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
   passwordFields: { gap: 10 },
+  emailPasswordField: { marginTop: 10 },
   warningBox: {
     flexDirection: 'row',
     alignItems: 'center',

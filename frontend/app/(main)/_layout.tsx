@@ -7,6 +7,8 @@ import { useSidebar } from '../../src/sidebar';
 import Sidebar from '../../components/Sidebar';
 import { Ionicons } from '@expo/vector-icons';
 
+export const unstable_settings = { initialRouteName: 'index' };
+
 export default function MainLayout() {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
@@ -45,6 +47,7 @@ export default function MainLayout() {
           ),
         }}
       >
+        <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="main" options={{ title: t('nav.home'), headerTitleAlign: 'center' }} />
         <Stack.Screen name="invitations" options={{ title: t('nav.invitations') }} />
         <Stack.Screen name="create-trip" options={{ headerShown: false }} />

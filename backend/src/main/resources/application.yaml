@@ -3,7 +3,7 @@ spring:
     name: telaria-backend
   mvc:
     async:
-      request-timeout: -1
+      request-timeout: 120000
   datasource:
     url: jdbc:postgresql://localhost:5432/telaria
     driver-class-name: org.postgresql.Driver
@@ -27,7 +27,7 @@ keystore:
 
 minio:
   endpoint: http://localhost:9000
-  public-endpoint: http://192.168.1.142:9000
+  public-endpoint: http://192.168.1.41:9000
   access-key: admin
   secret-key: password123
   bucket: telaria-document-sharing
@@ -37,3 +37,10 @@ images:
   avatar-max-dimension: 512
   thumbnail-max-dimension: 512
   jpeg-quality: 0.8
+
+scheduling:
+  orphan-cleanup-delay-ms: 900000      # 15 min
+  orphan-cleanup-age-minutes: 30
+  thumbnail-backfill-delay-ms: 1800000 # 30 min
+  chat-cleanup-cron: "0 0 2 * * *"
+  chat-retention-days: 30

@@ -1,5 +1,6 @@
 package gal.usc.telariabackend.schedullers;
 
+import gal.usc.telariabackend.configuration.SchedulingProperties;
 import gal.usc.telariabackend.repository.AiChatMessageRepository;
 import gal.usc.telariabackend.repository.TripChatMessageRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +29,8 @@ class ChatMessageCleanupSchedulerTest {
 
     @BeforeEach
     void setUp() {
-        scheduler = new ChatMessageCleanupScheduler(aiChatMessageRepository, tripChatMessageRepository);
+        scheduler = new ChatMessageCleanupScheduler(aiChatMessageRepository, tripChatMessageRepository,
+                new SchedulingProperties());
     }
 
     @Test

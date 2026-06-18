@@ -46,7 +46,8 @@ public class UserController implements UsersApi {
         return ResponseEntity.ok(userService.updateProfile(
                 securityHelper.getUserId(),
                 updateProfileRequest.getUsername(),
-                updateProfileRequest.getEmail()));
+                updateProfileRequest.getEmail(),
+                updateProfileRequest.getCurrentPassword()));
     }
 
     @Override

@@ -98,6 +98,10 @@ public class ExpenseService {
 
     @Transactional
     public UUID createSettlement(UUID tripId, UUID payerId, CreateSettlementRequest request) {
+        // The payer is always the authenticated user, so it cannot be spoofed.
+        if (payerId.equals(request.getToId())) {
+            throw new NotATripMemberException("Payer and receiver must be different users");
+        }
         User payer = userRepo.findById(payerId).orElseThrow();
         Trip trip = tripRepo.findByIdAndMembersContaining(tripId, payer)
                 .orElseThrow(NotATripMemberException::new);

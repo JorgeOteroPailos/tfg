@@ -38,8 +38,7 @@ public class Event {
             @AttributeOverride(name = "name",      column = @Column(name = "location_name")),
             @AttributeOverride(name = "address",   column = @Column(name = "location_address")),
             @AttributeOverride(name = "latitude",  column = @Column(name = "location_latitude")),
-            @AttributeOverride(name = "longitude", column = @Column(name = "location_longitude")),
-            @AttributeOverride(name = "mapURL",    column = @Column(name = "location_map_url"))
+            @AttributeOverride(name = "longitude", column = @Column(name = "location_longitude"))
     })
     private Location location = new Location();
 
@@ -55,13 +54,12 @@ public class Event {
 
     public EventSummary toEventSummary() {
         gal.usc.telariabackend.model.dto.Location locationDto = null;
-        if (this.location != null) {
+        if (this.location != null && !this.location.isEmpty()) {
             locationDto = new gal.usc.telariabackend.model.dto.Location()
                     .name(this.location.getName())
                     .address(this.location.getAddress())
                     .latitude(this.location.getLatitude())
-                    .longitude(this.location.getLongitude())
-                    .mapURL(this.location.getMapURL());
+                    .longitude(this.location.getLongitude());
         }
         return new EventSummary()
                 .id(this.id)

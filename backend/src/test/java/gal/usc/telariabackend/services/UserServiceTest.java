@@ -19,6 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
@@ -52,6 +54,9 @@ class UserServiceTest {
     @Mock
     private ImageService imageService;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     private MinioConfig minioConfig;
 
     private UserService userService;
@@ -63,7 +68,7 @@ class UserServiceTest {
         minioConfig.setPresignedUrlExpirationMinutes(15);
 
         userService = new UserService(userRepository, s3Client, s3Presigner, minioConfig,
-                imageService, new ImageProperties());
+                imageService, new ImageProperties(), passwordEncoder);
     }
 
     private void stubAvatarBytesInStorage(byte[] bytes) {
@@ -78,7 +83,7 @@ class UserServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        OwnProfile result = userService.updateProfile(userId, "newName", null);
+        OwnProfile result = userService.updateProfile(userId, "newName", null, null);
 
         assertEquals("newName", result.getUsername());
         assertEquals("test@test.com", result.getEmail());
@@ -90,14 +95,15 @@ class UserServiceTest {
     }
 
     @Test
-    void updateProfile_WhenEmailProvidedAndFree_ShouldPersistNewEmail() {
+    void updateProfile_WhenEmailProvidedAndFreeAndPasswordCorrect_ShouldPersistNewEmail() {
         UUID userId = UUID.randomUUID();
         User user = new User("userName", "old@test.com", "encoded-password", userId);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("secret", "encoded-password")).thenReturn(true);
         when(userRepository.existsByEmail("new@test.com")).thenReturn(false);
 
-        OwnProfile result = userService.updateProfile(userId, null, "new@test.com");
+        OwnProfile result = userService.updateProfile(userId, null, "new@test.com", "secret");
 
         assertEquals("new@test.com", result.getEmail());
         assertEquals("userName", result.getUsername());
@@ -106,16 +112,52 @@ class UserServiceTest {
     }
 
     @Test
+    void updateProfile_WhenEmailChangedWithWrongPassword_ShouldThrowAndNotChangeEmail() {
+        UUID userId = UUID.randomUUID();
+        User user = new User("userName", "old@test.com", "encoded-password", userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrong", "encoded-password")).thenReturn(false);
+
+        assertThrows(
+                BadCredentialsException.class,
+                () -> userService.updateProfile(userId, null, "new@test.com", "wrong")
+        );
+
+        assertEquals("old@test.com", user.getEmail());
+        verify(userRepository, never()).existsByEmail(anyString());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void updateProfile_WhenEmailChangedWithoutPassword_ShouldThrowAndNotChangeEmail() {
+        UUID userId = UUID.randomUUID();
+        User user = new User("userName", "old@test.com", "encoded-password", userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        assertThrows(
+                BadCredentialsException.class,
+                () -> userService.updateProfile(userId, null, "new@test.com", null)
+        );
+
+        assertEquals("old@test.com", user.getEmail());
+        verify(userRepository, never()).existsByEmail(anyString());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
     void updateProfile_WhenEmailAlreadyInUse_ShouldThrowAndNotChangeEmail() {
         UUID userId = UUID.randomUUID();
         User user = new User("userName", "old@test.com", "encoded-password", userId);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("secret", "encoded-password")).thenReturn(true);
         when(userRepository.existsByEmail("taken@test.com")).thenReturn(true);
 
         assertThrows(
                 AlreadyDoneException.class,
-                () -> userService.updateProfile(userId, null, "taken@test.com")
+                () -> userService.updateProfile(userId, null, "taken@test.com", "secret")
         );
 
         assertEquals("old@test.com", user.getEmail());
@@ -123,17 +165,18 @@ class UserServiceTest {
     }
 
     @Test
-    void updateProfile_WhenEmailIsUnchanged_ShouldNotCheckUniqueness() {
+    void updateProfile_WhenEmailIsUnchanged_ShouldNotCheckUniquenessNorPassword() {
         UUID userId = UUID.randomUUID();
         User user = new User("userName", "same@test.com", "encoded-password", userId);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        OwnProfile result = userService.updateProfile(userId, "newName", "same@test.com");
+        OwnProfile result = userService.updateProfile(userId, "newName", "same@test.com", null);
 
         assertEquals("same@test.com", result.getEmail());
         assertEquals("newName", result.getUsername());
         verify(userRepository, never()).existsByEmail(anyString());
+        verifyNoInteractions(passwordEncoder);
         verify(userRepository).save(user);
     }
 

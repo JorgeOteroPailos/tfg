@@ -10,15 +10,17 @@ public class Location {
     private String address;
     private Double latitude;
     private Double longitude;
-    private String mapURL;
 
     public Location() {}
 
-    public Location(String name, String address, Double latitude, Double longitude, String mapURL) {
+    public Location(String name, String address, Double latitude, Double longitude) {
         this.name = name;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.mapURL = mapURL;
+    }
+
+    public boolean isEmpty() {
+        return name == null && address == null && latitude == null && longitude == null;
     }
 }

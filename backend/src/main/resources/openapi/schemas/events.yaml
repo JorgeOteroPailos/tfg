@@ -3,6 +3,7 @@ schemas:
     type: object
     required:
       - name
+      - startTime
     properties:
       name:
         type: string
@@ -12,6 +13,7 @@ schemas:
         format: date-time
       duration:
         type: integer
+        minimum: 0
         description: Duration in minutes
       location:
         $ref: '#/schemas/Location'
@@ -50,9 +52,10 @@ schemas:
       latitude:
         type: number
         format: double
+        minimum: -90
+        maximum: 90
       longitude:
         type: number
         format: double
-      mapURL:
-        type: string
-        example: https://maps.google.com/?q=42.8782,-8.5448
+        minimum: -180
+        maximum: 180

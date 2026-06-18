@@ -38,7 +38,7 @@ class EventTest {
     @Test
     void constructor_ShouldSetAllFields() {
         ZonedDateTime start = ZonedDateTime.of(2025, 6, 15, 10, 0, 0, 0, ZoneOffset.UTC);
-        Location location = new Location("Hotel", "Calle Mayor 1", 40.0, -3.0, "https://maps.example.com");
+        Location location = new Location("Hotel", "Calle Mayor 1", 40.0, -3.0);
 
         Event event = new Event(trip, "Cena", start, 90, location);
 
@@ -67,7 +67,7 @@ class EventTest {
 
     @Test
     void toEventSummary_ShouldMapLocationFields() {
-        Location location = new Location("Hotel", "Calle Mayor 1", 40.0, -3.0, "https://maps.example.com");
+        Location location = new Location("Hotel", "Calle Mayor 1", 40.0, -3.0);
         Event event = new Event(trip, "Evento", ZonedDateTime.now(), 60, location);
 
         var loc = event.toEventSummary().getLocation();
@@ -77,7 +77,13 @@ class EventTest {
         assertEquals("Calle Mayor 1", loc.getAddress());
         assertEquals(40.0, loc.getLatitude());
         assertEquals(-3.0, loc.getLongitude());
-        assertEquals("https://maps.example.com", loc.getMapURL());
+    }
+
+    @Test
+    void toEventSummary_WhenLocationEmpty_ShouldReturnNullLocation() {
+        Event event = new Event(trip, "Sin lugar", ZonedDateTime.now(), 60, null);
+
+        assertNull(event.toEventSummary().getLocation());
     }
 
     @Test

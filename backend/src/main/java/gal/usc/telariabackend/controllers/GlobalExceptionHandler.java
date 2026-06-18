@@ -85,6 +85,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error;
     }
 
+    @ExceptionHandler(InvalidLocationException.class)
+    public ProblemDetail handleInvalidLocationException(InvalidLocationException e) {
+        ProblemDetail error = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        error.setTitle("Invalid location");
+        error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
+                .pathSegment("error", "invalid-location").build().toUri());
+        error.setDetail(e.getMessage());
+        return error;
+    }
+
     @ExceptionHandler(NotATripMemberException.class)
     public ProblemDetail handleAccessDeniedException(NotATripMemberException e) {
         ProblemDetail error = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);

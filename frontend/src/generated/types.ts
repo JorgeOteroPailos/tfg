@@ -778,10 +778,6 @@ export interface components {
         };
         CreateSettlementRequest: {
             /** Format: uuid */
-            tripId?: string;
-            /** Format: uuid */
-            fromId: string;
-            /** Format: uuid */
             toId: string;
             /**
              * Format: double
@@ -812,8 +808,6 @@ export interface components {
             latitude?: number;
             /** Format: double */
             longitude?: number;
-            /** @example https://maps.google.com/?q=42.8782,-8.5448 */
-            mapURL?: string;
         };
         EventSummary: {
             /** Format: uuid */
@@ -827,7 +821,7 @@ export interface components {
         CreateEventRequest: {
             name: string;
             /** Format: date-time */
-            startTime?: string;
+            startTime: string;
             /** @description Duration in minutes */
             duration?: number;
             location?: components["schemas"]["Location"];
@@ -886,7 +880,7 @@ export interface components {
              */
             password: string;
         };
-        /** @description At least one field should be provided; omitted fields are left unchanged. */
+        /** @description At least one field should be provided; omitted fields are left unchanged. Changing the email requires the account's current password in currentPassword. */
         UpdateProfileRequest: {
             /** @example juanperez */
             username?: string;
@@ -895,6 +889,12 @@ export interface components {
              * @example juan@example.com
              */
             email?: string;
+            /**
+             * Format: password
+             * @description The account's current password, required only when changing the email
+             * @example secreto123
+             */
+            currentPassword?: string;
         };
         ChangePasswordRequest: {
             /**
@@ -1809,6 +1809,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Event not found in this trip */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     confirmDocumentUpload: {
@@ -1862,7 +1869,12 @@ export interface operations {
     };
     listDocuments: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description When present, only documents uploaded on this calendar day are returned. */
+                date?: string;
+                /** @description Timezone offset of the requesting client as returned by JavaScript's Date.getTimezoneOffset() (minutes to add to local time to reach UTC). Used together with `date` to compute the calendar-day window in the client's timezone. Defaults to UTC when omitted. */
+                tzOffsetMinutes?: number;
+            };
             header?: never;
             path: {
                 tripId: string;
@@ -1871,7 +1883,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of documents. Members see only ACTIVE documents. The uploader also sees their own PENDING documents. */
+            /** @description List of documents. Members see only ACTIVE documents. The uploader also sees their own PENDING documents. When the date filter is supplied, results are limited to that calendar day. */
             200: {
                 headers: {
                     [name: string]: unknown;

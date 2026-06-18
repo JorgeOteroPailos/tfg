@@ -248,6 +248,68 @@ class ExpenseE2ETest extends BaseE2ETest{
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    @DisplayName("Create expense: non-positive amount returns 400")
+    void createExpense_nonPositiveAmount_returns400() throws Exception {
+        String token = registerAndObtainToken("pepe", "pepe@example.com");
+        UUID userId = extractUserIdFromToken(token);
+        UUID tripId = createTrip(token, "Viaje a Oslo");
+
+        mockMvc.perform(post("/trips/{tripId}/expenses", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new CreateExpenseRequest()
+                                .amount(0.0)
+                                .name("Cena")
+                                .payerId(userId)
+                                .beneficiaryIds(List.of(userId)))))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/trips/{tripId}/expenses", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new CreateExpenseRequest()
+                                .amount(-5.0)
+                                .name("Cena")
+                                .payerId(userId)
+                                .beneficiaryIds(List.of(userId)))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Create expense: empty beneficiaries returns 400")
+    void createExpense_emptyBeneficiaries_returns400() throws Exception {
+        String token = registerAndObtainToken("pepe", "pepe@example.com");
+        UUID userId = extractUserIdFromToken(token);
+        UUID tripId = createTrip(token, "Viaje a Berlin");
+
+        mockMvc.perform(post("/trips/{tripId}/expenses", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new CreateExpenseRequest()
+                                .amount(30.0)
+                                .name("Cena")
+                                .payerId(userId)
+                                .beneficiaryIds(List.of()))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Create settlement: paying yourself returns 403")
+    void createSettlement_payToSelf_returns403() throws Exception {
+        String token = registerAndObtainToken("pepe", "pepe@example.com");
+        UUID userId = extractUserIdFromToken(token);
+        UUID tripId = createTrip(token, "Viaje a Lisboa");
+
+        mockMvc.perform(post("/trips/{tripId}/settlements", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new CreateSettlementRequest()
+                                .toId(userId)
+                                .amount(10.0))))
+                .andExpect(status().isForbidden());
+    }
+
     private ExpenseDetail getExpenseDetail(String token, UUID tripId, UUID expenseId) throws Exception {
         MvcResult result = mockMvc.perform(get("/trips/{tripId}/expenses/{expenseId}", tripId, expenseId)
                         .header("Authorization", "Bearer " + token))

@@ -203,6 +203,19 @@ class AiChatE2ETest extends BaseE2ETest {
     }
 
     @Test
+    @DisplayName("POST /ai-chat: blank content returns 400")
+    void sendAiChatMessage_blankContent_returns400() throws Exception {
+        String token = registerAndObtainToken("frank", "frank@test.com");
+        UUID tripId = createTripAndObtainId(token, "Frank's Trip");
+
+        mockMvc.perform(post("/trips/{tripId}/ai-chat", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"content\":\"   \"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @DisplayName("POST /ai-chat: member starts SSE stream")
     void sendAiChatMessage_member_startsAsyncSseStream() throws Exception {
         String token = registerAndObtainToken("eve", "eve@test.com");

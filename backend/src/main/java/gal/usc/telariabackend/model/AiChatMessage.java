@@ -47,11 +47,15 @@ public class AiChatMessage {
     protected AiChatMessage() {}
 
     public AiChatMessage(Trip trip, User user, Role role, String content) {
+        this(trip, user, role, content, OffsetDateTime.now(ZoneOffset.UTC));
+    }
+
+    public AiChatMessage(Trip trip, User user, Role role, String content, OffsetDateTime timestamp) {
         this.trip = trip;
         this.user = user;
         this.role = role;
         this.content = content;
-        this.timestamp = OffsetDateTime.now(ZoneOffset.UTC);
+        this.timestamp = timestamp;
     }
 
     public gal.usc.telariabackend.model.dto.AiChatMessage toDto() {

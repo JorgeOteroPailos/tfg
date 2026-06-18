@@ -27,8 +27,13 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class SharedDocumentService {
@@ -43,6 +48,7 @@ public class SharedDocumentService {
     private final MinioConfig minioConfig;
     private final ImageService imageService;
     private final ImageProperties imageProperties;
+    private final ExecutorService thumbnailExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
     public SharedDocumentService(SharedDocumentRepository documentRepository,
                                  TripRepository tripRepository,
@@ -102,10 +108,34 @@ public class SharedDocumentService {
         }
 
         document.confirmUpload();
-        generateThumbnail(document);
         documentRepository.save(document);
+
+        UUID id = document.getId();
+        thumbnailExecutor.submit(() -> generateAndStoreThumbnail(id));
     }
 
+    /**
+     * Generates and persists the thumbnail for a single document off the request thread.
+     * Reloads the entity by id (the caller's copy is detached once the request transaction
+     * has committed) and saves only when a thumbnail was actually produced.
+     */
+    private void generateAndStoreThumbnail(UUID documentId) {
+        try {
+            documentRepository.findById(documentId).ifPresent(document -> {
+                generateThumbnail(document);
+                if (document.getThumbnailObjectKey() != null) {
+                    documentRepository.save(document);
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Async thumbnail generation failed for document {}: {}", documentId, e.getMessage());
+        }
+    }
+
+    /**
+     * Produces the downscaled JPEG, uploads it to storage and sets {@code thumbnailObjectKey}
+     * on the entity. Does not persist — the caller is responsible for saving.
+     */
     private void generateThumbnail(SharedDocument document) {
         if (!imageService.isSupportedImage(document.getContentType(), document.getFileName())) {
             return;
@@ -133,23 +163,36 @@ public class SharedDocumentService {
     }
 
     public List<DocumentResponse> listDocuments(UUID tripId, UUID requesterId) {
+        return listDocuments(tripId, requesterId, null, null);
+    }
+
+    public List<DocumentResponse> listDocuments(UUID tripId, UUID requesterId, LocalDate date) {
+        return listDocuments(tripId, requesterId, date, null);
+    }
+
+    public List<DocumentResponse> listDocuments(UUID tripId, UUID requesterId, LocalDate date, Integer tzOffsetMinutes) {
         Trip t=tripRepository.findById(tripId)
                 .orElseThrow(NotATripMemberException::new);
 
         t.assertIsMember(requesterId);
 
-        List<SharedDocument> docs = documentRepository.findByTripId(tripId).stream()
+        List<SharedDocument> source;
+        if (date != null) {
+            // tzOffsetMinutes follows JS Date.getTimezoneOffset() (minutes to add to local
+            // to reach UTC), so the client's zone offset is its negation.
+            ZoneOffset zone = tzOffsetMinutes != null
+                    ? ZoneOffset.ofTotalSeconds(-tzOffsetMinutes * 60)
+                    : ZoneOffset.UTC;
+            OffsetDateTime start = date.atStartOfDay().atOffset(zone);
+            OffsetDateTime end = date.plusDays(1).atStartOfDay().atOffset(zone);
+            source = documentRepository.findByTripIdAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(tripId, start, end);
+        } else {
+            source = documentRepository.findByTripId(tripId);
+        }
+
+        List<SharedDocument> docs = source.stream()
                 .filter(d -> d.isUploaded() || d.getCreator().getId().equals(requesterId))
                 .toList();
-
-        for (SharedDocument doc : docs) {
-            if (doc.isUploaded() && doc.getThumbnailObjectKey() == null) {
-                generateThumbnail(doc);
-                if (doc.getThumbnailObjectKey() != null) {
-                    documentRepository.save(doc);
-                }
-            }
-        }
 
         return docs.stream()
                 .map(d -> {
@@ -160,6 +203,20 @@ public class SharedDocumentService {
                     return response;
                 })
                 .toList();
+    }
+
+    /**
+     * Generates thumbnails for uploaded image documents that don't have one yet. Runs off the
+     * request path (see {@code ThumbnailBackfillScheduler}) so listing stays read-only.
+     */
+    public void backfillMissingThumbnails() {
+        List<SharedDocument> docs = documentRepository.findByUploadedTrueAndThumbnailObjectKeyIsNull();
+        for (SharedDocument doc : docs) {
+            generateThumbnail(doc);
+            if (doc.getThumbnailObjectKey() != null) {
+                documentRepository.save(doc);
+            }
+        }
     }
 
     private String presignGet(String objectKey) {

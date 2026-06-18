@@ -25,9 +25,11 @@ schemas:
       amount:
         type: number
         format: double
+        minimum: 0.01
         example: 90.00
       beneficiaryIds:
         type: array
+        minItems: 1
         items:
           type: string
           format: uuid
@@ -125,21 +127,15 @@ schemas:
   CreateSettlementRequest:
     type: object
     properties:
-      tripId:
-        type: string
-        format: uuid
-      fromId:
-        type: string
-        format: uuid
       toId:
         type: string
         format: uuid
       amount:
         type: number
         format: double
+        minimum: 0.01
         example: 25.00
     required:
-      - fromId
       - toId
       - amount
 

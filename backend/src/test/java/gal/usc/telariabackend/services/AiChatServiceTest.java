@@ -10,6 +10,7 @@ import gal.usc.telariabackend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -117,5 +118,62 @@ class AiChatServiceTest {
 
         verifyNoInteractions(chatMessageRepo);
         verifyNoInteractions(userRepo);
+    }
+
+    @Test
+    void streamResponse_WhenStreamFails_ShouldStillPersistUserMessageButNotAssistant() {
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
+        when(chatMessageRepo.findTop5ByTripIdAndUserIdOrderByTimestampDesc(tripId, userId))
+                .thenReturn(List.of());
+        when(tripRepo.findById(tripId)).thenReturn(Optional.of(trip));
+        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
+
+        AiChatService spy = spy(service);
+        doThrow(new RuntimeException("ollama unreachable"))
+                .when(spy).callOllamaStream(any(), any(), any(), any());
+        SseEmitter emitter = mock(SseEmitter.class);
+
+        spy.streamResponse(tripId, userId, "Hola", emitter);
+
+        // The user message must survive even though the model never replied,
+        // and no (empty) assistant row should be stored.
+        ArgumentCaptor<AiChatMessage> captor = ArgumentCaptor.forClass(AiChatMessage.class);
+        verify(chatMessageRepo, times(1)).save(captor.capture());
+        AiChatMessage saved = captor.getValue();
+        assertEquals(AiChatMessage.Role.USER, saved.getRole());
+        assertEquals("Hola", saved.getContent());
+        verify(emitter).completeWithError(any());
+    }
+
+    @Test
+    void streamResponse_OnSuccess_ShouldOrderAssistantStrictlyAfterUser() {
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
+        when(chatMessageRepo.findTop5ByTripIdAndUserIdOrderByTimestampDesc(tripId, userId))
+                .thenReturn(List.of());
+        when(tripRepo.findById(tripId)).thenReturn(Optional.of(trip));
+        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
+
+        AiChatService spy = spy(service);
+        doAnswer(inv -> {
+            java.util.function.Consumer<String> onChunk = inv.getArgument(3);
+            onChunk.accept("Hola, ");
+            onChunk.accept("¿qué tal?");
+            return null;
+        }).when(spy).callOllamaStream(any(), any(), any(), any());
+        SseEmitter emitter = mock(SseEmitter.class);
+
+        spy.streamResponse(tripId, userId, "Hola", emitter);
+
+        ArgumentCaptor<AiChatMessage> captor = ArgumentCaptor.forClass(AiChatMessage.class);
+        verify(chatMessageRepo, times(2)).save(captor.capture());
+        AiChatMessage userMsg = captor.getAllValues().get(0);
+        AiChatMessage assistantMsg = captor.getAllValues().get(1);
+
+        assertEquals(AiChatMessage.Role.USER, userMsg.getRole());
+        assertEquals(AiChatMessage.Role.ASSISTANT, assistantMsg.getRole());
+        assertEquals("Hola, ¿qué tal?", assistantMsg.getContent());
+        assertTrue(assistantMsg.getTimestamp().isAfter(userMsg.getTimestamp()),
+                "assistant timestamp must sort strictly after the user message");
+        verify(emitter).complete();
     }
 }

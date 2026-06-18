@@ -109,6 +109,13 @@ Telaria centraliza nun único sistema os seguintes aspectos:
         persistente por viaxe.
 \end{itemize}
 
+Á marxe destes obxectivos centrais, a aplicación incorpora unha funcionalidade
+complementaria de carácter social —unha rede de amizades entre usuarios— que non
+constitúe un módulo principal, senón unha mellora da experiencia de uso. O seu
+propósito é simplificar as invitacións recorrentes entre usuarios habituais e
+reforzar a retención, facilitando que as persoas que proban a aplicación sigan
+empregándoa en sucesivas viaxes.
+
 Como obxectivos técnicos, o proxecto busca aplicar unha arquitectura
 \textit{API-first} e tecnoloxías multiplataforma modernas, de xeito que a solución
 sexa funcional tanto en iOS como en Android desde unha única base de código.
@@ -147,9 +154,17 @@ O módulo de gastos calcula automaticamente as liquidacións entre membros aplic
 algoritmo de minimización de débedas, de xeito que o número de transferencias necesarias
 para saldar todos os saldos sexa o mínimo posible. O módulo de eventos permite asociar
 localizacións xeográficas a cada entrada do calendario. O módulo de documentos delega
-o almacenamento nun servizo de obxectos compatible con S3. O asistente de IA mantén
+o almacenamento nun servizo de obxectos compatible con S3 e xera de forma asíncrona
+miniaturas de previsualización para os documentos de imaxe. O asistente de IA mantén
 un historial de conversación independente por viaxe, de modo que o contexto se preserve
 entre sesións.
+
+De maneira complementaria, a plataforma ofrece unha rede de amizades entre usuarios:
+calquera usuario pode engadir outros como amigos e, a partir de aí, convidalos ás súas
+viaxes de forma máis áxil que mediante o identificador ou o código QR. Esta
+funcionalidade non altera o modelo colaborativo descrito, senón que actúa como atallo
+para os usuarios habituais. Adicionalmente, cada usuario pode eliminar a súa propia
+conta, operación que require a confirmación do contrasinal.
 
 \subsection{Información adicional de interese}
 
@@ -208,6 +223,15 @@ A diferenza de Docker, Podman opera sen un daemon centralizado e permite executa
 contedores sen privilexios de superusuario (\textit{rootless}), o que mellora o
 illamento de seguridade do entorno de execución.
 
+\subsubsection*{Tarefas periódicas de limpeza}
+
+Para os documentos de imaxe xérase unha miniatura de previsualización reducida que se
+mostra na listaxe de documentos sen necesidade de descargar o ficheiro orixinal. Esta
+xeración realízase de forma asíncrona (fóra do fluxo de subida e da ruta de petición)
+mediante unha tarefa programada que procesa periodicamente os documentos aínda sen
+miniatura. Deste xeito a subida e a listaxe de documentos manteñen unha latencia baixa
+e independente do custo de procesamento de imaxe.
+
 \newpage
 \section{Especificación de Requisitos}
 
@@ -234,6 +258,11 @@ O sistema cobre os seguintes módulos funcionais:
   \item Chat de grupo entre membros da viaxe
   \item Asistente conversacional de intelixencia artificial por viaxe
 \end{itemize}
+
+Ademais dos módulos anteriores, o sistema inclúe dúas funcionalidades complementarias:
+unha rede de amizades entre usuarios (funcionalidade de calidade de vida orientada a
+axilizar as invitacións recorrentes) e a xestión da propia conta, incluída a súa
+eliminación con confirmación de contrasinal.
 
 \subsubsection{Características dos usuarios}
 
@@ -317,9 +346,12 @@ renovar o \textit{access token} sen necesidade de volver a autenticarse.
   RF06 & Rexistro de gastos       & Calquera membro pode rexistrar un gasto con importe, nome, categoría, usuario pagador e conxunto de beneficiarios.                                                                  & Alta   \\[4pt]
   RF07 & Cálculo de liquidacións  & O sistema calcula automaticamente as liquidacións entre membros, minimizando o número de transferencias necesarias para saldar as débedas.                                          & Alta   \\[4pt]
   RF08 & Xestión de eventos       & Calquera membro pode crear, consultar e eliminar eventos con nome, data e hora de inicio, duración e localización xeográfica (nome, enderezo, coordenadas e URL de mapa).          & Alta  \\[4pt]
-  RF09 & Documentos compartidos   & Calquera membro pode subir, consultar e eliminar documentos asociados á viaxe.                                                                                                      & Media  \\[4pt]
+  RF09 & Documentos compartidos   & Calquera membro pode subir, consultar e eliminar documentos asociados á viaxe; os documentos de imaxe mostran unha miniatura de previsualización xerada automaticamente.                                                                                                   & Media  \\[4pt]
   RF10 & Chat de grupo            & Os membros dunha viaxe poden enviar e consultar mensaxes de texto no chat común da viaxe.                                                                                           & Media  \\[4pt]
-  RF11 & Asistente de IA          & Cada viaxe dispón dun chatbot conversacional con historial persistente entre sesións.                                                                                               & Baixa  \\
+  RF11 & Asistente de IA          & Cada viaxe dispón dun chatbot conversacional con historial persistente entre sesións.                                                                                               & Baixa  \\[4pt]
+  RF12 & Rede de amizades         & Funcionalidade complementaria: un usuario pode enviar solicitudes de amizade a outro (polo seu identificador ou código QR), aceptalas ou rexeitalas, consultar a súa lista de amigos e eliminar amizades.   & Baixa  \\[4pt]
+  RF13 & Convidar amigos á viaxe  & Funcionalidade complementaria que permite convidar amigos a unha viaxe directamente desde a lista de amizades, como atallo ás invitacións por identificador ou QR.                  & Baixa  \\[4pt]
+  RF14 & Eliminación de conta     & Un usuario pode eliminar a súa propia conta; a operación require a confirmación do contrasinal e elimina os datos persoais asociados.                                               & Baixa  \\
   \bottomrule
 \end{longtable}
 
@@ -331,6 +363,7 @@ renovar o \textit{access token} sen necesidade de volver a autenticarse.
 \begin{itemize}
   \item \textbf{RNF-SE-01} — Control de acceso: só os membros dunha viaxe acceden aos seus datos; calquera usuario autenticado pode crear viaxes.
   \item \textbf{RNF-SE-02} — Os contrasinais almacénanse con hash BCrypt; os \textit{access tokens} JWT teñen vida curta e os \textit{refresh tokens} opacos almacénanse no servidor para limitar a exposición ante compromisos.
+  \item \textbf{RNF-SE-03} — As operacións sensibles sobre a conta —o cambio de correo electrónico e a eliminación da conta— requiren a confirmación do contrasinal actual.
 \end{itemize}
 
 \subsubsection{Rendemento}
@@ -376,8 +409,10 @@ renovar o \textit{access token} sen necesidade de volver a autenticarse.
   Evento                     & Identificador, nome, data e hora de inicio (con fuso horario), duración en minutos, localización embebida (nome, enderezo, latitude, lonxitude, URL de mapa). \\[4pt]
   Gasto                      & Identificador, importe (decimal), nome, categoría (enumeración), usuario pagador, usuario creador do rexistro, conxunto de beneficiarios, marca temporal. \\[4pt]
   Liquidación                & Identificador, importe (decimal), usuario pagador, usuario receptor, marca temporal. \\[4pt]
-  Documento compartido       & Identificador, nome de ficheiro, clave no almacén de obxectos, estado de subida (booleano), usuario creador, marca temporal. \\[4pt]
+  Documento compartido       & Identificador, nome de ficheiro, clave no almacén de obxectos, clave da miniatura de previsualización, estado de subida (booleano), usuario creador, marca temporal. \\[4pt]
   Invitación / Solicitude    & Identificador, usuario, viaxe asociada, marca temporal de creación. \\[4pt]
+  Amizade                    & Identificador (UUID), dous usuarios asociados (almacenados de forma normalizada para garantir a unicidade da parella), marca temporal de creación. \\[4pt]
+  Solicitude de amizade      & Identificador (UUID), usuario emisor, usuario receptor, marca temporal de creación. \\[4pt]
   Mensaxe de chat de grupo   & Identificador, contido (texto), autor, viaxe asociada, marca temporal. \\[4pt]
   Mensaxe de asistente de IA & Identificador, contido (texto), rol (USUARIO ou ASISTENTE), usuario, viaxe asociada, marca temporal. \\[4pt]
   Token de refresco          & Token (identificador), identificador do usuario asociado. \\

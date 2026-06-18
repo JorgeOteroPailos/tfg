@@ -3,7 +3,7 @@ import { BASE_URL } from '../constants/constants';
 import { AppError, ErrorCode } from './AppError';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { components } from '../src/generated/types';
-import { clearLastTripId } from './lastTrip';
+import { clearLastTripId, clearLastTripTab } from './lastTrip';
 import React, {
   createContext,
   use,
@@ -64,8 +64,8 @@ async function clearSession() {
     AsyncStorage.removeItem(USER_EMAIL_KEY),
     AsyncStorage.removeItem(USER_NAME_KEY),
     clearLastTripId(),
+    clearLastTripTab(),
   ]);
-  //TODO cerrar sesión en el servidor
 }
 
 
@@ -139,41 +139,6 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
     const { isAuthenticated, isLoading, accessToken, userEmail, username } = authState;
     const refreshPromiseRef = useRef<Promise<string> | null>(null);
 
-    useEffect(() => {
-      restoreSession();
-    }, []);
-
-    const restoreSession = async () => {
-      try {
-        const [refreshToken, storedAccessToken, storedUserEmail, storedUserName] = await Promise.all([
-          getRefreshToken(),
-          getAccessToken(),
-          getUserEmail(),
-          getUserName(),
-        ]);
-
-        console.log('restoreSession -> refreshToken:', refreshToken);
-        console.log('restoreSession -> accessToken:', storedAccessToken);
-        console.log('restoreSession -> userEmail:', storedUserEmail);
-        console.log('restoreSession -> username:', storedUserName);
-
-        if (!refreshToken) {
-          dispatch({ type: 'session_cleared' });
-          return;
-        }
-
-        //TODO refresh aquí
-
-        dispatch({ type: 'session_restored', accessToken: storedAccessToken, userEmail: storedUserEmail, username: storedUserName });
-      } catch (error) {
-        console.log('restoreSession error:', error);
-        await clearSession();
-        dispatch({ type: 'session_cleared' });
-      } finally {
-        dispatch({ type: 'loading_done' });
-      }
-    };
-
     const login = useCallback(async (email: string, password: string) => {
       let accessToken: string;
       let refreshToken: string;
@@ -182,8 +147,6 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       try {
         ({ accessToken, refreshToken, username } = await loginRequest({ email, password }));
       } catch (error) {
-        console.log('login error:', error);
-
         if (error instanceof AppError) {
           throw error;
         }
@@ -212,8 +175,6 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       try {
         ({ accessToken, refreshToken, username } = await registerRequest({ username, email, password }));
       } catch (error) {
-        console.log('register error:', error);
-
         if (error instanceof AppError) {
           throw error;
         }
@@ -233,12 +194,6 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       }
 
       dispatch({ type: 'session_restored', accessToken, userEmail: email, username });
-    }, []);
-
-    const logout = useCallback(async () => {
-      await clearSession();
-      dispatch({ type: 'session_cleared' });
-      //TODO cerrar sesión en el servidor
     }, []);
 
     const doRefresh = useCallback(async (): Promise<string> => {
@@ -267,6 +222,40 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return newAccessToken;
     }, []);
 
+    // Restore any persisted session on mount. The session-restore logic lives
+    // inside the effect (rather than as a function recreated on every render),
+    // so the effect's only dependency is the referentially stable doRefresh.
+    // That keeps it a true run-once-on-mount effect while satisfying
+    // exhaustive-deps — the deps array honestly lists everything it captures.
+    useEffect(() => {
+      const restoreSession = async () => {
+        try {
+          const [refreshToken, storedUserEmail, storedUserName] = await Promise.all([
+            getRefreshToken(),
+            getUserEmail(),
+            getUserName(),
+          ]);
+
+          if (!refreshToken) {
+            dispatch({ type: 'session_cleared' });
+            return;
+          }
+
+          // Exchange the stored refresh token for a fresh access token instead of
+          // trusting the persisted (possibly already-expired) one. doRefresh clears
+          // the session and throws if the refresh token is no longer valid.
+          const accessToken = await doRefresh();
+          dispatch({ type: 'session_restored', accessToken, userEmail: storedUserEmail, username: storedUserName });
+        } catch {
+          await clearSession();
+          dispatch({ type: 'session_cleared' });
+        } finally {
+          dispatch({ type: 'loading_done' });
+        }
+      };
+      restoreSession();
+    }, [doRefresh]);
+
     const callAuthenticated = useCallback(async (path: string, options?: RequestInit): Promise<Response> => {
       const currentToken = await getAccessToken();
       const url = `${BASE_URL}${path}`;
@@ -283,8 +272,6 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       if (response.status !== 401) {
         return response;
       }
-
-      console.log('Token expirado, intentando refresh...');
 
       if (!refreshPromiseRef.current) {
         refreshPromiseRef.current = doRefresh().finally(() => {
@@ -303,6 +290,16 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         },
       });
     }, [doRefresh]);
+
+    const logout = useCallback(async () => {
+      // Best-effort: revoke the refresh token server-side before dropping local state.
+      // If the call fails (offline, expired session) we still clear the local session.
+      try {
+        await callAuthenticated('/auth/logout', { method: 'POST' });
+      } catch {}
+      await clearSession();
+      dispatch({ type: 'session_cleared' });
+    }, [callAuthenticated]);
 
     const applyTokens = useCallback(async (accessToken: string, refreshToken: string) => {
       await Promise.all([saveAccessToken(accessToken), saveRefreshToken(refreshToken)]);
@@ -350,8 +347,6 @@ export const useAuth = () => {
   return context;
 };
 
-//TODO nada de esto usa eutenticación, y hay q gestionar lo del refresco tmbn
-
 async function loginRequest(data: LoginRequest): Promise<LoginResponse> {
   const response = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
@@ -359,13 +354,9 @@ async function loginRequest(data: LoginRequest): Promise<LoginResponse> {
     body: JSON.stringify(data),
   });
 
-  console.log('Login response status:', response.status);
-
   if (!response.ok) {
     try {
-      const errorData = await response.json();
-      console.log('Error from backend:', errorData);
-
+      await response.json();
       throw new AppError(response.status as ErrorCode);
     } catch (err) {
       if (err instanceof AppError) throw err;
@@ -383,13 +374,9 @@ async function registerRequest(data: RegisterRequest): Promise<LoginResponse> {
     body: JSON.stringify(data),
   });
 
-  console.log('Register response status:', response.status);
-
   if (!response.ok) {
     try {
-      const errorData = await response.json();
-      console.log('Error from backend:', errorData);
-
+      await response.json();
       throw new AppError(response.status as ErrorCode);
     } catch (err) {
       if (err instanceof AppError) throw err;

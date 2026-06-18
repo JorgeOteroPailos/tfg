@@ -102,6 +102,7 @@ type ExpenseDetailModalProps = {
   error: string | null;
   confirmingDelete: boolean;
   deleting: boolean;
+  deleteError: string | null;
   currentUserId: string | null | undefined;
   usernameFor: (id: string) => string;
   onClose: () => void;
@@ -110,7 +111,7 @@ type ExpenseDetailModalProps = {
 };
 
 const ExpenseDetailModal = React.memo(function ExpenseDetailModal({
-  visible, expense, isLoading, error, confirmingDelete, deleting, currentUserId, usernameFor, onClose, onDelete, setConfirmingDelete,
+  visible, expense, isLoading, error, confirmingDelete, deleting, deleteError, currentUserId, usernameFor, onClose, onDelete, setConfirmingDelete,
 }: ExpenseDetailModalProps) {
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
@@ -145,7 +146,7 @@ const ExpenseDetailModal = React.memo(function ExpenseDetailModal({
             <>
               <Text style={[styles.detailName, { color: theme.title }]}>{expense.name}</Text>
               <View style={[styles.amountHero, { backgroundColor: `${theme.tint}12`, borderColor: `${theme.tint}28` }]}>
-                <Text style={[styles.amountHeroText, { color: theme.tint, textShadowColor: `${theme.tint}70`, textShadowRadius: 16 }]}>
+                <Text style={[styles.amountHeroText, { color: theme.tint }, themeName !== 'light' && { textShadowColor: `${theme.tint}70`, textShadowRadius: 16 }]}>
                   {expense.amount?.toFixed(2)}€
                 </Text>
               </View>
@@ -191,6 +192,11 @@ const ExpenseDetailModal = React.memo(function ExpenseDetailModal({
               <Text style={[styles.detailLabel, { color: Colors.warning, textAlign: 'center', marginTop: 4 }]}>
                 {t('trip.deleteExpenseConfirm').toUpperCase()}
               </Text>
+              {deleteError && (
+                <Text style={[styles.detailLabel, { color: Colors.warning, textAlign: 'center', marginTop: 4 }]}>
+                  {deleteError}
+                </Text>
+              )}
               <View style={styles.modalBtns}>
                 <Pressable style={[styles.modalBtn, { borderColor: theme.border, borderWidth: 1 }]} onPress={() => setConfirmingDelete(false)} disabled={deleting}>
                   <Text style={{ color: theme.text, fontWeight: '700' }}>{t('common.cancel')}</Text>
@@ -517,6 +523,7 @@ const ExpensesScreen = () => {
   const [activeTab, setActiveTab] = useState<Tab>('expenses');
   const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [createModal, createDispatch] = useReducer(createReducer, CREATE_INITIAL);
   const [payingKey, setPayingKey] = useState<string | null>(null);
 
@@ -535,9 +542,12 @@ const ExpensesScreen = () => {
 
   const handleCreate = async () => {
     if (!trip?.id) return;
-    const amountValue = Number(createModal.amount.replace(',', '.'));
-    if (!createModal.name.trim() || !amountValue || !createModal.payerId || createModal.beneficiaryIds.length === 0) {
+    if (!createModal.name.trim() || !createModal.payerId || createModal.beneficiaryIds.length === 0) {
       createDispatch({ type: 'set_error', error: t('trip.fillAllRequiredFields') }); return;
+    }
+    const amountValue = Number(createModal.amount.replace(',', '.'));
+    if (!Number.isFinite(amountValue) || amountValue <= 0) {
+      createDispatch({ type: 'set_error', error: t('trip.invalidAmount') }); return;
     }
     try {
       await addExpenseMutation.mutateAsync({
@@ -554,29 +564,32 @@ const ExpensesScreen = () => {
   };
 
   const handleOpenDetail = useCallback((item: ExpenseSummary) => {
+    setDeleteError(null);
     setSelectedExpenseId(item.id);
   }, []);
 
   const handleDetailClose = useCallback(() => {
     setConfirmingDelete(false);
+    setDeleteError(null);
     setSelectedExpenseId(null);
   }, []);
 
   const handleDelete = useCallback(async () => {
     if (!selectedExpenseId) return;
+    setDeleteError(null);
     try {
       await deleteExpenseMutation.mutateAsync(selectedExpenseId);
       setConfirmingDelete(false);
       setSelectedExpenseId(null);
     } catch {
-      /* error visible via detailQuery.error would be stale; no-op is fine */
+      setDeleteError(t('trip.deleteExpenseError'));
     }
-  }, [selectedExpenseId, deleteExpenseMutation]);
+  }, [selectedExpenseId, deleteExpenseMutation, t]);
 
   const handlePaySettlement = useCallback((fromId: string, toId: string, amount: number) => {
     const key = `${fromId}-${toId}`;
     setPayingKey(key);
-    paySettlementMutation.mutate({ fromId, toId, amount }, {
+    paySettlementMutation.mutate({ toId, amount }, {
       onSettled: () => setPayingKey(null),
     });
   }, [paySettlementMutation]);
@@ -695,6 +708,7 @@ const ExpensesScreen = () => {
         error={detailQuery.isError ? t('trip.loadExpenseDetailError') : null}
         confirmingDelete={confirmingDelete}
         deleting={deleteExpenseMutation.isPending}
+        deleteError={deleteError}
         currentUserId={currentUserId}
         usernameFor={usernameFor}
         onClose={handleDetailClose}

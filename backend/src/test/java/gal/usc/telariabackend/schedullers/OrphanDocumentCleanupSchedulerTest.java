@@ -1,6 +1,7 @@
 package gal.usc.telariabackend.schedullers;
 
 import gal.usc.telariabackend.configuration.MinioConfig;
+import gal.usc.telariabackend.configuration.SchedulingProperties;
 import gal.usc.telariabackend.model.SharedDocument;
 import gal.usc.telariabackend.repository.SharedDocumentRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +36,8 @@ class OrphanDocumentCleanupSchedulerTest {
 
     @BeforeEach
     void setUp() {
-        scheduler = new OrphanDocumentCleanupScheduler(documentRepository, s3Client, minioConfig);
+        scheduler = new OrphanDocumentCleanupScheduler(documentRepository, s3Client, minioConfig,
+                new SchedulingProperties());
     }
 
     @Test

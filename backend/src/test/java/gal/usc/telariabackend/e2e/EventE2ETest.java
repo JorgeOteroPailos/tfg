@@ -12,6 +12,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -92,7 +93,8 @@ class EventE2ETest extends BaseE2ETest{
         MvcResult result = mockMvc.perform(post("/trips/{tripId}/events", tripId)
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateEventRequest().name(name))))
+                        .content(objectMapper.writeValueAsString(
+                                new CreateEventRequest().name(name).startTime(OffsetDateTime.now()))))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -130,7 +132,7 @@ class EventE2ETest extends BaseE2ETest{
         MvcResult result = mockMvc.perform(post("/trips/{tripId}/events", tripId)
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateEventRequest().name("Cena"))))
+                        .content(objectMapper.writeValueAsString(new CreateEventRequest().name("Cena").startTime(OffsetDateTime.now()))))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -148,7 +150,7 @@ class EventE2ETest extends BaseE2ETest{
         mockMvc.perform(post("/trips/{tripId}/events", tripId)
                         .header("Authorization", "Bearer " + outsiderToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateEventRequest().name("Cena"))))
+                        .content(objectMapper.writeValueAsString(new CreateEventRequest().name("Cena").startTime(OffsetDateTime.now()))))
                 .andExpect(status().isForbidden());
     }
 
@@ -160,7 +162,7 @@ class EventE2ETest extends BaseE2ETest{
 
         mockMvc.perform(post("/trips/{tripId}/events", tripId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateEventRequest().name("Cena"))))
+                        .content(objectMapper.writeValueAsString(new CreateEventRequest().name("Cena").startTime(OffsetDateTime.now()))))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -174,6 +176,87 @@ class EventE2ETest extends BaseE2ETest{
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new CreateEventRequest())))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Create event: missing startTime returns 400")
+    void createEvent_missingStartTime_returns400() throws Exception {
+        String token = registerAndObtainToken("pepe", "pepe@example.com");
+        UUID tripId = createTrip(token, "Viaje a Oslo");
+
+        mockMvc.perform(post("/trips/{tripId}/events", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new CreateEventRequest().name("Cena"))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Create event: valid location with coordinates returns 201")
+    void createEvent_withValidLocation_returns201() throws Exception {
+        String token = registerAndObtainToken("pepe", "pepe@example.com");
+        UUID tripId = createTrip(token, "Viaje a Santiago");
+
+        Location location = new Location()
+                .name("Restaurante Casa Pepe")
+                .address("Calle Mayor 1")
+                .latitude(42.8782)
+                .longitude(-8.5448);
+
+        mockMvc.perform(post("/trips/{tripId}/events", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new CreateEventRequest().name("Cena").startTime(OffsetDateTime.now()).location(location))))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("Create event: latitude out of range returns 400")
+    void createEvent_latitudeOutOfRange_returns400() throws Exception {
+        String token = registerAndObtainToken("pepe", "pepe@example.com");
+        UUID tripId = createTrip(token, "Viaje a la Luna");
+
+        Location location = new Location().latitude(91.0).longitude(0.0);
+
+        mockMvc.perform(post("/trips/{tripId}/events", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new CreateEventRequest().name("Cena").startTime(OffsetDateTime.now()).location(location))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Create event: longitude out of range returns 400")
+    void createEvent_longitudeOutOfRange_returns400() throws Exception {
+        String token = registerAndObtainToken("pepe", "pepe@example.com");
+        UUID tripId = createTrip(token, "Viaje a Marte");
+
+        Location location = new Location().latitude(0.0).longitude(200.0);
+
+        mockMvc.perform(post("/trips/{tripId}/events", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new CreateEventRequest().name("Cena").startTime(OffsetDateTime.now()).location(location))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Create event: latitude without longitude returns 400")
+    void createEvent_partialCoordinates_returns400() throws Exception {
+        String token = registerAndObtainToken("pepe", "pepe@example.com");
+        UUID tripId = createTrip(token, "Viaje incompleto");
+
+        Location location = new Location().latitude(42.0);
+
+        mockMvc.perform(post("/trips/{tripId}/events", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new CreateEventRequest().name("Cena").startTime(OffsetDateTime.now()).location(location))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -299,8 +382,8 @@ class EventE2ETest extends BaseE2ETest{
     }
 
     @Test
-    @DisplayName("Delete event: event from another trip returns 403")
-    void deleteEvent_eventFromAnotherTrip_returns403() throws Exception {
+    @DisplayName("Delete event: event from another trip returns 404")
+    void deleteEvent_eventFromAnotherTrip_returns404() throws Exception {
         String token = registerAndObtainToken("pepe", "pepe@example.com");
         UUID tripId1 = createTrip(token, "Viaje a Lisboa");
         UUID tripId2 = createTrip(token, "Viaje a Oporto");
@@ -308,7 +391,7 @@ class EventE2ETest extends BaseE2ETest{
 
         mockMvc.perform(delete("/trips/{tripId}/events/{eventId}", tripId2, eventId)
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
     }
 
     // Complete flow

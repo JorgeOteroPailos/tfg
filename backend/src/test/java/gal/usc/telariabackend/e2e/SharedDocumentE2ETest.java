@@ -15,6 +15,9 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.net.URI;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,6 +45,8 @@ class SharedDocumentE2ETest extends BaseE2ETest {
     private TransactionTemplate tx;
     @Autowired
     private EntityManager em;
+    @Autowired
+    private gal.usc.telariabackend.repository.SharedDocumentRepository documentRepository;
 
     @BeforeEach
     @SuppressWarnings("SqlNoDataSourceInspection")
@@ -161,6 +166,29 @@ class SharedDocumentE2ETest extends BaseE2ETest {
             assertEquals(200, response.statusCode());
             return response.body();
         }
+    }
+
+    /**
+     * Thumbnails are generated asynchronously after confirm, so the previewUrl is not
+     * guaranteed to be present on the first list. Polls the documents endpoint until the
+     * target document exposes a previewUrl (or fails after a short timeout).
+     */
+    private DocumentResponse awaitDocumentWithPreview(String token, UUID tripId, UUID documentId) throws Exception {
+        for (int attempt = 0; attempt < 50; attempt++) {
+            MvcResult result = mockMvc.perform(get("/trips/{tripId}/documents", tripId)
+                            .header("Authorization", "Bearer " + token))
+                    .andExpect(status().isOk())
+                    .andReturn();
+            DocumentResponse[] documents = objectMapper.readValue(
+                    result.getResponse().getContentAsString(), DocumentResponse[].class);
+            for (DocumentResponse doc : documents) {
+                if (doc.getId().equals(documentId) && doc.getPreviewUrl() != null) {
+                    return doc;
+                }
+            }
+            Thread.sleep(100);
+        }
+        throw new AssertionError("previewUrl was not generated for document " + documentId + " in time");
     }
 
     private UUID uploadDocumentCompletely(String token, UUID tripId, String fileName) throws Exception {
@@ -393,6 +421,138 @@ class SharedDocumentE2ETest extends BaseE2ETest {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    @DisplayName("List documents by date: today returns today's documents, other day returns none")
+    void listDocuments_byDate_filtersByUploadDay() throws Exception {
+        String token = registerAndObtainToken("uploader");
+        UUID tripId = createTrip(token, "Viaje a Tallin");
+
+        uploadDocumentCompletely(token, tripId, "billete.pdf");
+        uploadDocumentCompletely(token, tripId, "hotel.pdf");
+
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+
+        MvcResult todayResult = mockMvc.perform(get("/trips/{tripId}/documents", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .param("date", today.toString()))
+                .andExpect(status().isOk())
+                .andReturn();
+        DocumentResponse[] todayDocs = objectMapper.readValue(
+                todayResult.getResponse().getContentAsString(), DocumentResponse[].class);
+        assertEquals(2, todayDocs.length);
+
+        MvcResult yesterdayResult = mockMvc.perform(get("/trips/{tripId}/documents", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .param("date", today.minusDays(1).toString()))
+                .andExpect(status().isOk())
+                .andReturn();
+        DocumentResponse[] yesterdayDocs = objectMapper.readValue(
+                yesterdayResult.getResponse().getContentAsString(), DocumentResponse[].class);
+        assertEquals(0, yesterdayDocs.length);
+    }
+
+    @Test
+    @DisplayName("List documents by date: repository range query is half-open and isolates the upload day")
+    void listDocuments_byDate_repositoryRangeIsolatesDay() throws Exception {
+        String token = registerAndObtainToken("uploader");
+        UUID tripId = createTrip(token, "Viaje a Helsinki");
+
+        UUID todayDocId = uploadDocumentCompletely(token, tripId, "hoy.pdf");
+        UUID oldDocId = uploadDocumentCompletely(token, tripId, "ayer.pdf");
+
+        // Backdate one document to the previous day so the two docs fall on different calendar days.
+        OffsetDateTime backdated = OffsetDateTime.now(ZoneOffset.UTC).minusDays(1);
+        tx.execute(_ -> {
+            em.createNativeQuery("UPDATE documents SET created_at = :ts WHERE id = :id")
+                    .setParameter("ts", backdated)
+                    .setParameter("id", oldDocId)
+                    .executeUpdate();
+            return null;
+        });
+
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        OffsetDateTime todayStart = today.atStartOfDay().atOffset(ZoneOffset.UTC);
+        OffsetDateTime tomorrowStart = today.plusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC);
+        OffsetDateTime yesterdayStart = today.minusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC);
+
+        var todayDocs = documentRepository
+                .findByTripIdAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(tripId, todayStart, tomorrowStart);
+        assertEquals(1, todayDocs.size());
+        assertEquals(todayDocId, todayDocs.getFirst().getId());
+
+        var yesterdayDocs = documentRepository
+                .findByTripIdAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(tripId, yesterdayStart, todayStart);
+        assertEquals(1, yesterdayDocs.size());
+        assertEquals(oldDocId, yesterdayDocs.getFirst().getId());
+    }
+
+    @Test
+    @DisplayName("List documents by date: tzOffsetMinutes shifts which calendar day a near-midnight doc falls into")
+    void listDocuments_byDate_tzOffsetShiftsDay() throws Exception {
+        String token = registerAndObtainToken("uploader");
+        UUID tripId = createTrip(token, "Viaje a Oslo");
+
+        UUID docId = uploadDocumentCompletely(token, tripId, "nocturno.pdf");
+
+        // Pin the document to 23:30 UTC on a fixed day. For a UTC+2 client (offset -120)
+        // this instant belongs to the *next* calendar day, but to UTC it stays on the same day.
+        OffsetDateTime fixed = OffsetDateTime.of(2026, 6, 15, 23, 30, 0, 0, ZoneOffset.UTC);
+        tx.execute(_ -> {
+            em.createNativeQuery("UPDATE documents SET created_at = :ts WHERE id = :id")
+                    .setParameter("ts", fixed)
+                    .setParameter("id", docId)
+                    .executeUpdate();
+            return null;
+        });
+
+        // UTC+2 client viewing June 16 -> window [06-15T22:00Z, 06-16T22:00Z) -> includes the doc.
+        MvcResult tzResult = mockMvc.perform(get("/trips/{tripId}/documents", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .param("date", "2026-06-16")
+                        .param("tzOffsetMinutes", "-120"))
+                .andExpect(status().isOk())
+                .andReturn();
+        DocumentResponse[] tzDocs = objectMapper.readValue(
+                tzResult.getResponse().getContentAsString(), DocumentResponse[].class);
+        assertEquals(1, tzDocs.length);
+        assertEquals(docId, tzDocs[0].getId());
+
+        // Same June 16 but in UTC -> window [06-16T00:00Z, 06-17T00:00Z) -> excludes the doc.
+        MvcResult utcResult = mockMvc.perform(get("/trips/{tripId}/documents", tripId)
+                        .header("Authorization", "Bearer " + token)
+                        .param("date", "2026-06-16")
+                        .param("tzOffsetMinutes", "0"))
+                .andExpect(status().isOk())
+                .andReturn();
+        DocumentResponse[] utcDocs = objectMapper.readValue(
+                utcResult.getResponse().getContentAsString(), DocumentResponse[].class);
+        assertEquals(0, utcDocs.length);
+    }
+
+    @Test
+    @DisplayName("List documents by date: non-member gets 403")
+    void listDocuments_byDate_nonMember_returns403() throws Exception {
+        String ownerToken = registerAndObtainToken("owner");
+        String outsiderToken = registerAndObtainToken("outsider");
+        UUID tripId = createTrip(ownerToken, "Viaje a Riga");
+
+        mockMvc.perform(get("/trips/{tripId}/documents", tripId)
+                        .header("Authorization", "Bearer " + outsiderToken)
+                        .param("date", LocalDate.now(ZoneOffset.UTC).toString()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("List documents by date: unauthenticated returns 401")
+    void listDocuments_byDate_noToken_returns401() throws Exception {
+        String ownerToken = registerAndObtainToken("owner");
+        UUID tripId = createTrip(ownerToken, "Viaje a Vilna");
+
+        mockMvc.perform(get("/trips/{tripId}/documents", tripId)
+                        .param("date", LocalDate.now(ZoneOffset.UTC).toString()))
+                .andExpect(status().isUnauthorized());
+    }
+
     // -------------------------------------------------------------------------
     // GET /trips/{tripId}/documents/{documentId}  (download URL)
     // -------------------------------------------------------------------------
@@ -553,18 +713,9 @@ class SharedDocumentE2ETest extends BaseE2ETest {
         uploadBytesToMinio(uploadResponse.getUploadUrl(), pngBytes(1200, 800));
         confirmUpload(token, tripId, uploadResponse.getDocumentId());
 
-        MvcResult result = mockMvc.perform(get("/trips/{tripId}/documents", tripId)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andReturn();
+        DocumentResponse document = awaitDocumentWithPreview(token, tripId, uploadResponse.getDocumentId());
 
-        DocumentResponse[] documents = objectMapper.readValue(
-                result.getResponse().getContentAsString(), DocumentResponse[].class);
-
-        assertEquals(1, documents.length);
-        assertNotNull(documents[0].getPreviewUrl());
-
-        byte[] thumbBytes = httpGetBytes(documents[0].getPreviewUrl());
+        byte[] thumbBytes = httpGetBytes(document.getPreviewUrl());
         java.awt.image.BufferedImage thumb = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(thumbBytes));
         assertNotNull(thumb);
         assertEquals(512, thumb.getWidth());
@@ -622,6 +773,10 @@ class SharedDocumentE2ETest extends BaseE2ETest {
         DocumentUploadResponse uploadResponse = initUpload(token, tripId, "foto.png", "image/png");
         uploadBytesToMinio(uploadResponse.getUploadUrl(), pngBytes(1200, 800));
         confirmUpload(token, tripId, uploadResponse.getDocumentId());
+
+        // Wait until the async thumbnail has been written, otherwise the delete could race
+        // ahead of generation and leave an orphaned thumbnail object behind.
+        awaitDocumentWithPreview(token, tripId, uploadResponse.getDocumentId());
 
         mockMvc.perform(delete("/trips/{tripId}/documents/{documentId}", tripId, uploadResponse.getDocumentId())
                         .header("Authorization", "Bearer " + token))

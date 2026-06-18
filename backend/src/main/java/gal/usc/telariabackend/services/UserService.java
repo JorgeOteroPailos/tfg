@@ -12,6 +12,8 @@ import gal.usc.telariabackend.model.exceptions.DocumentNotFoundInStorageExceptio
 import gal.usc.telariabackend.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -39,19 +41,22 @@ public class UserService {
     private final MinioConfig minioConfig;
     private final ImageService imageService;
     private final ImageProperties imageProperties;
+    private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
                        S3Client s3Client,
                        S3Presigner s3Presigner,
                        MinioConfig minioConfig,
                        ImageService imageService,
-                       ImageProperties imageProperties) {
+                       ImageProperties imageProperties,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.s3Client = s3Client;
         this.s3Presigner = s3Presigner;
         this.minioConfig = minioConfig;
         this.imageService = imageService;
         this.imageProperties = imageProperties;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public OwnProfile getProfile(UUID userId) {
@@ -61,7 +66,7 @@ public class UserService {
     }
 
     @Transactional
-    public OwnProfile updateProfile(UUID userId, String username, String email) {
+    public OwnProfile updateProfile(UUID userId, String username, String email, String currentPassword) {
         User user = userRepository.findById(userId)
                 .orElseThrow(IllegalStateException::new);
 
@@ -69,6 +74,10 @@ public class UserService {
             user.setUsername(username);
         }
         if (email != null && !email.equals(user.getEmail())) {
+            // Changing the email is a sensitive operation: re-authenticate with the current password
+            if (currentPassword == null || !passwordEncoder.matches(currentPassword, user.getPassword())) {
+                throw new BadCredentialsException("Current password is incorrect");
+            }
             if (userRepository.existsByEmail(email)) {
                 throw new AlreadyDoneException("There is already a registered user with email " + email);
             }

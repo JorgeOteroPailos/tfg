@@ -12,8 +12,10 @@ import jakarta.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -49,6 +52,11 @@ public class AiChatService {
     @Value("${ollama.model:llama3.2:3b}")
     private String ollamaModel;
 
+    // Inactivity read timeout for the Ollama stream, aligned with the MVC async timeout
+    // so a stalled connection fails fast instead of pinning a thread + emitter.
+    @Value("${spring.mvc.async.request-timeout:120000}")
+    private long ollamaReadTimeoutMs;
+
     private RestClient restClient;
     private final ObjectMapper objectMapper;
 
@@ -70,7 +78,13 @@ public class AiChatService {
 
     @PostConstruct
     private void init() {
-        this.restClient = RestClient.builder().baseUrl(ollamaBaseUrl).build();
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(Duration.ofSeconds(3));
+        factory.setReadTimeout(Duration.ofMillis(ollamaReadTimeoutMs));
+        this.restClient = RestClient.builder()
+            .baseUrl(ollamaBaseUrl)
+            .requestFactory(factory)
+            .build();
     }
 
     public gal.usc.telariabackend.model.dto.AiChatHistoryPage getHistory(
@@ -121,6 +135,7 @@ public class AiChatService {
         // Phase 2: stream from Ollama (no DB connection held)
         StringBuilder fullResponse = new StringBuilder();
         boolean[] emitterAlive = {true};
+        Exception streamError = null;
 
         try {
             callOllamaStream(ctx.systemPrompt(), ctx.history(), userMessage, chunk -> {
@@ -136,20 +151,33 @@ public class AiChatService {
                 }
             });
         } catch (Exception e) {
-            if (emitterAlive[0]) emitter.completeWithError(e);
-            return;
+            streamError = e;
         }
 
-        // Phase 3: persist both messages (short write transaction, always runs)
+        // Phase 3: persist the exchange (short write transaction, always runs — even when
+        // the model call failed, so the user's message survives instead of vanishing from
+        // the transcript on the next history load). The assistant row is given a strictly
+        // later timestamp so OrderByTimestamp is deterministic, and is skipped when the
+        // model returned nothing so empty bubbles don't get stored and fed back as context.
+        String assistantResponse = fullResponse.toString();
         txWrite.execute(status -> {
             Trip trip = tripRepo.findById(tripId).orElseThrow();
             User user = userRepo.findById(userId).orElseThrow();
-            chatMessageRepo.save(new AiChatMessage(trip, user, AiChatMessage.Role.USER, userMessage));
-            chatMessageRepo.save(new AiChatMessage(trip, user, AiChatMessage.Role.ASSISTANT, fullResponse.toString()));
+            OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+            chatMessageRepo.save(new AiChatMessage(trip, user, AiChatMessage.Role.USER, userMessage, now));
+            if (!assistantResponse.isBlank()) {
+                chatMessageRepo.save(new AiChatMessage(
+                    trip, user, AiChatMessage.Role.ASSISTANT, assistantResponse, now.plusNanos(1_000_000)));
+            }
             return null;
         });
 
-        if (emitterAlive[0]) emitter.complete();
+        // Phase 4: close out the emitter.
+        if (streamError != null) {
+            if (emitterAlive[0]) emitter.completeWithError(streamError);
+        } else if (emitterAlive[0]) {
+            emitter.complete();
+        }
     }
 
     private String buildSystemPrompt(Trip trip) {
@@ -192,7 +220,8 @@ public class AiChatService {
         return sb.toString();
     }
 
-    private void callOllamaStream(
+    // Package-private (not private) so unit tests can stub the streaming call via a spy.
+    void callOllamaStream(
         String systemPrompt,
         List<AiChatMessage> history,
         String userMessage,

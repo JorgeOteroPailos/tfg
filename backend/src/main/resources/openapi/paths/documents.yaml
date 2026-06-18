@@ -78,11 +78,31 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: date
+          in: query
+          required: false
+          description: >
+            When present, only documents uploaded on this calendar day are returned.
+          schema:
+            type: string
+            format: date
+        - name: tzOffsetMinutes
+          in: query
+          required: false
+          description: >
+            Timezone offset of the requesting client as returned by JavaScript's
+            Date.getTimezoneOffset() (minutes to add to local time to reach UTC).
+            Used together with `date` to compute the calendar-day window in the
+            client's timezone. Defaults to UTC when omitted.
+          schema:
+            type: integer
+            format: int32
       responses:
         '200':
           description: >
             List of documents. Members see only ACTIVE documents.
             The uploader also sees their own PENDING documents.
+            When the date filter is supplied, results are limited to that calendar day.
           content:
             application/json:
               schema:

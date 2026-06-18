@@ -1,40 +1,25 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import {
   StyleSheet, View, FlatList, ActivityIndicator,
-  Pressable, Modal, Linking,
+  Pressable, Linking,
 } from 'react-native';
-import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import { useAppTheme } from '../../../src/theme';
-import { useDataSaver } from '../../../src/dataSaver';
 import { Colors } from '../../../constants/Colors';
 import { useDocuments, useDocumentsQuery, useDocumentDownloadQuery, useUploadDocumentMutation, useDeleteDocumentMutation, type DocumentResponse } from '../../../src/documents';
 import { useTrip } from '../../../src/trips';
 import { uploadToUrl } from '../../../src/upload';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '../../../components/ThemedText';
+import { DocGridCard, DocumentDetailModal } from '../../../src/documentCards';
+import {
+  detailReducer, DETAIL_INITIAL,
+  isImageFile, fileIcon, formatDate,
+} from '../../../src/documentCards.helpers';
 
 const EMPTY_DOCS: DocumentResponse[] = [];
-
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString(undefined, {
-      year: 'numeric', month: 'short', day: 'numeric',
-    });
-  } catch {
-    return iso;
-  }
-}
-
-function fileIcon(name: string): React.ComponentProps<typeof Ionicons>['name'] {
-  const ext = name.split('.').pop()?.toLowerCase();
-  if (ext === 'pdf') return 'document-text-outline';
-  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic'].includes(ext ?? '')) return 'image-outline';
-  if (['mp4', 'mov', 'avi', 'mkv'].includes(ext ?? '')) return 'videocam-outline';
-  return 'document-outline';
-}
 
 interface DocCardProps {
   item: DocumentResponse;
@@ -44,43 +29,6 @@ interface DocCardProps {
   memberName?: string;
   onPress: (item: DocumentResponse) => void;
 }
-const IMAGE_EXTS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic']);
-
-function isImageFile(name: string) {
-  return IMAGE_EXTS.has(name.split('.').pop()?.toLowerCase() ?? '');
-}
-
-const DocGridCard = React.memo(function DocGridCard({ item, background, tint, onPress }: Pick<DocCardProps, 'item' | 'background' | 'tint' | 'onPress'>) {
-  const { trip } = useTrip();
-  const { dataSaver } = useDataSaver();
-  const isImage = isImageFile(item.name);
-  // Full image only as fallback when there is no server-generated thumbnail (old docs, heic, failed generation)
-  const { data: fallbackUri } = useDocumentDownloadQuery(trip?.id ?? '', item.id, { enabled: isImage && !item.previewUrl && !!trip?.id && !dataSaver });
-  // In data-saver mode the grid shows the file icon instead of fetching previews.
-  const imageUri = dataSaver ? undefined : (item.previewUrl ?? fallbackUri);
-
-  return (
-    <Pressable
-      style={({ pressed }) => [styles.gridCard, { backgroundColor: background, opacity: pressed ? 0.75 : 1 }]}
-      onPress={() => onPress(item)}
-    >
-      {isImage && imageUri ? (
-        <>
-          <Image source={{ uri: imageUri }} style={StyleSheet.absoluteFill} contentFit="cover" />
-          <View style={styles.gridImageOverlay}>
-            <ThemedText style={styles.gridImageName} numberOfLines={1}>{item.name}</ThemedText>
-          </View>
-        </>
-      ) : (
-        <>
-          <Ionicons name={fileIcon(item.name)} size={36} color={tint} />
-          <ThemedText style={styles.gridName} numberOfLines={2}>{item.name}</ThemedText>
-          <ThemedText style={styles.gridMeta}>{formatDate(item.uploadedAt)}</ThemedText>
-        </>
-      )}
-    </Pressable>
-  );
-});
 
 const DocCard = React.memo(function DocCard({ item, background, tint, icon, memberName, onPress }: DocCardProps) {
   return (
@@ -102,32 +50,6 @@ const DocCard = React.memo(function DocCard({ item, background, tint, icon, memb
     </Pressable>
   );
 });
-
-// --- Detail modal state ---
-type DetailState = { visible: boolean; doc: DocumentResponse | null; downloading: boolean; deleting: boolean; error: string | null };
-type DetailAction =
-  | { type: 'open'; doc: DocumentResponse }
-  | { type: 'close' }
-  | { type: 'start_download' }
-  | { type: 'end_download' }
-  | { type: 'start_delete' }
-  | { type: 'end_delete' }
-  | { type: 'set_error'; error: string };
-
-const DETAIL_INITIAL: DetailState = { visible: false, doc: null, downloading: false, deleting: false, error: null };
-
-function detailReducer(state: DetailState, action: DetailAction): DetailState {
-  switch (action.type) {
-    case 'open': return { visible: true, doc: action.doc, downloading: false, deleting: false, error: null };
-    case 'close': return DETAIL_INITIAL;
-    case 'start_download': return { ...state, downloading: true, error: null };
-    case 'end_download': return { ...state, downloading: false };
-    case 'start_delete': return { ...state, deleting: true, error: null };
-    case 'end_delete': return { ...state, deleting: false };
-    case 'set_error': return { ...state, error: action.error };
-    default: return state;
-  }
-}
 
 // ── Filter chip ───────────────────────────────────────────────────────────────
 type FilterChipProps = { ext: string; selected: boolean; tint: string; onPress: (ext: string) => void };
@@ -178,121 +100,6 @@ function uiReducer(s: UIState, a: UIAction): UIState {
     default: return s;
   }
 }
-
-// ── Detail modal ───────────────────────────────────────────────────────────────
-type DocumentDetailModalProps = {
-  detail: DetailState;
-  detailDispatch: React.Dispatch<DetailAction>;
-  detailImageUrl: string | null;
-  memberMap: Record<string, string>;
-  onDownload: () => void;
-  onDelete: () => void;
-};
-
-const DocumentDetailModal = React.memo(function DocumentDetailModal({
-  detail, detailDispatch, detailImageUrl, memberMap, onDownload, onDelete,
-}: DocumentDetailModalProps) {
-  const { t } = useTranslation();
-  const { themeName } = useAppTheme();
-  const theme = Colors[themeName] ?? Colors.light;
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
-
-  useEffect(() => {
-    if (!detail.visible) setConfirmingDelete(false);
-  }, [detail.visible]);
-
-  const handleClose = useCallback(() => {
-    detailDispatch({ type: 'close' });
-    setConfirmingDelete(false);
-  }, [detailDispatch]);
-
-  return (
-    <Modal
-      visible={detail.visible}
-      transparent
-      animationType="fade"
-      onRequestClose={handleClose}
-    >
-      <Pressable style={styles.overlay} onPress={handleClose}>
-        <Pressable onPress={() => {}} style={[styles.modalBox, { backgroundColor: theme.tabBackground }]}>
-          <ThemedText style={styles.modalTitle}>{t('trip.documentDetail')}</ThemedText>
-
-          {detail.doc && (
-            <>
-              <View style={styles.docIconCentered}>
-                {isImageFile(detail.doc.name) && detailImageUrl
-                  ? <Image source={{ uri: detailImageUrl }} style={styles.detailImage} contentFit="contain" />
-                  : <Ionicons name={fileIcon(detail.doc.name)} size={48} color={theme.tint} />}
-              </View>
-              <ThemedText style={styles.detailName} numberOfLines={2}>{detail.doc.name}</ThemedText>
-
-              <View style={styles.detailRow}>
-                <ThemedText style={styles.detailLabel}>{t('trip.uploadedAt')}</ThemedText>
-                <ThemedText style={styles.detailValue}>{formatDate(detail.doc.uploadedAt)}</ThemedText>
-              </View>
-              {memberMap[detail.doc.uploaderId] && (
-                <View style={styles.detailRow}>
-                  <ThemedText style={styles.detailLabel}>{t('trip.uploadedBy')}</ThemedText>
-                  <ThemedText style={styles.detailValue}>{memberMap[detail.doc.uploaderId]}</ThemedText>
-                </View>
-              )}
-            </>
-          )}
-
-          {detail.error && <ThemedText style={styles.errorText}>{detail.error}</ThemedText>}
-
-          {confirmingDelete ? (
-            <>
-              <ThemedText style={[styles.errorText, { color: theme.text, marginTop: 8 }]}>{t('trip.deleteDocumentConfirm')}</ThemedText>
-              <View style={styles.modalButtons}>
-                <Pressable
-                  style={[styles.modalBtn, { borderColor: theme.icon + '55', borderWidth: 1 }]}
-                  onPress={() => setConfirmingDelete(false)}
-                  disabled={detail.deleting}
-                >
-                  <ThemedText style={{ fontWeight: '600' }}>{t('common.cancel')}</ThemedText>
-                </Pressable>
-                <Pressable
-                  style={[styles.modalBtn, styles.deleteBtn]}
-                  onPress={onDelete}
-                  disabled={detail.deleting}
-                >
-                  {detail.deleting
-                    ? <ActivityIndicator color="white" />
-                    : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('common.delete')}</ThemedText>}
-                </Pressable>
-              </View>
-            </>
-          ) : (
-            <>
-              <View style={styles.modalButtons}>
-                <Pressable
-                  style={[styles.modalBtn, styles.deleteBtn]}
-                  onPress={() => setConfirmingDelete(true)}
-                  disabled={detail.deleting || detail.downloading}
-                >
-                  <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('trip.delete')}</ThemedText>
-                </Pressable>
-                <Pressable
-                  style={[styles.modalBtn, { backgroundColor: theme.tint }]}
-                  onPress={onDownload}
-                  disabled={detail.downloading || detail.deleting}
-                >
-                  {detail.downloading
-                    ? <ActivityIndicator color="white" />
-                    : <ThemedText style={{ color: 'white', fontWeight: '600' }}>{t('trip.downloadDocument')}</ThemedText>}
-                </Pressable>
-              </View>
-              <Pressable style={styles.closeBtn} onPress={handleClose}>
-                <ThemedText style={styles.closeBtnText}>{t('common.close')}</ThemedText>
-              </Pressable>
-            </>
-          )}
-        </Pressable>
-      </Pressable>
-    </Modal>
-  );
-});
 
 // ── Main screen ────────────────────────────────────────────────────────────────
 const DocumentsScreen = () => {
@@ -572,29 +379,6 @@ const styles = StyleSheet.create({
   sortBtnText: { fontSize: 13, fontWeight: '500' },
 
   gridRow: { gap: 10 },
-  gridCard: {
-    flex: 1,
-    borderRadius: 12,
-    padding: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    minHeight: 110,
-    overflow: 'hidden',
-  },
-  gridName: { fontSize: 12, fontWeight: '600', textAlign: 'center' },
-  gridMeta: { fontSize: 11, opacity: 0.6, textAlign: 'center' },
-  detailImage: { width: '100%', height: 180, borderRadius: 10, marginBottom: 8 },
-  gridImageOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-  },
-  gridImageName: { fontSize: 11, fontWeight: '600', color: 'white' },
 
   docCard: {
     flexDirection: 'row',
@@ -620,26 +404,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#d9534f', padding: 12, borderRadius: 8, alignItems: 'center',
   },
   toastText: { color: 'white', fontWeight: '600' },
-
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: 24 },
-  modalBox: { borderRadius: 16, padding: 20 },
-  modalTitle: { fontSize: 20, fontWeight: '700', marginBottom: 16 },
-  docIconCentered: { alignItems: 'center', marginBottom: 8 },
-  detailName: { fontSize: 16, fontWeight: '700', textAlign: 'center', marginBottom: 16 },
-  detailRow: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', marginBottom: 10,
-  },
-  detailLabel: { fontSize: 13, opacity: 0.6, fontWeight: '500' },
-  detailValue: { fontSize: 14, fontWeight: '600', maxWidth: '60%', textAlign: 'right' },
-
-  modalButtons: { flexDirection: 'row', gap: 8, marginTop: 12 },
-  modalBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
-  deleteBtn: { backgroundColor: '#d9534f' },
-  closeBtn: {
-    marginTop: 8, paddingVertical: 12, borderRadius: 10,
-    alignItems: 'center', borderWidth: 1, borderColor: '#ccc',
-  },
-  closeBtnText: { fontSize: 15 },
-  errorText: { color: '#d9534f', marginTop: 8, textAlign: 'center' },
 });

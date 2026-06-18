@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
-  StyleSheet, View, ActivityIndicator,
+  StyleSheet, View, ActivityIndicator, FlatList, Linking,
   Pressable, Modal, ScrollView, TextInput, PanResponder,
   type NativeScrollEvent, type NativeSyntheticEvent,
 } from 'react-native';
@@ -12,6 +12,12 @@ import { useAppTheme } from '../../../src/theme';
 import { Colors } from '../../../constants/Colors';
 import { useQuery } from '@tanstack/react-query';
 import { useEventsQuery, useAddEventMutation, useDeleteEventMutation, type EventSummary } from '../../../src/events';
+import { useDocuments, useDocumentsByDateQuery, useDocumentDownloadQuery, useDeleteDocumentMutation, type DocumentResponse } from '../../../src/documents';
+import { DocGridCard, DocumentDetailModal } from '../../../src/documentCards';
+import {
+  detailReducer as docDetailReducer,
+  DETAIL_INITIAL as DOC_DETAIL_INITIAL, isImageFile,
+} from '../../../src/documentCards.helpers';
 import { useTrip } from '../../../src/trips';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '../../../components/ThemedText';
@@ -197,11 +203,9 @@ const EventCard = ({ ev, showDate = false, isPast = false, theme, formatTime, fo
   >
     <View style={styles.eventLeft}>
       <ThemedText style={styles.eventName}>{ev.name}</ThemedText>
-      {ev.startTime && (
-        <ThemedText style={styles.eventMeta}>
-          {showDate ? formatDateTime(ev.startTime) : formatTime(ev.startTime)}
-        </ThemedText>
-      )}
+      <ThemedText style={styles.eventMeta}>
+        {showDate ? formatDateTime(ev.startTime) : formatTime(ev.startTime)}
+      </ThemedText>
       {ev.location?.name && (
         <View style={styles.locationRow}>
           <Ionicons name="location-outline" size={13} color={theme.icon} />
@@ -382,15 +386,45 @@ type NominatimResult = {
   display_name: string;
   lat: string;
   lon: string;
+  name?: string;
+  namedetails?: { name?: string };
+  // [south, north, west, east] as strings
+  boundingbox?: [string, string, string, string];
   address?: { road?: string; house_number?: string; city?: string; town?: string; village?: string; country?: string };
 };
 
-function nominatimName(r: NominatimResult) { return r.display_name.split(',')[0].trim(); }
+function nominatimCoords(r: NominatimResult) { return { latitude: parseFloat(r.lat), longitude: parseFloat(r.lon) }; }
+function nominatimName(r: NominatimResult) {
+  const named = r.namedetails?.name ?? r.name;
+  if (named && named.trim()) return named.trim();
+  const segments = r.display_name.split(',').map(s => s.trim()).filter(Boolean);
+  // Skip bare house numbers (e.g. "10, Calle Mayor, ...") so we get a real name.
+  return segments.find(s => !/^\d+$/.test(s)) ?? segments[0] ?? '';
+}
 function nominatimAddress(r: NominatimResult) {
   const a = r.address ?? {};
   const road = [a.house_number, a.road].filter(Boolean).join(' ');
   const city = a.city ?? a.town ?? a.village ?? '';
   return [road, city, a.country].filter(Boolean).join(', ');
+}
+// Frame the whole feature (centered on its bounding box) rather than landing on
+// Nominatim's representative point, which can sit off to one side.
+function regionFromResult(r: NominatimResult): Region {
+  const bb = r.boundingbox;
+  const { latitude, longitude } = nominatimCoords(r);
+  if (bb && bb.length === 4) {
+    const south = parseFloat(bb[0]), north = parseFloat(bb[1]);
+    const west = parseFloat(bb[2]), east = parseFloat(bb[3]);
+    if ([south, north, west, east].every(Number.isFinite)) {
+      return {
+        latitude: (south + north) / 2,
+        longitude: (west + east) / 2,
+        latitudeDelta: Math.max((north - south) * 1.3, 0.005),
+        longitudeDelta: Math.max((east - west) * 1.3, 0.005),
+      };
+    }
+  }
+  return { latitude, longitude, latitudeDelta: 0.02, longitudeDelta: 0.02 };
 }
 
 const FALLBACK_REGION: Region = { latitude: 42.8782, longitude: -8.5448, latitudeDelta: 0.05, longitudeDelta: 0.05 };
@@ -413,26 +447,30 @@ const DARK_MAP_STYLE: MapStyleElement[] = [
   { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#3d3d3d' }] },
 ];
 
-type MapPickerState = { region: Region; ready: boolean; searchQuery: string; confirming: boolean };
+type MapPickerState = { region: Region; ready: boolean; searchQuery: string; confirming: boolean; searching: boolean; notice: string | null };
 type MapPickerInternalAction =
   | { type: 'closed' }
   | { type: 'hint'; region: Region }
   | { type: 'locating' }
   | { type: 'located'; region: Region }
-  | { type: 'location_failed' }
+  | { type: 'location_failed'; notice: string }
   | { type: 'set_query'; query: string }
+  | { type: 'search_start' }
+  | { type: 'search_end'; notice?: string | null }
   | { type: 'confirm_start' }
   | { type: 'confirm_end' };
 
 function mapPickerReducer(s: MapPickerState, a: MapPickerInternalAction): MapPickerState {
   switch (a.type) {
-    case 'closed': return { ...s, searchQuery: '', ready: false };
-    case 'hint': return { ...s, region: a.region, ready: true };
-    case 'locating': return { ...s, ready: false };
-    case 'located': return { ...s, region: a.region, ready: true };
-    case 'location_failed': return { ...s, ready: true };
+    case 'closed': return { ...s, searchQuery: '', ready: false, searching: false, confirming: false, notice: null };
+    case 'hint': return { ...s, region: a.region, ready: true, notice: null };
+    case 'locating': return { ...s, ready: false, notice: null };
+    case 'located': return { ...s, region: a.region, ready: true, notice: null };
+    case 'location_failed': return { ...s, ready: true, notice: a.notice };
     case 'set_query': return { ...s, searchQuery: a.query };
-    case 'confirm_start': return { ...s, confirming: true };
+    case 'search_start': return { ...s, searching: true, notice: null };
+    case 'search_end': return { ...s, searching: false, notice: a.notice ?? null };
+    case 'confirm_start': return { ...s, confirming: true, notice: null };
     case 'confirm_end': return { ...s, confirming: false };
     default: return s;
   }
@@ -449,13 +487,23 @@ const MapPickerModal = React.memo(function MapPickerModal({ visible, tint, hintR
   const { t } = useTranslation();
   const { themeName } = useAppTheme();
   const theme = Colors[themeName] ?? Colors.light;
-  const [mapState, mapDispatch] = useReducer(mapPickerReducer, { region: FALLBACK_REGION, ready: false, searchQuery: '', confirming: false });
+  const [mapState, mapDispatch] = useReducer(mapPickerReducer, { region: FALLBACK_REGION, ready: false, searchQuery: '', confirming: false, searching: false, notice: null });
   const regionRef = useRef<Region>(FALLBACK_REGION);
   const mapRef = useRef<MapView>(null);
-  const searchedNameRef = useRef<string | null>(null);
+  // Tracks whether the picker is still open, so async fetches that resolve after
+  // the modal closes don't dispatch into the reducer or confirm a stale pick.
+  const activeRef = useRef(false);
+  // Remembers the user's typed search and where it landed, so confirm can use it
+  // as the name — but only while the map center stays on that spot (see onRegionChange).
+  const searchedRef = useRef<{ name: string; latitude: number; longitude: number } | null>(null);
 
   useEffect(() => {
-    if (!visible) { mapDispatch({ type: 'closed' }); searchedNameRef.current = null; return; }
+    activeRef.current = visible;
+    return () => { activeRef.current = false; };
+  }, [visible]);
+
+  useEffect(() => {
+    if (!visible) { mapDispatch({ type: 'closed' }); searchedRef.current = null; return; }
     if (hintRegion) {
       regionRef.current = hintRegion;
       mapDispatch({ type: 'hint', region: hintRegion });
@@ -464,26 +512,42 @@ const MapPickerModal = React.memo(function MapPickerModal({ visible, tint, hintR
     let cancelled = false;
     mapDispatch({ type: 'locating' });
     (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (cancelled) return;
-      if (status === 'granted') {
-        const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
         if (cancelled) return;
-        const r = { latitude: pos.coords.latitude, longitude: pos.coords.longitude, latitudeDelta: 0.05, longitudeDelta: 0.05 };
-        regionRef.current = r;
-        mapDispatch({ type: 'located', region: r });
-      } else {
-        mapDispatch({ type: 'location_failed' });
+        if (status === 'granted') {
+          const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+          if (cancelled) return;
+          const r = { latitude: pos.coords.latitude, longitude: pos.coords.longitude, latitudeDelta: 0.05, longitudeDelta: 0.05 };
+          regionRef.current = r;
+          mapDispatch({ type: 'located', region: r });
+        } else {
+          mapDispatch({ type: 'location_failed', notice: t('trip.locationUnavailable') });
+        }
+      } catch {
+        if (!cancelled) mapDispatch({ type: 'location_failed', notice: t('trip.locationUnavailable') });
       }
     })();
     return () => { cancelled = true; };
-  }, [visible, hintRegion]);
+  }, [visible, hintRegion, t]);
 
-  const onRegionChange = useCallback((r: Region) => { regionRef.current = r; }, []);
+  const onRegionChange = useCallback((r: Region) => {
+    regionRef.current = r;
+    // If the user pans away from the searched spot, drop the typed name so it
+    // isn't applied to a different coordinate. Epsilon scales with zoom level.
+    const s = searchedRef.current;
+    if (s) {
+      const eps = Math.max(r.latitudeDelta * 0.15, 0.0008);
+      if (Math.abs(r.latitude - s.latitude) > eps || Math.abs(r.longitude - s.longitude) > eps) {
+        searchedRef.current = null;
+      }
+    }
+  }, []);
 
   const handleSearch = async () => {
     const q = mapState.searchQuery.trim();
     if (!q) return;
+    mapDispatch({ type: 'search_start' });
     try {
       const c = regionRef.current;
       const viewbox = `${c.longitude - 1},${c.latitude - 1},${c.longitude + 1},${c.latitude + 1}`;
@@ -491,44 +555,57 @@ const MapPickerModal = React.memo(function MapPickerModal({ visible, tint, hintR
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&viewbox=${viewbox}&bounded=0`,
         { headers: { 'User-Agent': 'Telaria-TFG/1.0' } },
       );
+      if (!res.ok) throw new Error('search request failed');
       const data: NominatimResult[] = await res.json();
+      if (!activeRef.current) return;
       if (data[0]) {
-        const r = { latitude: parseFloat(data[0].lat), longitude: parseFloat(data[0].lon), latitudeDelta: 0.02, longitudeDelta: 0.02 };
+        const r = regionFromResult(data[0]);
         regionRef.current = r;
-        searchedNameRef.current = q;
+        searchedRef.current = { name: q, latitude: r.latitude, longitude: r.longitude };
         mapRef.current?.animateToRegion(r, 600);
+        mapDispatch({ type: 'search_end' });
+      } else {
+        mapDispatch({ type: 'search_end', notice: t('trip.searchNoResults') });
       }
-    } catch {}
+    } catch {
+      if (activeRef.current) mapDispatch({ type: 'search_end', notice: t('trip.searchFailed') });
+    }
   };
 
   const handleConfirm = async () => {
     mapDispatch({ type: 'confirm_start' });
     const { latitude, longitude } = regionRef.current;
-    let name: string | undefined;
+    // Prefer the name the user typed (kept only while still centered on that spot).
+    let name: string | undefined = searchedRef.current?.name;
     let address: string | undefined;
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`,
+        `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1&namedetails=1`,
         { headers: { 'User-Agent': 'Telaria-TFG/1.0' } },
       );
+      if (!res.ok) throw new Error('reverse request failed');
       const data = await res.json();
       if (data && !data.error) {
         const r = data as NominatimResult;
-        name = searchedNameRef.current ?? nominatimName(r);
+        if (!name) name = nominatimName(r);
         address = nominatimAddress(r);
       }
     } catch {}
+    if (!activeRef.current) return;
+    // Coordinates are always valid even if reverse geocoding failed, so confirm regardless.
     mapDispatch({ type: 'confirm_end' });
     onConfirm(latitude, longitude, name, address);
   };
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: theme.background }}>
+        {/* Map area: the center overlays below share these exact bounds, so the dot == map center */}
+        <View style={{ flex: 1 }}>
         {mapState.ready ? (
           <MapView
             ref={mapRef}
-            style={{ flex: 1 }}
+            style={StyleSheet.absoluteFill}
             initialRegion={mapState.region}
             onRegionChangeComplete={onRegionChange}
             userInterfaceStyle={themeName === 'dark' ? 'dark' : 'light'}
@@ -540,9 +617,13 @@ const MapPickerModal = React.memo(function MapPickerModal({ visible, tint, hintR
           </View>
         )}
 
-        {/* Fixed center-pin overlay */}
-        <View style={mapPicker.pin} pointerEvents="none">
+        {/* Decorative pin: its tip rests on the exact center dot below */}
+        <View style={mapPicker.pinIcon} pointerEvents="none">
           <Ionicons name="location" size={40} color={tint} />
+        </View>
+        {/* Exact selected point — geometric center == map center == saved coordinate */}
+        <View style={mapPicker.centerWrap} pointerEvents="none">
+          <View style={[mapPicker.centerDot, { backgroundColor: tint }]} />
         </View>
 
         {/* Search bar */}
@@ -556,15 +637,26 @@ const MapPickerModal = React.memo(function MapPickerModal({ visible, tint, hintR
             onSubmitEditing={handleSearch}
             returnKeyType="search"
           />
-          <Pressable onPress={handleSearch} hitSlop={8}>
-            <Ionicons name="search" size={20} color={tint} />
+          <Pressable onPress={handleSearch} hitSlop={8} disabled={mapState.searching}>
+            {mapState.searching
+              ? <ActivityIndicator color={tint} size="small" />
+              : <Ionicons name="search" size={20} color={tint} />}
           </Pressable>
         </View>
+
+        {/* Inline notice (search/geolocation feedback) */}
+        {mapState.notice && (
+          <View style={[mapPicker.notice, { backgroundColor: theme.tabBackground }]} pointerEvents="none">
+            <ThemedText style={{ color: theme.text, fontSize: 13 }}>{mapState.notice}</ThemedText>
+          </View>
+        )}
 
         {/* Top-left close button */}
         <Pressable style={[mapPicker.closeBtn, { backgroundColor: theme.tabBackground }]} onPress={onClose} hitSlop={8}>
           <Ionicons name="close" size={22} color={theme.icon} />
         </Pressable>
+
+        </View>
 
         {/* Bottom confirm button */}
         <View style={[mapPicker.footer, { backgroundColor: theme.tabBackground }]}>
@@ -602,12 +694,10 @@ const EventDetailModal = React.memo(function EventDetailModal({ detail, onClose,
           {detail.event && (
             <>
               <ThemedText style={styles.detailName}>{detail.event.name}</ThemedText>
-              {detail.event.startTime && (
-                <View style={styles.detailRow}>
-                  <ThemedText style={styles.detailLabel}>{t('trip.startTime')}</ThemedText>
-                  <ThemedText style={styles.detailValue}>{formatDateTime(detail.event.startTime)}</ThemedText>
-                </View>
-              )}
+              <View style={styles.detailRow}>
+                <ThemedText style={styles.detailLabel}>{t('trip.startTime')}</ThemedText>
+                <ThemedText style={styles.detailValue}>{formatDateTime(detail.event.startTime)}</ThemedText>
+              </View>
               <View style={styles.detailRow}>
                 <ThemedText style={styles.detailLabel}>{t('trip.duration')}</ThemedText>
                 <ThemedText style={styles.detailValue}>{formatDuration(detail.event.duration)}</ThemedText>
@@ -693,9 +783,10 @@ function useLocationSearch(query: string, biasLat: number | null, biasLon: numbe
         ? `&viewbox=${biasLon - 1},${biasLat - 1},${biasLon + 1},${biasLat + 1}&bounded=0`
         : '';
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(effectiveQuery)}&format=json&addressdetails=1&limit=5${viewbox}`,
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(effectiveQuery)}&format=json&addressdetails=1&namedetails=1&limit=5${viewbox}`,
         { headers: { 'User-Agent': 'Telaria-TFG/1.0' }, signal },
       );
+      if (!res.ok) throw new Error('location search failed');
       return res.json();
     },
     enabled: effectiveQuery.length >= 3,
@@ -727,16 +818,9 @@ const EventCreateModal = React.memo(function EventCreateModal({
   const biasLon = create.longitude ?? hintRegion?.longitude ?? null;
   const { suggestions, skipNext, clearSuggestions } = useLocationSearch(create.locationName, biasLat, biasLon);
 
-  const handleMapConfirm = useCallback((lat: number, lng: number, name?: string, address?: string) => {
-    createDispatch({ type: 'set_coords', latitude: lat, longitude: lng, name, address });
-  }, [createDispatch]);
-
-  const handleMapClose = useCallback(() => {
-    createDispatch({ type: 'close_map_picker' });
-  }, [createDispatch]);
-
   return (
-    <Modal visible={create.visible} transparent animationType="slide" onRequestClose={() => createDispatch({ type: 'close' })}>
+    // Hidden while the map picker is open so the MapView is never inside a nested Modal (Android transparency bug).
+    <Modal visible={create.visible && !create.mapPickerOpen} transparent animationType="slide" onRequestClose={() => createDispatch({ type: 'close' })}>
       <View style={styles.overlay}>
         <ScrollView
           style={{ width: '100%' }}
@@ -821,10 +905,11 @@ const EventCreateModal = React.memo(function EventCreateModal({
                     style={({ pressed }) => [autocomplete.item, { opacity: pressed ? 0.6 : 1 }]}
                     onPress={() => {
                       skipNext();
+                      const { latitude, longitude } = nominatimCoords(r);
                       createDispatch({
                         type: 'select_place',
-                        latitude: parseFloat(r.lat),
-                        longitude: parseFloat(r.lon),
+                        latitude,
+                        longitude,
                         name: nominatimName(r),
                         address: nominatimAddress(r),
                       });
@@ -855,14 +940,6 @@ const EventCreateModal = React.memo(function EventCreateModal({
               {create.latitude !== null && <Ionicons name="checkmark-circle" size={18} color={theme.tint} />}
             </Pressable>
 
-            <MapPickerModal
-              visible={create.mapPickerOpen}
-              tint={theme.tint}
-              hintRegion={hintRegion}
-              onConfirm={handleMapConfirm}
-              onClose={handleMapClose}
-            />
-
             {create.error && <ThemedText style={styles.errorText}>{create.error}</ThemedText>}
 
             <View style={styles.modalButtons}>
@@ -882,6 +959,96 @@ const EventCreateModal = React.memo(function EventCreateModal({
   );
 });
 
+// ── Selected-day documents ──────────────────────────────────────────────────────
+const EMPTY_DOCS: DocumentResponse[] = [];
+
+type SelectedDayDocumentsProps = {
+  docs: DocumentResponse[];
+  dateLabel: string;
+  theme: typeof Colors.light;
+  onOpenDoc: (doc: DocumentResponse) => void;
+};
+const SelectedDayDocuments = React.memo(function SelectedDayDocuments({ docs, dateLabel, theme, onOpenDoc }: SelectedDayDocumentsProps) {
+  const { t } = useTranslation();
+  const [popupOpen, setPopupOpen] = useState(false);
+
+  if (docs.length === 0) return null;
+
+  const preview = docs.slice(0, 3);
+  const remaining = docs.length - preview.length;
+
+  const renderPopupItem = ({ item }: { item: DocumentResponse }) => (
+    <View style={daydoc.cell}>
+      <DocGridCard item={item} background={theme.background} tint={theme.tint} onPress={onOpenDoc} />
+    </View>
+  );
+
+  return (
+    <View style={daydoc.wrap}>
+      <ThemedText style={daydoc.label}>{t('trip.dayDocuments')}</ThemedText>
+      <View style={daydoc.grid}>
+        {preview.map(doc => (
+          <View key={doc.id} style={daydoc.cell}>
+            <DocGridCard item={doc} background={theme.tabBackground} tint={theme.tint} onPress={onOpenDoc} />
+          </View>
+        ))}
+        {remaining > 0 && (
+          <View style={daydoc.cell}>
+            <Pressable
+              style={[daydoc.moreTile, { backgroundColor: theme.tabBackground }]}
+              onPress={() => setPopupOpen(true)}
+            >
+              <Ionicons name="ellipsis-horizontal" size={28} color={theme.tint} />
+              <ThemedText style={[daydoc.moreText, { color: theme.tint }]}>
+                {t('trip.documentsMore', { count: remaining })}
+              </ThemedText>
+            </Pressable>
+          </View>
+        )}
+      </View>
+
+      <Modal visible={popupOpen} transparent animationType="fade" onRequestClose={() => setPopupOpen(false)}>
+        <Pressable style={daydoc.popupOverlay} onPress={() => setPopupOpen(false)}>
+          <Pressable onPress={() => {}} style={[daydoc.popupBox, { backgroundColor: theme.tabBackground }]}>
+            <View style={daydoc.popupHeader}>
+              <ThemedText style={daydoc.popupTitle}>{t('trip.allDocumentsTitle', { date: dateLabel })}</ThemedText>
+              <Pressable onPress={() => setPopupOpen(false)} hitSlop={8}>
+                <Ionicons name="close" size={22} color={theme.icon} />
+              </Pressable>
+            </View>
+            <FlatList
+              data={docs}
+              keyExtractor={d => d.id}
+              numColumns={2}
+              columnWrapperStyle={daydoc.popupRow}
+              contentContainerStyle={daydoc.popupContent}
+              renderItem={renderPopupItem}
+            />
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </View>
+  );
+});
+
+const daydoc = StyleSheet.create({
+  wrap: { marginTop: 8, gap: 8 },
+  label: { fontSize: 13, fontWeight: '700', opacity: 0.55, textTransform: 'uppercase', letterSpacing: 0.5 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  cell: { width: '47%' },
+  moreTile: {
+    flex: 1, borderRadius: 12, padding: 14,
+    alignItems: 'center', justifyContent: 'center', gap: 6, minHeight: 110,
+  },
+  moreText: { fontSize: 13, fontWeight: '600' },
+  popupOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: 24 },
+  popupBox: { borderRadius: 16, padding: 16, maxHeight: '80%' },
+  popupHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  popupTitle: { fontSize: 18, fontWeight: '700' },
+  popupRow: { gap: 10 },
+  popupContent: { gap: 10, paddingBottom: 8 },
+});
+
 // ── Calendar tab ──────────────────────────────────────────────────────────────
 type CalendarTabProps = {
   calState: CalState;
@@ -889,18 +1056,35 @@ type CalendarTabProps = {
   isLoading: boolean;
   eventsByDay: Record<string, EventSummary[]>;
   agendaDays: { upcoming: string[]; past: string[] };
-  unscheduled: EventSummary[];
   todayKey: string;
   theme: typeof Colors.light;
+  selectedDayDocs: DocumentResponse[];
+  selectedDayLabel: string;
   formatSectionDate: (k: string) => string;
   t: (key: string) => string;
   onEventPress: (ev: EventSummary) => void;
+  onOpenDoc: (doc: DocumentResponse) => void;
 };
 const CalendarTab = React.memo(function CalendarTab({
-  calState, calDispatch, isLoading, eventsByDay, agendaDays, unscheduled,
-  todayKey, theme, formatSectionDate, t, onEventPress,
+  calState, calDispatch, isLoading, eventsByDay, agendaDays,
+  todayKey, theme, selectedDayDocs, selectedDayLabel, formatSectionDate, t, onEventPress, onOpenDoc,
 }: CalendarTabProps) {
-  const { collapsed } = calState;
+  const { collapsed, selectedKey } = calState;
+  const selectedHasDocs = selectedDayDocs.length > 0;
+
+  // The selected day gets its own dated section even when it has no events, so its
+  // documents render inside the event list for that date (not floating on top).
+  const upcomingDays = useMemo(() => {
+    const set = new Set(agendaDays.upcoming);
+    if (selectedHasDocs && selectedKey >= todayKey) set.add(selectedKey);
+    return [...set].sort();
+  }, [agendaDays.upcoming, selectedHasDocs, selectedKey, todayKey]);
+  const pastDays = useMemo(() => {
+    const set = new Set(agendaDays.past);
+    if (selectedHasDocs && selectedKey < todayKey) set.add(selectedKey);
+    return [...set].sort().reverse();
+  }, [agendaDays.past, selectedHasDocs, selectedKey, todayKey]);
+
   const setCollapsed = useCallback((value: boolean) => {
     calDispatch({ type: 'set_collapsed', value });
   }, [calDispatch]);
@@ -953,48 +1137,42 @@ const CalendarTab = React.memo(function CalendarTab({
       <View style={styles.agenda}>
         {isLoading ? (
           <ActivityIndicator size="small" color={theme.tint} style={{ marginTop: 12 }} />
-        ) : agendaDays.upcoming.length === 0 && agendaDays.past.length === 0 && unscheduled.length === 0 ? (
+        ) : upcomingDays.length === 0 && pastDays.length === 0 ? (
           <ThemedText style={styles.emptyText}>{t('trip.noEvents')}</ThemedText>
         ) : (
           <>
-            {agendaDays.upcoming.map(k => (
+            {upcomingDays.map(k => (
               <View key={k}>
-                <View style={[styles.agendaDayHeader, k === calState.selectedKey && { borderLeftColor: theme.tint, borderLeftWidth: 3 }]}>
-                  <ThemedText style={[styles.agendaDayText, k === calState.selectedKey && { color: theme.tint }]}>
+                <View style={[styles.agendaDayHeader, k === selectedKey && { borderLeftColor: theme.tint, borderLeftWidth: 3 }]}>
+                  <ThemedText style={[styles.agendaDayText, k === selectedKey && { color: theme.tint }]}>
                     {formatSectionDate(k)}
                   </ThemedText>
                 </View>
                 <View style={{ gap: 8 }}>
-                  {eventsByDay[k].map(ev => (
+                  {(eventsByDay[k] ?? []).map(ev => (
                     <EventCard key={ev.id} ev={ev} theme={theme} formatTime={formatTime} formatDateTime={formatDateTime} formatDuration={formatDuration} onPress={onEventPress} />
                   ))}
                 </View>
+                {k === selectedKey && (
+                  <SelectedDayDocuments docs={selectedDayDocs} dateLabel={selectedDayLabel} theme={theme} onOpenDoc={onOpenDoc} />
+                )}
               </View>
             ))}
-            {unscheduled.length > 0 && (
-              <View>
-                <View style={styles.agendaDayHeader}>
-                  <ThemedText style={styles.agendaDayText}>{t('trip.unscheduled')}</ThemedText>
-                </View>
-                <View style={{ gap: 8 }}>
-                  {unscheduled.map(ev => (
-                    <EventCard key={ev.id} ev={ev} theme={theme} formatTime={formatTime} formatDateTime={formatDateTime} formatDuration={formatDuration} onPress={onEventPress} />
-                  ))}
-                </View>
-              </View>
-            )}
-            {agendaDays.past.map(k => (
+            {pastDays.map(k => (
               <View key={k}>
-                <View style={[styles.agendaDayHeader, k === calState.selectedKey && { borderLeftColor: theme.tint, borderLeftWidth: 3 }]}>
-                  <ThemedText style={[styles.agendaDayText, k === calState.selectedKey && { color: theme.tint }]}>
+                <View style={[styles.agendaDayHeader, k === selectedKey && { borderLeftColor: theme.tint, borderLeftWidth: 3 }]}>
+                  <ThemedText style={[styles.agendaDayText, k === selectedKey && { color: theme.tint }]}>
                     {formatSectionDate(k)}
                   </ThemedText>
                 </View>
                 <View style={{ gap: 8 }}>
-                  {eventsByDay[k].map(ev => (
+                  {(eventsByDay[k] ?? []).map(ev => (
                     <EventCard key={ev.id} ev={ev} isPast theme={theme} formatTime={formatTime} formatDateTime={formatDateTime} formatDuration={formatDuration} onPress={onEventPress} />
                   ))}
                 </View>
+                {k === selectedKey && (
+                  <SelectedDayDocuments docs={selectedDayDocs} dateLabel={selectedDayLabel} theme={theme} onOpenDoc={onOpenDoc} />
+                )}
               </View>
             ))}
           </>
@@ -1013,7 +1191,54 @@ const EventsScreen = () => {
   const eventsQuery = useEventsQuery(trip?.id ?? '');
   const addEventMutation = useAddEventMutation(trip?.id ?? '');
   const deleteEventMutation = useDeleteEventMutation(trip?.id ?? '');
+  const { getDocumentDownloadUrl } = useDocuments();
+  const deleteDocumentMutation = useDeleteDocumentMutation(trip?.id ?? '');
   const navigation = useNavigation();
+
+  const [docDetail, docDetailDispatch] = useReducer(docDetailReducer, DOC_DETAIL_INITIAL);
+
+  const memberMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const m of trip?.members ?? []) map[m.id] = m.username;
+    return map;
+  }, [trip?.members]);
+
+  const { data: docDetailFallbackUrl } = useDocumentDownloadQuery(
+    trip?.id ?? '',
+    docDetail.doc?.id ?? '',
+    { enabled: !!docDetail.doc && isImageFile(docDetail.doc.name) && !docDetail.doc.previewUrl },
+  );
+  const docDetailImageUrl = docDetail.doc?.previewUrl ?? docDetailFallbackUrl ?? null;
+
+  const openDoc = useCallback((doc: DocumentResponse) => {
+    docDetailDispatch({ type: 'open', doc });
+  }, []);
+
+  const handleDocDownload = async () => {
+    if (!trip?.id || !docDetail.doc) return;
+    docDetailDispatch({ type: 'start_download' });
+    try {
+      const url = await getDocumentDownloadUrl(trip.id, docDetail.doc.id);
+      await Linking.openURL(url);
+    } catch {
+      docDetailDispatch({ type: 'set_error', error: t('trip.downloadError') });
+    } finally {
+      docDetailDispatch({ type: 'end_download' });
+    }
+  };
+
+  const handleDocDelete = async () => {
+    if (!docDetail.doc) return;
+    docDetailDispatch({ type: 'start_delete' });
+    try {
+      await deleteDocumentMutation.mutateAsync(docDetail.doc.id);
+      docDetailDispatch({ type: 'close' });
+    } catch {
+      docDetailDispatch({ type: 'set_error', error: t('trip.deleteDocumentError') });
+    } finally {
+      docDetailDispatch({ type: 'end_delete' });
+    }
+  };
 
   const [calState, calDispatch] = useReducer(calReducer, undefined, () => {
     const now = new Date();
@@ -1036,6 +1261,12 @@ const EventsScreen = () => {
   const today = useMemo(() => new Date(), []);
   const todayKey = useMemo(() => dateKey(today), [today]);
 
+  const selectedDayDocsQuery = useDocumentsByDateQuery(trip?.id ?? '', calState.selectedKey);
+  const selectedDayDocs = useMemo(() => {
+    const list = selectedDayDocsQuery.data ?? EMPTY_DOCS;
+    return [...list].sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+  }, [selectedDayDocsQuery.data]);
+
   useEffect(() => {
     if (trip?.name) navigation.setOptions({ title: trip.name });
   }, [trip?.name, navigation]);
@@ -1043,12 +1274,11 @@ const EventsScreen = () => {
   const eventsByDay = useMemo(() => {
     const map: Record<string, EventSummary[]> = {};
     for (const ev of eventsQuery.data ?? []) {
-      if (!ev.startTime) continue;
       const k = dateKey(new Date(ev.startTime));
       (map[k] ??= []).push(ev);
     }
     for (const k of Object.keys(map)) {
-      map[k].sort((a, b) => a.startTime!.localeCompare(b.startTime!));
+      map[k].sort((a, b) => a.startTime.localeCompare(b.startTime));
     }
     return map;
   }, [eventsQuery.data]);
@@ -1060,17 +1290,10 @@ const EventsScreen = () => {
     return { upcoming, past };
   }, [eventsByDay, todayKey]);
 
-  const unscheduled = useMemo(() => (eventsQuery.data ?? []).filter(e => !e.startTime), [eventsQuery.data]);
-
   const hintRegion = useMemo((): Region | null => {
     const withCoords = (eventsQuery.data ?? []).filter(e => e.location?.latitude != null && e.location?.longitude != null);
     if (withCoords.length === 0) return null;
-    const sorted = [...withCoords].sort((a, b) => {
-      if (!a.startTime && !b.startTime) return 0;
-      if (!a.startTime) return 1;
-      if (!b.startTime) return -1;
-      return b.startTime.localeCompare(a.startTime);
-    });
+    const sorted = [...withCoords].sort((a, b) => b.startTime.localeCompare(a.startTime));
     const ev = sorted[0];
     return { latitude: ev.location!.latitude!, longitude: ev.location!.longitude!, latitudeDelta: 0.05, longitudeDelta: 0.05 };
   }, [eventsQuery.data]);
@@ -1083,18 +1306,30 @@ const EventsScreen = () => {
     return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
   };
 
+  // Relative label used in the documents popup title: "today" / "yesterday" / "15 of June".
+  const formatDayLabel = (k: string) => {
+    const yesterday = dateKey(new Date(today.getTime() - 86_400_000));
+    if (k === todayKey) return t('trip.today');
+    if (k === yesterday) return t('trip.yesterday');
+    const d = new Date(k + 'T00:00:00');
+    return d.toLocaleDateString(undefined, { day: 'numeric', month: 'long' });
+  };
+  const selectedDayLabel = formatDayLabel(calState.selectedKey);
+
   const handleCreate = async () => {
     if (!trip?.id) return;
     if (!create.evName.trim()) { createDispatch({ type: 'set_error', error: t('trip.fillAllRequiredFields') }); return; }
+    if (!create.pickedDate) { createDispatch({ type: 'set_error', error: t('trip.dateRequired') }); return; }
     createDispatch({ type: 'start_creating' });
     try {
-      const payload: Parameters<typeof addEventMutation.mutateAsync>[0] = { name: create.evName.trim() };
-      if (create.pickedDate) {
-        const d = new Date(`${create.pickedDate}T00:00:00`);
-        d.setHours(create.pickHour, create.pickMinute, 0, 0);
-        payload.startTime = d.toISOString();
-      }
-      if (create.duration.trim()) payload.duration = Number(create.duration);
+      const d = new Date(`${create.pickedDate}T00:00:00`);
+      d.setHours(create.pickHour, create.pickMinute, 0, 0);
+      const payload: Parameters<typeof addEventMutation.mutateAsync>[0] = {
+        name: create.evName.trim(),
+        startTime: d.toISOString(),
+      };
+      const dur = parseInt(create.duration, 10);
+      if (Number.isFinite(dur) && dur > 0) payload.duration = dur;
       if (create.locationName.trim() || create.locationAddress.trim() || create.latitude !== null) {
         payload.location = {};
         if (create.locationName.trim()) payload.location.name = create.locationName.trim();
@@ -1102,7 +1337,6 @@ const EventsScreen = () => {
         if (create.latitude !== null && create.longitude !== null) {
           payload.location.latitude = create.latitude;
           payload.location.longitude = create.longitude;
-          payload.location.mapURL = `https://maps.google.com/?q=${create.latitude},${create.longitude}`;
         }
       }
       await addEventMutation.mutateAsync(payload);
@@ -1117,6 +1351,11 @@ const EventsScreen = () => {
   const handleEventPress = useCallback((ev: EventSummary) => {
     detailDispatch({ type: 'open', event: ev });
   }, []);
+
+  const handleMapConfirm = useCallback((lat: number, lng: number, name?: string, address?: string) => {
+    createDispatch({ type: 'set_coords', latitude: lat, longitude: lng, name, address });
+  }, []);
+  const handleMapClose = useCallback(() => createDispatch({ type: 'close_map_picker' }), []);
 
   const handleDelete = async () => {
     if (!trip?.id || !detail.event) return;
@@ -1147,12 +1386,14 @@ const EventsScreen = () => {
           isLoading={eventsQuery.isLoading}
           eventsByDay={eventsByDay}
           agendaDays={agendaDays}
-          unscheduled={unscheduled}
           todayKey={todayKey}
           theme={theme}
+          selectedDayDocs={selectedDayDocs}
+          selectedDayLabel={selectedDayLabel}
           formatSectionDate={formatSectionDate}
           t={t}
           onEventPress={handleEventPress}
+          onOpenDoc={openDoc}
         />
       )}
 
@@ -1181,6 +1422,24 @@ const EventsScreen = () => {
         formatSectionDate={formatSectionDate}
         onConfirm={handleCreate}
         hintRegion={hintRegion}
+      />
+
+      {/* Rendered at screen root (not nested in the create Modal) to avoid the Android map transparency bug */}
+      <MapPickerModal
+        visible={create.mapPickerOpen}
+        tint={theme.tint}
+        hintRegion={hintRegion}
+        onConfirm={handleMapConfirm}
+        onClose={handleMapClose}
+      />
+
+      <DocumentDetailModal
+        detail={docDetail}
+        detailDispatch={docDetailDispatch}
+        detailImageUrl={docDetailImageUrl}
+        memberMap={memberMap}
+        onDownload={handleDocDownload}
+        onDelete={handleDocDelete}
       />
     </View>
   );
@@ -1284,10 +1543,13 @@ const styles = StyleSheet.create({
 });
 
 const mapPicker = StyleSheet.create({
-  pin: { position: 'absolute', top: '50%', left: '50%', marginTop: -40, marginLeft: -20, pointerEvents: 'none' },
+  pinIcon: { position: 'absolute', top: '50%', left: '50%', marginTop: -40, marginLeft: -20, pointerEvents: 'none' },
+  centerWrap: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' },
+  centerDot: { width: 8, height: 8, borderRadius: 4, borderWidth: 1, borderColor: 'white' },
   closeBtn: { position: 'absolute', top: 48, left: 16, padding: 8, borderRadius: 20, boxShadow: '0px 2px 4px rgba(0,0,0,0.15)' },
   searchRow: { position: 'absolute', top: 48, left: 64, right: 16, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, boxShadow: '0px 2px 4px rgba(0,0,0,0.15)' },
   searchInput: { flex: 1, fontSize: 15 },
+  notice: { position: 'absolute', top: 100, left: 16, right: 16, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, boxShadow: '0px 2px 4px rgba(0,0,0,0.15)' },
   footer: { padding: 16, paddingBottom: 32, gap: 8 },
   footerLabel: { textAlign: 'center', opacity: 0.6, fontSize: 13 },
   confirmBtn: { paddingVertical: 14, borderRadius: 12, alignItems: 'center' },

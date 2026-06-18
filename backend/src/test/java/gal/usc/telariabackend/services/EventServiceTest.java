@@ -6,6 +6,7 @@ import gal.usc.telariabackend.model.User;
 import gal.usc.telariabackend.model.dto.CreateEventRequest;
 import gal.usc.telariabackend.model.dto.EventSummary;
 import gal.usc.telariabackend.model.exceptions.EventNotFoundException;
+import gal.usc.telariabackend.model.exceptions.InvalidLocationException;
 import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import gal.usc.telariabackend.repository.EventRepository;
 import gal.usc.telariabackend.repository.TripRepository;
@@ -51,7 +52,9 @@ class EventServiceTest {
     @Test
     void createEvent_WhenMember_ShouldSaveEventWithCorrectData() {
         Trip trip = new Trip("Viaje a Roma", user);
-        CreateEventRequest request = new CreateEventRequest().name("Cena en trattoria");
+        CreateEventRequest request = new CreateEventRequest()
+                .name("Cena en trattoria")
+                .startTime(OffsetDateTime.now());
 
         when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
 
@@ -95,6 +98,62 @@ class EventServiceTest {
     }
 
     @Test
+    void createEvent_WhenLatitudeWithoutLongitude_ShouldThrowAndNotSave() {
+        Trip trip = new Trip("Viaje a Roma", user);
+        gal.usc.telariabackend.model.dto.Location locationDto =
+                new gal.usc.telariabackend.model.dto.Location().latitude(42.87);
+        CreateEventRequest request = new CreateEventRequest()
+                .name("Cena")
+                .startTime(OffsetDateTime.now())
+                .location(locationDto);
+
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
+
+        assertThrows(InvalidLocationException.class,
+                () -> eventService.createEvent(tripId, userId, request));
+
+        verify(eventRepo, never()).save(any());
+    }
+
+    @Test
+    void createEvent_WhenLongitudeWithoutLatitude_ShouldThrowAndNotSave() {
+        Trip trip = new Trip("Viaje a Roma", user);
+        gal.usc.telariabackend.model.dto.Location locationDto =
+                new gal.usc.telariabackend.model.dto.Location().longitude(-8.54);
+        CreateEventRequest request = new CreateEventRequest()
+                .name("Cena")
+                .startTime(OffsetDateTime.now())
+                .location(locationDto);
+
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
+
+        assertThrows(InvalidLocationException.class,
+                () -> eventService.createEvent(tripId, userId, request));
+
+        verify(eventRepo, never()).save(any());
+    }
+
+    @Test
+    void createEvent_WhenLocationHasNameOnly_ShouldSave() {
+        Trip trip = new Trip("Viaje a Roma", user);
+        gal.usc.telariabackend.model.dto.Location locationDto =
+                new gal.usc.telariabackend.model.dto.Location().name("Plaza Mayor");
+        CreateEventRequest request = new CreateEventRequest()
+                .name("Paseo")
+                .startTime(OffsetDateTime.now())
+                .location(locationDto);
+
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
+
+        eventService.createEvent(tripId, userId, request);
+
+        ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+        verify(eventRepo).save(captor.capture());
+        assertEquals("Plaza Mayor", captor.getValue().getLocation().getName());
+        assertNull(captor.getValue().getLocation().getLatitude());
+    }
+
+    @Test
     void createEvent_WhenNotMember_ShouldThrowAndNotSave() {
         when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.empty());
 
@@ -119,7 +178,7 @@ class EventServiceTest {
 
         eventService.deleteEvent(tripId, eventId, userId);
 
-        verify(eventRepo).deleteById(eventId);
+        verify(eventRepo).delete(event);
     }
 
     @Test
@@ -129,7 +188,7 @@ class EventServiceTest {
         assertThrows(NotATripMemberException.class,
                 () -> eventService.deleteEvent(tripId, UUID.randomUUID(), userId));
 
-        verify(eventRepo, never()).deleteById(any());
+        verify(eventRepo, never()).delete(any());
     }
 
     @Test
@@ -141,7 +200,7 @@ class EventServiceTest {
         assertThrows(EventNotFoundException.class,
                 () -> eventService.deleteEvent(tripId, eventId, userId));
 
-        verify(eventRepo, never()).deleteById(any());
+        verify(eventRepo, never()).delete(any());
     }
 
     @Test
@@ -156,10 +215,10 @@ class EventServiceTest {
         when(event.getTrip()).thenReturn(otherTrip);
         when(otherTrip.getId()).thenReturn(UUID.randomUUID());
 
-        assertThrows(NotATripMemberException.class,
+        assertThrows(EventNotFoundException.class,
                 () -> eventService.deleteEvent(tripId, eventId, userId));
 
-        verify(eventRepo, never()).deleteById(any());
+        verify(eventRepo, never()).delete(any());
     }
 
     // listEvents
@@ -173,7 +232,7 @@ class EventServiceTest {
         EventSummary s2 = mock(EventSummary.class);
 
         when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
-        when(trip.getEvents()).thenReturn(List.of(e1, e2));
+        when(eventRepo.findByTripIdOrderByStartTimeAsc(tripId)).thenReturn(List.of(e1, e2));
         when(e1.toEventSummary()).thenReturn(s1);
         when(e2.toEventSummary()).thenReturn(s2);
 
@@ -187,7 +246,7 @@ class EventServiceTest {
     void listEvents_WhenNoEvents_ShouldReturnEmptyList() {
         Trip trip = mock(Trip.class);
         when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(trip));
-        when(trip.getEvents()).thenReturn(List.of());
+        when(eventRepo.findByTripIdOrderByStartTimeAsc(tripId)).thenReturn(List.of());
 
         List<EventSummary> result = eventService.listEvents(tripId, userId);
 

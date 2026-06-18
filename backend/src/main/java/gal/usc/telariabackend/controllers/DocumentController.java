@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,9 +41,9 @@ public class DocumentController implements DocumentsApi {
     }
 
     @Override
-    public ResponseEntity<List<DocumentResponse>> listDocuments(UUID tripId) {
+    public ResponseEntity<List<DocumentResponse>> listDocuments(UUID tripId, LocalDate date, Integer tzOffsetMinutes) {
         UUID requesterId = securityHelper.getUserId();
-        return ResponseEntity.ok(documentService.listDocuments(tripId, requesterId));
+        return ResponseEntity.ok(documentService.listDocuments(tripId, requesterId, date, tzOffsetMinutes));
     }
 
     @Override

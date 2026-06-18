@@ -21,7 +21,9 @@ schemas:
 
   UpdateProfileRequest:
     type: object
-    description: At least one field should be provided; omitted fields are left unchanged.
+    description: >-
+      At least one field should be provided; omitted fields are left unchanged.
+      Changing the email requires the account's current password in currentPassword.
     properties:
       username:
         type: string
@@ -32,6 +34,12 @@ schemas:
         format: email
         minLength: 1
         example: juan@example.com
+      currentPassword:
+        type: string
+        format: password
+        minLength: 1
+        description: The account's current password, required only when changing the email
+        example: secreto123
 
   ChangePasswordRequest:
     type: object

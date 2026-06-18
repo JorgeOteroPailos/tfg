@@ -4,10 +4,12 @@ import gal.usc.telariabackend.model.dto.AiChatHistoryPage;
 import gal.usc.telariabackend.model.dto.AiChatMessageRequest;
 import gal.usc.telariabackend.services.AiChatService;
 import gal.usc.telariabackend.utils.SecurityHelper;
+import jakarta.validation.Valid;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,12 @@ public class AiChatController implements AiChatApi {
     private final SecurityHelper securityHelper;
     // Virtual threads: lightweight, bounded only by memory, no pool tuning needed.
     private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+
+    // Sourced from the MVC async request timeout so the SseEmitter and the servlet
+    // async timeout never disagree (a shorter async timeout would otherwise cut the
+    // stream before the emitter's own deadline).
+    @Value("${spring.mvc.async.request-timeout:120000}")
+    private long asyncRequestTimeoutMs;
 
     public AiChatController(AiChatService aiChatService, SecurityHelper securityHelper) {
         this.aiChatService = aiChatService;
@@ -52,9 +60,12 @@ public class AiChatController implements AiChatApi {
      * @return an {@link SseEmitter} that streams the assistant response token by token
      */
     @PostMapping(value = "/trips/{tripId}/ai-chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter sendAiChatMessage(@PathVariable UUID tripId, @RequestBody AiChatMessageRequest request) {
+    public SseEmitter sendAiChatMessage(@PathVariable UUID tripId, @Valid @RequestBody AiChatMessageRequest request) {
         UUID userId = securityHelper.getUserId();
-        SseEmitter emitter = new SseEmitter(300_000L); // 5-minute timeout for long AI responses
+        // Aligned with spring.mvc.async.request-timeout so a long AI response is cut by a
+        // single, predictable deadline. On timeout, complete cleanly rather than erroring.
+        SseEmitter emitter = new SseEmitter(asyncRequestTimeoutMs);
+        emitter.onTimeout(emitter::complete);
 
         executor.execute(() -> {
             try {
