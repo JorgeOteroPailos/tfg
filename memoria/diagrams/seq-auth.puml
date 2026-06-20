@@ -1,0 +1,24 @@
+@startuml seq-auth
+skinparam shadowing false
+actor Usuario
+participant "App\n(cliente)" as App
+participant "API\n(AuthController/Service)" as API
+database "BD" as DB
+
+== Inicio de sesión ==
+Usuario -> App : introduce credenciais
+App -> API : POST /auth/login (email, contrasinal)
+API -> DB : verifica usuario e hash BCrypt
+API -> API : xera access token (JWT, RSA)\ne refresh token
+API -> DB : garda refresh token
+API --> App : { accessToken, refreshToken }
+
+== Petición autenticada con token caducado ==
+App -> API : GET /recurso (Bearer access token)
+API --> App : 401 Unauthorized
+App -> API : POST /auth/refresh (refreshToken)
+API -> DB : valida refresh token
+API --> App : novo accessToken
+App -> API : reintenta GET /recurso (novo Bearer)
+API --> App : 200 OK
+@enduml

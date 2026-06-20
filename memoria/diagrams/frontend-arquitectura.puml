@@ -1,0 +1,40 @@
+@startuml frontend-arquitectura
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+top to bottom direction
+
+package "Presentación" {
+  component "Expo Router\n(grupos: (auth), (main), (trip))" as router
+  component "Compoñentes UI\n(themed, reutilizables)" as ui
+}
+
+package "Estado / Contextos" {
+  component "AuthProvider" as ctxAuth
+  component "Theme / DataSaver /\nSidebar Provider" as ctxUi
+  component "Trip / GroupChat\nProvider" as ctxTrip
+}
+
+package "Acceso a datos" {
+  component "Hooks React Query\n(useTrips, useExpenses, ...)" as hooks
+  component "callAuthenticated\n(fetch + Bearer + refresco 401)" as call
+  component "Tipos xerados (OpenAPI)" as types
+}
+
+package "Almacenamento local" {
+  component "SecureStore\n(tokens)" as secure
+  component "AsyncStorage\n(preferencias)" as async
+}
+
+cloud "Backend\nAPI REST" as api
+
+router --> ui
+router --> hooks
+ctxAuth --> call
+hooks --> call
+call --> api
+hooks ..> types
+ctxAuth --> secure
+ctxUi --> async
+ctxTrip --> hooks
+@enduml

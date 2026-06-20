@@ -18,7 +18,6 @@ const TripContent = () => {
   const theme = Colors[themeName] ?? Colors.light;
   const { t } = useTranslation();
   const [moreVisible, setMoreVisible] = useState(false);
-  const [backConfirmVisible, setBackConfirmVisible] = useState(false);
   const [leaveConfirmVisible, setLeaveConfirmVisible] = useState(false);
   const [leaveLastMemberConfirmVisible, setLeaveLastMemberConfirmVisible] = useState(false);
   const segments = useSegments();
@@ -71,7 +70,7 @@ const TripContent = () => {
       <View style={[styles.header, { backgroundColor: theme.navBackground, borderBottomColor: theme.border }]}>
         <Pressable
           style={({ pressed }) => [styles.headerBtn, { backgroundColor: theme.uiBackground, borderColor: theme.border }, pressed && styles.pressed]}
-          onPress={() => setBackConfirmVisible(true)}
+          onPress={() => router.replace('/main')}
         >
           <Ionicons name="home-outline" size={18} color={theme.icon} />
         </Pressable>
@@ -143,36 +142,6 @@ const TripContent = () => {
           );
         })}
       </View>
-
-      {/* ── Back-home confirm ─────────────────────────────── */}
-      <Modal visible={backConfirmVisible} transparent animationType="fade" onRequestClose={() => setBackConfirmVisible(false)}>
-        <Pressable style={styles.overlay} onPress={() => setBackConfirmVisible(false)}>
-          <Pressable onPress={() => {}} style={[styles.confirmBox, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
-            <View style={[styles.confirmIcon, { backgroundColor: `${theme.tint}18`, borderColor: `${theme.tint}35` }]}>
-              <Ionicons name="home-outline" size={30} color={theme.tint} />
-            </View>
-            <Text style={[styles.confirmTitle, { color: theme.title }]}>{t('trip.backHomeTitle')}</Text>
-            <Text style={[styles.confirmMsg, { color: theme.icon }]}>{t('trip.backHomeMessage')}</Text>
-            <View style={styles.confirmBtns}>
-              <Pressable
-                style={[styles.confirmBtn, { borderColor: theme.border, borderWidth: 1 }]}
-                onPress={() => setBackConfirmVisible(false)}
-              >
-                <Text style={[styles.confirmBtnText, { color: theme.text }]}>{t('common.cancel')}</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.confirmBtn, { backgroundColor: theme.tint, boxShadow: `0 0 20px ${theme.tint}60` }]}
-                onPress={() => { setBackConfirmVisible(false); router.replace('/main'); }}
-              >
-                <Ionicons name="home-outline" size={15} color="#fff" />
-                <Text style={[styles.confirmBtnText, { color: '#fff', letterSpacing: 1 }]}>
-                  {t('trip.backHomeConfirm').toUpperCase()}
-                </Text>
-              </Pressable>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
 
       {/* ── Leave-trip confirm ───────────────────────────── */}
       <Modal visible={leaveConfirmVisible} transparent animationType="fade" onRequestClose={() => setLeaveConfirmVisible(false)}>

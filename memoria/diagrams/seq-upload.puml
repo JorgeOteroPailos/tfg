@@ -1,0 +1,21 @@
+@startuml seq-upload
+skinparam shadowing false
+actor Usuario
+participant "App" as App
+participant "API\n(DocumentController/Service)" as API
+database "BD" as DB
+participant "MinIO (S3)" as S3
+
+Usuario -> App : selecciona ficheiro
+App -> API : POST /trips/{id}/documents (nome, tipo)
+API -> DB : crea rexistro (uploaded=false)
+API --> App : { documentId, URL prefirmada (PUT) }
+
+App -> S3 : PUT ficheiro (URL prefirmada)
+S3 --> App : 200 OK
+
+App -> API : POST /trips/{id}/documents/{documentId}/confirm
+API -> DB : marca uploaded=true
+API ->> API : xera miniatura (asíncrono, se é imaxe)
+API --> App : 200 OK
+@enduml

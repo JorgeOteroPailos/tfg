@@ -1,0 +1,121 @@
+\newpage
+\section{Probas}
+
+A verificación da funcionalidade e da corrección global do sistema aborda dúas
+dimensións complementarias: as \textbf{probas automatizadas} do backend, que garanten a
+corrección técnica da lóxica e da API, e a \textbf{validación funcional} de extremo a
+extremo da aplicación, que comproba que o produto se comporta como espera o usuario.
+
+\subsection{Estratexia de probas}
+
+A estratexia segue o modelo da pirámide de probas, con tres niveis:
+
+\begin{itemize}
+  \item \textbf{Probas unitarias}: illan a lóxica de negocio de cada servizo, substituíndo
+        as dependencias por dobres de proba (\textit{mocks}).
+  \item \textbf{Probas de integración (E2E)}: exercitan a API completa contra unha base de
+        datos e un almacén de obxectos reais, levantados en contedores efémeros.
+  \item \textbf{Validación de sistema}: comprobación manual dos fluxos de usuario completos
+        sobre a aplicación en execución.
+\end{itemize}
+
+\subsection{Probas automatizadas do backend}
+
+O backend conta cunha batería de \textbf{367 probas automatizadas} repartidas en 26 clases,
+que se executan co \textit{framework} JUnit~5. A Táboa~\ref{tab:probas} resume a súa
+distribución.
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\textwidth}{@{}lcX@{}}
+    \toprule
+    \textbf{Tipo} & \textbf{Clases} & \textbf{Descrición} \\
+    \midrule
+    Unitarias de servizos   & 10 & Lóxica de negocio illada con Mockito. \\
+    Integración (E2E)        & 11 & API completa con base de datos e almacén reais (Testcontainers). \\
+    Modelo                   & 3  & Lóxica propia das entidades de dominio. \\
+    Tarefas programadas      & 2  & Comportamento dos \textit{schedulers} de limpeza. \\
+    \midrule
+    \textbf{Total}           & \textbf{26} & \textbf{367 probas} \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Distribución das probas automatizadas do backend.}
+  \label{tab:probas}
+\end{table}
+
+As probas de integración empregan \textbf{Testcontainers}~\cite{testcontainers}, que levanta
+contedores efémeros de PostgreSQL e MinIO para cada execución, de xeito que as probas se
+realizan contra servizos reais e non contra simulacións. Unha clase base común
+(\texttt{BaseE2ETest}) orquestra o arrinque dos contedores e a aplicación execútase cun
+perfil de proba que recrea o esquema da base de datos en cada execución. Deste xeito
+verifícanse os fluxos completos da API: autenticación, xestión de viaxes e membros, gastos
+e liquidacións, eventos, documentos, chat e asistente de IA.
+
+A cobertura de código mídese con \textbf{JaCoCo}~\cite{jacoco}. A
+Táboa~\ref{tab:cobertura} resume os resultados obtidos na execución completa da batería.
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\textwidth}{@{}Xcc@{}}
+    \toprule
+    \textbf{Métrica} & \textbf{Cobertura} & \textbf{} \\
+    \midrule
+    Liñas       & 55,8\,\% & \\
+    Instrucións & 48,3\,\% & \\
+    Métodos     & 60,7\,\% & \\
+    Clases      & 85,5\,\% & \\
+    Ramas       & 21,8\,\% & \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Cobertura de código do backend (JaCoCo).}
+  \label{tab:cobertura}
+\end{table}
+
+A cobertura concéntrase na capa de servizos e nos fluxos principais da API, que é onde
+reside a lóxica de negocio. As cifras máis baixas en ramas corresponden, en boa medida, a
+ramas defensivas e de manexo de erros pouco frecuentes. Ademais, a construción e a
+execución das probas intégranse nun fluxo de integración continua (GitHub Actions), e o
+código sométese a análise estática.
+
+\subsection{Validación funcional do sistema}
+
+Para verificar o comportamento de extremo a extremo executáronse manualmente sobre a
+aplicación os escenarios de uso descritos na Táboa~\ref{tab:escenarios}, que cobren a
+totalidade dos requisitos funcionais. Cada escenario comprende a secuencia completa de
+accións do usuario e a comprobación do resultado esperado.
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\textwidth}{@{}llX@{}}
+    \toprule
+    \textbf{ID} & \textbf{RF} & \textbf{Escenario verificado} \\
+    \midrule
+    CP01 & RF01, RF02      & Rexistro, inicio e peche de sesión, e renovación de token. \\
+    CP02 & RF03--RF05      & Crear viaxe, convidar e aceptar membros (e por código QR). \\
+    CP03 & RF06, RF07      & Rexistrar gastos, consultar balances e liquidar débedas. \\
+    CP04 & RF08            & Crear, consultar e eliminar eventos do calendario. \\
+    CP05 & RF09            & Subir, previsualizar e eliminar documentos. \\
+    CP06 & RF10            & Enviar e recibir mensaxes no chat de grupo en tempo real. \\
+    CP07 & RF11            & Conversar co asistente de IA e recuperar o historial. \\
+    CP08 & RF12, RF13      & Xestionar amizades e convidar amigos a unha viaxe. \\
+    CP09 & RF14, RF15      & Editar o perfil e eliminar a conta con confirmación. \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Escenarios de validación funcional e a súa trazabilidade cos requisitos.}
+  \label{tab:escenarios}
+\end{table}
+
+\figcaptura{Evidencia da validación funcional (capturas dos escenarios sobre a aplicación)}{fig:evidencia-funcional}
+
+\subsection{Resultados acadados}
+
+A totalidade das \textbf{367 probas automatizadas pasan correctamente}, e os nove
+escenarios de validación funcional completáronse co resultado esperado, polo que se
+verifica o cumprimento de todos os requisitos funcionais. A cobertura de código do backend
+sitúase arredor do 56\,\% de liñas, concentrada na lóxica de negocio.
+
+A principal limitación do plan de probas é a ausencia de probas automatizadas no frontend.
+Este risco mitígase por dúas vías: a validación funcional manual descrita anteriormente e a
+barreira de tipos que impón o contrato OpenAPI, que detecta en tempo de compilación as
+incoherencias entre cliente e servidor. A incorporación de probas automatizadas no frontend
+recóllese como liña de mellora nas conclusións.

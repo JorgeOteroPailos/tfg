@@ -75,9 +75,7 @@ const Register = () => {
           </View>
         </View>
         <Text style={[styles.appName, { color: theme.title }]}>TELARIA</Text>
-        <Text style={[styles.appTagline, { color: theme.icon }]}>
-          {t('auth.register.description')}
-        </Text>
+        <View style={styles.taglineSpacer} />
       </View>
 
       {/* Form card */}
@@ -198,12 +196,8 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 8,
   },
-  appTagline: {
-    fontSize: 13,
-    fontWeight: '500',
-    letterSpacing: 0.5,
-    textAlign: 'center',
-    opacity: 0.7,
+  taglineSpacer: {
+    height: 17,
   },
   card: {
     width: '100%',

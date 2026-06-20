@@ -95,6 +95,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error;
     }
 
+    @ExceptionHandler(TripAccessDeniedException.class)
+    public ProblemDetail handleTripAccessDeniedException(TripAccessDeniedException e) {
+        ProblemDetail error = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+        error.setTitle("Trip access denied");
+        error.setType(MvcUriComponentsBuilder.fromController(GlobalExceptionHandler.class)
+                .pathSegment("error", "trip-access-denied").build().toUri());
+        error.setDetail(e.getMessage());
+        return error;
+    }
+
     @ExceptionHandler(NotATripMemberException.class)
     public ProblemDetail handleAccessDeniedException(NotATripMemberException e) {
         ProblemDetail error = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);

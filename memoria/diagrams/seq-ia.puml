@@ -1,0 +1,19 @@
+@startuml seq-ia
+skinparam shadowing false
+actor Usuario
+participant "App" as App
+participant "API\n(AiChatController/Service)" as API
+database "BD" as DB
+participant "Ollama (LLM)" as LLM
+
+Usuario -> App : escribe consulta
+App -> API : POST /trips/{id}/ai-chat (mensaxe)
+API -> DB : carga contexto\n(eventos, gastos, últimas 5 mensaxes)
+API -> DB : garda mensaxe do usuario
+API -> LLM : solicitude con contexto (streaming)
+loop por cada token
+  LLM -->> API : token
+  API -->> App : evento SSE (token)
+end
+API -> DB : garda resposta do asistente
+@enduml

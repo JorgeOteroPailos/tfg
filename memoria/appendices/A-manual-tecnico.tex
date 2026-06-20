@@ -1,0 +1,114 @@
+\newpage
+\section{Manual técnico}
+
+Este manual recolle a información necesaria para instalar, executar, probar e modificar
+Telaria. Diríxese a persoas que vaian continuar o desenvolvemento do sistema.
+
+\subsection{Requisitos do entorno}
+
+\begin{itemize}
+  \item \textbf{JDK 25} (para o backend; a construción realízase co \textit{wrapper} de Gradle).
+  \item \textbf{Node.js} con \texttt{npm} (para o frontend e a xeración de tipos).
+  \item \textbf{Podman} con soporte de \texttt{podman compose} (para os servizos de apoio).
+  \item \textbf{Git}.
+\end{itemize}
+
+\subsection{Estrutura do repositorio}
+
+\begin{itemize}
+  \item \texttt{backend/} — API REST en Spring Boot (Gradle).
+  \item \texttt{frontend/} — aplicación móbil en React Native + Expo.
+  \item \texttt{memoria/} — esta documentación (LaTeX).
+\end{itemize}
+
+\subsection{Servizos de apoio (Podman)}
+
+Os servizos auxiliares (PostgreSQL, MinIO e Ollama) defínense en
+\texttt{backend/compose.yaml}. O xeito máis sinxelo de poñelos en marcha, descargar o
+modelo de linguaxe e arrincar o backend é o \textit{script} de inicio:
+
+\begin{lstlisting}[language=bash]
+cd backend
+./start.sh
+\end{lstlisting}
+
+\noindent Alternativamente, pódense levantar só os contedores:
+
+\begin{lstlisting}[language=bash]
+cd backend
+podman compose up -d        # engadir --profile gpu se hai GPU dispoñible
+\end{lstlisting}
+
+\noindent Portos por defecto: PostgreSQL \texttt{5432}, MinIO \texttt{9000}/\texttt{9001}
+(API/consola), Ollama \texttt{11434}.
+
+\subsection{Execución do backend}
+
+\begin{lstlisting}[language=bash]
+cd backend
+./gradlew bootRun
+\end{lstlisting}
+
+\noindent O servidor escoita no porto \texttt{8082}. A configuración (base de datos,
+\textit{keystore} de sinatura JWT, MinIO e tarefas programadas) atópase en
+\texttt{src/main/resources/application.yaml}. A documentación interactiva da API queda
+dispoñible en \texttt{/swagger-ui.html}.
+
+\subsection{Execución do frontend}
+
+\begin{lstlisting}[language=bash]
+cd frontend
+npm install
+npm start            # inicia o servidor de desenvolvemento de Expo
+\end{lstlisting}
+
+\noindent A dirección do backend configúrase na constante \texttt{BASE\_URL} de
+\texttt{frontend/constants/constants.tsx}, que debe apuntar ao enderezo accesible do
+servidor desde o dispositivo. A aplicación pode abrirse en Expo Go ou nun emulador
+(\texttt{npm run android} / \texttt{npm run ios}).
+
+\subsection{Contrato OpenAPI e xeración de código}
+
+A API especifícase en \texttt{backend/src/main/resources/openapi/}, cun documento
+principal (\texttt{api.yaml}) que referencia ficheiros de rutas e esquemas. A partir del
+xérase código:
+
+\begin{lstlisting}[language=bash]
+# Backend: interfaces de controladores e DTO
+cd backend && ./gradlew openApiGenerate
+
+# Frontend: tipos TypeScript
+cd frontend && npm run generate:types
+\end{lstlisting}
+
+\noindent Ao editar ficheiros referenciados con \texttt{\$ref} (rutas ou esquemas), pode
+ser preciso forzar a rexeneración, xa que a tarefa de Gradle só observa cambios en
+\texttt{api.yaml}.
+
+\subsection{Execución das probas}
+
+As probas de integración (E2E) empregan Testcontainers, que require un \textit{socket}
+compatible con Docker. Con Podman \textit{rootless}, débese indicar a súa ruta:
+
+\begin{lstlisting}[language=bash]
+cd backend
+export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
+export TESTCONTAINERS_RYUK_DISABLED=true
+./gradlew test
+\end{lstlisting}
+
+\noindent Ao rematar, o informe de cobertura JaCoCo xérase en
+\texttt{backend/build/reports/jacoco/test/html/index.html}. A análise estática SpotBugs
+está dispoñible mediante a tarefa correspondente de Gradle.
+
+\subsection{Configuración e segredos}
+
+A configuración do backend (credenciais da base de datos, contrasinal do \textit{keystore}
+JWT, claves de acceso a MinIO e parámetros das tarefas programadas) reside en
+\texttt{application.yaml}. Para un despregamento en produción recoméndase externalizar
+estes valores mediante variables de entorno e non incluílos no control de versións.
+
+\subsection{Integración continua}
+
+O repositorio inclúe fluxos de traballo de GitHub Actions que executan a construción e as
+probas do backend, así como unha análise de seguridade do código (CodeQL).

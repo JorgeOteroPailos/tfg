@@ -1,0 +1,65 @@
+\newpage
+\section{Conclusións e Posibles Ampliacións}
+
+\subsection{Grao de cumprimento dos obxectivos}
+
+O proxecto acadou os obxectivos formulados na introdución. Telaria centraliza nunha única
+aplicación a xestión integral dunha viaxe en grupo, substituíndo o conxunto disperso de
+ferramentas que se empregan habitualmente. A Táboa~\ref{tab:obxectivos} resume o grao de
+cumprimento de cada obxectivo.
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\textwidth}{@{}p{6.2cm}cX@{}}
+    \toprule
+    \textbf{Obxectivo} & \textbf{Estado} & \textbf{Observacións} \\
+    \midrule
+    Gastos compartidos e liquidacións & Cumprido & Cálculo no servidor con minimización de transferencias (RF06, RF07). \\[3pt]
+    Calendario de eventos con localización & Cumprido & Eventos con data, duración e localización xeográfica (RF08). \\[3pt]
+    Documentos compartidos & Cumprido & Subida directa ao almacén con miniaturas (RF09). \\[3pt]
+    Chat de grupo & Cumprido & Mensaxería en tempo real mediante SSE (RF10). \\[3pt]
+    Asistente de IA por viaxe & Cumprido & Chatbot con historial persistente sobre Ollama (RF11). \\[3pt]
+    Rede de amizades (complementaria) & Cumprido & Solicitudes, lista de amigos e convite áxil (RF12, RF13). \\[3pt]
+    Xestión de conta & Cumprido & Perfil, contrasinal, avatar e eliminación con confirmación (RF14, RF15). \\[3pt]
+    Arquitectura API-first & Cumprido & Contrato OpenAPI con xeración de código en ambos os extremos. \\[3pt]
+    Multiplataforma iOS/Android & Cumprido & Única base de código con React Native e Expo. \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Grao de cumprimento dos obxectivos.}
+  \label{tab:obxectivos}
+\end{table}
+
+\subsection{Valoración técnica}
+
+A adopción dunha arquitectura \textit{API-first} demostrou ser un acerto: ter o contrato
+OpenAPI como fonte de verdade permitiu xerar automaticamente os tipos do cliente e as
+interfaces do servidor, mantendo ambos os extremos sincronizados e detectando
+incoherencias en tempo de compilación. O uso de \textit{Server-Sent Events} para o chat e
+o asistente de IA, e o das URLs prefirmadas para os ficheiros, permitiron implementar
+funcionalidades esixentes sen sobrecargar o servidor. A execución local do modelo de
+linguaxe con Ollama evitou a dependencia de servizos externos de pago. Finalmente, a
+batería de probas automatizadas do backend proporcionou unha rede de seguridade que
+facilitou a evolución continua do código.
+
+Entre as dificultades atopadas destacan a integración de Testcontainers cun entorno de
+contedores sen daemon (Podman), a coordinación dos fluxos asíncronos de \textit{streaming}
+e a xestión coherente da subida de ficheiros en varios pasos.
+
+\subsection{Posibles ampliacións}
+
+O sistema deixa aberto un conxunto de liñas de mellora:
+
+\begin{itemize}
+  \item \textbf{Notificacións push} para invitacións, mensaxes novas e recordatorios de eventos.
+  \item \textbf{Preparación para produción}: externalizar os segredos de configuración
+        (actualmente en ficheiros de configuración), habilitar HTTPS/TLS e facer
+        configurable a dirección do servidor no cliente.
+  \item \textbf{Probas automatizadas no frontend} (por exemplo, con Jest e React Native
+        Testing Library), que complementarían a sólida cobertura do backend.
+  \item \textbf{Migracións de base de datos explícitas} (Flyway ou Liquibase) en lugar da
+        xeración automática de esquema, de cara a un control de versións do esquema en produción.
+  \item \textbf{Visualización de mapas} para a localización dos eventos, aproveitando as
+        coordenadas xa almacenadas.
+  \item \textbf{Modo sen conexión} con sincronización posterior, para mellorar a
+        experiencia en destinos con conectividade limitada.
+\end{itemize}

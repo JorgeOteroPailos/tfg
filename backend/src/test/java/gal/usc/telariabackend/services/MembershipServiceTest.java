@@ -7,6 +7,7 @@ import gal.usc.telariabackend.model.User;
 import gal.usc.telariabackend.model.dto.InvitationSummary;
 import gal.usc.telariabackend.model.exceptions.AlreadyDoneException;
 import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
+import gal.usc.telariabackend.model.exceptions.TripAccessDeniedException;
 import gal.usc.telariabackend.model.exceptions.TripNotFoundException;
 import gal.usc.telariabackend.repository.AiChatMessageRepository;
 import gal.usc.telariabackend.repository.InvitationRepository;
@@ -132,7 +133,7 @@ class MembershipServiceTest {
     void createJoinRequest_WhenTripDoesNotExist_ShouldThrowAndNotSaveRequest() {
         when(tripRepo.findById(tripId)).thenReturn(Optional.empty());
 
-        assertThrows(NotATripMemberException.class,
+        assertThrows(TripAccessDeniedException.class,
                 () -> membershipService.createJoinRequest(userId, tripId));
 
         verifyNoInteractions(joinRequestRepo);

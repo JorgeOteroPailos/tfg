@@ -1,0 +1,22 @@
+@startuml arquitectura
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+
+node "Dispositivo móbil\n(iOS / Android)" as movil {
+  component "Aplicación Telaria\n(React Native + Expo)" as app
+}
+
+node "Servidor (contedores Podman)" as servidor {
+  component "Backend\nSpring Boot (API REST)" as backend
+  database "PostgreSQL" as pg
+  component "MinIO\n(almacén S3)" as minio
+  component "Ollama\n(LLM local)" as ollama
+}
+
+app -down-> backend : HTTPS / REST + SSE\n(JSON, JWT)
+app ..> minio : subida/descarga directa\n(URL prefirmada)
+backend -down-> pg : JDBC
+backend -right-> minio : AWS S3 SDK\n(xera URLs prefirmadas)
+backend -down-> ollama : HTTP (streaming)
+@enduml

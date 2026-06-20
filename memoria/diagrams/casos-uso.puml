@@ -1,0 +1,57 @@
+@startuml casos-uso
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam actorStyle awesome
+
+actor "Usuario" as U
+
+rectangle "Conta" {
+  usecase "Rexistrarse" as REG
+  usecase "Autenticarse" as LOG
+  usecase "Xestionar perfil" as PERFIL
+  usecase "Eliminar conta" as DEL
+  usecase "Confirmar contrasinal" as PWD
+}
+
+rectangle "Viaxes" {
+  usecase "Crear viaxe" as CREAR
+  usecase "Unirse a viaxe" as UNIR
+  usecase "Unirse por QR" as QR
+  usecase "Xestionar membros" as MEMBROS
+  usecase "Abandonar viaxe" as SAIR
+}
+
+rectangle "Dentro da viaxe" {
+  usecase "Rexistrar gasto" as GASTO
+  usecase "Liquidar débedas" as LIQ
+  usecase "Xestionar eventos" as EVENTO
+  usecase "Compartir documentos" as DOC
+  usecase "Chat de grupo" as CHAT
+  usecase "Asistente de IA" as IA
+}
+
+rectangle "Social" {
+  usecase "Xestionar amizades" as AMIGO
+}
+
+U --> REG
+U --> LOG
+U --> PERFIL
+U --> DEL
+U --> CREAR
+U --> UNIR
+U --> MEMBROS
+U --> SAIR
+U --> GASTO
+U --> LIQ
+U --> EVENTO
+U --> DOC
+U --> CHAT
+U --> IA
+U --> AMIGO
+
+DEL ..> PWD : <<include>>
+PERFIL ..> PWD : <<include>>
+QR ..> UNIR : <<extend>>
+@enduml

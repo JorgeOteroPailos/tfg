@@ -19,8 +19,42 @@
 \usepackage{longtable}
 \usepackage{graphicx}
 \usepackage{xcolor}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{listings}
 
+\graphicspath{{.}{diagrams/}}
 \definecolor{uscred}{RGB}{128,0,0}
+
+% Índice ata subsubsección (os casos de uso, en \paragraph, non aparecen no índice)
+\setcounter{tocdepth}{3}
+
+% Marcador de captura de pantalla pendente (manual de usuario).
+% Para inserir a imaxe real, substituír a liña \fbox{...} por:
+%   \includegraphics[width=0.45\textwidth]{screenshots/<ficheiro>}
+\newcommand{\figcaptura}[2]{%
+  \begin{figure}[H]\centering
+  \fbox{\parbox[c][4.5cm][c]{0.5\textwidth}{\centering\itshape [Captura de pantalla pendente]\\[4pt]#1}}%
+  \caption{#1}\label{#2}\end{figure}}
+
+% Estilo base para fragmentos de código (manuais técnicos)
+\definecolor{codebg}{RGB}{245,245,245}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{codebg},
+  breaklines=true,
+  frame=single,
+  framesep=4pt,
+  columns=fullflexible,
+  showstringspaces=false,
+  captionpos=b,
+  extendedchars=true,
+  literate=%
+    {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+    {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+    {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {ü}{{\"u}}1 {ç}{{\c c}}1 {º}{{\textordmasculine}}1,
+}
 
 
 \title{tfg Jorge Otero Pailos}
@@ -60,363 +94,18 @@
 \tableofcontents
 \newpage
 
-\section{Resumo}
-
-Este Traballo de Fin de Grao ten como obxectivo o deseño e desenvolvemento de 
-\textbf{Telaria}, unha aplicación móbil colaborativa para a xestión integral de 
-viaxes en grupo. A aplicación permite coordinar de forma centralizada todos os 
-aspectos dunha viaxe compartida: o seguimento de gastos e débedas entre os 
-participantes, a planificación de eventos mediante un calendario común, o 
-almacenamento de documentos relevantes e a comunicación entre os membros do 
-grupo a través dun asistente conversacional baseado en intelixencia artificial.
-
-A implementación levouse a cabo empregando tecnoloxías modernas para o 
-desenvolvemento de aplicacións móbiles multiplataforma, concretamente 
-\textbf{React Native} con \textbf{Expo} no frontend e \textbf{Spring Boot} 
-no backend, seguindo unha arquitectura \textit{API-first} baseada na 
-especificación \textbf{OpenAPI}. A infraestrutura inclúe ademais servizos 
-de almacenamento de ficheiros, modelos de linguaxe locais e despregamento mediante contedores.
-
-Como conclusión, o proxecto ofrece unha solución completa ao problema de 
-coordinación habitual nas viaxes en grupo, integrando nunha única plataforma 
-funcionalidades que adoitan xestionarse de forma dispersa entre distintas 
-ferramentas.
-
-
-\newpage
-\section{Introdución}
-
-\subsection{Obxectivos xerais}
-
-O obxectivo principal deste traballo é o deseño e desenvolvemento de \textbf{Telaria},
-unha aplicación móbil colaborativa para a xestión integral de viaxes en grupo. O
-problema que motiva o proxecto é a dispersión habitual das ferramentas empregadas
-durante a planificación e o transcurso dunha viaxe compartida: os gastos xestiónanse
-nun grupo de mensaxería, os eventos en aplicacións de calendario individuais, os
-documentos en servizos de almacenamento xenéricos e a comunicación en plataformas
-non específicas para o contexto da viaxe.
-
-Telaria centraliza nun único sistema os seguintes aspectos:
-
-\begin{itemize}
-  \item Rexistro de gastos compartidos e cálculo automático das liquidacións entre
-        membros, minimizando o número de transferencias necesarias para saldar as débedas.
-  \item Planificación de eventos mediante un calendario común, con soporte para
-        localización xeográfica.
-  \item Almacenamento de documentos relevantes para a viaxe (reservas, billetes, etc.).
-  \item Chat de grupo entre os membros da viaxe.
-  \item Asistente conversacional baseado en intelixencia artificial, con historial
-        persistente por viaxe.
-\end{itemize}
-
-Á marxe destes obxectivos centrais, a aplicación incorpora unha funcionalidade
-complementaria de carácter social —unha rede de amizades entre usuarios— que non
-constitúe un módulo principal, senón unha mellora da experiencia de uso. O seu
-propósito é simplificar as invitacións recorrentes entre usuarios habituais e
-reforzar a retención, facilitando que as persoas que proban a aplicación sigan
-empregándoa en sucesivas viaxes.
-
-Como obxectivos técnicos, o proxecto busca aplicar unha arquitectura
-\textit{API-first} e tecnoloxías multiplataforma modernas, de xeito que a solución
-sexa funcional tanto en iOS como en Android desde unha única base de código.
-
-\subsection{Relación da documentación que conforma a memoria}
-
-\begin{tabularx}{\textwidth}{@{}lX@{}}
-  \toprule
-  \textbf{Sección} & \textbf{Contido} \\
-  \midrule
-  Resumo                            & Breve resumo das principais contribucións do traballo. \\[4pt]
-  Introdución                       & Obxectivos xerais, descrición do sistema e tecnoloxías e arquitecturas empregadas. \\[4pt]
-  Especificación de Requisitos      & Requisitos funcionais e non funcionais, interfaces con outros sistemas e información que o sistema debe almacenar. \\[4pt]
-  Deseño                            & Arquitectura do sistema, división en compoñentes e comunicación entre eles. Equipamento hardware e software empregado. \\[4pt]
-  Probas                            & Plan de probas con evidencias que verifican a funcionalidade e corrección global do sistema. Resultados acadados. \\[4pt]
-  Conclusións e Posibles Ampliacións & Grao de cumprimento dos obxectivos e posibles vías de mellora futura. \\[4pt]
-  Bibliografía                      & Lista completa de referencias citadas no texto. \\[4pt]
-  Manuais Técnicos                  & Documentación para desenvolvedores: código fonte, recursos necesarios e operacións de modificación e proba. \\[4pt]
-  Manuais de Usuario                & Documentación autocontida para usuarios finais: instalación, uso, configuración e mensaxes de erro. \\
-  \bottomrule
-\end{tabularx}
-
-\subsection{Descrición do sistema}
-
-Telaria é unha aplicación móbil orientada a grupos de persoas que realizan viaxes
-conxuntas. Calquera usuario pode rexistrarse na plataforma e, a partir de aí, crear
-novas viaxes ou unirse a viaxes existentes mediante invitación, solicitude ou código QR.
-
-Dentro de cada viaxe, todos os membros teñen acceso completo e en igualdade de
-condicións ás funcionalidades da aplicación. Non existe distinción de roles: o sistema
-está deseñado baixo un modelo plenamente colaborativo no que calquera participante pode
-rexistrar gastos, crear eventos, subir documentos, enviar mensaxes ao chat e interactuar
-co asistente de IA.
-
-O módulo de gastos calcula automaticamente as liquidacións entre membros aplicando un
-algoritmo de minimización de débedas, de xeito que o número de transferencias necesarias
-para saldar todos os saldos sexa o mínimo posible. O módulo de eventos permite asociar
-localizacións xeográficas a cada entrada do calendario. O módulo de documentos delega
-o almacenamento nun servizo de obxectos compatible con S3 e xera de forma asíncrona
-miniaturas de previsualización para os documentos de imaxe. O asistente de IA mantén
-un historial de conversación independente por viaxe, de modo que o contexto se preserve
-entre sesións.
-
-De maneira complementaria, a plataforma ofrece unha rede de amizades entre usuarios:
-calquera usuario pode engadir outros como amigos e, a partir de aí, convidalos ás súas
-viaxes de forma máis áxil que mediante o identificador ou o código QR. Esta
-funcionalidade non altera o modelo colaborativo descrito, senón que actúa como atallo
-para os usuarios habituais. Adicionalmente, cada usuario pode eliminar a súa propia
-conta, operación que require a confirmación do contrasinal.
-
-\subsection{Información adicional de interese}
-
-\subsubsection*{Arquitectura API-first con OpenAPI}
-
-O deseño do sistema parte da especificación da API antes de calquera implementación.
-Isto establece un contrato explícito e verificable entre frontend e backend, permite
-xerar documentación interactiva de forma automática (Swagger UI) e facilita o
-desenvolvemento en paralelo de ambos os extremos.
-
-\subsubsection*{React Native e Expo}
-
-O frontend está desenvolvido con React Native, o que permite compartir a mesma base
-de código para iOS e Android. Expo engade sobre React Native unha capa de utilidades
-que simplifica a xestión de dependencias nativas, o proceso de compilación e a
-distribución da aplicación, reducindo a complexidade de configuración do proxecto.
-
-\subsubsection*{Spring Boot}
-
-O backend emprega Spring Boot pola súa madurez e polo seu ecosistema integrado: Spring
-MVC para a capa REST, Spring Data JPA para a persistencia, Spring Security para a
-autenticación e autorización, e integración directa con bibliotecas de xeración de
-documentación OpenAPI.
-
-\subsubsection*{Autenticación baseada en JWT}
-
-O mecanismo de autenticación utiliza dous tokens complementarios. O \textit{access
-token}, de tipo JWT e vida curta, inclúese en cada petición á API e permite verificar
-a identidade do usuario sen consultar a base de datos. O \textit{refresh token}, de
-tipo opaco e almacenado no servidor, empregase exclusivamente para renovar o
-\textit{access token} e pode invalidarse explicitamente no peche de sesión.
-
-\subsubsection*{Ollama}
-
-O asistente conversacional funciona sobre Ollama, un motor de inferencia local de
-modelos de linguaxe grande. A execución local elimina a dependencia de servizos
-externos de pago, preserva a privacidade dos datos dos usuarios e ofrece latencias
-predecibles independentes de terceiros.
-
-\subsubsection*{Almacenamento de obxectos compatible con S3}
-
-Os documentos compartidos almacénanse nun servizo compatible co protocolo S3. A
-elección deste estándar garante a independencia do provedor e aproveita o soporte
-nativo dispoñible en Spring Boot mediante o AWS SDK.
-
-\subsubsection*{PostgreSQL}
-
-A base de datos relacional escollida é PostgreSQL, pola súa robustez, polo seu soporte
-nativo para UUID e tipos de data con fuso horario, e pola súa excelente integración
-con Spring Data JPA.
-
-\subsubsection*{Podman}
-
-O despregamento dos servizos realízase mediante contedores OCI xestionados con Podman.
-A diferenza de Docker, Podman opera sen un daemon centralizado e permite executar os
-contedores sen privilexios de superusuario (\textit{rootless}), o que mellora o
-illamento de seguridade do entorno de execución.
-
-\subsubsection*{Tarefas periódicas de limpeza}
-
-Para os documentos de imaxe xérase unha miniatura de previsualización reducida que se
-mostra na listaxe de documentos sen necesidade de descargar o ficheiro orixinal. Esta
-xeración realízase de forma asíncrona (fóra do fluxo de subida e da ruta de petición)
-mediante unha tarefa programada que procesa periodicamente os documentos aínda sen
-miniatura. Deste xeito a subida e a listaxe de documentos manteñen unha latencia baixa
-e independente do custo de procesamento de imaxe.
-
-\newpage
-\section{Especificación de Requisitos}
-
-\subsection{Descrición xeral}
-
-\subsubsection{Perspectiva do produto}
-
-Telaria é unha aplicación móbil baseada nunha arquitectura cliente–servidor. O frontend,
-desenvolvido con React Native e Expo, comunícase cun backend Spring Boot mediante unha
-API REST documentada con OpenAPI. O backend integra á súa vez servizos externos: un
-motor de inferencia de linguaxe (Ollama) para o asistente de IA e un almacén de obxectos
-compatible con S3 para os documentos compartidos.
-
-\subsubsection{Funcionalidade do produto}
-
-O sistema cobre os seguintes módulos funcionais:
-
-\begin{itemize}
-  \item Autenticación e xestión de conta de usuario
-  \item Creación e adhesión a viaxes, xestión de membros
-  \item Rexistro de gastos compartidos e cálculo de liquidacións
-  \item Planificación de eventos con localización xeográfica
-  \item Almacenamento de documentos compartidos
-  \item Chat de grupo entre membros da viaxe
-  \item Asistente conversacional de intelixencia artificial por viaxe
-\end{itemize}
-
-Ademais dos módulos anteriores, o sistema inclúe dúas funcionalidades complementarias:
-unha rede de amizades entre usuarios (funcionalidade de calidade de vida orientada a
-axilizar as invitacións recorrentes) e a xestión da propia conta, incluída a súa
-eliminación con confirmación de contrasinal.
-
-\subsubsection{Características dos usuarios}
-
-\begin{tabularx}{\textwidth}{@{}lX@{}}
-  \toprule
-  \textbf{Tipo} & \textbf{Descrición} \\
-  \midrule
-  Usuario & Persoa rexistrada na aplicación. Pode crear ou unirse a viaxes e, dentro delas, ten acceso completo a todas as funcionalidades de forma colaborativa e en igualdade de condicións co resto de membros. \\
-  \bottomrule
-\end{tabularx}
-
-\subsubsection{Restriccións}
-
-\begin{itemize}
-  \item A aplicación é multiplataforma (iOS e Android) e funciona sobre Expo.
-  \item Toda comunicación co servidor realízase mediante HTTP e API REST.
-  \item O sistema require conexión á rede para a totalidade das súas operacións.
-\end{itemize}
-
-\subsubsection{Suposicións e dependencias}
-
-\begin{itemize}
-  \item O servizo Ollama está dispoñible e accesible no servidor para o módulo de IA.
-  \item O servizo de almacenamento PostgreSQL está operativo e accesible para a persistencia de datos.
-  \item Existe un servizo de almacenamento compatible co protocolo S3 para os documentos.
-  \item Os requisitos aquí descritos son estables durante o desenvolvemento.
-\end{itemize}
-
-% -----------------------------------------------------------------------
-\subsection{Interfaces con outros sistemas}
-
-\subsubsection{Interface de usuario}
-
-Interface gráfica móbil nativa (React Native) con navegación en pestanas e pilas de
-pantallas, adaptada a iOS e Android sen necesidade de compilación separada por plataforma.
-
-\subsubsection{Interfaces de hardware}
-
-\begin{itemize}
-  \item Dispositivo móbil do usuario con sistema operativo iOS ou Android e conexión á rede.
-  \item Servidor con capacidade para executar contedores Podman.
-\end{itemize}
-
-\subsubsection{Interfaces de software}
-
-\begin{tabularx}{\textwidth}{@{}lX@{}}
-  \toprule
-  \textbf{Sistema} & \textbf{Descrición} \\
-  \midrule
-  API REST propia & Interface principal entre frontend e backend; documentada con OpenAPI/Swagger e consumida mediante JSON sobre HTTP. \\
-  Ollama          & Servizo local de inferencia de modelos de linguaxe grande, accedido por HTTP para alimentar o asistente conversacional. \\
-  Almacenamento S3 & Servizo de almacenamento de obxectos (compatible con S3) para a subida e descarga de documentos compartidos. \\
-  PostgreSQL       & Base de datos relacional para a persistencia de todas as entidades do sistema. \\
-  \bottomrule
-\end{tabularx}
-
-\subsubsection{Interfaces de comunicación}
-
-O frontend e o backend comunícanse mediante HTTP. A autenticación baséase en dous
-tokens: un \textit{access token} JWT de vida curta incluído en cada petición, e un
-\textit{refresh token} opaco de vida longa almacenado no servidor e utilizado para
-renovar o \textit{access token} sen necesidade de volver a autenticarse.
-
-% -----------------------------------------------------------------------
-\subsection{Requisitos funcionais}
-
-\begin{longtable}{@{}p{1.2cm}p{3cm}p{8.5cm}p{1.5cm}@{}}
-  \toprule
-  \textbf{ID} & \textbf{Nome} & \textbf{Descrición} & \textbf{Prior.} \\
-  \midrule
-  \endfirsthead
-  \toprule
-  \textbf{ID} & \textbf{Nome} & \textbf{Descrición} & \textbf{Prior.} \\
-  \midrule
-  \endhead
-  RF01 & Rexistro de usuario      & O sistema permite crear unha conta con nome de usuario, correo electrónico e contrasinal.                                                                                        & Alta   \\[4pt]
-  RF02 & Autenticación            & O sistema autentica usuarios mediante un \textit{access token} JWT; o \textit{refresh token} opaco invalídase no peche de sesión.                                                  & Alta   \\[4pt]
-  RF03 & Crear viaxe              & Un usuario autenticado pode crear novas viaxes.                                                                                                                                     & Alta   \\[4pt]
-  RF04 & Unirse a viaxe           & Un usuario pode unirse a unha viaxe mediante invitación recibida, solicitude de unión ou código QR.                                                                                 & Alta   \\[4pt]
-  RF05 & Xestión de membros       & Calquera membro pode invitar outros usuarios á viaxe e xestionar as solicitudes de unión pendentes.                                                                                 & Alta   \\[4pt]
-  RF06 & Rexistro de gastos       & Calquera membro pode rexistrar un gasto con importe, nome, categoría, usuario pagador e conxunto de beneficiarios.                                                                  & Alta   \\[4pt]
-  RF07 & Cálculo de liquidacións  & O sistema calcula automaticamente as liquidacións entre membros, minimizando o número de transferencias necesarias para saldar as débedas.                                          & Alta   \\[4pt]
-  RF08 & Xestión de eventos       & Calquera membro pode crear, consultar e eliminar eventos con nome, data e hora de inicio, duración e localización xeográfica (nome, enderezo, coordenadas e URL de mapa).          & Alta  \\[4pt]
-  RF09 & Documentos compartidos   & Calquera membro pode subir, consultar e eliminar documentos asociados á viaxe; os documentos de imaxe mostran unha miniatura de previsualización xerada automaticamente.                                                                                                   & Media  \\[4pt]
-  RF10 & Chat de grupo            & Os membros dunha viaxe poden enviar e consultar mensaxes de texto no chat común da viaxe.                                                                                           & Media  \\[4pt]
-  RF11 & Asistente de IA          & Cada viaxe dispón dun chatbot conversacional con historial persistente entre sesións.                                                                                               & Baixa  \\[4pt]
-  RF12 & Rede de amizades         & Funcionalidade complementaria: un usuario pode enviar solicitudes de amizade a outro (polo seu identificador ou código QR), aceptalas ou rexeitalas, consultar a súa lista de amigos e eliminar amizades.   & Baixa  \\[4pt]
-  RF13 & Convidar amigos á viaxe  & Funcionalidade complementaria que permite convidar amigos a unha viaxe directamente desde a lista de amizades, como atallo ás invitacións por identificador ou QR.                  & Baixa  \\[4pt]
-  RF14 & Eliminación de conta     & Un usuario pode eliminar a súa propia conta; a operación require a confirmación do contrasinal e elimina os datos persoais asociados.                                               & Baixa  \\
-  \bottomrule
-\end{longtable}
-
-% -----------------------------------------------------------------------
-\subsection{Requisitos non funcionais}
-
-\subsubsection{Seguridade}
-
-\begin{itemize}
-  \item \textbf{RNF-SE-01} — Control de acceso: só os membros dunha viaxe acceden aos seus datos; calquera usuario autenticado pode crear viaxes.
-  \item \textbf{RNF-SE-02} — Os contrasinais almacénanse con hash BCrypt; os \textit{access tokens} JWT teñen vida curta e os \textit{refresh tokens} opacos almacénanse no servidor para limitar a exposición ante compromisos.
-  \item \textbf{RNF-SE-03} — As operacións sensibles sobre a conta —o cambio de correo electrónico e a eliminación da conta— requiren a confirmación do contrasinal actual.
-\end{itemize}
-
-\subsubsection{Rendemento}
-
-\begin{itemize}
-  \item \textbf{RNF-RE-01} — O cálculo de liquidacións realízase no servidor, evitando sobrecargar o dispositivo cliente.
-\end{itemize}
-
-\subsubsection{Usabilidade}
-
-\begin{itemize}
-  \item \textbf{RNF-US-01} — A interface debe ser intuitiva e usable sen formación previa.
-  \item \textbf{RNF-US-02} — A aplicación estará dispoñible en galego, castelán e inglés.
-\end{itemize}
-
-\subsubsection{Portabilidade e despregamento}
-
-\begin{itemize}
-  \item \textbf{RNF-PO-01} — O backend e os servizos auxiliares despreganse en contedores Podman.
-  \item \textbf{RNF-PO-02} — A aplicación móbil é compatible con iOS e Android mediante Expo/React Native.
-\end{itemize}
-
-\subsubsection{Fiabilidade}
-
-\begin{itemize}
-  \item \textbf{RNF-FI-01} — O sistema valida os datos de entrada na API e devolve mensaxes de erro claras e estruturadas ao cliente.
-\end{itemize}
-
-% -----------------------------------------------------------------------
-\subsection{Información que o sistema debe almacenar}
-
-\begin{longtable}{@{}p{4cm}p{10.3cm}@{}}
-  \toprule
-  \textbf{Entidade} & \textbf{Atributos principais} \\
-  \midrule
-  \endfirsthead
-  \toprule
-  \textbf{Entidade} & \textbf{Atributos principais} \\
-  \midrule
-  \endhead
-  Usuario                    & Identificador (UUID), nome de usuario, correo electrónico, contrasinal (hash). \\[4pt]
-  Viaxe                      & Identificador (UUID), nome, conxunto de membros (usuarios). \\[4pt]
-  Evento                     & Identificador, nome, data e hora de inicio (con fuso horario), duración en minutos, localización embebida (nome, enderezo, latitude, lonxitude, URL de mapa). \\[4pt]
-  Gasto                      & Identificador, importe (decimal), nome, categoría (enumeración), usuario pagador, usuario creador do rexistro, conxunto de beneficiarios, marca temporal. \\[4pt]
-  Liquidación                & Identificador, importe (decimal), usuario pagador, usuario receptor, marca temporal. \\[4pt]
-  Documento compartido       & Identificador, nome de ficheiro, clave no almacén de obxectos, clave da miniatura de previsualización, estado de subida (booleano), usuario creador, marca temporal. \\[4pt]
-  Invitación / Solicitude    & Identificador, usuario, viaxe asociada, marca temporal de creación. \\[4pt]
-  Amizade                    & Identificador (UUID), dous usuarios asociados (almacenados de forma normalizada para garantir a unicidade da parella), marca temporal de creación. \\[4pt]
-  Solicitude de amizade      & Identificador (UUID), usuario emisor, usuario receptor, marca temporal de creación. \\[4pt]
-  Mensaxe de chat de grupo   & Identificador, contido (texto), autor, viaxe asociada, marca temporal. \\[4pt]
-  Mensaxe de asistente de IA & Identificador, contido (texto), rol (USUARIO ou ASISTENTE), usuario, viaxe asociada, marca temporal. \\[4pt]
-  Token de refresco          & Token (identificador), identificador do usuario asociado. \\
-  \bottomrule
-\end{longtable}
+% ====================== Núcleo da memoria (≤ 50 páxinas) ======================
+\input{chapters/01-resumo}
+\input{chapters/02-introducion}
+\input{chapters/03-requisitos}
+\input{chapters/04-deseno}
+\input{chapters/05-probas}
+\input{chapters/06-conclusions}
+\input{chapters/07-bibliografia}
+
+% ====================== Apéndices (manuais, fóra do límite) ===================
+\appendix
+\input{appendices/A-manual-tecnico}
+\input{appendices/B-manual-usuario}
 
 \end{document}

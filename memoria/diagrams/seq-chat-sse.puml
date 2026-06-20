@@ -1,0 +1,18 @@
+@startuml seq-chat-sse
+skinparam shadowing false
+participant "App membro A" as A
+participant "App membro B" as B
+participant "API\n(TripChatController/Service)" as API
+database "BD" as DB
+
+A -> API : GET /trips/{id}/group-chat/stream
+activate API
+API -> API : rexistra SseEmitter (subscrición)
+API --> A : fluxo SSE aberto
+
+B -> API : POST /trips/{id}/group-chat (mensaxe)
+API -> DB : garda TripChatMessage
+API --> B : 200 OK
+API -->> A : evento SSE (nova mensaxe)
+deactivate API
+@enduml

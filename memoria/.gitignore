@@ -1,0 +1,7 @@
+# Renderizador de diagramas (binario grande; non versionar)
+plantuml.jar
+
+# Artefactos de compilación LaTeX
+*.fdb_latexmk
+*.fls
+*.synctex.gz

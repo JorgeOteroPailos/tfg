@@ -1,0 +1,148 @@
+\newpage
+\section{Introdución}
+
+\subsection{Obxectivos xerais}
+
+O obxectivo principal deste traballo é o deseño e desenvolvemento de \textbf{Telaria},
+unha aplicación móbil colaborativa para a xestión integral de viaxes en grupo. O
+problema que motiva o proxecto é a dispersión habitual das ferramentas empregadas
+durante a planificación e o transcurso dunha viaxe compartida: os gastos xestiónanse
+nun grupo de mensaxería, os eventos en aplicacións de calendario individuais, os
+documentos en servizos de almacenamento xenéricos e a comunicación en plataformas
+non específicas para o contexto da viaxe.
+
+Telaria centraliza nun único sistema os seguintes aspectos:
+
+\begin{itemize}
+  \item Rexistro de gastos compartidos e cálculo automático das liquidacións entre
+        membros, minimizando o número de transferencias necesarias para saldar as débedas.
+  \item Planificación de eventos mediante un calendario común, con soporte para
+        localización xeográfica.
+  \item Almacenamento de documentos relevantes para a viaxe (reservas, billetes, etc.).
+  \item Chat de grupo entre os membros da viaxe.
+  \item Asistente conversacional baseado en intelixencia artificial, con historial
+        persistente por viaxe.
+\end{itemize}
+
+Á marxe destes obxectivos centrais, a aplicación incorpora unha funcionalidade
+complementaria de carácter social —unha rede de amizades entre usuarios— que non
+constitúe un módulo principal, senón unha mellora da experiencia de uso. O seu
+propósito é simplificar as invitacións recorrentes entre usuarios habituais e
+reforzar a retención, facilitando que as persoas que proban a aplicación sigan
+empregándoa en sucesivas viaxes.
+
+Como obxectivos técnicos, o proxecto busca aplicar unha arquitectura
+\textit{API-first} e tecnoloxías multiplataforma modernas, de xeito que a solución
+sexa funcional tanto en iOS como en Android desde unha única base de código.
+
+\subsection{Relación da documentación que conforma a memoria}
+
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+  \toprule
+  \textbf{Sección} & \textbf{Contido} \\
+  \midrule
+  Resumo                            & Breve resumo das principais contribucións do traballo. \\[4pt]
+  Introdución                       & Obxectivos xerais, descrición do sistema e tecnoloxías e arquitecturas empregadas. \\[4pt]
+  Especificación de Requisitos      & Requisitos funcionais e non funcionais, interfaces con outros sistemas e información que o sistema debe almacenar. \\[4pt]
+  Deseño                            & Arquitectura do sistema, división en compoñentes e comunicación entre eles. Equipamento hardware e software empregado. \\[4pt]
+  Probas                            & Plan de probas con evidencias que verifican a funcionalidade e corrección global do sistema. Resultados acadados. \\[4pt]
+  Conclusións e Posibles Ampliacións & Grao de cumprimento dos obxectivos e posibles vías de mellora futura. \\[4pt]
+  Bibliografía                      & Lista completa de referencias citadas no texto. \\[4pt]
+  Manuais Técnicos                  & Documentación para desenvolvedores: código fonte, recursos necesarios e operacións de modificación e proba. \\[4pt]
+  Manuais de Usuario                & Documentación autocontida para usuarios finais: instalación, uso, configuración e mensaxes de erro. \\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Descrición do sistema}
+
+Telaria é unha aplicación móbil orientada a grupos de persoas que realizan viaxes
+conxuntas. Calquera usuario pode rexistrarse na plataforma e, a partir de aí, crear
+novas viaxes ou unirse a viaxes existentes mediante invitación, solicitude ou código QR.
+
+Dentro de cada viaxe, todos os membros teñen acceso completo e en igualdade de
+condicións ás funcionalidades da aplicación. Non existe distinción de roles: o sistema
+está deseñado baixo un modelo plenamente colaborativo no que calquera participante pode
+rexistrar gastos, crear eventos, subir documentos, enviar mensaxes ao chat e interactuar
+co asistente de IA.
+
+O módulo de gastos calcula automaticamente as liquidacións entre membros aplicando un
+algoritmo de minimización de débedas, de xeito que o número de transferencias necesarias
+para saldar todos os saldos sexa o mínimo posible. O módulo de eventos permite asociar
+localizacións xeográficas a cada entrada do calendario. O módulo de documentos delega
+o almacenamento nun servizo de obxectos compatible con S3 e xera de forma asíncrona
+miniaturas de previsualización para os documentos de imaxe. O asistente de IA mantén
+un historial de conversación independente por viaxe, de modo que o contexto se preserve
+entre sesións.
+
+De maneira complementaria, a plataforma ofrece unha rede de amizades entre usuarios:
+calquera usuario pode engadir outros como amigos e, a partir de aí, convidalos ás súas
+viaxes de forma máis áxil que mediante o identificador ou o código QR. Esta
+funcionalidade non altera o modelo colaborativo descrito, senón que actúa como atallo
+para os usuarios habituais. Adicionalmente, cada usuario pode eliminar a súa propia
+conta, operación que require a confirmación do contrasinal.
+
+\subsection{Información adicional de interese}
+
+\subsubsection*{Arquitectura API-first con OpenAPI}
+
+O deseño do sistema parte da especificación da API antes de calquera implementación.
+Isto establece un contrato explícito e verificable entre frontend e backend, permite
+xerar documentación interactiva de forma automática (Swagger UI)~\cite{openapi} e facilita o
+desenvolvemento en paralelo de ambos os extremos.
+
+\subsubsection*{React Native e Expo}
+
+O frontend está desenvolvido con React Native~\cite{reactnative}, o que permite compartir a mesma base
+de código para iOS e Android. Expo~\cite{expo} engade sobre React Native unha capa de utilidades
+que simplifica a xestión de dependencias nativas, o proceso de compilación e a
+distribución da aplicación, reducindo a complexidade de configuración do proxecto.
+
+\subsubsection*{Spring Boot}
+
+O backend emprega Spring Boot~\cite{springboot} pola súa madurez e polo seu ecosistema integrado: Spring
+MVC para a capa REST, Spring Data JPA para a persistencia, Spring Security para a
+autenticación e autorización, e integración directa con bibliotecas de xeración de
+documentación OpenAPI.
+
+\subsubsection*{Autenticación baseada en JWT}
+
+O mecanismo de autenticación utiliza dous tokens complementarios. O \textit{access
+token}, de tipo JWT~\cite{rfc7519} e vida curta, inclúese en cada petición á API e permite verificar
+a identidade do usuario sen consultar a base de datos. O \textit{refresh token}, de
+tipo opaco e almacenado no servidor, empregase exclusivamente para renovar o
+\textit{access token} e pode invalidarse explicitamente no peche de sesión.
+
+\subsubsection*{Ollama}
+
+O asistente conversacional funciona sobre Ollama~\cite{ollama}, un motor de inferencia local de
+modelos de linguaxe grande. A execución local elimina a dependencia de servizos
+externos de pago, preserva a privacidade dos datos dos usuarios e ofrece latencias
+predecibles independentes de terceiros.
+
+\subsubsection*{Almacenamento de obxectos compatible con S3}
+
+Os documentos compartidos almacénanse nun servizo compatible co protocolo S3~\cite{minio}. A
+elección deste estándar garante a independencia do provedor e aproveita o soporte
+nativo dispoñible en Spring Boot mediante o AWS SDK.
+
+\subsubsection*{PostgreSQL}
+
+A base de datos relacional escollida é PostgreSQL~\cite{postgresql}, pola súa robustez, polo seu soporte
+nativo para UUID e tipos de data con fuso horario, e pola súa excelente integración
+con Spring Data JPA.
+
+\subsubsection*{Podman}
+
+O despregamento dos servizos realízase mediante contedores OCI xestionados con Podman~\cite{podman}.
+A diferenza de Docker, Podman opera sen un daemon centralizado e permite executar os
+contedores sen privilexios de superusuario (\textit{rootless}), o que mellora o
+illamento de seguridade do entorno de execución.
+
+\subsubsection*{Tarefas periódicas de limpeza}
+
+Para os documentos de imaxe xérase unha miniatura de previsualización reducida que se
+mostra na listaxe de documentos sen necesidade de descargar o ficheiro orixinal. Esta
+xeración realízase de forma asíncrona (fóra do fluxo de subida e da ruta de petición)
+mediante unha tarefa programada que procesa periodicamente os documentos aínda sen
+miniatura. Deste xeito a subida e a listaxe de documentos manteñen unha latencia baixa
+e independente do custo de procesamento de imaxe.

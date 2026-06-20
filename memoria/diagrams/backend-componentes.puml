@@ -1,0 +1,35 @@
+@startuml backend-componentes
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+top to bottom direction
+
+package "Capa REST (Controllers)" as L1 {
+  component "Auth · Trip · Expense · Event · Membership\nFriend · User · Document · TripChat · AiChat" as ctrls
+}
+
+package "Capa de servizos (lóxica de negocio)" as L2 {
+  component "Auth · Trip · Expense · Event · Membership · Friend\nUser · SharedDocument · TripChat · AiChat\nAccountDeletion · Image" as svcs
+}
+
+package "Capa de persistencia" as L3 {
+  component "Repositories\n(Spring Data JPA)" as repos
+  component "Entidades JPA\n(modelo de dominio)" as model
+}
+
+package "Aspectos transversais" as X {
+  component "SecurityConfig (JWT)\nSecurityHelper\nGlobalExceptionHandler\nSchedulers" as cross
+}
+
+cloud "Servizos externos" as ext {
+  component "Ollama" as ollama
+  component "MinIO (S3)" as minio
+}
+
+ctrls --> svcs
+svcs --> repos
+repos --> model
+svcs ..> ext
+X .right.> ctrls
+@enduml

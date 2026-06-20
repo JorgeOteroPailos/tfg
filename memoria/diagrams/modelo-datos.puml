@@ -1,0 +1,116 @@
+@startuml modelo-datos
+skinparam shadowing false
+skinparam linetype ortho
+hide methods
+hide circle
+
+class User {
+  +id : UUID
+  username
+  email
+  password (hash)
+  avatarObjectKey
+}
+
+class Trip {
+  +id : UUID
+  name
+  creationDate
+}
+
+class Expense {
+  +id : UUID
+  amount
+  name
+  category
+  timestamp
+}
+
+class Settlement {
+  +id : UUID
+  amount
+  timestamp
+}
+
+class Event {
+  +id : UUID
+  name
+  startTime
+  duration
+}
+
+class Location <<embeddable>> {
+  name
+  address
+  latitude
+  longitude
+  mapUrl
+}
+
+class SharedDocument {
+  +id : UUID
+  fileName
+  objectKey
+  thumbnailObjectKey
+  contentType
+  uploaded
+  createdAt
+}
+
+class TripChatMessage {
+  +id : UUID
+  content
+  timestamp
+}
+
+class AiChatMessage {
+  +id : UUID
+  role
+  content
+  timestamp
+}
+
+abstract class PendingMembership {
+  +id : UUID
+  createdAt
+}
+class Invitation
+class JoinRequest
+PendingMembership <|-- Invitation
+PendingMembership <|-- JoinRequest
+
+class Friendship {
+  +id : UUID
+  createdAt
+}
+
+class FriendRequest {
+  +id : UUID
+  createdAt
+}
+
+class RefreshToken {
+  +token
+  userId
+}
+
+User "*" -- "*" Trip : membros
+Trip "1" -- "*" Expense
+Expense "*" -- "1" User : pagador
+Expense "*" -- "*" User : beneficiarios
+Trip "1" -- "*" Settlement
+Settlement "*" -- "1" User : pagador
+Settlement "*" -- "1" User : receptor
+Trip "1" -- "*" Event
+Event *-- Location
+Trip "1" -- "*" SharedDocument
+SharedDocument "*" -- "1" User : creador
+Trip "1" -- "*" TripChatMessage
+Trip "1" -- "*" AiChatMessage
+TripChatMessage "*" -- "1" User
+AiChatMessage "*" -- "1" User
+Trip "1" -- "*" PendingMembership
+PendingMembership "*" -- "1" User
+Friendship "*" -- "2" User
+FriendRequest "*" -- "1" User : emisor/receptor
+@enduml

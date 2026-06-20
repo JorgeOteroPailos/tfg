@@ -1,0 +1,27 @@
+@startmindmap navegacion
+skinparam shadowing false
+* Telaria
+** (auth)
+*** login
+*** register
+** (main)
+*** main (lista de viaxes)
+*** create-trip
+*** join-trip
+*** friends
+**** add-friend
+**** friend-requests
+*** invitations
+*** scan-qr
+*** settings
+*** (profile) / profile
+** (trip) [pestanas]
+*** expenses
+**** past-settlements
+*** events
+*** documents
+*** members
+**** add-member
+**** join-requests
+*** chat
+@endmindmap
