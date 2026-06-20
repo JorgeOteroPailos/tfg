@@ -15,7 +15,7 @@ skinparam shadowing false
 *** scan-qr
 *** settings
 *** (profile) / profile
-** (trip) [pestanas]
+** (trip) [tabs]
 *** expenses
 **** past-settlements
 *** events

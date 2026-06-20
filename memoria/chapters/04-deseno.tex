@@ -60,8 +60,8 @@ responsabilidades, como se aprecia na Figura~\ref{fig:backend}.
         dentro dunha mesma transacción.
   \item \textbf{Capa de persistencia.} Componse dos repositorios de Spring Data JPA e
         das entidades do modelo de dominio, que Hibernate mapea ás táboas de PostgreSQL.
-  \item \textbf{Aspectos transversais.} A configuración de seguridade (servidor de
-        recursos OAuth2 con JWT), a utilidade de extracción do usuario autenticado
+  \item \textbf{Aspectos transversais.} A configuración de seguridade (validación de
+        tokens JWT con Spring Security), a utilidade de extracción do usuario autenticado
         (\texttt{SecurityHelper}), o manexo centralizado de erros
         (\texttt{GlobalExceptionHandler}, que devolve respostas no formato
         \textit{Problem Details}, RFC~7807)~\cite{rfc7807} e as tarefas programadas
@@ -98,7 +98,8 @@ As decisións de deseño máis salientables son:
         unicidade da parella e simplifica as consultas bidireccionais.
   \item \textbf{Valor embebido.} A localización dun evento (\texttt{Location}: nome,
         enderezo, coordenadas e URL de mapa) modélase como un obxecto embebido dentro de
-        \texttt{Event}, ao non ter identidade propia.
+        \texttt{Event}, ao non ter identidade propia (considérase que os diferentes eventos
+         non compartirán ubicación frecuentemente).
   \item \textbf{Xerarquía de membros pendentes.} \texttt{Invitation} e
         \texttt{JoinRequest} comparten estrutura (viaxe, usuario e marca temporal) a
         través da superclase \texttt{PendingMembership}, diferenciándose só na
@@ -142,11 +143,11 @@ Táboa~\ref{tab:recursos} resume os principais recursos da API.
     \texttt{/auth}                    & Rexistro, inicio e peche de sesión, renovación de tokens. \\
     \texttt{/users}                   & Perfil, contrasinal, avatar, eliminación de conta. \\
     \texttt{/trips}                   & Creación e consulta de viaxes. \\
-    \texttt{/trips/.../expenses}      & Gastos, balances e liquidacións. \\
-    \texttt{/trips/.../events}        & Eventos do calendario. \\
-    \texttt{/trips/.../documents}     & Documentos compartidos (subida en varios pasos). \\
-    \texttt{/trips/.../group-chat}    & Chat de grupo (consulta, envío e fluxo SSE). \\
-    \texttt{/trips/.../ai-chat}       & Asistente de IA (historial e resposta en \textit{streaming}). \\
+    \texttt{/trips/[tripID]/expenses}      & Gastos, balances e liquidacións. \\
+    \texttt{/trips/[tripID]/events}        & Eventos do calendario. \\
+    \texttt{/trips/[tripID]/documents}     & Documentos compartidos (subida en varios pasos). \\
+    \texttt{/trips/[tripID]/group-chat}    & Chat de grupo (consulta, envío e fluxo SSE). \\
+    \texttt{/trips/[tripID]/ai-chat}       & Asistente de IA (historial e resposta en \textit{streaming}). \\
     Invitacións, solicitudes, amizades & Xestión de membros e da rede social de usuarios. \\
     \bottomrule
   \end{tabularx}
@@ -253,10 +254,14 @@ de escritura progresiva (Figura~\ref{fig:seq-ia}).
 A seguridade do sistema descansa sobre os seguintes piares de deseño:
 
 \begin{itemize}
-  \item \textbf{Autenticación con JWT asinado.} Os \textit{access tokens} son JWT
-        asinados cunha clave RSA almacenada nun \textit{keystore}. O backend actúa como
-        servidor de recursos OAuth2~\cite{springsecurity} e valida a sinatura de cada token coa clave pública,
-        sen necesidade de consultar a base de datos.
+  \item \textbf{Autenticación con JWT asinado.} No inicio de sesión, o backend asina os
+        seus propios \textit{access tokens} (JWT) cunha clave privada RSA almacenada nun
+        \textit{keystore}; en cada petición valida a sinatura do token coa clave pública,
+        sen necesidade de consultar a base de datos. Esta validación de tokens portadores
+        (\textit{bearer}) apóiase no soporte de JWT de Spring Security~\cite{springsecurity}.
+        Non se implementa o protocolo OAuth~2.0: non existe un servidor de autorización
+        externo nin fluxos de delegación, senón un esquema de autenticación propio baseado
+        en tokens autoasinados.
   \item \textbf{Sesións sen estado.} O servidor non mantén sesión; cada petición é
         autosuficiente grazas ao token, o que mellora a escalabilidade.
   \item \textbf{Contrasinais protexidos.} Os contrasinais almacénanse cifrados con

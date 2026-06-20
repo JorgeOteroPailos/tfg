@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1781924967.97209 "memoria.tex" "memoria.pdf" "memoria" 1781924971.6463 0
+["pdflatex"] 1781973280.88712 "/home/jorge/Documentos/universidad/cuarto/tfg/memoria/memoria.tex" "memoria.pdf" "memoria" 1781973283.4716 0
   "/etc/texmf/web2c/texmf.cnf" 1770728380.43519 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbi1000.600pk" 1781922942.06644 34088 9469f0323f39764a5cf40dea2b8e1ef3 ""
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1000.600pk" 1770739871.14476 25396 179f692b62f7b2053251f7398f5fbc63 ""
@@ -13,6 +13,7 @@
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1000.600pk" 1780965489.63911 31872 d3102e2158933ad76d9e97ab05688bcb ""
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.600pk" 1781924451.68461 15172 dc37dfd413d921539ff7bd49a36665f2 ""
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk" 1780998759.06536 20008 9d47347a3badf301c76fe423afb29e3f ""
+  "/home/jorge/Documentos/universidad/cuarto/tfg/memoria/memoria.tex" 1781924799.88955 3129 c0b421cf51d8c9f6f292fd86d35c915c ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecbi1000.tfm" 1136768653 3072 e6fe53b666f9cbd66cb135c6fdea66d3 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecbx1000.tfm" 1136768653 3584 2d666ecf6d466d8b007246bc2f94d9da ""
@@ -107,7 +108,7 @@
   "chapters/01-resumo.tex" 1781921300.26883 1292 6ff208ae9dda76b6adaf802699e4356c ""
   "chapters/02-introducion.tex" 1781924318.96764 8559 b42ac4dfb980fe1a3c6b3ec3e7f1d201 ""
   "chapters/03-requisitos.tex" 1781922829.77846 19304 83e83feea8346ac78a402a1c3a1dcce2 ""
-  "chapters/04-deseno.tex" 1781924365.1343 15105 729bc323804964b509bd918dd0965044 ""
+  "chapters/04-deseno.tex" 1781973280.25057 15568 1cdd8396322a357f7e7ba63b11dda1ff ""
   "chapters/05-probas.tex" 1781924913.07444 5923 e920c0afc28e9edcaa6abb69095934f3 ""
   "chapters/06-conclusions.tex" 1781923470.88494 3794 d85db570c27eb9d33f56a42fb84a2531 ""
   "chapters/07-bibliografia.tex" 1781923772.3048 1995 731cb99dbb63278b80bad68841ab9d13 ""
@@ -121,10 +122,10 @@
   "diagrams/seq-chat-sse.pdf" 1781922666.46796 3279 c8d67860615900f28f7085157f658d05 ""
   "diagrams/seq-ia.pdf" 1781922666.46896 4243 2997e6780ba10487c0aef039a15b9a5d ""
   "diagrams/seq-upload.pdf" 1781922666.47496 3990 c50756ce925e7f8a24ec06b7e2171f55 ""
-  "memoria.aux" 1781924971.18253 19566 2a5664c0c13753a4a85e9a311a48b04a "pdflatex"
-  "memoria.out" 1781924971.19253 14425 8e77b59d0f7e6c1e22ac56d24991e272 "pdflatex"
+  "memoria.aux" 1781973283.20876 19566 2a5664c0c13753a4a85e9a311a48b04a "pdflatex"
+  "memoria.out" 1781973283.21576 14425 8e77b59d0f7e6c1e22ac56d24991e272 "pdflatex"
   "memoria.tex" 1781924799.88955 3129 c0b421cf51d8c9f6f292fd86d35c915c ""
-  "memoria.toc" 1781924971.19353 7359 cae9a3ecf3997e95b8f86ab70766d8c6 "pdflatex"
+  "memoria.toc" 1781973283.2164 7359 cae9a3ecf3997e95b8f86ab70766d8c6 "pdflatex"
   (generated)
   "memoria.aux"
   "memoria.log"
