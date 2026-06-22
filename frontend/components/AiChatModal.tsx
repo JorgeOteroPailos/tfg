@@ -240,7 +240,7 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
         <View style={[styles.header, { borderBottomColor: theme.border }]}>
           <Ionicons name="sparkles-outline" size={20} color={Colors.primary} />
           <ThemedText style={styles.headerTitle}>{t('trip.chat')}</ThemedText>
-          <Pressable onPress={handleClose} style={styles.closeButton} hitSlop={8}>
+          <Pressable onPress={handleClose} style={styles.closeButton} hitSlop={8} accessibilityRole="button" accessibilityLabel={t('common.close')}>
             <Ionicons name="close-outline" size={28} color={theme.icon} />
           </Pressable>
         </View>
@@ -289,6 +289,9 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
               style={[styles.sendButton, { backgroundColor: Colors.primary, opacity: (!input.trim() || streaming) ? 0.45 : 1 }]}
               onPress={handleSend}
               disabled={!input.trim() || streaming}
+              accessibilityRole="button"
+              accessibilityLabel={t('a11y.send')}
+              hitSlop={8}
             >
               <Ionicons name="send" size={17} color="#fff" />
             </Pressable>
@@ -301,12 +304,15 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
 
 export const AiChatButton = ({ tripId, isChatTab }: { tripId: string; isChatTab?: boolean }) => {
   const [visible, setVisible] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <>
       <Pressable
         style={[styles.fab, { backgroundColor: Colors.primary }, isChatTab && styles.fabChatTab]}
         onPress={() => setVisible(true)}
+        accessibilityRole="button"
+        accessibilityLabel={t('a11y.aiAssistant')}
       >
         <Ionicons name="sparkles-outline" size={24} color="#fff" />
       </Pressable>
@@ -350,7 +356,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(239,68,68,0.12)',
+    backgroundColor: 'rgba(220,38,38,0.12)',
   },
   bubbleErrorText: { color: Colors.warning },
   bubbleText: { fontSize: 15, lineHeight: 22 },

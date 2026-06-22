@@ -10,6 +10,7 @@ import { saveLastTripId, saveLastTripTab, clearLastTripId } from '../../../src/l
 import { GroupChatProvider, useTripChat } from '../../../src/groupChat';
 import { Ionicons } from '@expo/vector-icons';
 import { AiChatButton } from '../../../components/AiChatModal';
+import { useReducedMotion } from '../../../src/useReducedMotion';
 
 
 const TripContent = () => {
@@ -27,6 +28,7 @@ const TripContent = () => {
   const { unreadCount } = useTripChat();
   const { leaveTrip } = useTrips();
   const { bottom: safeBottom } = useSafeAreaInsets();
+  const reduced = useReducedMotion();
 
   const keyboardHeightRef = useRef<Animated.Value | null>(null);
   if (keyboardHeightRef.current === null) keyboardHeightRef.current = new Animated.Value(0);
@@ -39,13 +41,13 @@ const TripContent = () => {
       // Content area ends tabBarHeight above screen bottom (tabBarHeight includes safeBottom padding).
       // Net overlap = endCoordinates.height + safeBottom - tabBarHeight.
       const target = Math.max(0, e.endCoordinates.height + safeBottom - tabBarHeightRef.current);
-      Animated.timing(keyboardHeight, { toValue: target, duration: 200, useNativeDriver: false }).start();
+      Animated.timing(keyboardHeight, { toValue: target, duration: reduced ? 0 : 200, useNativeDriver: false }).start();
     });
     const hide = Keyboard.addListener('keyboardDidHide', () => {
-      Animated.timing(keyboardHeight, { toValue: 0, duration: 150, useNativeDriver: false }).start();
+      Animated.timing(keyboardHeight, { toValue: 0, duration: reduced ? 0 : 150, useNativeDriver: false }).start();
     });
     return () => { show.remove(); hide.remove(); };
-  }, [keyboardHeight, safeBottom]);
+  }, [keyboardHeight, safeBottom, reduced]);
 
   useEffect(() => {
     if (tripId) saveLastTripId(tripId);
@@ -71,6 +73,9 @@ const TripContent = () => {
         <Pressable
           style={({ pressed }) => [styles.headerBtn, { backgroundColor: theme.uiBackground, borderColor: theme.border }, pressed && styles.pressed]}
           onPress={() => router.replace('/main')}
+          accessibilityRole="button"
+          accessibilityLabel={t('nav.home')}
+          hitSlop={10}
         >
           <Ionicons name="home-outline" size={18} color={theme.icon} />
         </Pressable>
@@ -84,6 +89,9 @@ const TripContent = () => {
         <Pressable
           style={({ pressed }) => [styles.headerBtn, { backgroundColor: theme.uiBackground, borderColor: theme.border }, pressed && styles.pressed]}
           onPress={() => setMoreVisible(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('a11y.moreOptions')}
+          hitSlop={10}
         >
           <Ionicons name="menu-outline" size={18} color={theme.icon} />
         </Pressable>
@@ -110,6 +118,8 @@ const TripContent = () => {
               key={tab.name}
               style={styles.tab}
               onPress={() => router.replace({ pathname: `/${tab.name}`, params: { tripId } })}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isActive }}
             >
               {isActive && (
                 <View style={[
@@ -147,7 +157,7 @@ const TripContent = () => {
       <Modal visible={leaveConfirmVisible} transparent animationType="fade" onRequestClose={() => setLeaveConfirmVisible(false)}>
         <Pressable style={styles.overlay} onPress={() => setLeaveConfirmVisible(false)}>
           <Pressable onPress={() => {}} style={[styles.confirmBox, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
-            <View style={[styles.confirmIcon, { backgroundColor: 'rgba(239,68,68,0.12)', borderColor: 'rgba(239,68,68,0.25)' }]}>
+            <View style={[styles.confirmIcon, { backgroundColor: 'rgba(220,38,38,0.12)', borderColor: 'rgba(220,38,38,0.25)' }]}>
               <Ionicons name="exit-outline" size={30} color={Colors.warning} />
             </View>
             <Text style={[styles.confirmTitle, { color: theme.title }]}>{t('trip.leaveTitle')}</Text>
@@ -160,7 +170,7 @@ const TripContent = () => {
                 <Text style={[styles.confirmBtnText, { color: theme.text }]}>{t('common.cancel')}</Text>
               </Pressable>
               <Pressable
-                style={[styles.confirmBtn, { backgroundColor: Colors.warning, boxShadow: `0 0 20px rgba(239,68,68,0.5)` }]}
+                style={[styles.confirmBtn, { backgroundColor: Colors.warning, boxShadow: `0 0 20px rgba(220,38,38,0.5)` }]}
                 onPress={async () => {
                   setLeaveConfirmVisible(false);
                   try {
@@ -184,7 +194,7 @@ const TripContent = () => {
       <Modal visible={leaveLastMemberConfirmVisible} transparent animationType="fade" onRequestClose={() => setLeaveLastMemberConfirmVisible(false)}>
         <Pressable style={styles.overlay} onPress={() => setLeaveLastMemberConfirmVisible(false)}>
           <Pressable onPress={() => {}} style={[styles.confirmBox, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
-            <View style={[styles.confirmIcon, { backgroundColor: 'rgba(239,68,68,0.12)', borderColor: 'rgba(239,68,68,0.35)' }]}>
+            <View style={[styles.confirmIcon, { backgroundColor: 'rgba(220,38,38,0.12)', borderColor: 'rgba(220,38,38,0.35)' }]}>
               <Ionicons name="trash-outline" size={30} color={Colors.warning} />
             </View>
             <Text style={[styles.confirmTitle, { color: theme.title }]}>{t('trip.leaveLastMemberTitle')}</Text>
@@ -197,7 +207,7 @@ const TripContent = () => {
                 <Text style={[styles.confirmBtnText, { color: theme.text }]}>{t('common.cancel')}</Text>
               </Pressable>
               <Pressable
-                style={[styles.confirmBtn, { backgroundColor: Colors.warning, boxShadow: `0 0 20px rgba(239,68,68,0.5)` }]}
+                style={[styles.confirmBtn, { backgroundColor: Colors.warning, boxShadow: `0 0 20px rgba(220,38,38,0.5)` }]}
                 onPress={async () => {
                   setLeaveLastMemberConfirmVisible(false);
                   try {
@@ -241,6 +251,8 @@ const TripContent = () => {
             ))}
 
             <Pressable
+              accessibilityRole="button"
+              accessibilityHint={t('a11y.hintLeaveTrip')}
               style={({ pressed }) => [styles.sheetRow, { borderBottomWidth: 0 }, pressed && styles.pressed]}
               onPress={() => {
                 setMoreVisible(false);
@@ -251,7 +263,7 @@ const TripContent = () => {
                 }
               }}
             >
-              <View style={[styles.sheetIcon, { backgroundColor: 'rgba(239,68,68,0.14)' }]}>
+              <View style={[styles.sheetIcon, { backgroundColor: 'rgba(220,38,38,0.14)' }]}>
                 <Ionicons name="exit-outline" size={20} color={Colors.warning} />
               </View>
               <Text style={[styles.sheetLabel, { color: Colors.warning }]}>{t('trip.leave')}</Text>

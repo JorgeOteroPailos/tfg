@@ -1,80 +1,94 @@
 \babel@toc {galician}{}\relax 
-\contentsline {section}{\numberline {1}Resumo}{3}{section.1}%
-\contentsline {section}{\numberline {2}Introdución}{4}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Obxectivos xerais}{4}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Relación da documentación que conforma a memoria}{4}{subsection.2.2}%
-\contentsline {subsection}{\numberline {2.3}Descrición do sistema}{4}{subsection.2.3}%
-\contentsline {subsection}{\numberline {2.4}Información adicional de interese}{5}{subsection.2.4}%
-\contentsline {section}{\numberline {3}Especificación de Requisitos}{7}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Descrición xeral}{7}{subsection.3.1}%
-\contentsline {subsubsection}{\numberline {3.1.1}Perspectiva do produto}{7}{subsubsection.3.1.1}%
-\contentsline {subsubsection}{\numberline {3.1.2}Funcionalidade do produto}{7}{subsubsection.3.1.2}%
-\contentsline {subsubsection}{\numberline {3.1.3}Características dos usuarios}{7}{subsubsection.3.1.3}%
-\contentsline {subsubsection}{\numberline {3.1.4}Restricións}{7}{subsubsection.3.1.4}%
-\contentsline {subsubsection}{\numberline {3.1.5}Suposicións e dependencias}{7}{subsubsection.3.1.5}%
-\contentsline {subsection}{\numberline {3.2}Interfaces con outros sistemas}{8}{subsection.3.2}%
-\contentsline {subsubsection}{\numberline {3.2.1}Interface de usuario}{8}{subsubsection.3.2.1}%
-\contentsline {subsubsection}{\numberline {3.2.2}Interfaces de hardware}{8}{subsubsection.3.2.2}%
-\contentsline {subsubsection}{\numberline {3.2.3}Interfaces de software}{8}{subsubsection.3.2.3}%
-\contentsline {subsubsection}{\numberline {3.2.4}Interfaces de comunicación}{8}{subsubsection.3.2.4}%
-\contentsline {subsection}{\numberline {3.3}Requisitos funcionais}{8}{subsection.3.3}%
-\contentsline {subsection}{\numberline {3.4}Casos de uso}{9}{subsection.3.4}%
-\contentsline {subsection}{\numberline {3.5}Requisitos non funcionais}{12}{subsection.3.5}%
-\contentsline {subsubsection}{\numberline {3.5.1}Seguridade}{12}{subsubsection.3.5.1}%
-\contentsline {subsubsection}{\numberline {3.5.2}Privacidade e protección de datos}{12}{subsubsection.3.5.2}%
-\contentsline {subsubsection}{\numberline {3.5.3}Rendemento}{12}{subsubsection.3.5.3}%
-\contentsline {subsubsection}{\numberline {3.5.4}Usabilidade}{12}{subsubsection.3.5.4}%
-\contentsline {subsubsection}{\numberline {3.5.5}Mantibilidade}{12}{subsubsection.3.5.5}%
-\contentsline {subsubsection}{\numberline {3.5.6}Portabilidade e despregamento}{12}{subsubsection.3.5.6}%
-\contentsline {subsubsection}{\numberline {3.5.7}Interoperabilidade}{12}{subsubsection.3.5.7}%
-\contentsline {subsubsection}{\numberline {3.5.8}Fiabilidade}{13}{subsubsection.3.5.8}%
-\contentsline {subsection}{\numberline {3.6}Información que o sistema debe almacenar}{13}{subsection.3.6}%
-\contentsline {section}{\numberline {4}Deseño}{14}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Arquitectura xeral do sistema}{14}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Arquitectura do backend}{14}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Modelo de datos}{15}{subsection.4.3}%
-\contentsline {subsection}{\numberline {4.4}Deseño da API REST}{17}{subsection.4.4}%
-\contentsline {subsection}{\numberline {4.5}Arquitectura do frontend}{17}{subsection.4.5}%
-\contentsline {subsection}{\numberline {4.6}Fluxos de comunicación entre compoñentes}{18}{subsection.4.6}%
-\contentsline {subsubsection}{\numberline {4.6.1}Autenticación e renovación de tokens}{18}{subsubsection.4.6.1}%
-\contentsline {subsubsection}{\numberline {4.6.2}Chat de grupo en tempo real (SSE)}{19}{subsubsection.4.6.2}%
-\contentsline {subsubsection}{\numberline {4.6.3}Subida de documentos con URL prefirmada}{20}{subsubsection.4.6.3}%
-\contentsline {subsubsection}{\numberline {4.6.4}Asistente de IA en \textit {streaming}}{20}{subsubsection.4.6.4}%
-\contentsline {subsection}{\numberline {4.7}Seguridade}{21}{subsection.4.7}%
-\contentsline {subsection}{\numberline {4.8}Integración con servizos externos}{21}{subsection.4.8}%
-\contentsline {subsection}{\numberline {4.9}Equipamento hardware e software}{21}{subsection.4.9}%
-\contentsline {section}{\numberline {5}Probas}{22}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Estratexia de probas}{22}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}Probas automatizadas do backend}{22}{subsection.5.2}%
-\contentsline {subsection}{\numberline {5.3}Validación funcional do sistema}{23}{subsection.5.3}%
-\contentsline {subsection}{\numberline {5.4}Resultados acadados}{23}{subsection.5.4}%
-\contentsline {section}{\numberline {6}Conclusións e Posibles Ampliacións}{24}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Grao de cumprimento dos obxectivos}{24}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Valoración técnica}{24}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}Posibles ampliacións}{24}{subsection.6.3}%
-\contentsline {section}{Bibliografía}{26}{subsection.6.3}%
-\contentsline {section}{\numberline {A}Manual técnico}{27}{appendix.Alph1}%
-\contentsline {subsection}{\numberline {A.1}Requisitos do entorno}{27}{subsection.Alph1.1}%
-\contentsline {subsection}{\numberline {A.2}Estrutura do repositorio}{27}{subsection.Alph1.2}%
-\contentsline {subsection}{\numberline {A.3}Servizos de apoio (Podman)}{27}{subsection.Alph1.3}%
-\contentsline {subsection}{\numberline {A.4}Execución do backend}{27}{subsection.Alph1.4}%
-\contentsline {subsection}{\numberline {A.5}Execución do frontend}{27}{subsection.Alph1.5}%
-\contentsline {subsection}{\numberline {A.6}Contrato OpenAPI e xeración de código}{28}{subsection.Alph1.6}%
-\contentsline {subsection}{\numberline {A.7}Execución das probas}{28}{subsection.Alph1.7}%
-\contentsline {subsection}{\numberline {A.8}Configuración e segredos}{28}{subsection.Alph1.8}%
-\contentsline {subsection}{\numberline {A.9}Integración continua}{28}{subsection.Alph1.9}%
-\contentsline {section}{\numberline {B}Manual de usuario}{29}{appendix.Alph2}%
-\contentsline {subsection}{\numberline {B.1}Instalación e acceso}{29}{subsection.Alph2.1}%
-\contentsline {subsection}{\numberline {B.2}Rexistro e inicio de sesión}{29}{subsection.Alph2.2}%
-\contentsline {subsection}{\numberline {B.3}Pantalla principal: as miñas viaxes}{29}{subsection.Alph2.3}%
-\contentsline {subsection}{\numberline {B.4}Crear e unirse a viaxes}{29}{subsection.Alph2.4}%
-\contentsline {subsection}{\numberline {B.5}Xestión de membros}{30}{subsection.Alph2.5}%
-\contentsline {subsection}{\numberline {B.6}Gastos e liquidacións}{30}{subsection.Alph2.6}%
-\contentsline {subsection}{\numberline {B.7}Eventos e calendario}{31}{subsection.Alph2.7}%
-\contentsline {subsection}{\numberline {B.8}Documentos compartidos}{31}{subsection.Alph2.8}%
-\contentsline {subsection}{\numberline {B.9}Chat de grupo}{31}{subsection.Alph2.9}%
-\contentsline {subsection}{\numberline {B.10}Asistente de intelixencia artificial}{32}{subsection.Alph2.10}%
-\contentsline {subsection}{\numberline {B.11}Amizades}{32}{subsection.Alph2.11}%
-\contentsline {subsection}{\numberline {B.12}Perfil e axustes}{32}{subsection.Alph2.12}%
-\contentsline {subsection}{\numberline {B.13}Eliminación da conta}{33}{subsection.Alph2.13}%
-\contentsline {subsection}{\numberline {B.14}Mensaxes de erro comúns}{33}{subsection.Alph2.14}%
+\contentsline {chapter}{\numberline {1}Introdución}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Obxectivos xerais}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Motivación e contexto}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Solucións existentes e diferenciación}{2}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Descrición do sistema}{3}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Relación da documentación que conforma a memoria}{5}{section.1.5}%
+\contentsline {section}{\numberline {1.6}Información adicional de interese}{5}{section.1.6}%
+\contentsline {chapter}{\numberline {2}Especificación de Requisitos}{7}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Descrición xeral}{7}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Perspectiva do produto}{7}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Funcionalidade do produto}{7}{subsection.2.1.2}%
+\contentsline {subsection}{\numberline {2.1.3}Características dos usuarios}{8}{subsection.2.1.3}%
+\contentsline {subsection}{\numberline {2.1.4}Restricións}{8}{subsection.2.1.4}%
+\contentsline {subsection}{\numberline {2.1.5}Suposicións e dependencias}{8}{subsection.2.1.5}%
+\contentsline {section}{\numberline {2.2}Interfaces con outros sistemas}{8}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Interface de usuario}{8}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Interfaces de hardware}{8}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Interfaces de software}{9}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}Interfaces de comunicación}{9}{subsection.2.2.4}%
+\contentsline {section}{\numberline {2.3}Requisitos funcionais}{9}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Casos de uso}{10}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Requisitos non funcionais}{13}{section.2.5}%
+\contentsline {subsection}{\numberline {2.5.1}Seguridade}{13}{subsection.2.5.1}%
+\contentsline {subsection}{\numberline {2.5.2}Privacidade e protección de datos}{13}{subsection.2.5.2}%
+\contentsline {subsection}{\numberline {2.5.3}Rendemento}{13}{subsection.2.5.3}%
+\contentsline {subsection}{\numberline {2.5.4}Usabilidade}{14}{subsection.2.5.4}%
+\contentsline {subsection}{\numberline {2.5.5}Mantibilidade}{14}{subsection.2.5.5}%
+\contentsline {subsection}{\numberline {2.5.6}Portabilidade e despregamento}{14}{subsection.2.5.6}%
+\contentsline {subsection}{\numberline {2.5.7}Interoperabilidade}{14}{subsection.2.5.7}%
+\contentsline {subsection}{\numberline {2.5.8}Fiabilidade}{14}{subsection.2.5.8}%
+\contentsline {section}{\numberline {2.6}Información que o sistema debe almacenar}{14}{section.2.6}%
+\contentsline {subsection}{\numberline {2.6.1}Almacenamento de ficheiros (MinIO)}{15}{subsection.2.6.1}%
+\contentsline {subsection}{\numberline {2.6.2}Información almacenada no dispositivo (frontend)}{16}{subsection.2.6.2}%
+\contentsline {chapter}{\numberline {3}Deseño}{17}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Arquitectura xeral do sistema}{17}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Arquitectura do backend}{18}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Modelo de datos}{20}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Deseño da API REST}{21}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Arquitectura do frontend}{22}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Deseño da interface de usuario}{23}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Linguaxe visual e temas}{23}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}Compoñentes e patróns de interface}{24}{subsection.3.6.2}%
+\contentsline {subsection}{\numberline {3.6.3}Animacións e retroalimentación visual}{25}{subsection.3.6.3}%
+\contentsline {subsection}{\numberline {3.6.4}Accesibilidade}{25}{subsection.3.6.4}%
+\contentsline {subsection}{\numberline {3.6.5}Análise heurística}{27}{subsection.3.6.5}%
+\contentsline {section}{\numberline {3.7}Fluxos de comunicación entre compoñentes}{29}{section.3.7}%
+\contentsline {subsection}{\numberline {3.7.1}Autenticación e renovación de tokens}{29}{subsection.3.7.1}%
+\contentsline {subsection}{\numberline {3.7.2}Chat de grupo en tempo real (SSE)}{29}{subsection.3.7.2}%
+\contentsline {subsection}{\numberline {3.7.3}Subida de documentos con URL prefirmada}{30}{subsection.3.7.3}%
+\contentsline {subsection}{\numberline {3.7.4}Asistente de IA en \textit {streaming}}{30}{subsection.3.7.4}%
+\contentsline {section}{\numberline {3.8}Seguridade}{31}{section.3.8}%
+\contentsline {section}{\numberline {3.9}Integración con servizos externos}{32}{section.3.9}%
+\contentsline {section}{\numberline {3.10}Equipamento hardware e software}{32}{section.3.10}%
+\contentsline {chapter}{\numberline {4}Probas}{33}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Estratexia de probas}{33}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Probas automatizadas do backend}{33}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Probas automatizadas do frontend}{34}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Validación funcional do sistema}{35}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Avaliación de usabilidade con usuarios reais}{36}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Resultados acadados}{37}{section.4.6}%
+\contentsline {chapter}{\numberline {5}Conclusións e Posibles Ampliacións}{39}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Grao de cumprimento dos obxectivos}{39}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Valoración técnica}{40}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Posibles ampliacións}{40}{section.5.3}%
+\contentsline {chapter}{\numberline {A}Manual técnico}{41}{appendix.Alph1}%
+\contentsline {section}{\numberline {A.1}Requisitos do entorno}{41}{section.Alph1.1}%
+\contentsline {section}{\numberline {A.2}Estrutura do repositorio}{41}{section.Alph1.2}%
+\contentsline {section}{\numberline {A.3}Servizos de apoio (Podman)}{41}{section.Alph1.3}%
+\contentsline {section}{\numberline {A.4}Execución do backend}{42}{section.Alph1.4}%
+\contentsline {section}{\numberline {A.5}Execución do frontend}{42}{section.Alph1.5}%
+\contentsline {section}{\numberline {A.6}Contrato OpenAPI e xeración de código}{42}{section.Alph1.6}%
+\contentsline {section}{\numberline {A.7}Execución das probas}{42}{section.Alph1.7}%
+\contentsline {section}{\numberline {A.8}Configuración e segredos}{43}{section.Alph1.8}%
+\contentsline {section}{\numberline {A.9}Integración continua}{43}{section.Alph1.9}%
+\contentsline {chapter}{\numberline {B}Manual de usuario}{45}{appendix.Alph2}%
+\contentsline {section}{\numberline {B.1}Instalación e acceso}{45}{section.Alph2.1}%
+\contentsline {section}{\numberline {B.2}Rexistro e inicio de sesión}{45}{section.Alph2.2}%
+\contentsline {section}{\numberline {B.3}Pantalla principal: as miñas viaxes}{46}{section.Alph2.3}%
+\contentsline {section}{\numberline {B.4}Crear e unirse a viaxes}{47}{section.Alph2.4}%
+\contentsline {section}{\numberline {B.5}Xestión de membros}{48}{section.Alph2.5}%
+\contentsline {section}{\numberline {B.6}Gastos e liquidacións}{49}{section.Alph2.6}%
+\contentsline {section}{\numberline {B.7}Eventos e calendario}{50}{section.Alph2.7}%
+\contentsline {section}{\numberline {B.8}Documentos compartidos}{51}{section.Alph2.8}%
+\contentsline {section}{\numberline {B.9}Chat de grupo}{52}{section.Alph2.9}%
+\contentsline {section}{\numberline {B.10}Asistente de intelixencia artificial}{53}{section.Alph2.10}%
+\contentsline {section}{\numberline {B.11}Amizades}{54}{section.Alph2.11}%
+\contentsline {section}{\numberline {B.12}Invitacións}{54}{section.Alph2.12}%
+\contentsline {section}{\numberline {B.13}Perfil}{55}{section.Alph2.13}%
+\contentsline {section}{\numberline {B.14}Axustes}{56}{section.Alph2.14}%
+\contentsline {section}{\numberline {B.15}Eliminación da conta}{57}{section.Alph2.15}%
+\contentsline {section}{\numberline {B.16}Mensaxes de erro comúns}{58}{section.Alph2.16}%
+\contentsline {chapter}{\numberline {C}Licenza}{59}{appendix.Alph3}%
+\contentsline {chapter}{Bibliografía}{61}{appendix.Alph3}%

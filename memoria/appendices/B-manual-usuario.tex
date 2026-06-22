@@ -1,33 +1,51 @@
-\newpage
-\section{Manual de usuario}
+\chapter{Manual de usuario}
 
 Este manual é autocontido e está dirixido ás persoas que utilicen Telaria. Describe a
-instalación e o uso de todas as funcionalidades. As capturas de pantalla insírense nos
-espazos reservados ao efecto.
+instalación e o uso de todas as funcionalidades. En cada sección inclúense capturas de pantalla representativas 
+da aplicación, que poden axudar ao usuario a familiarizarse coas distintas pantallas e fluxos de interacción. 
+As capturas de pantalla foron tomadas empregando o modo claro da aplicación para unha maior claridade visual, 
+pero a funcionalidade é a mesma no modo escuro.
 
-\subsection{Instalación e acceso}
+\section{Instalación e acceso}
 
 Telaria é unha aplicación móbil para iOS e Android. Durante o desenvolvemento pode
 executarse a través de Expo Go ou instalando unha compilación da aplicación. Ao abrila por
 primeira vez, o usuario debe rexistrarse ou iniciar sesión.
 
-\subsection{Rexistro e inicio de sesión}
+\section{Rexistro e inicio de sesión}
 
 Na pantalla inicial pódese crear unha conta nova indicando nome de usuario, correo
 electrónico e contrasinal (con confirmación), ou iniciar sesión cunha conta existente. A
 sesión mantense aberta entre usos.
 
-\figcaptura{Pantallas de rexistro e inicio de sesión}{fig:b-login}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{login.jpeg}
+    \caption{Inicio de sesión}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{register.jpeg}
+    \caption{Rexistro}
+  \end{subfigure}
+  \caption{Pantallas de rexistro e inicio de sesión}\label{fig:b-login}
+\end{figure}
 
-\subsection{Pantalla principal: as miñas viaxes}
+\section{Pantalla principal: as miñas viaxes}
 
 Tras iniciar sesión, móstrase a lista de viaxes do usuario. Desde aquí pódese acceder a
 unha viaxe, crear unha nova ou unirse a unha existente, así como abrir o menú lateral para
 acceder a amigos, invitacións, perfil e axustes.
 
-\figcaptura{Lista de viaxes e menú principal}{fig:b-main}
+\begin{figure}[H]\centering
+  \includegraphics[width=0.45\textwidth]{main.jpeg}
+  \caption{Pantalla principal, coas viaxes do usuario}\label{fig:b-main}
+\end{figure}
 
-\subsection{Crear e unirse a viaxes}
+\section{Crear e unirse a viaxes}
 
 Para crear unha viaxe abonda con indicar o seu nome; opcionalmente pódense convidar amigos
 no momento da creación. Para unirse a unha viaxe existente pódese empregar unha invitación
@@ -35,51 +53,77 @@ recibida, enviar unha solicitude de unión ou escanear un código QR.
 
 \figcaptura{Creación de viaxe e unión mediante código QR}{fig:b-crear}
 
-\subsection{Xestión de membros}
+\section{Xestión de membros}
 
 Dentro dunha viaxe, calquera membro pode convidar outros usuarios e xestionar as
 solicitudes de unión pendentes. Non existen roles: todos os membros teñen as mesmas
 capacidades.
 
-\figcaptura{Membros da viaxe e solicitudes pendentes}{fig:b-membros}
+\begin{figure}[H]\centering
+  \includegraphics[width=0.45\textwidth]{members.jpeg}
+  \caption{Membros da viaxe e solicitudes pendentes}\label{fig:b-membros}
+\end{figure}
 
-\subsection{Gastos e liquidacións}
+\section{Gastos e liquidacións}
 
 No apartado de gastos rexístranse os pagamentos indicando importe, concepto, categoría,
 quen pagou e entre quen se reparte. A aplicación calcula automaticamente os balances (quen
 debe a quen) e propón as liquidacións que minimizan o número de transferencias. As débedas
 saldadas rexístranse no histórico de liquidacións.
 
-\figcaptura{Lista de gastos, balances e liquidacións}{fig:b-gastos}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{expenses.jpeg}
+    \caption{Pestaña de gastos}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{balances-light.jpeg}
+    \caption{Pestaña de liquidacións}
+  \end{subfigure}
+  \caption{Lista de gastos e liquidacións}\label{fig:b-gastos}
+\end{figure}
 
-\subsection{Eventos e calendario}
+\section{Eventos e calendario}
 
 O calendario da viaxe permite crear eventos con nome, data e hora de inicio, duración e
 unha localización opcional. Os eventos amósanse organizados por data.
 
-\figcaptura{Calendario e creación de eventos}{fig:b-eventos}
+\begin{figure}[H]\centering
+  \includegraphics[width=0.45\textwidth]{calendar.jpeg}
+  \caption{Calendario e creación de eventos}\label{fig:b-eventos}
+\end{figure}
 
-\subsection{Documentos compartidos}
+\section{Documentos compartidos}
 
 Os membros poden subir documentos relevantes para a viaxe (reservas, billetes, etc.) e
 consultalos ou eliminalos. Os documentos de imaxe amosan unha miniatura de previsualización.
 
-\figcaptura{Listaxe de documentos compartidos}{fig:b-documentos}
+\begin{figure}[H]\centering
+  \includegraphics[width=0.45\textwidth]{sharedDocuments.jpeg}
+  \caption{Listaxe de documentos compartidos}\label{fig:b-documentos}
+\end{figure}
 
-\subsection{Chat de grupo}
+\section{Chat de grupo}
 
 Cada viaxe dispón dun chat común no que os membros intercambian mensaxes en tempo real.
 
-\figcaptura{Chat de grupo da viaxe}{fig:b-chat}
+\begin{figure}[H]\centering
+  \includegraphics[width=0.45\textwidth]{groupChat.jpeg}
+  \caption{Chat de grupo da viaxe}\label{fig:b-chat}
+\end{figure}
 
-\subsection{Asistente de intelixencia artificial}
+\section{Asistente de intelixencia artificial}
 
 Cada viaxe inclúe un asistente conversacional que responde preguntas tendo en conta o
 contexto da viaxe (eventos e gastos). A conversa garda un historial persistente.
 
 \figcaptura{Asistente de IA da viaxe}{fig:b-ia}
 
-\subsection{Amizades}
+\section{Amizades}
 
 A sección de amigos permite enviar e xestionar solicitudes de amizade (por identificador
 ou código QR), consultar a lista de amigos e eliminar amizades. Os amigos poden convidarse
@@ -87,23 +131,41 @@ ou código QR), consultar a lista de amigos e eliminar amizades. Os amigos poden
 
 \figcaptura{Lista de amigos e solicitudes de amizade}{fig:b-amigos}
 
-\subsection{Perfil e axustes}
+\section{Invitacións}
+
+Na caixa de entrada de invitacións agrúpanse as invitacións a viaxes e as solicitudes de
+amizade recibidas. Desde aquí pódense aceptar ou rexeitar cada unha de forma individual.
+
+\figcaptura{Caixa de entrada de invitacións}{fig:b-invitacins}
+
+\section{Perfil}
 
 No perfil pódese consultar e actualizar o nome de usuario e o correo electrónico (o cambio
-de correo require o contrasinal), cambiar o contrasinal e establecer un avatar. Nos axustes
-configúrase o idioma (galego, castelán ou inglés), o tema (claro ou escuro) e o aforro de
-datos.
+de correo require o contrasinal), cambiar o contrasinal e establecer un avatar.
 
-\figcaptura{Perfil de usuario e pantalla de axustes}{fig:b-perfil}
+\begin{figure}[H]\centering
+  \includegraphics[width=0.45\textwidth]{profile.jpeg}
+  \caption{Perfil de usuario}\label{fig:b-perfil}
+\end{figure}
 
-\subsection{Eliminación da conta}
+\section{Axustes}
+
+Na pantalla de axustes configúrase o idioma (galego, castelán ou inglés), o tema (claro ou
+escuro) e o aforro de datos.
+
+\begin{figure}[H]\centering
+  \includegraphics[width=0.45\textwidth]{settings.jpeg}
+  \caption{Pantalla de axustes}\label{fig:b-axustes}
+\end{figure}
+
+\section{Eliminación da conta}
 
 Desde os axustes, o usuario pode eliminar a súa conta. A operación require a confirmación
 do contrasinal e elimina os datos persoais asociados.
 
 \figcaptura{Confirmación de eliminación de conta}{fig:b-eliminar}
 
-\subsection{Mensaxes de erro comúns}
+\section{Mensaxes de erro comúns}
 
 \begin{itemize}
   \item \textbf{Credenciais incorrectas}: o correo ou o contrasinal non son válidos no

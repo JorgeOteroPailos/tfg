@@ -377,6 +377,10 @@ const Profile = () => {
           {userId && (
             <Pressable
               onPress={handleCopyUserId}
+              accessibilityRole="button"
+              accessibilityLabel={t('a11y.copyUserId')}
+              accessibilityHint={t('a11y.hintCopyId')}
+              hitSlop={10}
               style={({ pressed }) => [
                 styles.copyButton,
                 { backgroundColor: copied ? Colors.primary : theme.background, opacity: pressed ? 0.7 : 1 },
@@ -396,6 +400,7 @@ const Profile = () => {
         <Pressable
           style={({ pressed }) => [styles.infoRow, { opacity: pressed ? 0.7 : 1 }]}
           onPress={() => setActiveModal('password')}
+          accessibilityRole="button"
         >
           <View style={[styles.iconBadge, { backgroundColor: theme.background }]}>
             <Ionicons name="lock-closed-outline" size={18} color={Colors.primary} />
@@ -444,7 +449,7 @@ const Profile = () => {
     </ScrollView>
 
     {toast && (
-      <View style={[styles.toast, { backgroundColor: toast.kind === 'error' ? '#d9534f' : '#4caf50' }]}>
+      <View style={[styles.toast, { backgroundColor: toast.kind === 'error' ? Colors.warning : '#4caf50' }]}>
         <ThemedText style={styles.toastText}>{toast.text}</ThemedText>
       </View>
     )}
@@ -606,7 +611,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,165,0,0.12)',
   },
   warningText: { flex: 1, fontSize: 13, opacity: 0.8 },
-  errorText: { color: '#d9534f', marginTop: 10, textAlign: 'center' },
+  errorText: { color: Colors.warning, marginTop: 10, textAlign: 'center' },
 
   toast: {
     position: 'absolute', bottom: 40, left: 24, right: 24,

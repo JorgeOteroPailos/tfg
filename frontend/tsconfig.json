@@ -3,5 +3,5 @@
   "compilerOptions": {
     "strict": true
   },
-  "include": ["src/**/*", "app/**/*", "*.ts", "*.tsx"]
+  "include": ["src/**/*", "app/**/*", "components/**/*", "**/__tests__/**/*", "*.ts", "*.tsx"]
 }

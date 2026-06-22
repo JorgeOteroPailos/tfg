@@ -4,6 +4,7 @@ import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useAppTheme } from '../../src/theme';
+import { useReducedMotion } from '../../src/useReducedMotion';
 import { Colors } from '../../constants/Colors';
 import { useInvitations } from '../../src/invitations';
 import { useFriends } from '../../src/friends';
@@ -91,13 +92,14 @@ const ScanQrScreen = () => {
   const pulseAnimRef = useRef<Animated.Value | null>(null);
   if (pulseAnimRef.current === null) pulseAnimRef.current = new Animated.Value(1);
   const pulseAnim = pulseAnimRef.current;
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     navigation.setOptions({ title: screenTitle });
   }, [navigation, screenTitle]);
 
   useEffect(() => {
-    if (scanState !== 'scanning') return;
+    if (scanState !== 'scanning' || reduced) return;
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(scanAnim, { toValue: 1, duration: 2200, useNativeDriver: true }),
@@ -106,9 +108,10 @@ const ScanQrScreen = () => {
     );
     loop.start();
     return () => loop.stop();
-  }, [scanState, scanAnim]);
+  }, [scanState, scanAnim, reduced]);
 
   useEffect(() => {
+    if (reduced) return;
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, { toValue: 1.1, duration: 1000, useNativeDriver: true }),
@@ -117,7 +120,7 @@ const ScanQrScreen = () => {
     );
     loop.start();
     return () => loop.stop();
-  }, [pulseAnim]);
+  }, [pulseAnim, reduced]);
 
   const scanLineY = scanAnim.interpolate({
     inputRange: [0, 1],
@@ -226,7 +229,7 @@ const ScanQrScreen = () => {
           )}
           {scanState === 'error' && (
             <>
-              <Ionicons name="close-circle" size={72} color="#d9534f" />
+              <Ionicons name="close-circle" size={72} color={Colors.warning} />
               <ThemedText style={styles.resultText}>{errorMessage}</ThemedText>
               <Pressable
                 style={[styles.primaryButton, { backgroundColor: theme.tint, marginTop: 16 }]}

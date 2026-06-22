@@ -1,8 +1,12 @@
 package gal.usc.telariabackend.services;
 
 import gal.usc.telariabackend.model.AiChatMessage;
+import gal.usc.telariabackend.model.Event;
+import gal.usc.telariabackend.model.Expense;
+import gal.usc.telariabackend.model.Location;
 import gal.usc.telariabackend.model.Trip;
 import gal.usc.telariabackend.model.User;
+import gal.usc.telariabackend.model.dto.ExpenseCategory;
 import gal.usc.telariabackend.model.exceptions.NotATripMemberException;
 import gal.usc.telariabackend.repository.AiChatMessageRepository;
 import gal.usc.telariabackend.repository.TripRepository;
@@ -18,9 +22,12 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import tools.jackson.databind.ObjectMapper;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -175,5 +182,100 @@ class AiChatServiceTest {
         assertTrue(assistantMsg.getTimestamp().isAfter(userMsg.getTimestamp()),
                 "assistant timestamp must sort strictly after the user message");
         verify(emitter).complete();
+    }
+
+    // ── system prompt / context assembly ──────────────────────────────────────────
+    // These exercise the optional-field branches of buildSystemPrompt by driving a full
+    // streamResponse and capturing the system prompt handed to the (stubbed) Ollama call.
+
+    /**
+     * Runs streamResponse with the model call stubbed out and returns the system prompt
+     * that buildSystemPrompt produced for the given trip.
+     */
+    private String captureSystemPrompt(Trip contextTrip) {
+        when(tripRepo.findByIdAndMembersId(tripId, userId)).thenReturn(Optional.of(contextTrip));
+        when(chatMessageRepo.findTop5ByTripIdAndUserIdOrderByTimestampDesc(tripId, userId))
+                .thenReturn(List.of());
+        when(tripRepo.findById(tripId)).thenReturn(Optional.of(contextTrip));
+        when(userRepo.findById(userId)).thenReturn(Optional.of(user));
+
+        AiChatService spy = spy(service);
+        ArgumentCaptor<String> promptCaptor = ArgumentCaptor.forClass(String.class);
+        doNothing().when(spy).callOllamaStream(promptCaptor.capture(), any(), any(), any());
+
+        spy.streamResponse(tripId, userId, "Hola", mock(SseEmitter.class));
+
+        return promptCaptor.getValue();
+    }
+
+    @Test
+    void buildSystemPrompt_WhenEventHasTimeAndNamedLocation_ShouldIncludeBoth() {
+        trip.getEvents().add(new Event(trip, "Cena", ZonedDateTime.now(), 90,
+                new Location("Trattoria", "Via Roma 1", 41.9, 12.5)));
+
+        String prompt = captureSystemPrompt(trip);
+
+        assertTrue(prompt.contains("Cena"), "event name should appear");
+        assertTrue(prompt.contains("Trattoria"), "named location should appear after 'en'");
+        assertTrue(prompt.contains(" en Trattoria"), "location should be prefixed with ' en '");
+        assertTrue(prompt.matches("(?s).*Cena \\(\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}\\).*"),
+                "start time should be formatted in parentheses");
+    }
+
+    @Test
+    void buildSystemPrompt_WhenEventHasNoTimeAndUnnamedLocation_ShouldOmitBoth() {
+        // A null location passed to the Event constructor becomes an empty Location (name == null).
+        trip.getEvents().add(new Event(trip, "Paseo libre", null, null, null));
+
+        String prompt = captureSystemPrompt(trip);
+
+        assertTrue(prompt.contains("Paseo libre"), "event name should still appear");
+        assertFalse(prompt.contains("Paseo libre ("), "no start-time parenthesis should be added");
+        assertFalse(prompt.contains("Paseo libre en"), "an unnamed location should not be rendered");
+    }
+
+    @Test
+    void buildSystemPrompt_WhenEventLocationIsNull_ShouldNotRenderLocation() {
+        // Guards against legacy/incomplete rows whose location was never set.
+        Event event = mock(Event.class);
+        when(event.getName()).thenReturn("Visita guiada");
+        when(event.getStartTime()).thenReturn(null);
+        when(event.getLocation()).thenReturn(null);
+        trip.getEvents().add(event);
+
+        String prompt = captureSystemPrompt(trip);
+
+        assertTrue(prompt.contains("Visita guiada"));
+        assertFalse(prompt.contains("Visita guiada en"), "a null location must not produce ' en '");
+    }
+
+    @Test
+    void buildSystemPrompt_WhenExpenseHasTimestamp_ShouldRenderItsDate() {
+        trip.getExpenses().add(new Expense(trip, user, new BigDecimal("42.50"), "Hotel",
+                user, Set.of(user), ExpenseCategory.GENERAL));
+
+        String prompt = captureSystemPrompt(trip);
+
+        assertTrue(prompt.contains("Hotel"), "expense name should appear");
+        assertTrue(prompt.contains("pagado por " + user.getUsername()), "payer should appear");
+        assertTrue(prompt.matches("(?s).*Hotel.*, el \\d{2}/\\d{2}/\\d{4}\\).*"),
+                "a present timestamp should render a date");
+    }
+
+    @Test
+    void buildSystemPrompt_WhenExpenseHasNoTimestamp_ShouldOmitTheDate() {
+        // Guards against rows with a null timestamp.
+        Expense expense = mock(Expense.class);
+        when(expense.getName()).thenReturn("Tren");
+        when(expense.getCategory()).thenReturn(ExpenseCategory.GENERAL);
+        when(expense.getAmount()).thenReturn(new BigDecimal("10.00"));
+        when(expense.getPayer()).thenReturn(user);
+        when(expense.getTimestamp()).thenReturn(null);
+        trip.getExpenses().add(expense);
+
+        String prompt = captureSystemPrompt(trip);
+
+        assertTrue(prompt.contains("Tren"), "expense name should appear");
+        assertFalse(prompt.contains(", el "), "a null timestamp should not render a date");
     }
 }

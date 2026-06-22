@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   hint: { fontSize: 13, lineHeight: 19 },
 
   successText: { color: '#4caf50', textAlign: 'center', fontSize: 14 },
-  errorText: { color: '#d9534f', textAlign: 'center', fontSize: 14 },
+  errorText: { color: Colors.warning, textAlign: 'center', fontSize: 14 },
 
   sendBtn: { paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
   sendBtnContent: { flexDirection: 'row', alignItems: 'center', gap: 8 },

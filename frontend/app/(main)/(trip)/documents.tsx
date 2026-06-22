@@ -240,7 +240,7 @@ const DocumentsScreen = () => {
           {docs.length > 0 && (
             <View style={[styles.filterBar, { backgroundColor: theme.background, zIndex: 10 }]}>
               <View style={styles.filterLeft}>
-                <Pressable style={styles.toolbarBtn} onPress={() => uiDispatch({ type: 'toggle_filters' })}>
+                <Pressable style={styles.toolbarBtn} onPress={() => uiDispatch({ type: 'toggle_filters' })} accessibilityRole="button" accessibilityLabel={t('a11y.toggleFilters')} hitSlop={10}>
                   <Ionicons
                     name={ui.showFilters ? 'options' : 'options-outline'}
                     size={22}
@@ -275,10 +275,10 @@ const DocumentsScreen = () => {
                         {t(ui.sortOrder === 'desc' ? 'trip.sortNewest' : 'trip.sortOldest')}
                       </ThemedText>
                     </Pressable>
-                    <Pressable style={styles.toolbarBtn} onPress={() => uiDispatch({ type: 'set_view_mode', mode: 'list' })}>
+                    <Pressable style={styles.toolbarBtn} onPress={() => uiDispatch({ type: 'set_view_mode', mode: 'list' })} accessibilityRole="button" accessibilityState={{ selected: ui.viewMode === 'list' }} accessibilityLabel={t('a11y.listView')} hitSlop={10}>
                       <Ionicons name="list" size={20} color={ui.viewMode === 'list' ? theme.tint : theme.icon} />
                     </Pressable>
-                    <Pressable style={styles.toolbarBtn} onPress={() => uiDispatch({ type: 'set_view_mode', mode: 'grid' })}>
+                    <Pressable style={styles.toolbarBtn} onPress={() => uiDispatch({ type: 'set_view_mode', mode: 'grid' })} accessibilityRole="button" accessibilityState={{ selected: ui.viewMode === 'grid' }} accessibilityLabel={t('a11y.gridView')} hitSlop={10}>
                       <Ionicons name="grid" size={20} color={ui.viewMode === 'grid' ? theme.tint : theme.icon} />
                     </Pressable>
                   </>
@@ -309,6 +309,8 @@ const DocumentsScreen = () => {
           style={[styles.fab, { backgroundColor: ui.upload.uploading ? theme.icon : theme.tint }]}
           onPress={handleUpload}
           disabled={ui.upload.uploading}
+          accessibilityRole="button"
+          accessibilityLabel={t('a11y.uploadDocument')}
         >
           {ui.upload.uploading
             ? <ActivityIndicator color="white" />
@@ -401,7 +403,7 @@ const styles = StyleSheet.create({
 
   toast: {
     position: 'absolute', bottom: 96, left: 24, right: 24,
-    backgroundColor: '#d9534f', padding: 12, borderRadius: 8, alignItems: 'center',
+    backgroundColor: Colors.warning, padding: 12, borderRadius: 8, alignItems: 'center',
   },
   toastText: { color: 'white', fontWeight: '600' },
 });

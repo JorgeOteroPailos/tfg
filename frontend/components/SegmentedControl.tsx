@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useReducedMotion } from '../src/useReducedMotion';
 
 export type SegmentOption = {
   value: string;
@@ -38,16 +39,21 @@ const SegmentedControl = ({
   const translateXRef = useRef<Animated.Value | null>(null);
   if (translateXRef.current === null) translateXRef.current = new Animated.Value(0);
   const translateX = translateXRef.current;
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     if (thumbWidth === 0) return;
+    if (reduced) {
+      translateX.setValue(selectedIndex * thumbWidth);
+      return;
+    }
     Animated.spring(translateX, {
       toValue: selectedIndex * thumbWidth,
       useNativeDriver: true,
       tension: 300,
       friction: 30,
     }).start();
-  }, [selectedIndex, thumbWidth, translateX]);
+  }, [selectedIndex, thumbWidth, translateX, reduced]);
 
   const handleLayout = (e: LayoutChangeEvent) => {
     setContainerWidth(e.nativeEvent.layout.width);

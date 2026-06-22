@@ -101,6 +101,8 @@ const Main = () => {
       headerLeft: () => (
         <Pressable
           onPress={() => router.push('/invitations')}
+          accessibilityRole="button"
+          accessibilityLabel={t('nav.invitations')}
           style={({ pressed }) => [
             styles.invBtn,
             { backgroundColor: theme.uiBackground, borderColor: theme.border },
@@ -116,7 +118,7 @@ const Main = () => {
         </Pressable>
       ),
     });
-  }, [invitationCount, theme, navigation]);
+  }, [invitationCount, theme, navigation, t]);
 
   const renderTripItem = useCallback(
     ({ item }: { item: TripSummary }) => <TripCard item={item} />,
@@ -126,7 +128,7 @@ const Main = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {isDark && <DotGrid color="rgba(168,85,247,0.055)" />}
-      <AmbientBlobs tint={theme.tint} secondary={Colors.secondary} />
+      <AmbientBlobs tint={theme.tint} />
 
       <View style={styles.content}>
         <View style={styles.actionRow}>

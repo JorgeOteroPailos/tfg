@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AmbientBlobs, DotGrid } from '../../components/BackgroundTexture';
 import SegmentedControl from '../../components/SegmentedControl';
@@ -72,8 +73,11 @@ const DeleteAccountModal = ({ onClose }: { onClose: () => void }) => {
             <Text style={[styles.dangerText, { color: theme.text }]}>{t('settings.deleteAccountWarning')}</Text>
           </View>
 
+          <Text style={[styles.inputLabel, { color: theme.text }]}>
+            {t('settings.deleteAccountPassword')}
+          </Text>
           <ThemedInput
-            placeholder={t('settings.deleteAccountPassword')}
+            placeholder={t('settings.deleteAccountPasswordPlaceholder')}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -122,11 +126,15 @@ const Settings = () => {
   const { dataSaver, setDataSaver } = useDataSaver();
   const theme = Colors[themeName] ?? Colors.light;
   const isDark = themeName === 'dark';
+  const insets = useSafeAreaInsets();
 
   const [selectedLanguage, setSelectedLanguage] = useState<AppLanguage>('es');
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  // Seed the language selector from storage once on mount. Subscribing to
+  // i18n.language here re-fired this effect (and its AsyncStorage read) on every
+  // language switch; handleLanguageChange already keeps selectedLanguage in sync.
   useEffect(() => {
     const loadPreferences = async () => {
       try {
@@ -148,7 +156,8 @@ const Settings = () => {
       }
     };
     loadPreferences();
-  }, [i18n.language]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLanguageChange = async (language: AppLanguage) => {
     try {
@@ -186,9 +195,12 @@ const Settings = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {isDark && <DotGrid color="rgba(168,85,247,0.055)" />}
-      <AmbientBlobs tint={theme.tint} secondary={Colors.secondary} />
+      <AmbientBlobs tint={theme.tint} />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 12 }}
+      >
         <LinearGradient
           colors={['#7c3aed', '#9d44f0', '#b873f8']}
           start={{ x: 0, y: 0 }}
@@ -295,6 +307,8 @@ const Settings = () => {
             <Pressable
               style={({ pressed }) => [styles.deleteButton, { borderColor: Colors.warning, opacity: pressed ? 0.7 : 1 }]}
               onPress={() => setShowDeleteModal(true)}
+              accessibilityRole="button"
+              accessibilityHint={t('a11y.hintDeleteAccount')}
             >
               <Ionicons name="trash-outline" size={16} color={Colors.warning} />
               <Text style={[styles.deleteButtonText, { color: Colors.warning }]}>{t('settings.deleteAccount')}</Text>
@@ -401,9 +415,10 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     padding: 10,
     borderRadius: 10,
-    backgroundColor: 'rgba(239,68,68,0.12)',
+    backgroundColor: 'rgba(220,38,38,0.12)',
   },
   dangerText: { flex: 1, fontSize: 13, opacity: 0.85 },
-  errorText: { color: '#d9534f', marginTop: 10, textAlign: 'center' },
+  inputLabel: { fontSize: 13, fontWeight: '600', marginBottom: 8 },
+  errorText: { color: Colors.warning, marginTop: 10, textAlign: 'center' },
 
 });

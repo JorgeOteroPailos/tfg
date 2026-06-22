@@ -11,6 +11,7 @@ const ThemedInput = ({ style, ...props }: ThemedInputProps) => {
 
     return (
         <TextInput
+            maxFontSizeMultiplier={1.6}
             style={[
                 styles.input,
                 {

@@ -1,10 +1,9 @@
-\newpage
-\section{Manual técnico}
+\chapter{Manual técnico}
 
 Este manual recolle a información necesaria para instalar, executar, probar e modificar
 Telaria. Diríxese a persoas que vaian continuar o desenvolvemento do sistema.
 
-\subsection{Requisitos do entorno}
+\section{Requisitos do entorno}
 
 \begin{itemize}
   \item \textbf{JDK 25} (para o backend; a construción realízase co \textit{wrapper} de Gradle).
@@ -13,7 +12,7 @@ Telaria. Diríxese a persoas que vaian continuar o desenvolvemento do sistema.
   \item \textbf{Git}.
 \end{itemize}
 
-\subsection{Estrutura do repositorio}
+\section{Estrutura do repositorio}
 
 \begin{itemize}
   \item \texttt{backend/} — API REST en Spring Boot (Gradle).
@@ -21,7 +20,7 @@ Telaria. Diríxese a persoas que vaian continuar o desenvolvemento do sistema.
   \item \texttt{memoria/} — esta documentación (LaTeX).
 \end{itemize}
 
-\subsection{Servizos de apoio (Podman)}
+\section{Servizos de apoio (Podman)}
 
 Os servizos auxiliares (PostgreSQL, MinIO e Ollama) defínense en
 \texttt{backend/compose.yaml}. O xeito máis sinxelo de poñelos en marcha, descargar o
@@ -42,7 +41,7 @@ podman compose up -d        # engadir --profile gpu se hai GPU dispoñible
 \noindent Portos por defecto: PostgreSQL \texttt{5432}, MinIO \texttt{9000}/\texttt{9001}
 (API/consola), Ollama \texttt{11434}.
 
-\subsection{Execución do backend}
+\section{Execución do backend}
 
 \begin{lstlisting}[language=bash]
 cd backend
@@ -54,7 +53,7 @@ cd backend
 \texttt{src/main/resources/application.yaml}. A documentación interactiva da API queda
 dispoñible en \texttt{/swagger-ui.html}.
 
-\subsection{Execución do frontend}
+\section{Execución do frontend}
 
 \begin{lstlisting}[language=bash]
 cd frontend
@@ -67,7 +66,7 @@ npm start            # inicia o servidor de desenvolvemento de Expo
 servidor desde o dispositivo. A aplicación pode abrirse en Expo Go ou nun emulador
 (\texttt{npm run android} / \texttt{npm run ios}).
 
-\subsection{Contrato OpenAPI e xeración de código}
+\section{Contrato OpenAPI e xeración de código}
 
 A API especifícase en \texttt{backend/src/main/resources/openapi/}, cun documento
 principal (\texttt{api.yaml}) que referencia ficheiros de rutas e esquemas. A partir del
@@ -85,7 +84,7 @@ cd frontend && npm run generate:types
 ser preciso forzar a rexeneración, xa que a tarefa de Gradle só observa cambios en
 \texttt{api.yaml}.
 
-\subsection{Execución das probas}
+\section{Execución das probas}
 
 As probas de integración (E2E) empregan Testcontainers, que require un \textit{socket}
 compatible con Docker. Con Podman \textit{rootless}, débese indicar a súa ruta:
@@ -101,14 +100,14 @@ export TESTCONTAINERS_RYUK_DISABLED=true
 \texttt{backend/build/reports/jacoco/test/html/index.html}. A análise estática SpotBugs
 está dispoñible mediante a tarefa correspondente de Gradle.
 
-\subsection{Configuración e segredos}
+\section{Configuración e segredos}
 
 A configuración do backend (credenciais da base de datos, contrasinal do \textit{keystore}
 JWT, claves de acceso a MinIO e parámetros das tarefas programadas) reside en
 \texttt{application.yaml}. Para un despregamento en produción recoméndase externalizar
 estes valores mediante variables de entorno e non incluílos no control de versións.
 
-\subsection{Integración continua}
+\section{Integración continua}
 
 O repositorio inclúe fluxos de traballo de GitHub Actions que executan a construción e as
 probas do backend, así como unha análise de seguridade do código (CodeQL).

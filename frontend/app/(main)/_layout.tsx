@@ -27,6 +27,9 @@ export default function MainLayout() {
           headerRight: () => (
             <Pressable
               onPress={() => setOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel={t('a11y.menu')}
+              hitSlop={10}
               style={({ pressed }) => [
                 {
                   width: 36,

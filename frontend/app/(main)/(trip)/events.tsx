@@ -113,11 +113,11 @@ const MiniCal = ({
   return (
     <View>
       <View style={cal.header}>
-        <Pressable onPress={onPrevMonth} hitSlop={12}>
+        <Pressable onPress={onPrevMonth} hitSlop={12} accessibilityRole="button" accessibilityLabel={t('a11y.prevMonth')}>
           <Ionicons name="chevron-back" size={22} color={tint} />
         </Pressable>
         <ThemedText style={cal.title}>{monthNames[month]} {year}</ThemedText>
-        <Pressable onPress={onNextMonth} hitSlop={12}>
+        <Pressable onPress={onNextMonth} hitSlop={12} accessibilityRole="button" accessibilityLabel={t('a11y.nextMonth')}>
           <Ionicons name="chevron-forward" size={22} color={tint} />
         </Pressable>
       </View>
@@ -152,6 +152,7 @@ const MiniCal = ({
 // ── Time picker ────────────────────────────────────────────────────────────────
 type TimePickerProps = { hour: number; minute: number; tint: string; onChange: (h: number, m: number) => void };
 const TimePicker = ({ hour, minute, tint, onChange }: TimePickerProps) => {
+  const { t } = useTranslation();
   const adj = (unit: 'h' | 'm', delta: number) => {
     if (unit === 'h') onChange((hour + delta + 24) % 24, minute);
     else onChange(hour, (minute + delta + 60) % 60);
@@ -160,22 +161,22 @@ const TimePicker = ({ hour, minute, tint, onChange }: TimePickerProps) => {
     <View style={tp.row}>
       {/* Hour */}
       <View style={tp.unit}>
-        <Pressable style={[tp.btn, { borderColor: tint }]} onPress={() => adj('h', 1)}>
+        <Pressable style={[tp.btn, { borderColor: tint }]} onPress={() => adj('h', 1)} accessibilityRole="button" accessibilityLabel={t('a11y.increaseHour')}>
           <Ionicons name="chevron-up" size={16} color={tint} />
         </Pressable>
         <ThemedText style={tp.value}>{String(hour).padStart(2, '0')}</ThemedText>
-        <Pressable style={[tp.btn, { borderColor: tint }]} onPress={() => adj('h', -1)}>
+        <Pressable style={[tp.btn, { borderColor: tint }]} onPress={() => adj('h', -1)} accessibilityRole="button" accessibilityLabel={t('a11y.decreaseHour')}>
           <Ionicons name="chevron-down" size={16} color={tint} />
         </Pressable>
       </View>
       <ThemedText style={tp.colon}>:</ThemedText>
       {/* Minute */}
       <View style={tp.unit}>
-        <Pressable style={[tp.btn, { borderColor: tint }]} onPress={() => adj('m', 5)}>
+        <Pressable style={[tp.btn, { borderColor: tint }]} onPress={() => adj('m', 5)} accessibilityRole="button" accessibilityLabel={t('a11y.increaseMinute')}>
           <Ionicons name="chevron-up" size={16} color={tint} />
         </Pressable>
         <ThemedText style={tp.value}>{String(minute).padStart(2, '0')}</ThemedText>
-        <Pressable style={[tp.btn, { borderColor: tint }]} onPress={() => adj('m', -5)}>
+        <Pressable style={[tp.btn, { borderColor: tint }]} onPress={() => adj('m', -5)} accessibilityRole="button" accessibilityLabel={t('a11y.decreaseMinute')}>
           <Ionicons name="chevron-down" size={16} color={tint} />
         </Pressable>
       </View>
@@ -1526,8 +1527,8 @@ const styles = StyleSheet.create({
   modalButtons: { flexDirection: 'row', gap: 8, marginTop: 12 },
   modalBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
   cancelBtn: { borderWidth: 1, borderColor: '#ccc' },
-  deleteBtn: { backgroundColor: '#d9534f' },
-  errorText: { color: '#d9534f', marginBottom: 8, textAlign: 'center' },
+  deleteBtn: { backgroundColor: Colors.warning },
+  errorText: { color: Colors.warning, marginBottom: 8, textAlign: 'center' },
   confirmText: { textAlign: 'center', fontWeight: '600', marginBottom: 12, marginTop: 4 },
 
   detailName: { fontSize: 18, fontWeight: '700', marginBottom: 16 },

@@ -27,7 +27,7 @@ keystore:
 
 minio:
   endpoint: http://localhost:9000
-  public-endpoint: http://192.168.1.41:9000
+  public-endpoint: http://192.168.1.142:9000
   access-key: admin
   secret-key: password123
   bucket: telaria-document-sharing

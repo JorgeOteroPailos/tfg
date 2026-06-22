@@ -1,27 +1,28 @@
-\newpage
-\section{Probas}
+\chapter{Probas}
+\label{ch:probas}
 
 A verificación da funcionalidade e da corrección global do sistema aborda dúas
 dimensións complementarias: as \textbf{probas automatizadas} do backend, que garanten a
 corrección técnica da lóxica e da API, e a \textbf{validación funcional} de extremo a
 extremo da aplicación, que comproba que o produto se comporta como espera o usuario.
 
-\subsection{Estratexia de probas}
+\section{Estratexia de probas}
 
 A estratexia segue o modelo da pirámide de probas, con tres niveis:
 
 \begin{itemize}
-  \item \textbf{Probas unitarias}: illan a lóxica de negocio de cada servizo, substituíndo
-        as dependencias por dobres de proba (\textit{mocks}).
+  \item \textbf{Probas unitarias}: illan a lóxica de negocio de cada servizo ou módulo,
+        substituíndo as dependencias por dobres de proba (\textit{mocks}). Aplícanse tanto
+        no backend (JUnit~5) como no frontend (Jest).
   \item \textbf{Probas de integración (E2E)}: exercitan a API completa contra unha base de
         datos e un almacén de obxectos reais, levantados en contedores efémeros.
   \item \textbf{Validación de sistema}: comprobación manual dos fluxos de usuario completos
         sobre a aplicación en execución.
 \end{itemize}
 
-\subsection{Probas automatizadas do backend}
+\section{Probas automatizadas do backend}
 
-O backend conta cunha batería de \textbf{367 probas automatizadas} repartidas en 26 clases,
+O backend conta cunha batería de \textbf{410 probas automatizadas} repartidas en 30 clases,
 que se executan co \textit{framework} JUnit~5. A Táboa~\ref{tab:probas} resume a súa
 distribución.
 
@@ -31,12 +32,12 @@ distribución.
     \toprule
     \textbf{Tipo} & \textbf{Clases} & \textbf{Descrición} \\
     \midrule
-    Unitarias de servizos   & 10 & Lóxica de negocio illada con Mockito. \\
-    Integración (E2E)        & 11 & API completa con base de datos e almacén reais (Testcontainers). \\
-    Modelo                   & 3  & Lóxica propia das entidades de dominio. \\
-    Tarefas programadas      & 2  & Comportamento dos \textit{schedulers} de limpeza. \\
+    Unitarias de servizos   & 11 & Lóxica de negocio illada con Mockito. \\
+    Integración (E2E)        & 12 & API completa con base de datos e almacén reais (Testcontainers). \\
+    Modelo                   & 4  & Lóxica propia das entidades de dominio. \\
+    Tarefas programadas      & 3  & Comportamento dos \textit{schedulers} de limpeza. \\
     \midrule
-    \textbf{Total}           & \textbf{26} & \textbf{367 probas} \\
+    \textbf{Total}           & \textbf{30} & \textbf{410 probas} \\
     \bottomrule
   \end{tabularx}
   \caption{Distribución das probas automatizadas do backend.}
@@ -51,8 +52,13 @@ perfil de proba que recrea o esquema da base de datos en cada execución. Deste 
 verifícanse os fluxos completos da API: autenticación, xestión de viaxes e membros, gastos
 e liquidacións, eventos, documentos, chat e asistente de IA.
 
-A cobertura de código mídese con \textbf{JaCoCo}~\cite{jacoco}. A
-Táboa~\ref{tab:cobertura} resume os resultados obtidos na execución completa da batería.
+A cobertura de código mídese con \textbf{JaCoCo}~\cite{jacoco}. As métricas exclúen o
+código xerado automaticamente a partir da especificación OpenAPI (os \textit{DTO} e as
+interfaces \texttt{*Api}), seguindo a práctica habitual de non contabilizar o código que
+non se escribe a man: incluílo só distorsionaría as cifras, xa que os seus métodos
+\texttt{equals}, \texttt{hashCode} e construtores nunca se exercitan. A
+Táboa~\ref{tab:cobertura} resume os resultados obtidos sobre o código propio na execución
+completa da batería.
 
 \begin{table}[H]
   \centering
@@ -60,11 +66,11 @@ Táboa~\ref{tab:cobertura} resume os resultados obtidos na execución completa d
     \toprule
     \textbf{Métrica} & \textbf{Cobertura} & \textbf{} \\
     \midrule
-    Liñas       & 55,8\,\% & \\
-    Instrucións & 48,3\,\% & \\
-    Métodos     & 60,7\,\% & \\
-    Clases      & 85,5\,\% & \\
-    Ramas       & 21,8\,\% & \\
+    Liñas       & 92,6\,\% & \\
+    Instrucións & 91,4\,\% & \\
+    Métodos     & 92,9\,\% & \\
+    Clases      & 96,7\,\% & \\
+    Ramas       & 85,0\,\% & \\
     \bottomrule
   \end{tabularx}
   \caption{Cobertura de código do backend (JaCoCo).}
@@ -72,12 +78,78 @@ Táboa~\ref{tab:cobertura} resume os resultados obtidos na execución completa d
 \end{table}
 
 A cobertura concéntrase na capa de servizos e nos fluxos principais da API, que é onde
-reside a lóxica de negocio. As cifras máis baixas en ramas corresponden, en boa medida, a
-ramas defensivas e de manexo de erros pouco frecuentes. Ademais, a construción e a
-execución das probas intégranse nun fluxo de integración continua (GitHub Actions), e o
-código sométese a análise estática.
+reside a lóxica de negocio, e supera o 90\,\% de liñas. As cifras lixeiramente máis baixas
+en ramas corresponden, en boa medida, a ramas defensivas e de manexo de erros pouco
+frecuentes. Ademais, a construción e a execución das probas intégranse nun fluxo de
+integración continua (GitHub Actions), e o código sométese a análise estática.
 
-\subsection{Validación funcional do sistema}
+\section{Probas automatizadas do frontend}
+
+O frontend conta cunha batería de \textbf{77 probas automatizadas} en 8 suites, executadas
+con \textbf{Jest} mediante o preset oficial de Expo (\texttt{jest-expo}). Para as probas de
+compoñentes e \textit{hooks} utilizouse \texttt{@testing-library/react-native}, que promove
+probas centradas no comportamento observable polo usuario en lugar de detalles de
+implementación internos.
+
+As probas organizáronse segundo dúas orientacións complementarias:
+
+\begin{itemize}
+  \item \textbf{Probas de contrato e lóxica pura}: cubren módulos sen dependencias de React
+        Native, como a clase de erros (\texttt{AppError}), as claves de caché de React Query
+        (\texttt{queryKeys}), as funcións auxiliares de documentos
+        (\texttt{documentCards.helpers}) e as funcións de persistencia de sesión
+        (\texttt{lastTrip}). Son especialmente robustas fronte a cambios de interface: só
+        fallan se muda a lóxica de negocio.
+
+  \item \textbf{Probas de comportamento e interacción}: cubren o \textit{hook} de
+        accesibilidade (\texttt{useReducedMotion}), a función de subida de ficheiros
+        (\texttt{upload}), o compoñente de texto temático (\texttt{ThemedText}) e o control
+        de segmentos (\texttt{SegmentedControl}). Verifican o comportamento observable: que
+        ao premer un segmento se invoca o \textit{callback} co valor correcto, ou que un
+        código de estado HTTP de erro rexeita a promesa.
+\end{itemize}
+
+A cobertura mídese con Jest sobre os \textbf{módulos directamente exercitados} polas
+probas. Por defecto, Jest só contabiliza os ficheiros que se importan durante a execución,
+de xeito que as pantallas da aplicación, os hooks de datos e os contextos de autenticación
+—que non forman parte desta batería— non aparecen na análise, nin sequera con 0\,\%. Polo
+tanto, as cifras da Táboa~\ref{tab:cobertura-frontend} reflicten a calidade da cobertura
+dentro dos módulos elixidos, non a cobertura global do frontend; o resto do código non
+dispón aínda de cobertura automatizada.
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\textwidth}{@{}Xcccc@{}}
+    \toprule
+    \textbf{Módulo} & \textbf{Instrucións} & \textbf{Ramas} & \textbf{Funcións} & \textbf{Liñas} \\
+    \midrule
+    \texttt{lastTrip.ts}              & 100\,\% & 100\,\% & 100\,\% & 100\,\% \\
+    \texttt{upload.ts}                & 100\,\% & 100\,\% & 100\,\% & 100\,\% \\
+    \texttt{useReducedMotion.ts}      & 100\,\% &  50\,\% & 100\,\% & 100\,\% \\
+    \texttt{ThemedText.tsx}           & 100\,\% &  86\,\% & 100\,\% & 100\,\% \\
+    \texttt{documentCards.helpers.ts} &  92\,\% &  80\,\% & 100\,\% &  91\,\% \\
+    \texttt{queryKeys.ts}             &  92\,\% & 100\,\% &  88\,\% &  92\,\% \\
+    \texttt{SegmentedControl.tsx}     &  80\,\% &  41\,\% &  83\,\% &  77\,\% \\
+    \texttt{AppError.ts}              &  22\,\% &  25\,\% &  50\,\% &  22\,\% \\
+    \midrule
+    \textbf{Media}                    &  87\,\% &  64\,\% &  91\,\% &  86\,\% \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Cobertura de código do frontend (Jest) sobre os módulos probados.}
+  \label{tab:cobertura-frontend}
+\end{table}
+
+A cobertura baixa de \texttt{AppError.ts} (22\,\% de instrucións) débese a que o ficheiro
+contén unha función privada non exportada (\texttt{mapHttpStatusToErrorCode}) que as probas
+non poden invocar directamente; a API pública do módulo —a clase e a enumeración— está
+completamente cuberta. As cifras de \texttt{SegmentedControl.tsx} reflicten que o código de
+animación e o manejador de \textit{layout} non se activan no entorno de proba, onde o
+compoñente non realiza medicións reais de anchura. A rama non cuberta de
+\texttt{useReducedMotion.ts} correspóndese co caso de carreira no que o compoñente se
+desmonta xusto antes de que a promesa de \texttt{AccessibilityInfo} resolva, o que resulta
+difícil de reproducir de forma determinista nun test.
+
+\section{Validación funcional do sistema}
 
 Para verificar o comportamento de extremo a extremo executáronse manualmente sobre a
 aplicación os escenarios de uso descritos na Táboa~\ref{tab:escenarios}, que cobren a
@@ -107,15 +179,58 @@ accións do usuario e a comprobación do resultado esperado.
 
 \figcaptura{Evidencia da validación funcional (capturas dos escenarios sobre a aplicación)}{fig:evidencia-funcional}
 
-\subsection{Resultados acadados}
+\section{Avaliación de usabilidade con usuarios reais}
 
-A totalidade das \textbf{367 probas automatizadas pasan correctamente}, e os nove
-escenarios de validación funcional completáronse co resultado esperado, polo que se
-verifica o cumprimento de todos os requisitos funcionais. A cobertura de código do backend
-sitúase arredor do 56\,\% de liñas, concentrada na lóxica de negocio.
+Para complementar a validación técnica cunha perspectiva centrada na experiencia de uso,
+realizouse unha avaliación de usabilidade mediante o \textbf{protocolo de pensar en voz
+alta} (\textit{think-aloud})~\cite{nielsen1994usability}. Nesta técnica, os participantes
+verbalizan os seus pensamentos mentres interactúan libremente co sistema, o que permite ao
+avaliador identificar tanto obstáculos de navegación como erros de comprensión que os
+escenarios de validación estruturados non detectan.
 
-A principal limitación do plan de probas é a ausencia de probas automatizadas no frontend.
-Este risco mitígase por dúas vías: a validación funcional manual descrita anteriormente e a
-barreira de tipos que impón o contrato OpenAPI, que detecta en tempo de compilación as
-incoherencias entre cliente e servidor. A incorporación de probas automatizadas no frontend
-recóllese como liña de mellora nas conclusións.
+As sesións realizáronse de forma moderada con \textbf{15 participantes} en total. Non se
+definiron tarefas pechadas: pedíuselle a cada participante que explorara a aplicación como
+se a fose a usar no seu día a día, interviñendo o avaliador só para solicitar que
+verbalizasen o que estaban a pensar. Anotábanse os problemas observados e, ao rematar a
+sesión, recollíanse as impresións xerais do participante.
+
+Os problemas identificados priorizábanse segundo dous criterios: (1) \textbf{frecuencia},
+cando varios participantes atopaban o mesmo obstáculo; e (2) \textbf{severidade}, cando un
+único participante atopaba un bloqueo evidente que impedía completar un fluxo. Este dobre
+criterio é coherente coa práctica habitual da enxeñaría de usabilidade para distinguir
+incidencias menores de problemas críticos~\cite{nielsen1994usability}. O proceso continuou
+de forma iterativa, aplicando correccións entre sesións, ata alcanzar a
+\textbf{saturación}: o punto no que as sesións deixaron de producir problemas novos
+significativos.
+
+Entre os aspectos corrixidos como resultado desta avaliación destacan:
+
+\begin{itemize}
+  \item Acceso directo aos documentos do día seleccionado desde o calendario, que
+        anteriormente requiría navegar a unha pantalla separada.
+  \item Eliminación do diálogo de confirmación para volver ao menú principal, percibido
+        como un paso innecesario que interrompía o fluxo de navegación.
+  \item Ordenación das viaxes por data de creación, xa que os participantes esperaban
+        atopar a viaxe máis recente en primeiro lugar.
+  \item Incorporación dun mapa interactivo no modal de creación de eventos, para facilitar
+        a selección da localización sen abandonar a pantalla.
+  \item Engadido de categorías aos gastos, que varios participantes botaron en falta para
+        organizar e filtrar as partidas dunha viaxe.
+\end{itemize}
+
+Ao final das sesións, os participantes completaban todos os fluxos principais sen atopar
+obstáculos relevantes e valoraban positivamente a claridade da navegación e a consistencia
+visual da aplicación.
+
+\section{Resultados acadados}
+
+A avaliación de usabilidade con 15 participantes mediante o protocolo de pensar en voz
+alta alcanzou a saturación sen detectar problemas críticos pendentes, confirmando que os
+fluxos principais son navegables e comprensibles para os usuarios obxectivo.
+
+A totalidade das \textbf{487 probas automatizadas pasan correctamente}: 410 do backend
+(JUnit~5) e 77 do frontend (Jest). Os nove escenarios de validación funcional completáronse
+co resultado esperado, polo que se verifica o cumprimento de todos os requisitos funcionais.
+A cobertura do backend supera o 90\,\% de liñas sobre o código propio; no frontend, os
+8 módulos directamente exercitados polas probas acadan de media un 86\,\% de liñas e un
+91\,\% de funcións, aínda que estes valores non reflicten a cobertura global do frontend.

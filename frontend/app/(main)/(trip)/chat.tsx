@@ -165,6 +165,9 @@ const ChatScreen = () => {
             style={[styles.sendBtn, { backgroundColor: Colors.primary, opacity: canSend ? 1 : 0.4 }]}
             onPress={handleSend}
             disabled={!canSend}
+            accessibilityRole="button"
+            accessibilityLabel={t('a11y.send')}
+            hitSlop={10}
           >
             <Ionicons name="send" size={16} color="#fff" />
           </Pressable>

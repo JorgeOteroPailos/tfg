@@ -1,7 +1,6 @@
-\newpage
-\section{Conclusións e Posibles Ampliacións}
+\chapter{Conclusións e Posibles Ampliacións}
 
-\subsection{Grao de cumprimento dos obxectivos}
+\section{Grao de cumprimento dos obxectivos}
 
 O proxecto acadou os obxectivos formulados na introdución. Telaria centraliza nunha única
 aplicación a xestión integral dunha viaxe en grupo, substituíndo o conxunto disperso de
@@ -29,7 +28,7 @@ cumprimento de cada obxectivo.
   \label{tab:obxectivos}
 \end{table}
 
-\subsection{Valoración técnica}
+\section{Valoración técnica}
 
 A adopción dunha arquitectura \textit{API-first} demostrou ser un acerto: ter o contrato
 OpenAPI como fonte de verdade permitiu xerar automaticamente os tipos do cliente e as
@@ -45,7 +44,7 @@ Entre as dificultades atopadas destacan a integración de Testcontainers cun ent
 contedores sen daemon (Podman), a coordinación dos fluxos asíncronos de \textit{streaming}
 e a xestión coherente da subida de ficheiros en varios pasos.
 
-\subsection{Posibles ampliacións}
+\section{Posibles ampliacións}
 
 O sistema deixa aberto un conxunto de liñas de mellora:
 
@@ -62,4 +61,8 @@ O sistema deixa aberto un conxunto de liñas de mellora:
         coordenadas xa almacenadas.
   \item \textbf{Modo sen conexión} con sincronización posterior, para mellorar a
         experiencia en destinos con conectividade limitada.
+  \item \textbf{Accesibilidade}: estender o límite de escala da tipografía a todos os textos da
+        interface, sobre a base do etiquetado para lectores de pantalla, o axuste de contraste
+        WCAG~AA, o respecto do movemento reducido, as áreas de pulsación ampliadas e as pistas
+        de accesibilidade xa implementados (ver a subsección de deseño da interface de usuario).
 \end{itemize}

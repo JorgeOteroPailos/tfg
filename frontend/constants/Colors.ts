@@ -16,15 +16,13 @@ interface ThemeColors {
 interface ColorsType {
   primary: string;
   warning: string;
-  secondary: string;
   dark: ThemeColors;
   light: ThemeColors;
 }
 
 export const Colors: ColorsType = {
-  primary: "#9d44f0",
-  warning: "#ef4444",
-  secondary: "#f59e0b",
+  primary: "#8b3ce0",
+  warning: "#dc2626",
 
   dark: {
     text: "#e8e0fa",
@@ -47,12 +45,12 @@ export const Colors: ColorsType = {
     background: "#f7f3ff",
     navBackground: "#ffffff",
     uiBackground: "#ede3fd",
-    iconColor: "#9472cc",
+    iconColor: "#67509c",
     iconColorFocused: "#14043a",
     tabBackground: "#fefcff",
-    tabIconDefault: "#9472cc",
+    tabIconDefault: "#67509c",
     tint: "#7c3aed",
     border: "#d4c2f9",
-    icon: "#9472cc",
+    icon: "#67509c",
   },
 };

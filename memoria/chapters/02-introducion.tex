@@ -1,17 +1,23 @@
-\newpage
-\section{Introdución}
+\chapter{Introdución}
 
-\subsection{Obxectivos xerais}
+\section{Obxectivos xerais}
 
 O obxectivo principal deste traballo é o deseño e desenvolvemento de \textbf{Telaria},
-unha aplicación móbil colaborativa para a xestión integral de viaxes en grupo. O
-problema que motiva o proxecto é a dispersión habitual das ferramentas empregadas
+unha aplicación móbil colaborativa para a xestión integral de viaxes en grupo. A idea
+de partida é sinxela: ofrecer un \textit{espazo de viaxe} único e compartido no que un
+grupo de persoas poida organizar toda a vida dunha viaxe (antes, durante e despois) sen
+ter que saltar entre media ducia de aplicacións xenéricas non pensadas para ese fin.
+
+O problema que motiva o proxecto é a dispersión habitual das ferramentas empregadas
 durante a planificación e o transcurso dunha viaxe compartida: os gastos xestiónanse
 nun grupo de mensaxería, os eventos en aplicacións de calendario individuais, os
 documentos en servizos de almacenamento xenéricos e a comunicación en plataformas
-non específicas para o contexto da viaxe.
+non específicas para o contexto da viaxe. Esta fragmentación obriga a cada participante
+a manter manualmente sincronizada a información espallada e provoca friccións
+recorrentes: reservas que se perden no historial dun chat, contas que ninguén ten claro
+quen debe a quen, ou planos que só coñece a persoa que os organizou.
 
-Telaria centraliza nun único sistema os seguintes aspectos:
+Fronte a esa dispersión, Telaria centraliza nun único sistema os seguintes aspectos:
 
 \begin{itemize}
   \item Rexistro de gastos compartidos e cálculo automático das liquidacións entre
@@ -25,7 +31,7 @@ Telaria centraliza nun único sistema os seguintes aspectos:
 \end{itemize}
 
 Á marxe destes obxectivos centrais, a aplicación incorpora unha funcionalidade
-complementaria de carácter social —unha rede de amizades entre usuarios— que non
+complementaria de carácter social (unha rede de amizades entre usuarios) que non
 constitúe un módulo principal, senón unha mellora da experiencia de uso. O seu
 propósito é simplificar as invitacións recorrentes entre usuarios habituais e
 reforzar a retención, facilitando que as persoas que proban a aplicación sigan
@@ -35,7 +41,141 @@ Como obxectivos técnicos, o proxecto busca aplicar unha arquitectura
 \textit{API-first} e tecnoloxías multiplataforma modernas, de xeito que a solución
 sexa funcional tanto en iOS como en Android desde unha única base de código.
 
-\subsection{Relación da documentación que conforma a memoria}
+\section{Motivación e contexto}
+
+A organización dunha viaxe en grupo é, na práctica, un problema de coordinación entre
+varias persoas que comparten un mesmo obxectivo pero usan ferramentas distintas e
+illadas entre si. Durante a fase de planificación adóitanse acumular as reservas de
+aloxamento e transporte no correo ou na galería de cada quen, os horarios nun calendario
+persoal e as propostas de actividades nun grupo de mensaxería; xa durante a viaxe,
+súmanse a ese caos os tíckets dos gastos compartidos e as fotos dos documentos
+importantes. Ningunha desas ferramentas foi concibida para o contexto concreto dunha
+viaxe, polo que a información queda repartida e desactualizada.
+
+Esta fragmentación traduce-se en custos reais para o grupo. O máis evidente é o
+económico: ao final da viaxe ninguén sabe con certeza canto puxo cada persoa nin como
+saldar as contas, e a liquidación faise a man, de forma propensa a erros e a
+transferencias innecesarias. A iso engádese a perda de información (un billete enterrado
+nun fío de chat de centos de mensaxes), a dependencia dunha única persoa que «leva» a
+organización e a dificultade de que todos os participantes teñan unha visión completa e
+actualizada do plan.
+
+A utilidade que perseguimos con Telaria é precisamente eliminar ese traballo de
+coordinación manual. Ao reunir gastos, calendario, documentos, comunicación e asistencia
+intelixente nun mesmo espazo compartido por viaxe, cada participante accede sempre á
+mesma información actualizada e o esforzo de mantela sincronizada desaparece. O público
+ao que se dirixe non é o da viaxe corporativa nin o das axencias, senón os grupos
+informais (cuadrillas de amizades, familias ou compañeiros) que viaxan xuntos de cando
+en vez e que hoxe resolven esta coordinación cun conxunto disperso de aplicacións
+xenéricas.
+
+\section{Solucións existentes e diferenciación}
+
+No mercado existen aplicacións que cobren \textit{partes} do problema descrito, pero
+ningunha o aborda de forma integrada para o contexto dunha viaxe en grupo. As
+alternativas máis representativas son as seguintes:
+
+\begin{itemize}
+  \item \textbf{Tricount}~\cite{tricount}: especializada na xestión de gastos
+        compartidos e no cálculo de quen debe a quen. Resolve ben a parte económica, pero
+        non ofrece calendario, almacenamento de documentos, chat de grupo nin asistencia
+        intelixente. Foi, de feito, unha das inspiracións do proxecto: o seu enfoque da
+        liquidación de gastos é o punto de partida que Telaria estende ao resto de
+        necesidades dunha viaxe.
+  \item \textbf{WhatsApp e grupos de mensaxería}~\cite{whatsapp}: cobren a comunicación
+        do grupo, que é onde acaba converxendo o resto da organización por falta dun lugar
+        mellor. Todo o demais (gastos, calendario, documentos) queda como información non
+        estruturada dentro do fío de conversa, sen ningún tratamento específico.
+  \item \textbf{Google Calendar}~\cite{googlecalendar}: resolve a planificación temporal,
+        pero é unha ferramenta de calendario xenérica e centrada no individuo, non un
+        espazo colaborativo organizado por viaxe nin integrado co resto de necesidades.
+  \item \textbf{Wanderlog e TravelPerk}~\cite{wanderlog,travelperk}: son planificadores
+        de viaxe máis completos, pero orientados respectivamente ao descubrimento de
+        itinerarios e á xestión de viaxes corporativas. Teñen un soporte feble da
+        liquidación de gastos compartidos entre iguais e carecen dun asistente de
+        intelixencia artificial integrado.
+\end{itemize}
+
+A diferenza destas opcións, Telaria intégraas todas nun mesmo produto e engade catro
+trazos que a distinguen: \textbf{(1)} un \textit{espazo de viaxe único} que reúne nun
+só lugar gastos, calendario, documentos, chat e asistente; \textbf{(2)} un \textit{modelo
+plenamente colaborativo sen roles}, no que todos os membros teñen as mesmas capacidades e
+ningún depende dun «organizador»; \textbf{(3)} a \textit{liquidación automática con
+minimización de débedas}, que reduce ao mínimo o número de transferencias necesarias; e
+\textbf{(4)} un \textit{asistente de intelixencia artificial integrado por viaxe}, que
+ningunha das alternativas ofrece. A táboa~\ref{tab:comparativa} resume esta comparación.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{@{}lccccc@{}}
+    \toprule
+    \textbf{Funcionalidade} & \textbf{Tricount} & \textbf{WhatsApp} & \textbf{G. Calendar} & \textbf{Wanderlog} & \textbf{Telaria} \\
+    \midrule
+    Gastos e liquidación   & \ding{51} & \ding{55} & \ding{55} & parcial   & \ding{51} \\
+    Calendario / eventos   & \ding{55} & \ding{55} & \ding{51} & \ding{51} & \ding{51} \\
+    Documentos compartidos & \ding{55} & parcial   & \ding{55} & parcial   & \ding{51} \\
+    Chat de grupo          & \ding{55} & \ding{51} & \ding{55} & \ding{55} & \ding{51} \\
+    Asistente de IA        & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{51} \\
+    Modelo colaborativo    & parcial   & parcial   & \ding{55} & \ding{51} & \ding{51} \\
+    \bottomrule
+  \end{tabular}
+  \caption{Comparativa de funcionalidades entre Telaria e as alternativas existentes.}
+  \label{tab:comparativa}
+\end{table}
+
+\section{Descrición do sistema}
+
+Telaria é unha aplicación móbil orientada a grupos de persoas que realizan viaxes
+conxuntas. Calquera usuario pode rexistrarse na plataforma e, a partir de aí, crear
+novas viaxes ou unirse a viaxes existentes mediante invitación, solicitude ou código QR.
+
+Dentro de cada viaxe, todos os membros teñen acceso completo e en igualdade de
+condicións ás funcionalidades da aplicación. Non existe distinción de roles: o sistema
+está deseñado baixo un modelo plenamente colaborativo no que calquera participante pode
+rexistrar gastos, crear eventos, subir documentos, enviar mensaxes ao chat e interactuar
+co asistente de IA. A continuación descríbense, desde o punto de vista do usuario, as
+principais funcionalidades que compoñen este espazo de viaxe.
+
+\textbf{Ciclo de vida da viaxe.} A viaxe é a unidade central arredor da que se organiza
+todo o demais. Un usuario crea unha viaxe e convida a outras persoas, que poden
+incorporarse por invitación directa, solicitando o acceso ou escaneando un código QR;
+calquera membro pode abandonala e o creador xestionar as solicitudes pendentes.
+
+\textbf{Gastos e liquidacións.} Cada membro pode rexistrar os gastos que paga, indicando
+os beneficiarios e unha categoría (aloxamento, transporte, comida, etc.). A partir deses
+rexistros, o módulo calcula automaticamente o balance de cada persoa e propón un conxunto
+de liquidacións aplicando un algoritmo de minimización de débedas, de xeito que o número
+de transferencias necesarias para saldar todos os saldos sexa o mínimo posible. As
+liquidacións xa realizadas conservan-se nun historial.
+
+\textbf{Eventos e calendario.} O grupo constrúe un itinerario común sobre un calendario
+compartido. Cada evento pode ter data, hora, duración e unha localización xeográfica,
+que se pode escoller buscando un enderezo ou seleccionándoo directamente nun mapa
+interactivo con xeocodificación inversa.
+
+\textbf{Documentos compartidos.} A viaxe dispón dun repositorio de documentos relevantes
+(reservas, billetes, fotos, etc.) que calquera membro pode subir, descargar ou eliminar.
+Para os documentos de imaxe xérase de forma asíncrona unha miniatura de previsualización,
+de modo que a listaxe se mostre con axilidade sen descargar os ficheiros orixinais.
+
+\textbf{Chat de grupo.} Cada viaxe inclúe unha sala de conversa propia para a
+coordinación entre os membros, con entrega de mensaxes en tempo real e aviso de mensaxes
+sen ler.
+
+\textbf{Asistente de intelixencia artificial.} Cada viaxe conta cun asistente
+conversacional que axuda na planificación e responde consultas. Mantén un historial de
+conversa independente por viaxe, de modo que o contexto se preserve entre sesións.
+
+\textbf{Rede de amizades e xestión de conta.} De maneira complementaria, a plataforma
+ofrece unha rede de amizades entre usuarios: calquera usuario pode engadir outros como
+amigos e, a partir de aí, convidalos ás súas viaxes de forma máis áxil que mediante o
+identificador ou o código QR. Esta funcionalidade non altera o modelo colaborativo
+descrito, senón que actúa como atallo para os usuarios habituais. Cada usuario xestiona
+ademais o seu propio perfil (nome, correo, avatar e contrasinal) e pode eliminar a súa
+conta, operación que require a confirmación do contrasinal. A aplicación está dispoñible
+en tres idiomas (galego, español e inglés) e ofrece temas de aparencia claro e escuro.
+
+\section{Relación da documentación que conforma a memoria}
 
 \begin{tabularx}{\textwidth}{@{}lX@{}}
   \toprule
@@ -53,35 +193,7 @@ sexa funcional tanto en iOS como en Android desde unha única base de código.
   \bottomrule
 \end{tabularx}
 
-\subsection{Descrición do sistema}
-
-Telaria é unha aplicación móbil orientada a grupos de persoas que realizan viaxes
-conxuntas. Calquera usuario pode rexistrarse na plataforma e, a partir de aí, crear
-novas viaxes ou unirse a viaxes existentes mediante invitación, solicitude ou código QR.
-
-Dentro de cada viaxe, todos os membros teñen acceso completo e en igualdade de
-condicións ás funcionalidades da aplicación. Non existe distinción de roles: o sistema
-está deseñado baixo un modelo plenamente colaborativo no que calquera participante pode
-rexistrar gastos, crear eventos, subir documentos, enviar mensaxes ao chat e interactuar
-co asistente de IA.
-
-O módulo de gastos calcula automaticamente as liquidacións entre membros aplicando un
-algoritmo de minimización de débedas, de xeito que o número de transferencias necesarias
-para saldar todos os saldos sexa o mínimo posible. O módulo de eventos permite asociar
-localizacións xeográficas a cada entrada do calendario. O módulo de documentos delega
-o almacenamento nun servizo de obxectos compatible con S3 e xera de forma asíncrona
-miniaturas de previsualización para os documentos de imaxe. O asistente de IA mantén
-un historial de conversación independente por viaxe, de modo que o contexto se preserve
-entre sesións.
-
-De maneira complementaria, a plataforma ofrece unha rede de amizades entre usuarios:
-calquera usuario pode engadir outros como amigos e, a partir de aí, convidalos ás súas
-viaxes de forma máis áxil que mediante o identificador ou o código QR. Esta
-funcionalidade non altera o modelo colaborativo descrito, senón que actúa como atallo
-para os usuarios habituais. Adicionalmente, cada usuario pode eliminar a súa propia
-conta, operación que require a confirmación do contrasinal.
-
-\subsection{Información adicional de interese}
+\section{Información adicional de interese}
 
 \subsubsection*{Arquitectura API-first con OpenAPI}
 

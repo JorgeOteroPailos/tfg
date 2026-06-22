@@ -35,7 +35,7 @@ const MemberPopup = React.memo(function MemberPopup({ member, isMe, reqStatus, o
       <Pressable style={styles.overlay} onPress={onClose}>
         <Pressable onPress={() => {}} style={[styles.popup, { backgroundColor: theme.tabBackground, borderColor: theme.border }]}>
 
-          <Pressable style={styles.closeBtn} onPress={onClose}>
+          <Pressable style={styles.closeBtn} onPress={onClose} accessibilityRole="button" accessibilityLabel={t('common.close')} hitSlop={10}>
             <Ionicons name="close" size={20} color={theme.icon} />
           </Pressable>
 

@@ -97,6 +97,10 @@ const AddMemberScreen = () => {
           {tripId && (
             <Pressable
               onPress={handleCopyTripId}
+              accessibilityRole="button"
+              accessibilityLabel={t('a11y.copyTripId')}
+              accessibilityHint={t('a11y.hintCopyId')}
+              hitSlop={10}
               style={({ pressed }) => [
                 styles.copyButton,
                 { backgroundColor: copied ? Colors.primary : theme.background, opacity: pressed ? 0.7 : 1 },
@@ -212,6 +216,10 @@ const AddMemberScreen = () => {
                       ]}
                       onPress={() => handleInviteFriend(friend)}
                       disabled={isSending || invitingFriend !== null}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('a11y.inviteFriend')}
+                      accessibilityHint={t('a11y.hintInviteFriend')}
+                      hitSlop={8}
                     >
                       {isSending
                         ? <ActivityIndicator size="small" color="#fff" />
@@ -308,7 +316,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   errorText: {
-    color: '#d9534f',
+    color: Colors.warning,
     textAlign: 'center',
     fontSize: 14,
   },
@@ -393,7 +401,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   friendErrorText: {
-    color: '#d9534f',
+    color: Colors.warning,
     fontSize: 12,
   },
 });

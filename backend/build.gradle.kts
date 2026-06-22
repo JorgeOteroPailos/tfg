@@ -33,6 +33,21 @@ tasks.jacocoTestReport {
         html.required.set(true)
         csv.required.set(false)
     }
+    // Exclude OpenAPI-generated code from coverage: the DTOs (model/dto) and the
+    // `*Api` interfaces + ApiUtil are produced by the generator, not hand-written,
+    // so counting their builders/equals/hashCode and unused default methods only
+    // distorts the metric. Hand-written controllers (…Controller) are kept.
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(
+                    "gal/usc/telariabackend/model/dto/**",
+                    "gal/usc/telariabackend/controllers/*Api.class",
+                    "gal/usc/telariabackend/controllers/ApiUtil.class",
+                )
+            }
+        })
+    )
 }
 
 repositories {

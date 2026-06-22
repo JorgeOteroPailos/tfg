@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[12pt,twoside,a4paper]{book}
 
 % Language setting
 % Replace `english' with e.g. `spanish' to change the document language
@@ -21,14 +21,19 @@
 \usepackage{xcolor}
 \usepackage{float}
 \usepackage{caption}
+\usepackage{subcaption}
 \usepackage{enumitem}
+\usepackage{pifont}
 \usepackage{listings}
 
-\graphicspath{{.}{diagrams/}}
+\graphicspath{{.}{diagrams/}{screenshots/}}
 \definecolor{uscred}{RGB}{128,0,0}
 
 % Índice ata subsubsección (os casos de uso, en \paragraph, non aparecen no índice)
 \setcounter{tocdepth}{3}
+
+% Nome do capítulo de bibliografía (clase book)
+\renewcommand{\bibname}{Bibliografía}
 
 % Marcador de captura de pantalla pendente (manual de usuario).
 % Para inserir a imaxe real, substituír a liña \fbox{...} por:
@@ -37,6 +42,29 @@
   \begin{figure}[H]\centering
   \fbox{\parbox[c][4.5cm][c]{0.5\textwidth}{\centering\itshape [Captura de pantalla pendente]\\[4pt]#1}}%
   \caption{#1}\label{#2}\end{figure}}
+
+% --- Paleta de cores de Telaria (figura de deseño visual, §4.6) ---
+\definecolor{telPrimary}{HTML}{8b3ce0}
+\definecolor{telSecondary}{HTML}{f59e0b}
+\definecolor{telWarning}{HTML}{dc2626}
+\definecolor{telLbg}{HTML}{f7f3ff}
+\definecolor{telLui}{HTML}{ede3fd}
+\definecolor{telLtext}{HTML}{3d1e7a}
+\definecolor{telLtint}{HTML}{7c3aed}
+\definecolor{telLborder}{HTML}{d4c2f9}
+\definecolor{telDbg}{HTML}{07050f}
+\definecolor{telDui}{HTML}{0e0b1f}
+\definecolor{telDtext}{HTML}{e8e0fa}
+\definecolor{telDtint}{HTML}{a855f7}
+\definecolor{telDborder}{HTML}{2b1650}
+\definecolor{swframe}{gray}{0.65}
+% Mostra de cor: caixa coloreada + etiqueta hexadecimal
+\newcommand{\swatch}[2]{%
+  \begin{tabular}{@{}c@{}}
+    \fcolorbox{swframe}{#1}{\rule{22pt}{0pt}\rule{0pt}{16pt}}\\[1pt]
+    {\scriptsize\texttt{#2}}%
+  \end{tabular}%
+}
 
 % Estilo base para fragmentos de código (manuais técnicos)
 \definecolor{codebg}{RGB}{245,245,245}
@@ -57,55 +85,82 @@
 }
 
 
-\title{tfg Jorge Otero Pailos}
+\title{Telaria}
 \author{Jorge Otero Pailos}
 
 \begin{document}
-\begin{titlepage}
-    \centering
 
-    % Cabeceira
-    \includegraphics[width=5cm]{assets/usc/logo_usc.pdf}\\[0.6cm]
-    {\large Universidade de Santiago de Compostela}\\[0.15cm]
-    {\normalsize Escola Técnica Superior de Enxeñaría}\\[0.15cm]
-    {\normalsize Grao en Enxeñaría Informática}
+% ====================== Portada (formato oficial ETSE) ========================
+\pagestyle{empty}
+\begin{center}
+	{\bf\Large UNIVERSIDADE DE SANTIAGO DE COMPOSTELA}
 
-    \vspace{1.2cm}
-    \rule{\textwidth}{1pt}
-    \vspace{0.8cm}
+	\vspace{0.5cm}
+	\includegraphics[width=5cm]{assets/usc/logo_usc.pdf}
 
-    % Título
-    {\fontsize{42}{50}\selectfont\bfseries Telaria}\\[0.6cm]
-    {\large Aplicación móbil colaborativa\\[0.2cm]para a xestión integral de viaxes en grupo}
+	\vspace{0.5cm}
+	{\bf\large ESCOLA TÉCNICA SUPERIOR DE ENXEÑARÍA}
 
-    \vspace{0.8cm}
-    \rule{\textwidth}{1pt}
+	\vspace{3cm}
+	{\bf\LARGE Telaria}
 
-    \vfill
+	\vspace{0.5cm}
+	{\bf\Large Aplicación móbil colaborativa para a xestión integral de viaxes en grupo}
+\end{center}
 
-    % Datos do autor
-    {\small Traballo de Fin de Grao}\\[0.5cm]
-    {\Large\bfseries Jorge Otero Pailos}\\[0.4cm]
-    {\normalsize \today}
+\vspace{2cm}
+\hspace{4cm}\begin{tabular}{l}
+	{\it\Large Autor:} \\
+	{\bf\Large Jorge Otero Pailos} \\
+	~ \\
+	{\it\Large Titores:} \\
+	{\bf\Large Pedro Gamallo Fernández} \\
+	{\bf\Large Víctor José Gallego Fontenla}
+\end{tabular}
 
-\end{titlepage}
+\vspace{2cm}
+\begin{center}
+	{\bf\Large Grao en Enxeñaría Informática}
 
+	\vspace{0.5cm}
+	{\bf\large Xuño 2026}
+
+	\vspace{0.5cm}
+	Traballo de Fin de Grao presentado na Escola Técnica Superior de Enxeñaría da Universidade de Santiago de Compostela para a obtención do Grao en Enxeñaría Informática
+\end{center}
+\cleardoublepage
+
+% ====================== Páxinas previas (numeración romana) ===================
+\pagenumbering{roman}
+\pagestyle{plain}
+\input{chapters/00-agradecementos}
+\cleardoublepage
+\input{chapters/01-resumo}
+\cleardoublepage
 
 \tableofcontents
-\newpage
+\listoffigures
+\listoftables
 
 % ====================== Núcleo da memoria (≤ 50 páxinas) ======================
-\input{chapters/01-resumo}
+\cleardoublepage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\pagestyle{headings}
 \input{chapters/02-introducion}
 \input{chapters/03-requisitos}
 \input{chapters/04-deseno}
 \input{chapters/05-probas}
 \input{chapters/06-conclusions}
-\input{chapters/07-bibliografia}
 
 % ====================== Apéndices (manuais, fóra do límite) ===================
 \appendix
 \input{appendices/A-manual-tecnico}
 \input{appendices/B-manual-usuario}
+\input{appendices/C-licenza}
+
+% ====================== Bibliografía ==========================================
+\cleardoublepage
+\input{chapters/07-bibliografia}
 
 \end{document}

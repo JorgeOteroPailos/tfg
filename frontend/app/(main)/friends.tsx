@@ -89,6 +89,7 @@ interface FriendRowProps {
 }
 
 const FriendRow = React.memo(function FriendRow({ item, tint, border, uiBackground, onRemove, removing }: FriendRowProps) {
+  const { t } = useTranslation();
   const isRemoving = removing === item.id;
   return (
     <View style={[styles.row, { backgroundColor: uiBackground, borderColor: border }]}>
@@ -104,6 +105,10 @@ const FriendRow = React.memo(function FriendRow({ item, tint, border, uiBackgrou
       <Pressable
         onPress={() => onRemove(item)}
         disabled={isRemoving}
+        accessibilityRole="button"
+        accessibilityLabel={t('a11y.removeFriend')}
+        accessibilityHint={t('a11y.hintRemoveFriend')}
+        hitSlop={10}
         style={({ pressed }) => [styles.removeBtn, { opacity: pressed || isRemoving ? 0.5 : 1 }]}
       >
         {isRemoving

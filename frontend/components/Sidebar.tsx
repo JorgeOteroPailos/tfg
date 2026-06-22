@@ -1,4 +1,5 @@
 import { View, Pressable, StyleSheet, Text, Modal } from 'react-native';
+import { useState } from 'react';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSidebar } from '../src/sidebar';
@@ -16,8 +17,10 @@ const Sidebar = () => {
   const { t } = useTranslation();
   const friendRequestsQuery = useFriendRequestsQuery();
   const pendingFriendRequests = friendRequestsQuery.data?.length ?? 0;
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = async () => {
+    setShowLogoutConfirm(false);
     setOpen(false);
     await logout();
     router.replace('/login');
@@ -41,6 +44,7 @@ const Sidebar = () => {
               key={item.label}
               style={({ pressed }) => [styles.sheetRow, { borderBottomColor: theme.border }, pressed && styles.pressed]}
               onPress={() => { setOpen(false); router.push(item.href); }}
+              accessibilityRole="button"
             >
               <View style={[styles.sheetIcon, { backgroundColor: `${theme.tint}18` }]}>
                 <Ionicons name={item.icon} size={20} color={theme.tint} />
@@ -57,15 +61,43 @@ const Sidebar = () => {
 
           <Pressable
             style={({ pressed }) => [styles.sheetRow, { borderBottomWidth: 0 }, pressed && styles.pressed]}
-            onPress={handleLogout}
+            onPress={() => setShowLogoutConfirm(true)}
+            accessibilityRole="button"
+            accessibilityHint={t('a11y.hintLogout')}
           >
-            <View style={[styles.sheetIcon, { backgroundColor: 'rgba(239,68,68,0.14)' }]}>
+            <View style={[styles.sheetIcon, { backgroundColor: 'rgba(220,38,38,0.14)' }]}>
               <Ionicons name="log-out-outline" size={20} color={Colors.warning} />
             </View>
             <Text style={[styles.sheetLabel, { color: Colors.warning }]}>{t('profile.logout')}</Text>
           </Pressable>
         </Pressable>
       </Pressable>
+
+      <Modal visible={showLogoutConfirm} transparent animationType="fade" onRequestClose={() => setShowLogoutConfirm(false)}>
+        <Pressable style={styles.centeredOverlay} onPress={() => setShowLogoutConfirm(false)}>
+          <Pressable onPress={() => {}} style={[styles.confirmBox, { backgroundColor: theme.tabBackground }]}>
+            <View style={styles.confirmIconWrap}>
+              <Ionicons name="log-out-outline" size={28} color={Colors.warning} />
+            </View>
+            <Text style={[styles.confirmTitle, { color: theme.title }]}>{t('profile.logoutConfirmTitle')}</Text>
+            <Text style={[styles.confirmMessage, { color: theme.text }]}>{t('profile.logoutConfirmMessage')}</Text>
+            <View style={styles.confirmButtons}>
+              <Pressable
+                style={({ pressed }) => [styles.confirmBtn, { borderColor: theme.border, borderWidth: 1, opacity: pressed ? 0.7 : 1 }]}
+                onPress={() => setShowLogoutConfirm(false)}
+              >
+                <Text style={{ color: theme.title, fontWeight: '600' }}>{t('common.cancel')}</Text>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.confirmBtn, { backgroundColor: Colors.warning, opacity: pressed ? 0.7 : 1 }]}
+                onPress={handleLogout}
+              >
+                <Text style={{ color: '#fff', fontWeight: '700' }}>{t('profile.logoutConfirm')}</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </Modal>
   );
 };
@@ -122,4 +154,30 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   badgeText: { color: '#fff', fontSize: 11, fontWeight: '800' },
+
+  centeredOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'center',
+  },
+  confirmBox: {
+    marginHorizontal: 32,
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    gap: 10,
+  },
+  confirmIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: 'rgba(220,38,38,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  confirmTitle: { fontSize: 18, fontWeight: '700' },
+  confirmMessage: { fontSize: 14, opacity: 0.7, textAlign: 'center', marginBottom: 4 },
+  confirmButtons: { flexDirection: 'row', gap: 10, marginTop: 6, width: '100%' },
+  confirmBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center' },
 });

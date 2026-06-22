@@ -407,7 +407,7 @@ const BalancesSection = React.memo(function BalancesSection({
                 </View>
               )}
             </View>
-            <View style={[styles.balancePill, { backgroundColor: pos ? 'rgba(76,175,80,0.15)' : 'rgba(239,68,68,0.15)', boxShadow: pos ? '0 0 10px rgba(76,175,80,0.3)' : '0 0 10px rgba(239,68,68,0.3)' }]}>
+            <View style={[styles.balancePill, { backgroundColor: pos ? 'rgba(76,175,80,0.15)' : 'rgba(220,38,38,0.15)', boxShadow: pos ? '0 0 10px rgba(76,175,80,0.3)' : '0 0 10px rgba(220,38,38,0.3)' }]}>
               <Text style={[styles.balanceAmt, { color: pos ? '#4caf50' : Colors.warning }]}>{pos ? '+' : ''}{item.amount.toFixed(2)}€</Text>
             </View>
           </View>

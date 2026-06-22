@@ -103,17 +103,17 @@ const CreateTripScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {isDark && <DotGrid color="rgba(168,85,247,0.055)" />}
-      <AmbientBlobs tint={theme.tint} secondary={Colors.secondary} />
+      <AmbientBlobs tint={theme.tint} />
 
       {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.navBackground, borderBottomColor: theme.border }]}>
-        <Pressable onPress={() => router.back()} style={styles.headerButton}>
+        <Pressable onPress={() => router.back()} style={styles.headerButton} accessibilityRole="button" accessibilityLabel={t('a11y.back')} hitSlop={10}>
           <Ionicons name="chevron-back" size={26} color={theme.title} />
         </Pressable>
         <ThemedText style={[styles.headerTitle, { color: theme.title }]}>
           {t('trip.new')}
         </ThemedText>
-        <Pressable onPress={() => setOpen(true)} style={styles.headerButton}>
+        <Pressable onPress={() => setOpen(true)} style={styles.headerButton} accessibilityRole="button" accessibilityLabel={t('a11y.menu')} hitSlop={10}>
           <ThemedText style={[styles.hamburger, { color: theme.title }]}>☰</ThemedText>
         </Pressable>
       </View>

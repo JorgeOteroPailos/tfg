@@ -16,6 +16,7 @@ const ThemedText = ({ style, title=false, ...props}: ThemedTextProps) => {
 
     return (
         <Text
+            maxFontSizeMultiplier={1.6}
             style={[{ color: textColor, fontWeight: title ? "700" : "600"},
                 style]}
             {...props}
