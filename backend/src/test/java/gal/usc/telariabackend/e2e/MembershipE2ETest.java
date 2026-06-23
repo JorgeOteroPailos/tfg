@@ -618,7 +618,7 @@ class MembershipE2ETest extends BaseE2ETest{
         // create a pending invitation
         invite(ownerToken, inviteeId, tripId);
 
-        // owner (last member) leaves — should cascade-delete join request, invitation, and the trip
+        // owner (last member) leaves -> should cascade-delete join request, invitation, and the trip
         mockMvc.perform(delete("/trips/{tripId}/members/me", tripId)
                         .header("Authorization", "Bearer " + ownerToken))
                 .andExpect(status().isNoContent());

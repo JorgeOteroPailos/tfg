@@ -186,7 +186,7 @@ const ScanQrScreen = () => {
         onBarcodeScanned={scanState === 'scanning' ? handleBarCodeScanned : undefined}
       />
 
-      {/* Dark mask — flex layout creates transparent cutout in the center */}
+      {/* Dark mask: flex layout creates transparent cutout in the center */}
       <View style={[StyleSheet.absoluteFill, styles.maskContainer]} pointerEvents="none">
         <View style={[styles.maskStrip, { flex: 1.2 }]} />
         <View style={styles.maskMiddleRow}>

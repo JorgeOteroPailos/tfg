@@ -52,8 +52,6 @@ public class AiChatService {
     @Value("${ollama.model:llama3.2:3b}")
     private String ollamaModel;
 
-    // Inactivity read timeout for the Ollama stream, aligned with the MVC async timeout
-    // so a stalled connection fails fast instead of pinning a thread + emitter.
     @Value("${spring.mvc.async.request-timeout:120000}")
     private long ollamaReadTimeoutMs;
 
@@ -112,15 +110,12 @@ public class AiChatService {
         });
     }
 
-    // Not @Transactional — transaction is split manually so the DB connection
-    // is NOT held open for the duration of the Ollama HTTP call.
     public void streamResponse(
         UUID tripId,
         UUID userId,
         String userMessage,
         SseEmitter emitter
     ) {
-        // Phase 1: permission check + context fetch (short read-only transaction)
         record Context(String systemPrompt, List<AiChatMessage> history) {}
         Context ctx = txReadOnly.execute(status -> {
             Trip trip = tripRepo
@@ -132,7 +127,6 @@ public class AiChatService {
             return new Context(buildSystemPrompt(trip), history);
         });
 
-        // Phase 2: stream from Ollama (no DB connection held)
         StringBuilder fullResponse = new StringBuilder();
         boolean[] emitterAlive = {true};
         Exception streamError = null;
@@ -144,8 +138,6 @@ public class AiChatService {
                     try {
                         emitter.send(SseEmitter.event().data(chunk));
                     } catch (IOException e) {
-                        // Client disconnected — stop sending but keep accumulating
-                        // so the full response is still persisted in phase 3.
                         emitterAlive[0] = false;
                     }
                 }
@@ -154,11 +146,6 @@ public class AiChatService {
             streamError = e;
         }
 
-        // Phase 3: persist the exchange (short write transaction, always runs — even when
-        // the model call failed, so the user's message survives instead of vanishing from
-        // the transcript on the next history load). The assistant row is given a strictly
-        // later timestamp so OrderByTimestamp is deterministic, and is skipped when the
-        // model returned nothing so empty bubbles don't get stored and fed back as context.
         String assistantResponse = fullResponse.toString();
         txWrite.execute(status -> {
             Trip trip = tripRepo.findById(tripId).orElseThrow();
@@ -172,7 +159,6 @@ public class AiChatService {
             return null;
         });
 
-        // Phase 4: close out the emitter.
         if (streamError != null) {
             if (emitterAlive[0]) emitter.completeWithError(streamError);
         } else if (emitterAlive[0]) {
@@ -183,6 +169,7 @@ public class AiChatService {
     private String buildSystemPrompt(Trip trip) {
         StringBuilder sb = new StringBuilder();
         sb.append("Eres un asistente experto en viajes. ");
+        sb.append("\nResponde en el idioma en que te escriba el usuario.");
         sb.append("Hoy es ").append(LocalDate.now().format(DATE_FMT)).append(".\n");
         sb.append("El usuario está en un viaje llamado \"")
             .append(trip.getName())
@@ -216,11 +203,10 @@ public class AiChatService {
             sb.append(")\n");
         });
 
-        sb.append("\nResponde en el idioma en que te escriba el usuario.");
+        
         return sb.toString();
     }
 
-    // Package-private (not private) so unit tests can stub the streaming call via a spy.
     void callOllamaStream(
         String systemPrompt,
         List<AiChatMessage> history,

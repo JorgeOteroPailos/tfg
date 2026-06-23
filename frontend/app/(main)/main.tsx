@@ -6,6 +6,7 @@ import { useAppTheme } from '../../src/theme';
 import { Colors } from '../../constants/Colors';
 import { useTripsQuery } from '../../src/trips';
 import { useInvitationsQuery } from '../../src/invitations';
+import { useFriendRequestsQuery } from '../../src/friends';
 import { components } from '../../src/generated/types';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -81,44 +82,48 @@ const Main = () => {
 
   const tripsQuery = useTripsQuery();
   const invitationsQuery = useInvitationsQuery();
+  const friendRequestsQuery = useFriendRequestsQuery();
 
   const trips = [...(tripsQuery.data ?? [])].sort((a, b) => {
     if (!a.creationDate) return 1;
     if (!b.creationDate) return -1;
     return new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime();
   });
-  const invitationCount = invitationsQuery.data?.length ?? 0;
+  const notificationCount = (invitationsQuery.data?.length ?? 0) + (friendRequestsQuery.data?.length ?? 0);
 
   useFocusEffect(
     useCallback(() => {
       tripsQuery.refetch();
       invitationsQuery.refetch();
-    }, [tripsQuery.refetch, invitationsQuery.refetch])
+      friendRequestsQuery.refetch();
+    }, [tripsQuery.refetch, invitationsQuery.refetch, friendRequestsQuery.refetch])
   );
 
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <Pressable
-          onPress={() => router.push('/invitations')}
-          accessibilityRole="button"
-          accessibilityLabel={t('nav.invitations')}
-          style={({ pressed }) => [
-            styles.invBtn,
-            { backgroundColor: theme.uiBackground, borderColor: theme.border },
-            pressed && { opacity: 0.6 },
-          ]}
-        >
-          <Ionicons name="mail-outline" size={20} color={theme.icon} />
-          {invitationCount > 0 && (
+        <View style={styles.invBtnOuter}>
+          <Pressable
+            onPress={() => router.push('/invitations')}
+            accessibilityRole="button"
+            accessibilityLabel={t('nav.invitations')}
+            style={({ pressed }) => [
+              styles.invBtn,
+              { backgroundColor: theme.uiBackground, borderColor: theme.border },
+              pressed && { opacity: 0.6 },
+            ]}
+          >
+            <Ionicons name="mail-outline" size={20} color={theme.icon} />
+          </Pressable>
+          {notificationCount > 0 && (
             <View style={[styles.badge, { backgroundColor: Colors.warning }]}>
-              <Text style={styles.badgeText}>{invitationCount}</Text>
+              <Text style={styles.badgeText}>{notificationCount}</Text>
             </View>
           )}
-        </Pressable>
+        </View>
       ),
     });
-  }, [invitationCount, theme, navigation, t]);
+  }, [notificationCount, theme, navigation, t]);
 
   const renderTripItem = useCallback(
     ({ item }: { item: TripSummary }) => <TripCard item={item} />,
@@ -300,6 +305,11 @@ const styles = StyleSheet.create({
   emptyText: { fontSize: 16, fontWeight: '700', letterSpacing: 0.3 },
   emptyHint: { fontSize: 13, fontWeight: '500', opacity: 0.5 },
 
+  invBtnOuter: {
+    marginLeft: 4,
+    paddingTop: 5,
+    paddingRight: 5,
+  },
   invBtn: {
     width: 36,
     height: 36,
@@ -307,12 +317,11 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 4,
   },
   badge: {
     position: 'absolute',
-    top: -4,
-    right: -4,
+    top: 0,
+    right: 0,
     minWidth: 16,
     height: 16,
     borderRadius: 8,

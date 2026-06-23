@@ -52,17 +52,19 @@ O sistema deixa aberto un conxunto de liñas de mellora:
   \item \textbf{Notificacións push} para invitacións, mensaxes novas e recordatorios de eventos.
   \item \textbf{Preparación para produción}: externalizar os segredos de configuración
         (actualmente en ficheiros de configuración), habilitar HTTPS/TLS e facer
-        configurable a dirección do servidor no cliente.
-  \item \textbf{Probas automatizadas no frontend} (por exemplo, con Jest e React Native
-        Testing Library), que complementarían a sólida cobertura do backend.
-  \item \textbf{Migracións de base de datos explícitas} (Flyway ou Liquibase) en lugar da
-        xeración automática de esquema, de cara a un control de versións do esquema en produción.
-  \item \textbf{Visualización de mapas} para a localización dos eventos, aproveitando as
-        coordenadas xa almacenadas.
+        configurable a dirección do servidor no cliente. Empregar servizos de hosting para o backend que permitan escalar a demanda
+        , mellores modelos para o asistente de IA, monitorización de métricas e alertas, etc. O frontend
+            tamén debería ser empaquetado e publicado en \textit{App Store} e \textit{Google Play}.
+  \item \textbf{Engadir as probas do frontend ao pipeline de desenvolvemento}: Debido a limitacións 
+       de tempo e á tardía implementación das probas do frontend polo seu carácter máis propenso a cambios e
+       rediseños, non se puideron integrar estas no pipeline de desenvolvemento.
+   A súa integración permitiría detectar erros de interface e de interacción de usuario antes de que cheguen á produción.
   \item \textbf{Modo sen conexión} con sincronización posterior, para mellorar a
         experiencia en destinos con conectividade limitada.
-  \item \textbf{Accesibilidade}: estender o límite de escala da tipografía a todos os textos da
-        interface, sobre a base do etiquetado para lectores de pantalla, o axuste de contraste
-        WCAG~AA, o respecto do movemento reducido, as áreas de pulsación ampliadas e as pistas
-        de accesibilidade xa implementados (ver a subsección de deseño da interface de usuario).
+  \item \textbf{Accesibilidade}: Mellorar a accesibilidade tendo en conta diversos perfís de
+        usuario con distintas dificultades (engadir un modo para daltónicos, etc.).
+  \item \textbf{Novas funcionalidades}: Engadir novas
+         funcionalidades como por exemplo maiores facilidades pra a xestión dos membros dunha viaxe, autenticación
+         mediante proveedores externos.
+  \item \textbf{Soporte web}: Aínda que a aplicación está pensada para dispositivos móbiles, un cliente web permitiría acceder á información desde calquera navegador.
 \end{itemize}

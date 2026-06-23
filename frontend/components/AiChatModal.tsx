@@ -239,7 +239,7 @@ const AiChatModal = ({ visible, onClose, tripId }: AiChatModalProps) => {
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={[styles.header, { borderBottomColor: theme.border }]}>
           <Ionicons name="sparkles-outline" size={20} color={Colors.primary} />
-          <ThemedText style={styles.headerTitle}>{t('trip.chat')}</ThemedText>
+          <ThemedText style={styles.headerTitle}>{t('trip.aiChat')}</ThemedText>
           <Pressable onPress={handleClose} style={styles.closeButton} hitSlop={8} accessibilityRole="button" accessibilityLabel={t('common.close')}>
             <Ionicons name="close-outline" size={28} color={theme.icon} />
           </Pressable>
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 52,
+    paddingTop: 20,
     paddingBottom: 14,
     borderBottomWidth: 0.5,
     gap: 8,

@@ -134,7 +134,7 @@ public class SharedDocumentService {
 
     /**
      * Produces the downscaled JPEG, uploads it to storage and sets {@code thumbnailObjectKey}
-     * on the entity. Does not persist — the caller is responsible for saving.
+     * on the entity. Does not persist-> the caller is responsible for saving.
      */
     private void generateThumbnail(SharedDocument document) {
         if (!imageService.isSupportedImage(document.getContentType(), document.getFileName())) {

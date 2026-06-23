@@ -38,7 +38,8 @@ sesión mantense aberta entre usos.
 
 Tras iniciar sesión, móstrase a lista de viaxes do usuario. Desde aquí pódese acceder a
 unha viaxe, crear unha nova ou unirse a unha existente, así como abrir o menú lateral para
-acceder a amigos, invitacións, perfil e axustes.
+acceder a amigos, o teu perfil e axustes. Pulsando no sobre da esquina superior esquerda accédese á caixa
+de entrada de invitacións a viaxe e solicitdes de amizade.
 
 \begin{figure}[H]\centering
   \includegraphics[width=0.45\textwidth]{main.jpeg}
@@ -51,7 +52,10 @@ Para crear unha viaxe abonda con indicar o seu nome; opcionalmente pódense conv
 no momento da creación. Para unirse a unha viaxe existente pódese empregar unha invitación
 recibida, enviar unha solicitude de unión ou escanear un código QR.
 
-\figcaptura{Creación de viaxe e unión mediante código QR}{fig:b-crear}
+\begin{figure}[H]\centering
+  \includegraphics[width=0.45\textwidth]{createTrip.jpeg}
+  \caption{Creación dunha nova viaxe}\label{fig:b-crear-viaxe}
+\end{figure}
 
 \section{Xestión de membros}
 
@@ -67,9 +71,12 @@ capacidades.
 \section{Gastos e liquidacións}
 
 No apartado de gastos rexístranse os pagamentos indicando importe, concepto, categoría,
-quen pagou e entre quen se reparte. A aplicación calcula automaticamente os balances (quen
+quen pagou e entre quen se reparte. Na zona superior atópase un menú de pestanas que permite cambiar entre as vistas de gastos e liquidacións.
+ A aplicación calcula automaticamente os balances (quen
 debe a quen) e propón as liquidacións que minimizan o número de transferencias. As débedas
-saldadas rexístranse no histórico de liquidacións.
+saldadas rexístranse no histórico de liquidacións. No caso de que ti debas cartos a alguén, aparecerá enriba desa 
+débeda un botón pra marcar a débeda como saldada, que eliminará a débeda da lista de liquidacións pendentes e
+ engadirá un rexistro no histórico de liquidacións.
 
 \begin{figure}[H]
   \centering
@@ -89,8 +96,11 @@ saldadas rexístranse no histórico de liquidacións.
 
 \section{Eventos e calendario}
 
-O calendario da viaxe permite crear eventos con nome, data e hora de inicio, duración e
-unha localización opcional. Os eventos amósanse organizados por data.
+O calendario da viaxe permite crear eventos con nome (único campo obrigatorio), data e hora de inicio, duración e
+unha localización. Os eventos amósanse organizados por data. Debaixo do calendario, atópase
+unha lista dos eventos programados da vaxe, ordeados por data a partir do día seleccionado. Os eventos
+pasados móstranse ao final cunha cor máis clara e discreta. Se houbese documentos compartidos subidos na data seleccionada no 
+calenario, estes amósanse na parte inferior da pantalla, xunto cos eventos dese día.
 
 \begin{figure}[H]\centering
   \includegraphics[width=0.45\textwidth]{calendar.jpeg}
@@ -100,7 +110,10 @@ unha localización opcional. Os eventos amósanse organizados por data.
 \section{Documentos compartidos}
 
 Os membros poden subir documentos relevantes para a viaxe (reservas, billetes, etc.) e
-consultalos ou eliminalos. Os documentos de imaxe amosan unha miniatura de previsualización.
+consultalos ou eliminalos. As imaxes amosan unha miniatura de previsualización, e os documentos en outros
+formatos un icono ilustrativo. De estar o modo aforro de datos activados, bloquearase a carga de 
+miniaturas. No icono da esquina superior esquerda pódese acceder a un menú cunha serie de filtros (tipo de documento,
+orde ascendente ou descendente de subida, etc).
 
 \begin{figure}[H]\centering
   \includegraphics[width=0.45\textwidth]{sharedDocuments.jpeg}
@@ -109,7 +122,10 @@ consultalos ou eliminalos. Os documentos de imaxe amosan unha miniatura de previ
 
 \section{Chat de grupo}
 
-Cada viaxe dispón dun chat común no que os membros intercambian mensaxes en tempo real.
+Cada viaxe dispón dun chat común no que os membros intercambian mensaxes en tempo real. Trátase só dunha función de comunicación rápida,
+polo que as mensaxes serán eliminadas pasadas 30 días de seren enviadas. A planificación propiamente dita deberá facerse a través do calendario e os eventos,
+gastos e documentos compartidos, 
+ e non no chat.
 
 \begin{figure}[H]\centering
   \includegraphics[width=0.45\textwidth]{groupChat.jpeg}
@@ -119,9 +135,13 @@ Cada viaxe dispón dun chat común no que os membros intercambian mensaxes en te
 \section{Asistente de intelixencia artificial}
 
 Cada viaxe inclúe un asistente conversacional que responde preguntas tendo en conta o
-contexto da viaxe (eventos e gastos). A conversa garda un historial persistente.
+contexto da viaxe (eventos e gastos). A conversa garda un historial persistente durante, de novo,
+ 30 días.
 
-\figcaptura{Asistente de IA da viaxe}{fig:b-ia}
+\begin{figure}[H]\centering
+  \includegraphics[width=0.45\textwidth]{aiChat.jpeg}
+  \caption{Asistente de IA da viaxe}\label{fig:b-ia}
+\end{figure}
 
 \section{Amizades}
 
@@ -129,19 +149,29 @@ A sección de amigos permite enviar e xestionar solicitudes de amizade (por iden
 ou código QR), consultar a lista de amigos e eliminar amizades. Os amigos poden convidarse
 ás viaxes de forma máis áxil.
 
-\figcaptura{Lista de amigos e solicitudes de amizade}{fig:b-amigos}
 
-\section{Invitacións}
+\begin{figure}[H]\centering
+  \includegraphics[width=0.45\textwidth]{friends.jpeg}
+  \caption{Lista de amigos}\label{fig:b-amigos}
+\end{figure}
+
+\section{Caixa de entrada de invitacións a viaxes e solicitudes de amizade}
 
 Na caixa de entrada de invitacións agrúpanse as invitacións a viaxes e as solicitudes de
-amizade recibidas. Desde aquí pódense aceptar ou rexeitar cada unha de forma individual.
+amizade recibidas. Desde aquí pódese aceptar ou rexeitar cada unha de forma individual.
 
-\figcaptura{Caixa de entrada de invitacións}{fig:b-invitacins}
+\begin{figure}[H]\centering
+  \includegraphics[width=0.45\textwidth]{invitations.jpeg}
+  \caption{Caixa de entrada de invitacións a viaxes e solicitudes de amizade}\label{fig:b-invitations}
+\end{figure}
 
 \section{Perfil}
 
-No perfil pódese consultar e actualizar o nome de usuario e o correo electrónico (o cambio
-de correo require o contrasinal), cambiar o contrasinal e establecer un avatar.
+No perfil pódese consultar e actualizar o nome de usuario e o correo electrónico,
+ cambiar o contrasinal e establecer un avatar. O cambio de correo e de contrasinal
+ require introducir o contrasinal actual para confirmar a identidade. 
+ Tamén se pode acceder ao teu identificador de usuario, que se pode copiar ao portapapeis 
+ para compartilo con outros usuarios.
 
 \begin{figure}[H]\centering
   \includegraphics[width=0.45\textwidth]{profile.jpeg}
@@ -151,28 +181,121 @@ de correo require o contrasinal), cambiar o contrasinal e establecer un avatar.
 \section{Axustes}
 
 Na pantalla de axustes configúrase o idioma (galego, castelán ou inglés), o tema (claro ou
-escuro) e o aforro de datos.
+escuro) e o aforro de datos (evita a carga de miniaturas e fotos de perfil).
 
 \begin{figure}[H]\centering
   \includegraphics[width=0.45\textwidth]{settings.jpeg}
   \caption{Pantalla de axustes}\label{fig:b-axustes}
 \end{figure}
 
-\section{Eliminación da conta}
 
-Desde os axustes, o usuario pode eliminar a súa conta. A operación require a confirmación
-do contrasinal e elimina os datos persoais asociados.
+\section{Mensaxes de erro e confirmación}
 
-\figcaptura{Confirmación de eliminación de conta}{fig:b-eliminar}
+A aplicación mostra notificacións contextuais informando do resultado de cada acción.
+As mensaxes de éxito confírman que a operación se completou correctamente;
+as de erro explican o problema e, cando é posible, indican como solucionalo.
+En xeral, as mensaxes de erro son autoexplicativas e non requiren intervención do usuario, pero poden ser útiles para
+identificar problemas de conectividade ou de credenciais.
+A continuación recóllense as máis relevantes agrupadas por sección.
 
-\section{Mensaxes de erro comúns}
-
+\subsection*{Inicio de sesión e rexistro}
 \begin{itemize}
-  \item \textbf{Credenciais incorrectas}: o correo ou o contrasinal non son válidos no
-        inicio de sesión.
-  \item \textbf{Correo xa rexistrado}: existe xa unha conta con ese correo ao rexistrarse.
-  \item \textbf{Acción xa realizada}: por exemplo, o usuario xa é membro da viaxe ou xa foi
-        convidado.
-  \item \textbf{Sen conexión}: a aplicación require conexión á rede; comprobe a
-        conectividade e que o servidor estea accesible.
+  \item \textit{«Correo ou contrasinal incorrectos»}: as credenciais introducidas non
+        coinciden con ningunha conta.
+  \item \textit{«Debes introducir email e contrasinal»}: algún dos campos obrigatorios
+        quedou baleiro antes de tentar iniciar sesión.
+  \item \textit{«Requírense todos os campos»} / \textit{«Os contrasinais non coinciden»}:
+        validacións previas ao rexistro.
+  \item \textit{«Este correo electrónico xa está en uso»}: intento de rexistro cun correo
+        xa asociado a outra conta.
+\end{itemize}
+
+\subsection*{Perfil e conta}
+\begin{itemize}
+  \item \textit{«ID de usuario copiado!»}: confirmación ao copiar o identificador ao
+        portapapeis.
+  \item \textit{«Nome de usuario actualizado»} / \textit{«Email actualizado»} /
+        \textit{«Contrasinal actualizado»}: confirmacións tras gardar cada cambio no perfil.
+  \item \textit{«O contrasinal actual non é correcto»}: erro ao tentar cambiar o
+        contrasinal ou o correo electrónico con credencial incorrecta.
+  \item \textit{«Non se puido actualizar o nome de usuario»} /
+        \textit{«Non se puido actualizar o email»} /
+        \textit{«Non se puido cambiar o contrasinal»} /
+        \textit{«Non se puido actualizar a foto de perfil»}: fallos de comunicación co
+        servidor ao modificar datos do perfil.
+  \item \textit{«O contrasinal non é correcto»}: confirmación de contrasinal errónea ao
+        intentar eliminar a conta.
+  \item \textit{«Non se puido eliminar a conta»}: erro ao procesar a eliminación da conta.
+\end{itemize}
+
+\subsection*{Viaxes e membros}
+\begin{itemize}
+  \item \textit{«¡Invitación enviada!»}: confirmación ao convidar un usuario a unirse á
+        viaxe.
+  \item \textit{«Non se puido enviar a invitación»}: erro ao enviar a invitación (p.\,ex.
+        usuario xa membro ou xa invitado).
+  \item \textit{«¡Solicitude enviada!»}: confirmación ao solicitar unirse a unha viaxe.
+  \item \textit{«O usuario xa está invitado ou xa é membro da viaxe»} /
+        \textit{«Xa es membro ou tes unha solicitude pendente»}: erros de conflito ao
+        escanear un QR cando a acción xa foi realizada.
+  \item \textit{«Non tes permiso para realizar esta acción»}: intento de acción sen os
+        permisos necesarios (por exemplo, se non pertences á viaxe).
+  \item \textit{«A túa sesión expirou, por favor inicia sesión de novo»}: o token de
+        autenticación caducou.
+  \item \textit{«Non se puido procesar a solicitude»}: erro ao aceptar ou rexeitar unha
+        solicitude de unión.
+\end{itemize}
+
+\subsection*{Gastos e liquidacións}
+\begin{itemize}
+  \item \textit{«Por favor completa todos os campos obrigatorios»} /
+        \textit{«Introduce un importe válido maior que 0»}: validacións ao crear un gasto.
+  \item \textit{«Non se puido crear o gasto»} / \textit{«Non se puido eliminar o gasto»}:
+        erros de comunicación co servidor ao xestionar gastos.
+  \item \textit{«Non se puideron cargar os gastos»} /
+        \textit{«Non se puideron cargar os saldos»} /
+        \textit{«Non se puideron cargar os pagos pasados»}: fallos ao recuperar datos.
+  \item \textit{«Non se puido rexistrar o pago»}: erro ao marcar unha débeda como saldada.
+\end{itemize}
+
+\subsection*{Eventos}
+\begin{itemize}
+  \item \textit{«Por favor escolle unha data»}: campo de data obrigatorio baleiro ao crear
+        un evento.
+  \item \textit{«Non se puido crear o evento»} / \textit{«Non se puido eliminar o evento»}:
+        erros ao xestionar eventos.
+  \item \textit{«Non se puideron cargar os eventos»}: fallo ao recuperar a lista de eventos.
+\end{itemize}
+
+\subsection*{Documentos compartidos}
+\begin{itemize}
+  \item \textit{«Erro ao subir o ficheiro»}: fallo durante a subida dun documento.
+  \item \textit{«Non se puido abrir o documento»}: erro ao descargar ou previsualizar un
+        ficheiro.
+  \item \textit{«Non se puido eliminar o documento»}: erro ao borrar un documento da viaxe.
+  \item \textit{«Non se puideron cargar os documentos»}: fallo ao recuperar a listaxe.
+\end{itemize}
+
+\subsection*{Chat e asistente de IA}
+\begin{itemize}
+  \item \textit{«Non se puideron cargar as mensaxes»}: erro ao recuperar o historial do
+        chat de grupo.
+  \item \textit{«Non se puido obter unha resposta. Téntao de novo.»}: fallo do asistente
+        de intelixencia artificial ao xerar unha resposta.
+\end{itemize}
+
+\subsection*{Amizades e invitacións}
+\begin{itemize}
+  \item \textit{«Solicitude enviada!»}: confirmación ao enviar unha solicitude de amizade.
+  \item \textit{«Non se puido enviar a solicitude de amizade»}: erro xenérico ao enviar a
+        solicitude.
+  \item \textit{«Non podes enviarte unha solicitude de amizade a ti mesmo»}: intento de
+        engadirse a un mesmo como amigo.
+  \item \textit{«Xa sodes amigos ou xa hai unha solicitude pendente»}: conflito ao intentar
+        engadir un usuario coa relación xa existente.
+  \item \textit{«Non se puideron cargar os amigos»} /
+        \textit{«Non se puideron cargar as invitacións»}: fallos ao recuperar datos.
+  \item \textit{«Non se puido aceptar a invitación»} /
+        \textit{«Non se puido rexeitar a invitación»}: erros ao responder a invitacións
+        recibidas.
 \end{itemize}

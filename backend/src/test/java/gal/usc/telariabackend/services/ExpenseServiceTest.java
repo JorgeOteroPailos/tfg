@@ -439,7 +439,7 @@ class ExpenseServiceTest {
                 () -> expenseService.getExpense(otherTripId, expenseId, userId));
     }
 
-    // getBalances — settlements
+    // getBalances - settlements
 
     @Test
     void getBalances_WhenSettlementFullyCoversDebt_ShouldReturnZeroBalances() {

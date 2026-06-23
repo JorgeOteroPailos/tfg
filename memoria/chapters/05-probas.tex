@@ -85,13 +85,13 @@ integración continua (GitHub Actions), e o código sométese a análise estáti
 
 \section{Probas automatizadas do frontend}
 
-O frontend conta cunha batería de \textbf{77 probas automatizadas} en 8 suites, executadas
+O frontend conta cunha batería de \textbf{267 probas automatizadas} en 20 suites, executadas
 con \textbf{Jest} mediante o preset oficial de Expo (\texttt{jest-expo}). Para as probas de
 compoñentes e \textit{hooks} utilizouse \texttt{@testing-library/react-native}, que promove
 probas centradas no comportamento observable polo usuario en lugar de detalles de
 implementación internos.
 
-As probas organizáronse segundo dúas orientacións complementarias:
+As probas organizáronse segundo tres orientacións complementarias:
 
 \begin{itemize}
   \item \textbf{Probas de contrato e lóxica pura}: cubren módulos sen dependencias de React
@@ -107,15 +107,35 @@ As probas organizáronse segundo dúas orientacións complementarias:
         de segmentos (\texttt{SegmentedControl}). Verifican o comportamento observable: que
         ao premer un segmento se invoca o \textit{callback} co valor correcto, ou que un
         código de estado HTTP de erro rexeita a promesa.
+
+  \item \textbf{Probas de \textit{hooks} de API e contextos}: cubren os módulos de lóxica
+        de acceso a datos e xestión de estado. As de \texttt{friends.tsx} verifican que cada
+        \textit{hook} invoca o punto de acceso REST correcto e que os erros HTTP se propagan
+        como \texttt{AppError}; tamén comproba que \texttt{useRemoveFriend} e
+        \texttt{useInviteFriendToTrip} invalidan as claves de caché correspondentes. As de
+        \texttt{aiChat.tsx} verifican a construción da URL (incluída a codificación do
+        parámetro \texttt{before}), a entrega de tokens mediante SSE e o mecanismo de
+        cancelación. As de \texttt{dataSaver.tsx} e \texttt{preferences.tsx} comproba que os
+        provedores len o valor almacenado e persisten os cambios, e que os valores
+        descoñecidos se normalizan a un valor por defecto. Os módulos \texttt{expenses.tsx},
+        \texttt{invitations.tsx}, \texttt{events.tsx}, \texttt{trips.tsx},
+        \texttt{documents.tsx} e \texttt{users.tsx} achegan probas para todas as súas
+        funcións exportadas: validación dos parámetros enviados á API, procesamento de
+        respostas (incluíndo erros HTTP e valores nulos), e, nos módulos de documentos e
+        avatares, o fluxo de carga en dúas fases (inicialización, subida externa e
+        confirmación). As de \texttt{groupChat.tsx} cobren o ciclo de mensaxes en tempo real:
+        carga do historial, eventos SSE (incluíndo deduplicación e supresión de mensaxes
+        propias), envío e o contador de non lidos. As de \texttt{auth.tsx} exercitan o ciclo
+        de vida completo da autenticación: restauración de sesión ao arrancar, inicio e peche
+        de sesión, rexistro, renovación automática de token con deduplicación de peticións
+        concorrentes e as funcións auxiliares de actualización do perfil.
 \end{itemize}
 
 A cobertura mídese con Jest sobre os \textbf{módulos directamente exercitados} polas
 probas. Por defecto, Jest só contabiliza os ficheiros que se importan durante a execución,
-de xeito que as pantallas da aplicación, os hooks de datos e os contextos de autenticación
-—que non forman parte desta batería— non aparecen na análise, nin sequera con 0\,\%. Polo
-tanto, as cifras da Táboa~\ref{tab:cobertura-frontend} reflicten a calidade da cobertura
-dentro dos módulos elixidos, non a cobertura global do frontend; o resto do código non
-dispón aínda de cobertura automatizada.
+de xeito que as pantallas da aplicación (que non forman parte desta batería) non aparecen
+na análise. Polo tanto, as cifras da Táboa~\ref{tab:cobertura-frontend} reflicten a
+calidade da cobertura dentro dos módulos elixidos, non a cobertura global do frontend.
 
 \begin{table}[H]
   \centering
@@ -123,16 +143,28 @@ dispón aínda de cobertura automatizada.
     \toprule
     \textbf{Módulo} & \textbf{Instrucións} & \textbf{Ramas} & \textbf{Funcións} & \textbf{Liñas} \\
     \midrule
+    \texttt{events.tsx}               & 100\,\% & 100\,\% & 100\,\% & 100\,\% \\
+    \texttt{friends.tsx}              & 100\,\% & 100\,\% & 100\,\% & 100\,\% \\
     \texttt{lastTrip.ts}              & 100\,\% & 100\,\% & 100\,\% & 100\,\% \\
+    \texttt{preferences.tsx}          & 100\,\% & 100\,\% & 100\,\% & 100\,\% \\
+    \texttt{ThemedText.tsx}           & 100\,\% &  86\,\% & 100\,\% & 100\,\% \\
     \texttt{upload.ts}                & 100\,\% & 100\,\% & 100\,\% & 100\,\% \\
     \texttt{useReducedMotion.ts}      & 100\,\% &  50\,\% & 100\,\% & 100\,\% \\
-    \texttt{ThemedText.tsx}           & 100\,\% &  86\,\% & 100\,\% & 100\,\% \\
+    \texttt{users.tsx}                &  98\,\% &  91\,\% & 100\,\% & 100\,\% \\
+    \texttt{documents.tsx}            &  96\,\% &  88\,\% & 100\,\% & 100\,\% \\
+    \texttt{dataSaver.tsx}            &  94\,\% & 100\,\% &  80\,\% & 100\,\% \\
+    \texttt{expenses.tsx}             &  92\,\% &  92\,\% &  92\,\% &  93\,\% \\
+    \texttt{auth.tsx}                 &  92\,\% &  82\,\% & 100\,\% &  92\,\% \\
     \texttt{documentCards.helpers.ts} &  92\,\% &  80\,\% & 100\,\% &  91\,\% \\
+    \texttt{groupChat.tsx}            &  92\,\% &  73\,\% &  77\,\% &  94\,\% \\
     \texttt{queryKeys.ts}             &  92\,\% & 100\,\% &  88\,\% &  92\,\% \\
+    \texttt{trips.tsx}                &  84\,\% &  83\,\% &  75\,\% &  85\,\% \\
     \texttt{SegmentedControl.tsx}     &  80\,\% &  41\,\% &  83\,\% &  77\,\% \\
+    \texttt{invitations.tsx}          &  76\,\% &  75\,\% &  73\,\% &  77\,\% \\
+    \texttt{aiChat.tsx}               &  45\,\% &  30\,\% &  73\,\% &  44\,\% \\
     \texttt{AppError.ts}              &  22\,\% &  25\,\% &  50\,\% &  22\,\% \\
     \midrule
-    \textbf{Media}                    &  87\,\% &  64\,\% &  91\,\% &  86\,\% \\
+    \textbf{Media}                    &  93\,\% &  80\,\% &  90\,\% &  88\,\% \\
     \bottomrule
   \end{tabularx}
   \caption{Cobertura de código do frontend (Jest) sobre os módulos probados.}
@@ -141,13 +173,29 @@ dispón aínda de cobertura automatizada.
 
 A cobertura baixa de \texttt{AppError.ts} (22\,\% de instrucións) débese a que o ficheiro
 contén unha función privada non exportada (\texttt{mapHttpStatusToErrorCode}) que as probas
-non poden invocar directamente; a API pública do módulo —a clase e a enumeración— está
+non poden invocar directamente; a API pública do módulo (a clase e a enumeración) está
 completamente cuberta. As cifras de \texttt{SegmentedControl.tsx} reflicten que o código de
 animación e o manejador de \textit{layout} non se activan no entorno de proba, onde o
 compoñente non realiza medicións reais de anchura. A rama non cuberta de
 \texttt{useReducedMotion.ts} correspóndese co caso de carreira no que o compoñente se
 desmonta xusto antes de que a promesa de \texttt{AccessibilityInfo} resolva, o que resulta
-difícil de reproducir de forma determinista nun test.
+difícil de reproducir de forma determinista nun test. A cobertura baixa de
+\texttt{aiChat.tsx} (45\,\% de instrucións) débese á clase \texttt{OneShotEventSource}, que
+estende a biblioteca \texttt{react-native-sse}: dado que esta biblioteca está substituída por
+un \textit{mock} nas probas, o código da clase nunca se executa e Jest contabiliza todas as
+súas liñas como non cubertas; os \textit{hooks} exportados do módulo, que é o que se está a
+verificar, están completamente cubertos. A función \texttt{setDataSaver} de
+\texttt{dataSaver.tsx} non está cuberta ao 100\,\% en funcións (80\,\%) porque a variante
+interna de inicialización diferida non é exercitada directamente polas probas. A cobertura
+parcial de \texttt{expenses.tsx}, \texttt{invitations.tsx} e \texttt{trips.tsx} débese a
+\textit{hooks} internos non exportados (\texttt{usePastSettlementsQuery},
+\texttt{useResolveInvitationMutation} e \texttt{useLeaveTripMutation}/\texttt{useTripQuery},
+respectivamente) que non se poden invocar directamente desde as probas. As liñas non
+cubertas de \texttt{auth.tsx} (92\,\% de instrucións) corresponden a ramas defensivas dentro
+das funcións privadas \texttt{loginRequest} e \texttt{registerRequest} e á garda de
+\textit{parsing} do JWT. As de \texttt{groupChat.tsx} (92\,\% de instrucións) corresponden
+ao manejador de erros SSE e algunhas ramas de estado de chat que non se activan nas
+combinacións de proba elixidas.
 
 \section{Validación funcional do sistema}
 
@@ -176,8 +224,6 @@ accións do usuario e a comprobación do resultado esperado.
   \caption{Escenarios de validación funcional e a súa trazabilidade cos requisitos.}
   \label{tab:escenarios}
 \end{table}
-
-\figcaptura{Evidencia da validación funcional (capturas dos escenarios sobre a aplicación)}{fig:evidencia-funcional}
 
 \section{Avaliación de usabilidade con usuarios reais}
 
@@ -228,9 +274,9 @@ A avaliación de usabilidade con 15 participantes mediante o protocolo de pensar
 alta alcanzou a saturación sen detectar problemas críticos pendentes, confirmando que os
 fluxos principais son navegables e comprensibles para os usuarios obxectivo.
 
-A totalidade das \textbf{487 probas automatizadas pasan correctamente}: 410 do backend
-(JUnit~5) e 77 do frontend (Jest). Os nove escenarios de validación funcional completáronse
+A totalidade das \textbf{677 probas automatizadas pasan correctamente}: 410 do backend
+(JUnit~5) e 267 do frontend (Jest). Os nove escenarios de validación funcional completáronse
 co resultado esperado, polo que se verifica o cumprimento de todos os requisitos funcionais.
 A cobertura do backend supera o 90\,\% de liñas sobre o código propio; no frontend, os
-8 módulos directamente exercitados polas probas acadan de media un 86\,\% de liñas e un
-91\,\% de funcións, aínda que estes valores non reflicten a cobertura global do frontend.
+20 módulos directamente exercitados polas probas acadan de media un 88\,\% de liñas e un
+90\,\% de funcións, aínda que estes valores non reflicten a cobertura global do frontend.

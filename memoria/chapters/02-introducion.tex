@@ -139,7 +139,7 @@ principais funcionalidades que compoñen este espazo de viaxe.
 \textbf{Ciclo de vida da viaxe.} A viaxe é a unidade central arredor da que se organiza
 todo o demais. Un usuario crea unha viaxe e convida a outras persoas, que poden
 incorporarse por invitación directa, solicitando o acceso ou escaneando un código QR;
-calquera membro pode abandonala e o creador xestionar as solicitudes pendentes.
+calquera membro pode abandonala e xestionar as solicitudes pendentes.
 
 \textbf{Gastos e liquidacións.} Cada membro pode rexistrar os gastos que paga, indicando
 os beneficiarios e unha categoría (aloxamento, transporte, comida, etc.). A partir deses
@@ -164,7 +164,10 @@ sen ler.
 
 \textbf{Asistente de intelixencia artificial.} Cada viaxe conta cun asistente
 conversacional que axuda na planificación e responde consultas. Mantén un historial de
-conversa independente por viaxe, de modo que o contexto se preserve entre sesións.
+conversa independente por viaxe e por usuario, de modo que o contexto se preserve entre sesións. 
+Por razóns de rendemento no modelo local, o modelo só recibe como contexto as últimas 5 mensaxes do 
+chat (ademáis do contexto da viaxe),
+se ben as demáis quedan almacenadas e dispoñibles para consulta. O historial completo de conversa mantense durante 30 días, tras os cales elimínase automaticamente.
 
 \textbf{Rede de amizades e xestión de conta.} De maneira complementaria, a plataforma
 ofrece unha rede de amizades entre usuarios: calquera usuario pode engadir outros como
@@ -258,3 +261,8 @@ xeración realízase de forma asíncrona (fóra do fluxo de subida e da ruta de 
 mediante unha tarefa programada que procesa periodicamente os documentos aínda sen
 miniatura. Deste xeito a subida e a listaxe de documentos manteñen unha latencia baixa
 e independente do custo de procesamento de imaxe.
+
+Existen tamén tarefas periódicas de limpeza que eliminan documentos cuxa subida fallou e mensaxes 
+de chat (tanto os chat grupais como os do asistente de IA) que superan os 30 días de antigüidade. 
+Estas tarefas evitan o crecemento indefinido da base de datos e do almacenamento de obxectos, 
+mantendo o sistema áxil e eficiente.

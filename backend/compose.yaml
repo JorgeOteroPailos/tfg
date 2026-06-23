@@ -34,6 +34,16 @@ services:
     volumes:
       - ollama_data:/root/.ollama
 
+  ollama-init:
+    image: docker.io/curlimages/curl:latest
+    depends_on:
+      ollama:
+        condition: service_started
+    entrypoint: >
+      sh -c "sleep 3 &&
+             curl -sf http://ollama:11434/api/pull -d '{\"name\":\"qwen2.5:14b\"}'"
+    restart: "no"
+
   ollama-gpu:
     image: docker.io/ollama/ollama
     ports:

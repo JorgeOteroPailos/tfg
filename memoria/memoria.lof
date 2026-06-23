@@ -1,37 +1,35 @@
 \babel@toc {galician}{}\relax 
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Diagrama de casos de uso de Telaria (actor único: Usuario).}}{11}{figure.caption.7}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Diagrama de casos de uso de Telaria (actor único: Usuario).}}{13}{figure.caption.7}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Arquitectura xeral e despregamento de Telaria.}}{18}{figure.caption.8}%
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Compoñentes e capas do backend.}}{19}{figure.caption.9}%
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Modelo de datos (entidades e relacións principais).}}{20}{figure.caption.10}%
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Arquitectura do frontend.}}{22}{figure.caption.12}%
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Mapa de navegación da aplicación.}}{23}{figure.caption.13}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Paleta de cores de Telaria: cores globais e específicas de cada tema.}}{24}{figure.caption.14}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Pantalla representativa da aplicación (calendario compartido da viaxe).}}{25}{figure.caption.15}%
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Comparación dos temas claro e escuro: pantalla de balances da viaxe.}}{27}{figure.caption.16}%
-\contentsline {figure}{\numberline {3.9}{\ignorespaces Secuencia de autenticación e renovación do \textit {access token}.}}{29}{figure.caption.18}%
-\contentsline {figure}{\numberline {3.10}{\ignorespaces Secuencia do chat de grupo mediante \textit {Server-Sent Events}.}}{30}{figure.caption.19}%
-\contentsline {figure}{\numberline {3.11}{\ignorespaces Secuencia de subida de documentos con URL prefirmada.}}{30}{figure.caption.20}%
-\contentsline {figure}{\numberline {3.12}{\ignorespaces Secuencia do asistente de IA con resposta en \textit {streaming}.}}{31}{figure.caption.21}%
-\addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Evidencia da validación funcional (capturas dos escenarios sobre a aplicación)}}{36}{figure.caption.27}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Arquitectura xeral e despregamento de Telaria.}}{22}{figure.caption.8}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Compoñentes e capas do backend.}}{23}{figure.caption.9}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Modelo de datos (entidades e relacións principais).}}{24}{figure.caption.10}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Arquitectura do frontend.}}{26}{figure.caption.12}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Mapa de navegación da aplicación.}}{27}{figure.caption.13}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Paleta de cores de Telaria: cores globais e específicas de cada tema.}}{28}{figure.caption.14}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Pantalla representativa da aplicación (calendario compartido da viaxe).}}{29}{figure.caption.15}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Comparación dos temas claro e escuro: pantalla de balances da viaxe.}}{31}{figure.caption.16}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Secuencia de autenticación e renovación do \textit {access token}.}}{33}{figure.caption.18}%
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Secuencia do chat de grupo mediante \textit {Server-Sent Events}.}}{34}{figure.caption.19}%
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Secuencia de subida de documentos con URL prefirmada.}}{34}{figure.caption.20}%
+\contentsline {figure}{\numberline {3.12}{\ignorespaces Secuencia do asistente de IA con resposta en \textit {streaming}.}}{35}{figure.caption.21}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {B.1}{\ignorespaces Pantallas de rexistro e inicio de sesión}}{46}{figure.caption.29}%
-\contentsline {figure}{\numberline {B.2}{\ignorespaces Pantalla principal, coas viaxes do usuario}}{47}{figure.caption.30}%
-\contentsline {figure}{\numberline {B.3}{\ignorespaces Creación de viaxe e unión mediante código QR}}{48}{figure.caption.31}%
-\contentsline {figure}{\numberline {B.4}{\ignorespaces Membros da viaxe e solicitudes pendentes}}{49}{figure.caption.32}%
-\contentsline {figure}{\numberline {B.5}{\ignorespaces Lista de gastos e liquidacións}}{50}{figure.caption.33}%
-\contentsline {figure}{\numberline {B.6}{\ignorespaces Calendario e creación de eventos}}{51}{figure.caption.34}%
-\contentsline {figure}{\numberline {B.7}{\ignorespaces Listaxe de documentos compartidos}}{52}{figure.caption.35}%
-\contentsline {figure}{\numberline {B.8}{\ignorespaces Chat de grupo da viaxe}}{53}{figure.caption.36}%
-\contentsline {figure}{\numberline {B.9}{\ignorespaces Asistente de IA da viaxe}}{54}{figure.caption.37}%
-\contentsline {figure}{\numberline {B.10}{\ignorespaces Lista de amigos e solicitudes de amizade}}{54}{figure.caption.38}%
-\contentsline {figure}{\numberline {B.11}{\ignorespaces Caixa de entrada de invitacións}}{55}{figure.caption.39}%
-\contentsline {figure}{\numberline {B.12}{\ignorespaces Perfil de usuario}}{56}{figure.caption.40}%
-\contentsline {figure}{\numberline {B.13}{\ignorespaces Pantalla de axustes}}{57}{figure.caption.41}%
-\contentsline {figure}{\numberline {B.14}{\ignorespaces Confirmación de eliminación de conta}}{58}{figure.caption.42}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {B.1}{\ignorespaces Pantallas de rexistro e inicio de sesión}}{50}{figure.caption.28}%
+\contentsline {figure}{\numberline {B.2}{\ignorespaces Pantalla principal, coas viaxes do usuario}}{51}{figure.caption.29}%
+\contentsline {figure}{\numberline {B.3}{\ignorespaces Creación dunha nova viaxe}}{52}{figure.caption.30}%
+\contentsline {figure}{\numberline {B.4}{\ignorespaces Membros da viaxe e solicitudes pendentes}}{53}{figure.caption.31}%
+\contentsline {figure}{\numberline {B.5}{\ignorespaces Lista de gastos e liquidacións}}{54}{figure.caption.32}%
+\contentsline {figure}{\numberline {B.6}{\ignorespaces Calendario e creación de eventos}}{55}{figure.caption.33}%
+\contentsline {figure}{\numberline {B.7}{\ignorespaces Listaxe de documentos compartidos}}{56}{figure.caption.34}%
+\contentsline {figure}{\numberline {B.8}{\ignorespaces Chat de grupo da viaxe}}{57}{figure.caption.35}%
+\contentsline {figure}{\numberline {B.9}{\ignorespaces Asistente de IA da viaxe}}{58}{figure.caption.36}%
+\contentsline {figure}{\numberline {B.10}{\ignorespaces Lista de amigos}}{59}{figure.caption.37}%
+\contentsline {figure}{\numberline {B.11}{\ignorespaces Caixa de entrada de invitacións a viaxes e solicitudes de amizade}}{60}{figure.caption.38}%
+\contentsline {figure}{\numberline {B.12}{\ignorespaces Perfil de usuario}}{61}{figure.caption.39}%
+\contentsline {figure}{\numberline {B.13}{\ignorespaces Pantalla de axustes}}{62}{figure.caption.40}%
 \addvspace {10\p@ }

@@ -92,7 +92,7 @@ const FriendRequestCard = React.memo(function FriendRequestCard({ item, resolvin
   );
 });
 
-// ── Section separator — matches expenses.tsx dateSeparator ───────────────────
+// ── Section separator: matches expenses.tsx dateSeparator ───────────────────
 const SectionSeparator = React.memo(function SectionSeparator({ label, borderColor, textColor }: { label: string; borderColor: string; textColor: string }) {
   return (
     <View style={styles.separator}>

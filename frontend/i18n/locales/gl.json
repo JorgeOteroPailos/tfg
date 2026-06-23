@@ -183,6 +183,7 @@
         "noName": "Sen nome",
         "events": "Eventos",
         "chat": "Chat",
+        "aiChat": "Asistente IA",
         "groupChatPlaceholder": "Escribe unha mensaxe...",
         "unableLoadChat": "Non se puideron cargar as mensaxes",
         "more": "Máis",

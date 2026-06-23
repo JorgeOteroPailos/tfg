@@ -80,7 +80,7 @@ const ChatScreen = () => {
 
     const CUT = 3;
     const groupCornerStyle = (() => {
-      if (!isGrouped && isLastInGroup) return {}; // standalone — keep bubbleMe/bubbleOther defaults
+      if (!isGrouped && isLastInGroup) return {};
       if (isMe) {
         if (!isGrouped)    return { borderBottomRightRadius: CUT };                               // first
         if (!isLastInGroup) return { borderTopRightRadius: CUT, borderBottomRightRadius: CUT };   // middle

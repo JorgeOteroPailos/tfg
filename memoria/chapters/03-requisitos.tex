@@ -114,9 +114,9 @@ renovar o \textit{access token} sen necesidade de volver a autenticarse.
   RF03 & Crear viaxe              & Un usuario autenticado pode crear novas viaxes.                                                                                                                                     & Alta   \\[4pt]
   RF04 & Unirse a viaxe           & Un usuario pode unirse a unha viaxe mediante invitación recibida, solicitude de unión ou código QR.                                                                                 & Alta   \\[4pt]
   RF05 & Xestión de membros       & Calquera membro pode invitar outros usuarios á viaxe e xestionar as solicitudes de unión pendentes.                                                                                 & Alta   \\[4pt]
-  RF06 & Xestión de gastos        & Calquera membro pode rexistrar un gasto (importe, nome, categoría, usuario pagador e conxunto de beneficiarios), consultalo, filtralo por categoría ou nome e eliminalo.            & Alta   \\[4pt]
+  RF06 & Xestión de gastos        & Calquera membro pode rexistrar un gasto (importe, nome, categoría, usuario pagador e conxunto de beneficiarios), ver os gastos da viaxe, ver os detalles dun gasto ou eliminalo.            & Alta   \\[4pt]
   RF07 & Liquidacións             & O sistema calcula automaticamente as liquidacións entre membros, minimizando o número de transferencias necesarias para saldar as débedas; ademais, calquera membro pode rexistrar liquidacións xa realizadas e consultar o histórico de liquidacións da viaxe. & Alta   \\[4pt]
-  RF08 & Xestión de eventos       & Calquera membro pode crear, consultar e eliminar eventos con nome, data e hora de inicio, duración e localización xeográfica (nome, enderezo, coordenadas e URL de mapa).          & Alta  \\[4pt]
+  RF08 & Xestión de eventos       & Calquera membro pode crear, consultar e eliminar eventos con nome, data e hora de inicio, duración e localización xeográfica (nome, enderezo e coordenadas xeográficas).          & Alta  \\[4pt]
   RF09 & Documentos compartidos   & Calquera membro pode subir, consultar e eliminar documentos asociados á viaxe; os documentos de imaxe mostran unha miniatura de previsualización xerada automaticamente.                                                                                                   & Media  \\[4pt]
   RF10 & Chat de grupo            & Os membros dunha viaxe poden enviar e consultar mensaxes de texto no chat común da viaxe.                                                                                           & Media  \\[4pt]
   RF11 & Asistente de IA          & Cada viaxe dispón dun chatbot conversacional con historial persistente entre sesións.                                                                                               & Baixa  \\[4pt]
@@ -190,7 +190,7 @@ continuación detállanse os fluxos principais.
   \item \textbf{Actor:} Usuario (membro da viaxe).
   \item \textbf{Precondicións:} o usuario é membro da viaxe.
   \item \textbf{Fluxo principal:} (1) inicia a subida indicando nome e tipo de contido; (2) o sistema crea o rexistro e devolve unha URL prefirmada; (3) o cliente sobe o ficheiro directamente ao almacén de obxectos; (4) o cliente confirma a subida e o sistema marca o documento como dispoñible, xerando unha miniatura de forma asíncrona se é unha imaxe.
-  \item \textbf{Fluxos alternativos:} se a subida non se confirma, unha tarefa programada elimina o rexistro orfo.
+  \item \textbf{Fluxos alternativos:} se a subida non se confirma, unha tarefa programada verifica a existencia do arquivo no almacenamento e, de existir, a marca como confirmada; en caso contrario, elimina o rexistro orfo.
   \item \textbf{Poscondición:} o documento queda listado e descargable mediante URL prefirmada.
   \item \textbf{Requisitos:} RF09.
 \end{itemize}
@@ -287,7 +287,7 @@ principais entidades persistidas no servidor e os seus atributos.
   \midrule
   \endhead
   Usuario                    & Identificador (UUID), nome de usuario, correo electrónico, contrasinal (hash). \\[4pt]
-  Viaxe                      & Identificador (UUID), nome, conxunto de membros (usuarios). \\[4pt]
+  Viaxe                      & Identificador (UUID), nome, data de creación, conxunto de membros (usuarios). \\[4pt]
   Evento                     & Identificador, nome, data e hora de inicio (con fuso horario), duración en minutos, localización embebida (nome, enderezo, latitude, lonxitude, URL de mapa). \\[4pt]
   Gasto                      & Identificador, importe (decimal), nome, categoría (enumeración), usuario pagador, usuario creador do rexistro, conxunto de beneficiarios, marca temporal. \\[4pt]
   Liquidación                & Identificador, importe (decimal), usuario pagador, usuario receptor, marca temporal. \\[4pt]

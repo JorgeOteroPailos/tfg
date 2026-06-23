@@ -183,6 +183,7 @@
         "noName": "No name",
         "events": "Events",
         "chat": "Chat",
+        "aiChat": "AI Assistant",
         "groupChatPlaceholder": "Write a message...",
         "unableLoadChat": "Unable to load messages",
         "more": "More",

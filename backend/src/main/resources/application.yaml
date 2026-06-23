@@ -44,3 +44,7 @@ scheduling:
   thumbnail-backfill-delay-ms: 1800000 # 30 min
   chat-cleanup-cron: "0 0 2 * * *"
   chat-retention-days: 30
+
+ollama:
+  base-url: http://localhost:11434
+  model: qwen2.5:14b
