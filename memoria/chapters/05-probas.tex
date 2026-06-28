@@ -14,7 +14,7 @@ A estratexia segue o modelo da pirámide de probas, con tres niveis:
   \item \textbf{Probas unitarias}: illan a lóxica de negocio de cada servizo ou módulo,
         substituíndo as dependencias por dobres de proba (\textit{mocks}). Aplícanse tanto
         no backend (JUnit~5) como no frontend (Jest).
-  \item \textbf{Probas de integración (E2E)}: exercitan a API completa contra unha base de
+  \item \textbf{Probas de integración (E2E)}: executan a API completa contra unha base de
         datos e un almacén de obxectos reais, levantados en contedores efémeros.
   \item \textbf{Validación de sistema}: comprobación manual dos fluxos de usuario completos
         sobre a aplicación en execución.
@@ -23,10 +23,12 @@ A estratexia segue o modelo da pirámide de probas, con tres niveis:
 \section{Probas automatizadas do backend}
 
 O backend conta cunha batería de \textbf{410 probas automatizadas} repartidas en 30 clases,
-que se executan co \textit{framework} JUnit~5. A Táboa~\ref{tab:probas} resume a súa
+que se executan co \textit{framework} JUnit~5. O Cadro~\ref{tab:probas} resume a súa
 distribución.
 
 \begin{table}[H]
+  \caption{Distribución das probas automatizadas do backend.}
+  \label{tab:probas}
   \centering
   \begin{tabularx}{\textwidth}{@{}lcX@{}}
     \toprule
@@ -40,8 +42,6 @@ distribución.
     \textbf{Total}           & \textbf{30} & \textbf{410 probas} \\
     \bottomrule
   \end{tabularx}
-  \caption{Distribución das probas automatizadas do backend.}
-  \label{tab:probas}
 \end{table}
 
 As probas de integración empregan \textbf{Testcontainers}~\cite{testcontainers}, que levanta
@@ -56,25 +56,25 @@ A cobertura de código mídese con \textbf{JaCoCo}~\cite{jacoco}. As métricas e
 código xerado automaticamente a partir da especificación OpenAPI (os \textit{DTO} e as
 interfaces \texttt{*Api}), seguindo a práctica habitual de non contabilizar o código que
 non se escribe a man: incluílo só distorsionaría as cifras, xa que os seus métodos
-\texttt{equals}, \texttt{hashCode} e construtores nunca se exercitan. A
-Táboa~\ref{tab:cobertura} resume os resultados obtidos sobre o código propio na execución
+\texttt{equals}, \texttt{hashCode} e construtores nunca se executan. O
+Cadro~\ref{tab:cobertura} resume os resultados obtidos sobre o código propio na execución
 completa da batería.
 
 \begin{table}[H]
-  \centering
-  \begin{tabularx}{\textwidth}{@{}Xcc@{}}
-    \toprule
-    \textbf{Métrica} & \textbf{Cobertura} & \textbf{} \\
-    \midrule
-    Liñas       & 92,6\,\% & \\
-    Instrucións & 91,4\,\% & \\
-    Métodos     & 92,9\,\% & \\
-    Clases      & 96,7\,\% & \\
-    Ramas       & 85,0\,\% & \\
-    \bottomrule
-  \end{tabularx}
   \caption{Cobertura de código do backend (JaCoCo).}
   \label{tab:cobertura}
+  \centering
+  \begin{tabularx}{\textwidth}{@{}Xc@{}}
+    \toprule
+    \textbf{Métrica} & \textbf{Cobertura} \\
+    \midrule
+    Liñas       & 92,6\,\% \\
+    Instrucións & 91,4\,\% \\
+    Métodos     & 92,9\,\% \\
+    Clases      & 96,7\,\% \\
+    Ramas       & 85,0\,\% \\
+    \bottomrule
+  \end{tabularx}
 \end{table}
 
 A cobertura concéntrase na capa de servizos e nos fluxos principais da API, que é onde
@@ -115,7 +115,7 @@ As probas organizáronse segundo tres orientacións complementarias:
         \texttt{useInviteFriendToTrip} invalidan as claves de caché correspondentes. As de
         \texttt{aiChat.tsx} verifican a construción da URL (incluída a codificación do
         parámetro \texttt{before}), a entrega de tokens mediante SSE e o mecanismo de
-        cancelación. As de \texttt{dataSaver.tsx} e \texttt{preferences.tsx} comproba que os
+        cancelación. As de \texttt{dataSaver.tsx} e \texttt{preferences.tsx} comproban que os
         provedores len o valor almacenado e persisten os cambios, e que os valores
         descoñecidos se normalizan a un valor por defecto. Os módulos \texttt{expenses.tsx},
         \texttt{invitations.tsx}, \texttt{events.tsx}, \texttt{trips.tsx},
@@ -123,21 +123,23 @@ As probas organizáronse segundo tres orientacións complementarias:
         funcións exportadas: validación dos parámetros enviados á API, procesamento de
         respostas (incluíndo erros HTTP e valores nulos), e, nos módulos de documentos e
         avatares, o fluxo de carga en dúas fases (inicialización, subida externa e
-        confirmación). As de \texttt{groupChat.tsx} cobren o ciclo de mensaxes en tempo real:
+        confirmación). As de \texttt{groupChat.tsx} cubren o ciclo de mensaxes en tempo real:
         carga do historial, eventos SSE (incluíndo deduplicación e supresión de mensaxes
-        propias), envío e o contador de non lidos. As de \texttt{auth.tsx} exercitan o ciclo
+        propias), envío e o contador de non lidos. As de \texttt{auth.tsx} executan o ciclo
         de vida completo da autenticación: restauración de sesión ao arrancar, inicio e peche
         de sesión, rexistro, renovación automática de token con deduplicación de peticións
         concorrentes e as funcións auxiliares de actualización do perfil.
 \end{itemize}
 
-A cobertura mídese con Jest sobre os \textbf{módulos directamente exercitados} polas
+A cobertura mídese con Jest sobre os \textbf{módulos directamente executados} polas
 probas. Por defecto, Jest só contabiliza os ficheiros que se importan durante a execución,
 de xeito que as pantallas da aplicación (que non forman parte desta batería) non aparecen
-na análise. Polo tanto, as cifras da Táboa~\ref{tab:cobertura-frontend} reflicten a
+na análise. Polo tanto, as cifras do Cadro~\ref{tab:cobertura-frontend} reflicten a
 calidade da cobertura dentro dos módulos elixidos, non a cobertura global do frontend.
 
-\begin{table}[H]
+\begin{table}[htbp]
+  \caption{Cobertura de código do frontend (Jest) sobre os módulos probados.}
+  \label{tab:cobertura-frontend}
   \centering
   \begin{tabularx}{\textwidth}{@{}Xcccc@{}}
     \toprule
@@ -167,15 +169,13 @@ calidade da cobertura dentro dos módulos elixidos, non a cobertura global do fr
     \textbf{Media}                    &  93\,\% &  80\,\% &  90\,\% &  88\,\% \\
     \bottomrule
   \end{tabularx}
-  \caption{Cobertura de código do frontend (Jest) sobre os módulos probados.}
-  \label{tab:cobertura-frontend}
 \end{table}
 
 A cobertura baixa de \texttt{AppError.ts} (22\,\% de instrucións) débese a que o ficheiro
 contén unha función privada non exportada (\texttt{mapHttpStatusToErrorCode}) que as probas
 non poden invocar directamente; a API pública do módulo (a clase e a enumeración) está
 completamente cuberta. As cifras de \texttt{SegmentedControl.tsx} reflicten que o código de
-animación e o manejador de \textit{layout} non se activan no entorno de proba, onde o
+animación e o manexador de \textit{layout} non se activan no entorno de proba, onde o
 compoñente non realiza medicións reais de anchura. A rama non cuberta de
 \texttt{useReducedMotion.ts} correspóndese co caso de carreira no que o compoñente se
 desmonta xusto antes de que a promesa de \texttt{AccessibilityInfo} resolva, o que resulta
@@ -186,46 +186,113 @@ un \textit{mock} nas probas, o código da clase nunca se executa e Jest contabil
 súas liñas como non cubertas; os \textit{hooks} exportados do módulo, que é o que se está a
 verificar, están completamente cubertos. A función \texttt{setDataSaver} de
 \texttt{dataSaver.tsx} non está cuberta ao 100\,\% en funcións (80\,\%) porque a variante
-interna de inicialización diferida non é exercitada directamente polas probas. A cobertura
+interna de inicialización diferida non é executada directamente polas probas. A cobertura
 parcial de \texttt{expenses.tsx}, \texttt{invitations.tsx} e \texttt{trips.tsx} débese a
 \textit{hooks} internos non exportados (\texttt{usePastSettlementsQuery},
 \texttt{useResolveInvitationMutation} e \texttt{useLeaveTripMutation}/\texttt{useTripQuery},
-respectivamente) que non se poden invocar directamente desde as probas. As liñas non
+respectivamente) que non se poden invocar directamente dende as probas. As liñas non
 cubertas de \texttt{auth.tsx} (92\,\% de instrucións) corresponden a ramas defensivas dentro
 das funcións privadas \texttt{loginRequest} e \texttt{registerRequest} e á garda de
 \textit{parsing} do JWT. As de \texttt{groupChat.tsx} (92\,\% de instrucións) corresponden
-ao manejador de erros SSE e algunhas ramas de estado de chat que non se activan nas
+ao manexador de erros SSE e algunhas ramas de estado de chat que non se activan nas
 combinacións de proba elixidas.
 
 \section{Validación funcional do sistema}
 
 Para verificar o comportamento de extremo a extremo executáronse manualmente sobre a
-aplicación os escenarios de uso descritos na Táboa~\ref{tab:escenarios}, que cobren a
+aplicación os escenarios de uso descritos no Cadro~\ref{tab:escenarios}, que cubren a
 totalidade dos requisitos funcionais. Cada escenario comprende a secuencia completa de
 accións do usuario e a comprobación do resultado esperado.
 
 \begin{table}[H]
+  \caption{Escenarios de validación funcional e a súa trazabilidade cos requisitos.}
+  \label{tab:escenarios}
   \centering
   \begin{tabularx}{\textwidth}{@{}llX@{}}
     \toprule
     \textbf{ID} & \textbf{RF} & \textbf{Escenario verificado} \\
     \midrule
     CP01 & RF01, RF02      & Rexistro, inicio e peche de sesión, e renovación de token. \\
-    CP02 & RF03--RF05      & Crear viaxe, convidar e aceptar membros (e por código QR). \\
-    CP03 & RF06, RF07      & Rexistrar gastos, consultar balances e liquidar débedas. \\
-    CP04 & RF08            & Crear, consultar e eliminar eventos do calendario. \\
-    CP05 & RF09            & Subir, previsualizar e eliminar documentos. \\
-    CP06 & RF10            & Enviar e recibir mensaxes no chat de grupo en tempo real. \\
-    CP07 & RF11            & Conversar co asistente de IA e recuperar o historial. \\
-    CP08 & RF12, RF13      & Xestionar amizades e convidar amigos a unha viaxe. \\
-    CP09 & RF14, RF15      & Editar o perfil e eliminar a conta con confirmación. \\
+    CP02 & RF06--RF08      & Crear viaxe, convidar e aceptar membros (e por código QR). \\
+    CP03 & RF10, RF11      & Rexistrar gastos, consultar balances e liquidar débedas. \\
+    CP04 & RF12            & Crear, consultar e eliminar eventos do calendario. \\
+    CP05 & RF13            & Subir, previsualizar e eliminar documentos. \\
+    CP06 & RF14            & Enviar e recibir mensaxes no chat de grupo en tempo real. \\
+    CP07 & RF15            & Conversar co asistente de IA e recuperar o historial. \\
+    CP08 & RF16, RF17      & Xestionar amizades e convidar amigos a unha viaxe. \\
+    CP09 & RF03, RF04      & Editar o perfil e eliminar a conta con confirmación. \\
     \bottomrule
   \end{tabularx}
-  \caption{Escenarios de validación funcional e a súa trazabilidade cos requisitos.}
-  \label{tab:escenarios}
+\end{table}
+
+\section{Análise heurística}
+
+Co obxectivo de identificar posibles problemas de usabilidade dende unha perspectiva
+experta, a interface de Telaria avaliouse segundo as \textbf{dez heurísticas de
+usabilidade de Nielsen}~\cite{nielsen1994usability}. Esta avaliación complementa as
+probas de pensamento en voz alta con usuarios reais descritas na
+Sección~\ref{sec:usabilidade}. O Cadro~\ref{tab:heuristicas} resume como o deseño aborda
+cada heurística.
+
+\begin{table}[H]
+  \caption{Avaliación heurística da interface de Telaria segundo as dez heurísticas de Nielsen.}
+  \label{tab:heuristicas}
+  \centering
+  \begin{tabularx}{\textwidth}{@{}lX@{}}
+    \toprule
+    \textbf{Heurística} & \textbf{Aplicación en Telaria} \\
+    \midrule
+    Visibilidade do estado do sistema &
+      Indicadores de carga nas chamadas á API, progresión visual na subida de
+      documentos, actualizacións en tempo real do chat e do asistente de IA
+      (\textit{streaming}) e \textit{badges} de notificación na barra de pestanas. \\
+    \addlinespace
+    Correspondencia co mundo real &
+      Terminoloxía de viaxes familiar (gastos, membros, eventos, calendario),
+      categorías de gasto naturais e mapa interactivo para seleccionar localizacións. \\
+    \addlinespace
+    Control e liberdade do usuario &
+      Navegación cara atrás en todos os niveis, posibilidade de abandonar unha viaxe
+      e de eliminar a conta, e cancelación de calquera modal sen consecuencias. \\
+    \addlinespace
+    Consistencia e estándares &
+      Compoñentes con tema reutilizables (\texttt{ThemedText}, \texttt{ThemedButton},
+      \texttt{ThemedInput}), paleta e tipoloxía uniformes e patróns de navegación
+      estándar para plataformas móbiles (barra de pestanas, \textit{bottom sheet}). \\
+    \addlinespace
+    Prevención de erros &
+      Validación de formularios antes do envío, diálogos de confirmación para
+      operacións destrutivas (eliminar conta, saír da viaxe) e tipado estrito de
+      extremo a extremo a través do contrato OpenAPI. \\
+    \addlinespace
+    Recoñecemento antes que recordo &
+      Barra de pestanas sempre visible, historial de mensaxes e de gastos accesible
+      en todo momento e información contextual da viaxe activa presente en cada
+      pantalla. \\
+    \addlinespace
+    Flexibilidade e eficiencia &
+      Unión a viaxes por código QR, convites directos a amigos e acceso inmediato
+      aos documentos do día seleccionado no calendario. \\
+    \addlinespace
+    Deseño estético e minimalista &
+      Estética limpa, ausencia de información superflua en
+      pantalla e textura de fondo sutil que non distrae do contido principal. \\
+    \addlinespace
+    Axuda para recuperarse de erros &
+      Mensaxes de erro claras nas operacións fallidas, formato \textit{Problem
+      Details} (RFC~7807)~\cite{rfc7807} nas respostas de erro da API e
+      retroalimentación visual ante fallos de rede. \\
+    \addlinespace
+    Axuda e documentación &
+      Asistente de IA integrado que coñece o contexto da viaxe activa (eventos,
+      gastos e historial de chat) e pode responder consultas do usuario en
+      linguaxe natural. \\
+    \bottomrule
+  \end{tabularx}
 \end{table}
 
 \section{Avaliación de usabilidade con usuarios reais}
+\label{sec:usabilidade}
 
 Para complementar a validación técnica cunha perspectiva centrada na experiencia de uso,
 realizouse unha avaliación de usabilidade mediante o \textbf{protocolo de pensar en voz
@@ -236,7 +303,7 @@ escenarios de validación estruturados non detectan.
 
 As sesións realizáronse de forma moderada con \textbf{15 participantes} en total. Non se
 definiron tarefas pechadas: pedíuselle a cada participante que explorara a aplicación como
-se a fose a usar no seu día a día, interviñendo o avaliador só para solicitar que
+se a fose a usar no seu día a día, intervindo o avaliador só para solicitar que
 verbalizasen o que estaban a pensar. Anotábanse os problemas observados e, ao rematar a
 sesión, recollíanse as impresións xerais do participante.
 
@@ -252,7 +319,7 @@ significativos.
 Entre os aspectos corrixidos como resultado desta avaliación destacan:
 
 \begin{itemize}
-  \item Acceso directo aos documentos do día seleccionado desde o calendario, que
+  \item Acceso directo aos documentos do día seleccionado dende o calendario, que
         anteriormente requiría navegar a unha pantalla separada.
   \item Eliminación do diálogo de confirmación para volver ao menú principal, percibido
         como un paso innecesario que interrompía o fluxo de navegación.
@@ -261,7 +328,7 @@ Entre os aspectos corrixidos como resultado desta avaliación destacan:
   \item Incorporación dun mapa interactivo no modal de creación de eventos, para facilitar
         a selección da localización sen abandonar a pantalla.
   \item Engadido de categorías aos gastos, que varios participantes botaron en falta para
-        organizar e filtrar as partidas dunha viaxe.
+        organizar e filtrar os pagos dunha viaxe.
 \end{itemize}
 
 Ao final das sesións, os participantes completaban todos os fluxos principais sen atopar
@@ -278,5 +345,5 @@ A totalidade das \textbf{677 probas automatizadas pasan correctamente}: 410 do b
 (JUnit~5) e 267 do frontend (Jest). Os nove escenarios de validación funcional completáronse
 co resultado esperado, polo que se verifica o cumprimento de todos os requisitos funcionais.
 A cobertura do backend supera o 90\,\% de liñas sobre o código propio; no frontend, os
-20 módulos directamente exercitados polas probas acadan de media un 88\,\% de liñas e un
+20 módulos directamente executados polas probas acadan de media un 88\,\% de liñas e un
 90\,\% de funcións, aínda que estes valores non reflicten a cobertura global do frontend.

@@ -1102,6 +1102,18 @@ const CalendarTab = React.memo(function CalendarTab({
     if (collapsed && e.nativeEvent.contentOffset.y < -40) setCollapsed(false);
   }, [collapsed, setCollapsed]);
 
+  // Selected day always appears first; remaining upcoming then remaining past follow.
+  const orderedSections = useMemo(() => {
+    const sections: { key: string; isPast: boolean }[] = [];
+    const inUpcoming = upcomingDays.includes(selectedKey);
+    const inPast = pastDays.includes(selectedKey);
+    if (inUpcoming) sections.push({ key: selectedKey, isPast: false });
+    else if (inPast) sections.push({ key: selectedKey, isPast: true });
+    for (const k of upcomingDays) if (k !== selectedKey) sections.push({ key: k, isPast: false });
+    for (const k of pastDays) if (k !== selectedKey) sections.push({ key: k, isPast: true });
+    return sections;
+  }, [upcomingDays, pastDays, selectedKey]);
+
   return (
     <ScrollView
       contentContainerStyle={{ paddingBottom: 100 }}
@@ -1138,11 +1150,11 @@ const CalendarTab = React.memo(function CalendarTab({
       <View style={styles.agenda}>
         {isLoading ? (
           <ActivityIndicator size="small" color={theme.tint} style={{ marginTop: 12 }} />
-        ) : upcomingDays.length === 0 && pastDays.length === 0 ? (
+        ) : orderedSections.length === 0 ? (
           <ThemedText style={styles.emptyText}>{t('trip.noEvents')}</ThemedText>
         ) : (
           <>
-            {upcomingDays.map(k => (
+            {orderedSections.map(({ key: k, isPast }) => (
               <View key={k}>
                 <View style={[styles.agendaDayHeader, k === selectedKey && { borderLeftColor: theme.tint, borderLeftWidth: 3 }]}>
                   <ThemedText style={[styles.agendaDayText, k === selectedKey && { color: theme.tint }]}>
@@ -1151,24 +1163,7 @@ const CalendarTab = React.memo(function CalendarTab({
                 </View>
                 <View style={{ gap: 8 }}>
                   {(eventsByDay[k] ?? []).map(ev => (
-                    <EventCard key={ev.id} ev={ev} theme={theme} formatTime={formatTime} formatDateTime={formatDateTime} formatDuration={formatDuration} onPress={onEventPress} />
-                  ))}
-                </View>
-                {k === selectedKey && (
-                  <SelectedDayDocuments docs={selectedDayDocs} dateLabel={selectedDayLabel} theme={theme} onOpenDoc={onOpenDoc} />
-                )}
-              </View>
-            ))}
-            {pastDays.map(k => (
-              <View key={k}>
-                <View style={[styles.agendaDayHeader, k === selectedKey && { borderLeftColor: theme.tint, borderLeftWidth: 3 }]}>
-                  <ThemedText style={[styles.agendaDayText, k === selectedKey && { color: theme.tint }]}>
-                    {formatSectionDate(k)}
-                  </ThemedText>
-                </View>
-                <View style={{ gap: 8 }}>
-                  {(eventsByDay[k] ?? []).map(ev => (
-                    <EventCard key={ev.id} ev={ev} isPast theme={theme} formatTime={formatTime} formatDateTime={formatDateTime} formatDuration={formatDuration} onPress={onEventPress} />
+                    <EventCard key={ev.id} ev={ev} isPast={isPast} theme={theme} formatTime={formatTime} formatDateTime={formatDateTime} formatDuration={formatDuration} onPress={onEventPress} />
                   ))}
                 </View>
                 {k === selectedKey && (

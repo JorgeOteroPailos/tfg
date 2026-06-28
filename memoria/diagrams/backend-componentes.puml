@@ -27,9 +27,10 @@ cloud "Servizos externos" as ext {
   component "MinIO (S3)" as minio
 }
 
-ctrls --> svcs
-svcs --> repos
+ctrls --> L2
+svcs --> L3
 repos --> model
-svcs ..> ext
-X .right.> ctrls
+svcs .down.> ext
+L3 -[hidden]down-> ext
+cross .right.> L1
 @enduml

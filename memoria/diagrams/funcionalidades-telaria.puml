@@ -1,0 +1,32 @@
+@startmindmap funcionalidades-telaria
+skinparam shadowing false
+<style>
+mindmapDiagram {
+  rootNode {
+    BackgroundColor #2E6DA4
+    FontColor white
+    FontSize 16
+    FontStyle bold
+    BorderColor #1A4A7A
+    RoundCorner 12
+  }
+  node {
+    BackgroundColor #EAF2FB
+    BorderColor #2E6DA4
+    FontColor #1A1A1A
+    FontSize 12
+    RoundCorner 8
+  }
+}
+</style>
+
+* Telaria
+** Chat de\ngrupo
+** Asistente\nde IA
+** Rede de\namizades
+left side
+** Ciclo de vida\nda viaxe
+** Gastos e\nliquidacións
+** Eventos e\ncalendario
+** Documentos\ncompartidos
+@endmindmap

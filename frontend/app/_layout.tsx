@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -22,6 +22,14 @@ const RootNavigator = () => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   const theme = Colors[themeName] ?? Colors.light;
+
+  const wasAuthenticated = useRef(false);
+  useEffect(() => {
+    if (wasAuthenticated.current && !isAuthenticated) {
+      queryClient.clear();
+    }
+    wasAuthenticated.current = isAuthenticated;
+  }, [isAuthenticated]);
 
   useEffect(() => {
     applySavedLanguage();

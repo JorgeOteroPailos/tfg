@@ -1,11 +1,10 @@
 \babel@toc {galician}{}\relax 
 \contentsline {chapter}{\numberline {1}Introdución}{1}{chapter.1}%
-\contentsline {section}{\numberline {1.1}Obxectivos xerais}{1}{section.1.1}%
-\contentsline {section}{\numberline {1.2}Motivación e contexto}{2}{section.1.2}%
-\contentsline {section}{\numberline {1.3}Solucións existentes e diferenciación}{2}{section.1.3}%
-\contentsline {section}{\numberline {1.4}Descrición do sistema}{3}{section.1.4}%
-\contentsline {section}{\numberline {1.5}Relación da documentación que conforma a memoria}{5}{section.1.5}%
-\contentsline {section}{\numberline {1.6}Información adicional de interese}{5}{section.1.6}%
+\contentsline {section}{\numberline {1.1}Motivación e contexto}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Solucións existentes e diferenciación}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Obxectivos e descrición do sistema}{3}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Relación da documentación que conforma a memoria}{5}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Información adicional de interese}{5}{section.1.5}%
 \contentsline {chapter}{\numberline {2}Especificación de Requisitos}{9}{chapter.2}%
 \contentsline {section}{\numberline {2.1}Descrición xeral}{9}{section.2.1}%
 \contentsline {subsection}{\numberline {2.1.1}Perspectiva do produto}{9}{subsection.2.1.1}%
@@ -28,37 +27,37 @@
 \contentsline {subsection}{\numberline {2.5.5}Mantibilidade}{16}{subsection.2.5.5}%
 \contentsline {subsection}{\numberline {2.5.6}Portabilidade e despregamento}{16}{subsection.2.5.6}%
 \contentsline {subsection}{\numberline {2.5.7}Interoperabilidade}{16}{subsection.2.5.7}%
-\contentsline {subsection}{\numberline {2.5.8}Fiabilidade}{16}{subsection.2.5.8}%
+\contentsline {subsection}{\numberline {2.5.8}Fiabilidade}{17}{subsection.2.5.8}%
 \contentsline {section}{\numberline {2.6}Información que o sistema debe almacenar}{17}{section.2.6}%
-\contentsline {subsection}{\numberline {2.6.1}Almacenamento de ficheiros (MinIO)}{17}{subsection.2.6.1}%
+\contentsline {subsection}{\numberline {2.6.1}Almacenamento de ficheiros (MinIO)}{18}{subsection.2.6.1}%
 \contentsline {subsection}{\numberline {2.6.2}Información almacenada no dispositivo (frontend)}{18}{subsection.2.6.2}%
 \contentsline {chapter}{\numberline {3}Deseño}{21}{chapter.3}%
 \contentsline {section}{\numberline {3.1}Arquitectura xeral do sistema}{21}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Arquitectura do backend}{22}{section.3.2}%
-\contentsline {section}{\numberline {3.3}Modelo de datos}{24}{section.3.3}%
-\contentsline {section}{\numberline {3.4}Deseño da API REST}{25}{section.3.4}%
-\contentsline {section}{\numberline {3.5}Arquitectura do frontend}{26}{section.3.5}%
-\contentsline {section}{\numberline {3.6}Deseño da interface de usuario}{27}{section.3.6}%
-\contentsline {subsection}{\numberline {3.6.1}Linguaxe visual e temas}{27}{subsection.3.6.1}%
-\contentsline {subsection}{\numberline {3.6.2}Compoñentes e patróns de interface}{28}{subsection.3.6.2}%
-\contentsline {subsection}{\numberline {3.6.3}Animacións e retroalimentación visual}{29}{subsection.3.6.3}%
-\contentsline {subsection}{\numberline {3.6.4}Accesibilidade}{29}{subsection.3.6.4}%
-\contentsline {subsection}{\numberline {3.6.5}Análise heurística}{31}{subsection.3.6.5}%
-\contentsline {section}{\numberline {3.7}Fluxos de comunicación entre compoñentes}{33}{section.3.7}%
-\contentsline {subsection}{\numberline {3.7.1}Autenticación e renovación de tokens}{33}{subsection.3.7.1}%
-\contentsline {subsection}{\numberline {3.7.2}Chat de grupo en tempo real (SSE)}{33}{subsection.3.7.2}%
-\contentsline {subsection}{\numberline {3.7.3}Subida de documentos con URL prefirmada}{34}{subsection.3.7.3}%
-\contentsline {subsection}{\numberline {3.7.4}Asistente de IA en \textit {streaming}}{34}{subsection.3.7.4}%
-\contentsline {section}{\numberline {3.8}Seguridade}{35}{section.3.8}%
-\contentsline {section}{\numberline {3.9}Integración con servizos externos}{36}{section.3.9}%
-\contentsline {section}{\numberline {3.10}Equipamento hardware e software}{36}{section.3.10}%
-\contentsline {chapter}{\numberline {4}Probas}{37}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Estratexia de probas}{37}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Probas automatizadas do backend}{37}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Probas automatizadas do frontend}{38}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Validación funcional do sistema}{41}{section.4.4}%
-\contentsline {section}{\numberline {4.5}Avaliación de usabilidade con usuarios reais}{41}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Resultados acadados}{42}{section.4.6}%
+\contentsline {section}{\numberline {3.2}Arquitectura do backend}{21}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Modelo de datos}{23}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Deseño da API REST}{24}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Arquitectura do frontend}{25}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Deseño da interface de usuario}{26}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Linguaxe visual e temas}{26}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}Compoñentes e patróns de interface}{27}{subsection.3.6.2}%
+\contentsline {subsection}{\numberline {3.6.3}Animacións e retroalimentación visual}{27}{subsection.3.6.3}%
+\contentsline {subsection}{\numberline {3.6.4}Accesibilidade}{27}{subsection.3.6.4}%
+\contentsline {section}{\numberline {3.7}Fluxos de comunicación entre compoñentes}{29}{section.3.7}%
+\contentsline {subsection}{\numberline {3.7.1}Autenticación e renovación de tokens}{29}{subsection.3.7.1}%
+\contentsline {subsection}{\numberline {3.7.2}Chat de grupo en tempo real (SSE)}{31}{subsection.3.7.2}%
+\contentsline {subsection}{\numberline {3.7.3}Subida de documentos con URL prefirmada}{32}{subsection.3.7.3}%
+\contentsline {subsection}{\numberline {3.7.4}Asistente de IA en \textit {streaming}}{32}{subsection.3.7.4}%
+\contentsline {section}{\numberline {3.8}Seguridade}{33}{section.3.8}%
+\contentsline {section}{\numberline {3.9}Integración con servizos externos}{34}{section.3.9}%
+\contentsline {section}{\numberline {3.10}Equipamento hardware e software}{34}{section.3.10}%
+\contentsline {chapter}{\numberline {4}Probas}{35}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Estratexia de probas}{35}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Probas automatizadas do backend}{35}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Probas automatizadas do frontend}{36}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Validación funcional do sistema}{39}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Análise heurística}{39}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Avaliación de usabilidade con usuarios reais}{41}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Resultados acadados}{41}{section.4.7}%
 \contentsline {chapter}{\numberline {5}Conclusións e Posibles Ampliacións}{43}{chapter.5}%
 \contentsline {section}{\numberline {5.1}Grao de cumprimento dos obxectivos}{43}{section.5.1}%
 \contentsline {section}{\numberline {5.2}Valoración técnica}{44}{section.5.2}%

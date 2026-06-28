@@ -1,45 +1,10 @@
 \chapter{Introdución}
 
-\section{Obxectivos xerais}
-
 O obxectivo principal deste traballo é o deseño e desenvolvemento de \textbf{Telaria},
 unha aplicación móbil colaborativa para a xestión integral de viaxes en grupo. A idea
 de partida é sinxela: ofrecer un \textit{espazo de viaxe} único e compartido no que un
-grupo de persoas poida organizar toda a vida dunha viaxe (antes, durante e despois) sen
-ter que saltar entre media ducia de aplicacións xenéricas non pensadas para ese fin.
-
-O problema que motiva o proxecto é a dispersión habitual das ferramentas empregadas
-durante a planificación e o transcurso dunha viaxe compartida: os gastos xestiónanse
-nun grupo de mensaxería, os eventos en aplicacións de calendario individuais, os
-documentos en servizos de almacenamento xenéricos e a comunicación en plataformas
-non específicas para o contexto da viaxe. Esta fragmentación obriga a cada participante
-a manter manualmente sincronizada a información espallada e provoca friccións
-recorrentes: reservas que se perden no historial dun chat, contas que ninguén ten claro
-quen debe a quen, ou planos que só coñece a persoa que os organizou.
-
-Fronte a esa dispersión, Telaria centraliza nun único sistema os seguintes aspectos:
-
-\begin{itemize}
-  \item Rexistro de gastos compartidos e cálculo automático das liquidacións entre
-        membros, minimizando o número de transferencias necesarias para saldar as débedas.
-  \item Planificación de eventos mediante un calendario común, con soporte para
-        localización xeográfica.
-  \item Almacenamento de documentos relevantes para a viaxe (reservas, billetes, etc.).
-  \item Chat de grupo entre os membros da viaxe.
-  \item Asistente conversacional baseado en intelixencia artificial, con historial
-        persistente por viaxe.
-\end{itemize}
-
-Á marxe destes obxectivos centrais, a aplicación incorpora unha funcionalidade
-complementaria de carácter social (unha rede de amizades entre usuarios) que non
-constitúe un módulo principal, senón unha mellora da experiencia de uso. O seu
-propósito é simplificar as invitacións recorrentes entre usuarios habituais e
-reforzar a retención, facilitando que as persoas que proban a aplicación sigan
-empregándoa en sucesivas viaxes.
-
-Como obxectivos técnicos, o proxecto busca aplicar unha arquitectura
-\textit{API-first} e tecnoloxías multiplataforma modernas, de xeito que a solución
-sexa funcional tanto en iOS como en Android desde unha única base de código.
+grupo de persoas poida organizar todo o ciclo de vida dunha viaxe (antes, durante e despois) sen
+ter que interactuar con media ducia de aplicacións xenéricas non pensadas para ese fin.
 
 \section{Motivación e contexto}
 
@@ -47,20 +12,20 @@ A organización dunha viaxe en grupo é, na práctica, un problema de coordinaci
 varias persoas que comparten un mesmo obxectivo pero usan ferramentas distintas e
 illadas entre si. Durante a fase de planificación adóitanse acumular as reservas de
 aloxamento e transporte no correo ou na galería de cada quen, os horarios nun calendario
-persoal e as propostas de actividades nun grupo de mensaxería; xa durante a viaxe,
+persoal e as propostas de actividades nun grupo de mensaxería. Xa durante a viaxe,
 súmanse a ese caos os tíckets dos gastos compartidos e as fotos dos documentos
 importantes. Ningunha desas ferramentas foi concibida para o contexto concreto dunha
 viaxe, polo que a información queda repartida e desactualizada.
 
-Esta fragmentación traduce-se en custos reais para o grupo. O máis evidente é o
+Esta fragmentación tradúcese en custos reais para o grupo. O máis evidente é o
 económico: ao final da viaxe ninguén sabe con certeza canto puxo cada persoa nin como
 saldar as contas, e a liquidación faise a man, de forma propensa a erros e a
-transferencias innecesarias. A iso engádese a perda de información (un billete enterrado
-nun fío de chat de centos de mensaxes), a dependencia dunha única persoa que «leva» a
+transferencias innecesarias. A iso engádese a perda de información (un billete esquecido
+no fondo dun fío de chat de centos de mensaxes), a dependencia dunha única persoa que «leva» a
 organización e a dificultade de que todos os participantes teñan unha visión completa e
 actualizada do plan.
 
-A utilidade que perseguimos con Telaria é precisamente eliminar ese traballo de
+A utilidade que persigue Telaria é precisamente eliminar ese traballo de
 coordinación manual. Ao reunir gastos, calendario, documentos, comunicación e asistencia
 intelixente nun mesmo espazo compartido por viaxe, cada participante accede sempre á
 mesma información actualizada e o esforzo de mantela sincronizada desaparece. O público
@@ -96,17 +61,20 @@ alternativas máis representativas son as seguintes:
         intelixencia artificial integrado.
 \end{itemize}
 
-A diferenza destas opcións, Telaria intégraas todas nun mesmo produto e engade catro
+A diferenza destas opcións, Telaria integra todas as funcionalidades relevantes nun mesmo produto e engade catro
 trazos que a distinguen: \textbf{(1)} un \textit{espazo de viaxe único} que reúne nun
 só lugar gastos, calendario, documentos, chat e asistente; \textbf{(2)} un \textit{modelo
 plenamente colaborativo sen roles}, no que todos os membros teñen as mesmas capacidades e
 ningún depende dun «organizador»; \textbf{(3)} a \textit{liquidación automática con
 minimización de débedas}, que reduce ao mínimo o número de transferencias necesarias; e
 \textbf{(4)} un \textit{asistente de intelixencia artificial integrado por viaxe}, que
-ningunha das alternativas ofrece. A táboa~\ref{tab:comparativa} resume esta comparación.
+ningunha das alternativas ofrece. O cadro~\ref{tab:comparativa} resume esta comparación.
 
 \begin{table}[H]
+  \caption{Comparativa de funcionalidades entre Telaria e as alternativas existentes.}
+  \label{tab:comparativa}
   \centering
+  \resizebox{\textwidth}{!}{%
   \begin{tabular}{@{}lccccc@{}}
     \toprule
     \textbf{Funcionalidade} & \textbf{Tricount} & \textbf{WhatsApp} & \textbf{G. Calendar} & \textbf{Wanderlog} & \textbf{Telaria} \\
@@ -118,12 +86,10 @@ ningunha das alternativas ofrece. A táboa~\ref{tab:comparativa} resume esta com
     Asistente de IA        & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{51} \\
     Modelo colaborativo    & parcial   & parcial   & \ding{55} & \ding{51} & \ding{51} \\
     \bottomrule
-  \end{tabular}
-  \caption{Comparativa de funcionalidades entre Telaria e as alternativas existentes.}
-  \label{tab:comparativa}
+  \end{tabular}}
 \end{table}
 
-\section{Descrición do sistema}
+\section{Obxectivos e descrición do sistema}
 
 Telaria é unha aplicación móbil orientada a grupos de persoas que realizan viaxes
 conxuntas. Calquera usuario pode rexistrarse na plataforma e, a partir de aí, crear
@@ -133,8 +99,16 @@ Dentro de cada viaxe, todos os membros teñen acceso completo e en igualdade de
 condicións ás funcionalidades da aplicación. Non existe distinción de roles: o sistema
 está deseñado baixo un modelo plenamente colaborativo no que calquera participante pode
 rexistrar gastos, crear eventos, subir documentos, enviar mensaxes ao chat e interactuar
-co asistente de IA. A continuación descríbense, desde o punto de vista do usuario, as
-principais funcionalidades que compoñen este espazo de viaxe.
+co asistente de IA. A continuación descríbense, dende o punto de vista do usuario, as
+principais funcionalidades que compoñen este espazo de viaxe, cuxa implementación consiste no
+principal obxectivo deste traballo.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.80\textwidth]{diagrams/funcionalidades-telaria.pdf}
+  \caption{Funcionalidades principais de Telaria.}
+  \label{fig:funcionalidades-telaria}
+\end{figure}
 
 \textbf{Ciclo de vida da viaxe.} A viaxe é a unidade central arredor da que se organiza
 todo o demais. Un usuario crea unha viaxe e convida a outras persoas, que poden
@@ -146,12 +120,12 @@ os beneficiarios e unha categoría (aloxamento, transporte, comida, etc.). A par
 rexistros, o módulo calcula automaticamente o balance de cada persoa e propón un conxunto
 de liquidacións aplicando un algoritmo de minimización de débedas, de xeito que o número
 de transferencias necesarias para saldar todos os saldos sexa o mínimo posible. As
-liquidacións xa realizadas conservan-se nun historial.
+liquidacións xa realizadas consérvanse nun historial.
 
 \textbf{Eventos e calendario.} O grupo constrúe un itinerario común sobre un calendario
 compartido. Cada evento pode ter data, hora, duración e unha localización xeográfica,
 que se pode escoller buscando un enderezo ou seleccionándoo directamente nun mapa
-interactivo con xeocodificación inversa.
+interactivo.
 
 \textbf{Documentos compartidos.} A viaxe dispón dun repositorio de documentos relevantes
 (reservas, billetes, fotos, etc.) que calquera membro pode subir, descargar ou eliminar.
@@ -160,14 +134,15 @@ de modo que a listaxe se mostre con axilidade sen descargar os ficheiros orixina
 
 \textbf{Chat de grupo.} Cada viaxe inclúe unha sala de conversa propia para a
 coordinación entre os membros, con entrega de mensaxes en tempo real e aviso de mensaxes
-sen ler.
+sen ler. As mensaxes son almacenadas no servidor durante 30 días
+e despois son eliminadas automaticamente.
 
 \textbf{Asistente de intelixencia artificial.} Cada viaxe conta cun asistente
 conversacional que axuda na planificación e responde consultas. Mantén un historial de
-conversa independente por viaxe e por usuario, de modo que o contexto se preserve entre sesións. 
-Por razóns de rendemento no modelo local, o modelo só recibe como contexto as últimas 5 mensaxes do 
-chat (ademáis do contexto da viaxe),
-se ben as demáis quedan almacenadas e dispoñibles para consulta. O historial completo de conversa mantense durante 30 días, tras os cales elimínase automaticamente.
+conversa independente por viaxe e por usuario, de modo que o contexto se preserve entre sesións.
+Por razóns de rendemento do modelo local, este só recibe como contexto as últimas 5 mensaxes do
+chat (ademais do contexto da viaxe),
+se ben as demais mensaxes quedan almacenadas e dispoñibles para consulta. O historial completo de conversa mantense durante 30 días.
 
 \textbf{Rede de amizades e xestión de conta.} De maneira complementaria, a plataforma
 ofrece unha rede de amizades entre usuarios: calquera usuario pode engadir outros como
@@ -176,7 +151,11 @@ identificador ou o código QR. Esta funcionalidade non altera o modelo colaborat
 descrito, senón que actúa como atallo para os usuarios habituais. Cada usuario xestiona
 ademais o seu propio perfil (nome, correo, avatar e contrasinal) e pode eliminar a súa
 conta, operación que require a confirmación do contrasinal. A aplicación está dispoñible
-en tres idiomas (galego, español e inglés) e ofrece temas de aparencia claro e escuro.
+en tres idiomas (galego, español e inglés) e ofrece temas de aparencia clara e escura.
+
+Como obxectivos técnicos, o proxecto busca aplicar unha arquitectura
+\textit{API-first} e tecnoloxías multiplataforma modernas, de xeito que a solución
+sexa funcional tanto en iOS como en Android dende unha única base de código.
 
 \section{Relación da documentación que conforma a memoria}
 
@@ -224,7 +203,7 @@ documentación OpenAPI.
 O mecanismo de autenticación utiliza dous tokens complementarios. O \textit{access
 token}, de tipo JWT~\cite{rfc7519} e vida curta, inclúese en cada petición á API e permite verificar
 a identidade do usuario sen consultar a base de datos. O \textit{refresh token}, de
-tipo opaco e almacenado no servidor, empregase exclusivamente para renovar o
+tipo opaco e almacenado no servidor, emprégase exclusivamente para renovar o
 \textit{access token} e pode invalidarse explicitamente no peche de sesión.
 
 \subsubsection*{Ollama}
@@ -238,7 +217,10 @@ predecibles independentes de terceiros.
 
 Os documentos compartidos almacénanse nun servizo compatible co protocolo S3~\cite{minio}. A
 elección deste estándar garante a independencia do provedor e aproveita o soporte
-nativo dispoñible en Spring Boot mediante o AWS SDK.
+nativo dispoñible en Spring Boot mediante o AWS SDK. Para os documentos de imaxe,
+ao confirmar a subida lánzase de forma asíncrona mediante un virtual thread,
+fóra da ruta de petición, a xeración dunha miniatura de previsualización reducida
+que se mostrará na listaxe sen necesidade de descargar o ficheiro orixinal.
 
 \subsubsection*{PostgreSQL}
 
@@ -253,16 +235,12 @@ A diferenza de Docker, Podman opera sen un daemon centralizado e permite executa
 contedores sen privilexios de superusuario (\textit{rootless}), o que mellora o
 illamento de seguridade do entorno de execución.
 
-\subsubsection*{Tarefas periódicas de limpeza}
+\subsubsection*{Tarefas periódicas}
 
-Para os documentos de imaxe xérase unha miniatura de previsualización reducida que se
-mostra na listaxe de documentos sen necesidade de descargar o ficheiro orixinal. Esta
-xeración realízase de forma asíncrona (fóra do fluxo de subida e da ruta de petición)
-mediante unha tarefa programada que procesa periodicamente os documentos aínda sen
-miniatura. Deste xeito a subida e a listaxe de documentos manteñen unha latencia baixa
-e independente do custo de procesamento de imaxe.
-
-Existen tamén tarefas periódicas de limpeza que eliminan documentos cuxa subida fallou e mensaxes 
-de chat (tanto os chat grupais como os do asistente de IA) que superan os 30 días de antigüidade. 
-Estas tarefas evitan o crecemento indefinido da base de datos e do almacenamento de obxectos, 
-mantendo o sistema áxil e eficiente.
+Existen tres tarefas programadas de mantemento. A primeira percorre periodicamente os
+documentos de imaxe sen miniatura como rede de seguridade para os casos nos que a
+xeración inmediata fallase. A segunda reconcilia o estado dos documentos non confirmados
+co almacén de obxectos, recuperando os que chegaron ao almacén sen ser confirmados e
+eliminando os que non chegaron. A terceira elimina mensaxes de chat (tanto grupais como
+do asistente de IA) que superan os 30 días de antigüidade. Estas tarefas evitan o
+crecemento indefinido da base de datos e do almacenamento de obxectos.

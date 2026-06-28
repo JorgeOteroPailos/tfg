@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.2.10)  23 JUN 2026 05:00
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.2.10)  28 JUN 2026 23:14
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -352,24 +352,24 @@ File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
 ) (./memoria.aux)
 \openout1 = `memoria.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -405,7 +405,7 @@ LaTeX Font Info:    ... okay on input line 91.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring ON on input line 91.
+Package hyperref Info: Link coloring ON on input line 93.
 (./memoria.out) (./memoria.out)
 \@outlinefile=\write3
 \openout3 = `memoria.out'.
@@ -436,17 +436,17 @@ Package caption Info: End \AtBeginDocument code.
 
 
 pdfTeX warning: pdflatex (file ./assets/usc/logo_usc.pdf): PDF inclusion: found PDF version <1.7>, but at most version <1.5> allowed
-<assets/usc/logo_usc.pdf, id=372, 589.20125pt x 382.42876pt>
+<assets/usc/logo_usc.pdf, id=368, 589.20125pt x 382.42876pt>
 File: assets/usc/logo_usc.pdf Graphic file (type pdf)
 <use assets/usc/logo_usc.pdf>
-Package pdftex.def Info: assets/usc/logo_usc.pdf  used on input line 99.
+Package pdftex.def Info: assets/usc/logo_usc.pdf  used on input line 101.
 (pdftex.def)             Requested size: 142.26378pt x 92.33913pt.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 112.
+(Font)              <12> on input line 114.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 112.
+(Font)              <8> on input line 114.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 112.
+(Font)              <6> on input line 114.
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./assets/usc/logo_usc.pdf>] [2
@@ -454,276 +454,276 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 ] (./chapters/00-agradecementos.tex)
 
 LaTeX Font Warning: Font shape `T1/cmr/m/n' in size <13.13947> not available
-(Font)              size <12> substituted on input line 137.
+(Font)              size <12> substituted on input line 139.
 
 
 LaTeX Font Warning: Font shape `T1/cmr/m/sc' in size <13.13947> not available
-(Font)              size <12> substituted on input line 137.
+(Font)              size <12> substituted on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 137.
+(hyperref)                removing `\<let>-command' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 137.
+(hyperref)                removing `\@tempdima' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\divide' on input line 137.
+(hyperref)                removing `\divide' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 137.
+(hyperref)                removing `\@tempdima' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\multiply' on input line 137.
+(hyperref)                removing `\multiply' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 137.
+(hyperref)                removing `\@tempdima' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 137.
+(hyperref)                removing `\<def>-command' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\f@size' on input line 137.
+(hyperref)                removing `\f@size' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\hbox' on input line 137.
+(hyperref)                removing `\hbox' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 137.
+(hyperref)                removing `\<def>-command' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\tf@size' on input line 137.
+(hyperref)                removing `\tf@size' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 137.
+(hyperref)                removing `\<def>-command' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\sf@size' on input line 137.
+(hyperref)                removing `\sf@size' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 137.
+(hyperref)                removing `\<def>-command' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\ssf@size' on input line 137.
+(hyperref)                removing `\ssf@size' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 137.
+(hyperref)                removing `\<let>-command' on input line 139.
 
 [1
 
 ]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 137.
+(hyperref)                removing `\<let>-command' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 137.
+(hyperref)                removing `\@tempdima' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\divide' on input line 137.
+(hyperref)                removing `\divide' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 137.
+(hyperref)                removing `\@tempdima' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\multiply' on input line 137.
+(hyperref)                removing `\multiply' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 137.
+(hyperref)                removing `\@tempdima' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 137.
+(hyperref)                removing `\<def>-command' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\f@size' on input line 137.
+(hyperref)                removing `\f@size' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\hbox' on input line 137.
+(hyperref)                removing `\hbox' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 137.
+(hyperref)                removing `\<def>-command' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\tf@size' on input line 137.
+(hyperref)                removing `\tf@size' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 137.
+(hyperref)                removing `\<def>-command' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\sf@size' on input line 137.
+(hyperref)                removing `\sf@size' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 137.
+(hyperref)                removing `\<def>-command' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\ssf@size' on input line 137.
+(hyperref)                removing `\ssf@size' on input line 139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 137.
+(hyperref)                removing `\<let>-command' on input line 139.
 
 [2
 
 ] (./chapters/01-resumo.tex)
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 139.
+(hyperref)                removing `\<let>-command' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 139.
+(hyperref)                removing `\@tempdima' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\divide' on input line 139.
+(hyperref)                removing `\divide' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 139.
+(hyperref)                removing `\@tempdima' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\multiply' on input line 139.
+(hyperref)                removing `\multiply' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 139.
+(hyperref)                removing `\@tempdima' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 139.
+(hyperref)                removing `\<def>-command' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\f@size' on input line 139.
+(hyperref)                removing `\f@size' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\hbox' on input line 139.
+(hyperref)                removing `\hbox' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 139.
+(hyperref)                removing `\<def>-command' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\tf@size' on input line 139.
+(hyperref)                removing `\tf@size' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 139.
+(hyperref)                removing `\<def>-command' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\sf@size' on input line 139.
+(hyperref)                removing `\sf@size' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 139.
+(hyperref)                removing `\<def>-command' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\ssf@size' on input line 139.
+(hyperref)                removing `\ssf@size' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 139.
+(hyperref)                removing `\<let>-command' on input line 141.
 
 [3
 
 ]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 139.
+(hyperref)                removing `\<let>-command' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 139.
+(hyperref)                removing `\@tempdima' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\divide' on input line 139.
+(hyperref)                removing `\divide' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 139.
+(hyperref)                removing `\@tempdima' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\multiply' on input line 139.
+(hyperref)                removing `\multiply' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 139.
+(hyperref)                removing `\@tempdima' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 139.
+(hyperref)                removing `\<def>-command' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\f@size' on input line 139.
+(hyperref)                removing `\f@size' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\hbox' on input line 139.
+(hyperref)                removing `\hbox' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 139.
+(hyperref)                removing `\<def>-command' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\tf@size' on input line 139.
+(hyperref)                removing `\tf@size' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 139.
+(hyperref)                removing `\<def>-command' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\sf@size' on input line 139.
+(hyperref)                removing `\sf@size' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 139.
+(hyperref)                removing `\<def>-command' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\ssf@size' on input line 139.
+(hyperref)                removing `\ssf@size' on input line 141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 139.
+(hyperref)                removing `\<let>-command' on input line 141.
 
 [4
 
@@ -797,67 +797,67 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 ]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 79.
+(hyperref)                removing `\<let>-command' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 79.
+(hyperref)                removing `\@tempdima' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\divide' on input line 79.
+(hyperref)                removing `\divide' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 79.
+(hyperref)                removing `\@tempdima' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\multiply' on input line 79.
+(hyperref)                removing `\multiply' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 79.
+(hyperref)                removing `\@tempdima' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 79.
+(hyperref)                removing `\<def>-command' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\f@size' on input line 79.
+(hyperref)                removing `\f@size' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\hbox' on input line 79.
+(hyperref)                removing `\hbox' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 79.
+(hyperref)                removing `\<def>-command' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\tf@size' on input line 79.
+(hyperref)                removing `\tf@size' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 79.
+(hyperref)                removing `\<def>-command' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\sf@size' on input line 79.
+(hyperref)                removing `\sf@size' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 79.
+(hyperref)                removing `\<def>-command' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\ssf@size' on input line 79.
+(hyperref)                removing `\ssf@size' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 79.
+(hyperref)                removing `\<let>-command' on input line 81.
 
 [6])
 \tf@toc=\write4
@@ -866,132 +866,132 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 142.
+(hyperref)                removing `\<let>-command' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 142.
+(hyperref)                removing `\@tempdima' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\divide' on input line 142.
+(hyperref)                removing `\divide' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 142.
+(hyperref)                removing `\@tempdima' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\multiply' on input line 142.
+(hyperref)                removing `\multiply' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 142.
+(hyperref)                removing `\@tempdima' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 142.
+(hyperref)                removing `\<def>-command' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\f@size' on input line 142.
+(hyperref)                removing `\f@size' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\hbox' on input line 142.
+(hyperref)                removing `\hbox' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 142.
+(hyperref)                removing `\<def>-command' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\tf@size' on input line 142.
+(hyperref)                removing `\tf@size' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 142.
+(hyperref)                removing `\<def>-command' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\sf@size' on input line 142.
+(hyperref)                removing `\sf@size' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 142.
+(hyperref)                removing `\<def>-command' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\ssf@size' on input line 142.
+(hyperref)                removing `\ssf@size' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 142.
+(hyperref)                removing `\<let>-command' on input line 144.
 
 [7]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 142.
+(hyperref)                removing `\<let>-command' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 142.
+(hyperref)                removing `\@tempdima' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\divide' on input line 142.
+(hyperref)                removing `\divide' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 142.
+(hyperref)                removing `\@tempdima' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\multiply' on input line 142.
+(hyperref)                removing `\multiply' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 142.
+(hyperref)                removing `\@tempdima' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 142.
+(hyperref)                removing `\<def>-command' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\f@size' on input line 142.
+(hyperref)                removing `\f@size' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\hbox' on input line 142.
+(hyperref)                removing `\hbox' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 142.
+(hyperref)                removing `\<def>-command' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\tf@size' on input line 142.
+(hyperref)                removing `\tf@size' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 142.
+(hyperref)                removing `\<def>-command' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\sf@size' on input line 142.
+(hyperref)                removing `\sf@size' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 142.
+(hyperref)                removing `\<def>-command' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\ssf@size' on input line 142.
+(hyperref)                removing `\ssf@size' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 142.
+(hyperref)                removing `\<let>-command' on input line 144.
 
 [8
 
@@ -1002,132 +1002,132 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 143.
+(hyperref)                removing `\<let>-command' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 143.
+(hyperref)                removing `\@tempdima' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\divide' on input line 143.
+(hyperref)                removing `\divide' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 143.
+(hyperref)                removing `\@tempdima' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\multiply' on input line 143.
+(hyperref)                removing `\multiply' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 143.
+(hyperref)                removing `\@tempdima' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 143.
+(hyperref)                removing `\<def>-command' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\f@size' on input line 143.
+(hyperref)                removing `\f@size' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\hbox' on input line 143.
+(hyperref)                removing `\hbox' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 143.
+(hyperref)                removing `\<def>-command' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\tf@size' on input line 143.
+(hyperref)                removing `\tf@size' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 143.
+(hyperref)                removing `\<def>-command' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\sf@size' on input line 143.
+(hyperref)                removing `\sf@size' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 143.
+(hyperref)                removing `\<def>-command' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\ssf@size' on input line 143.
+(hyperref)                removing `\ssf@size' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 143.
+(hyperref)                removing `\<let>-command' on input line 145.
 
 [9]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 143.
+(hyperref)                removing `\<let>-command' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 143.
+(hyperref)                removing `\@tempdima' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\divide' on input line 143.
+(hyperref)                removing `\divide' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 143.
+(hyperref)                removing `\@tempdima' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\multiply' on input line 143.
+(hyperref)                removing `\multiply' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 143.
+(hyperref)                removing `\@tempdima' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 143.
+(hyperref)                removing `\<def>-command' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\f@size' on input line 143.
+(hyperref)                removing `\f@size' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\hbox' on input line 143.
+(hyperref)                removing `\hbox' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 143.
+(hyperref)                removing `\<def>-command' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\tf@size' on input line 143.
+(hyperref)                removing `\tf@size' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 143.
+(hyperref)                removing `\<def>-command' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\sf@size' on input line 143.
+(hyperref)                removing `\sf@size' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 143.
+(hyperref)                removing `\<def>-command' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\ssf@size' on input line 143.
+(hyperref)                removing `\ssf@size' on input line 145.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 143.
+(hyperref)                removing `\<let>-command' on input line 145.
 
 [10
 
@@ -1138,161 +1138,167 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 146.
+(hyperref)                removing `\<let>-command' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 146.
+(hyperref)                removing `\@tempdima' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\divide' on input line 146.
+(hyperref)                removing `\divide' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 146.
+(hyperref)                removing `\@tempdima' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\multiply' on input line 146.
+(hyperref)                removing `\multiply' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 146.
+(hyperref)                removing `\@tempdima' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 146.
+(hyperref)                removing `\<def>-command' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\f@size' on input line 146.
+(hyperref)                removing `\f@size' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\hbox' on input line 146.
+(hyperref)                removing `\hbox' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 146.
+(hyperref)                removing `\<def>-command' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\tf@size' on input line 146.
+(hyperref)                removing `\tf@size' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 146.
+(hyperref)                removing `\<def>-command' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\sf@size' on input line 146.
+(hyperref)                removing `\sf@size' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 146.
+(hyperref)                removing `\<def>-command' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\ssf@size' on input line 146.
+(hyperref)                removing `\ssf@size' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 146.
+(hyperref)                removing `\<let>-command' on input line 148.
 
 [11]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 146.
+(hyperref)                removing `\<let>-command' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 146.
+(hyperref)                removing `\@tempdima' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\divide' on input line 146.
+(hyperref)                removing `\divide' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 146.
+(hyperref)                removing `\@tempdima' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\multiply' on input line 146.
+(hyperref)                removing `\multiply' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\@tempdima' on input line 146.
+(hyperref)                removing `\@tempdima' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 146.
+(hyperref)                removing `\<def>-command' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\f@size' on input line 146.
+(hyperref)                removing `\f@size' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\hbox' on input line 146.
+(hyperref)                removing `\hbox' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 146.
+(hyperref)                removing `\<def>-command' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\tf@size' on input line 146.
+(hyperref)                removing `\tf@size' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 146.
+(hyperref)                removing `\<def>-command' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\sf@size' on input line 146.
+(hyperref)                removing `\sf@size' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<def>-command' on input line 146.
+(hyperref)                removing `\<def>-command' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\ssf@size' on input line 146.
+(hyperref)                removing `\ssf@size' on input line 148.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\<let>-command' on input line 146.
+(hyperref)                removing `\<let>-command' on input line 148.
 
 [12
 
 ] (./chapters/02-introducion.tex
 Cap\'{\i }tulo 1.
 
+Underfull \vbox (badness 6961) has occurred while \output is active []
+
+
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.43 
+l.42 
       [1
 
 ]
 pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.92   \item \textbf
-                    {Wanderlog e TravelPerk}~\cite{wanderlog,travelperk}: so... [2]
-Overfull \hbox (36.33136pt too wide) in paragraph at lines 110--122
- [][] 
- []
+l.98 D
+      entro de cada viaxe, todos os membros teÃ±en acceso completo e en igua... [2]
 
-[3]
-Underfull \hbox (badness 1087) in paragraph at lines 197--197
+pdfTeX warning: pdflatex (file ./diagrams/funcionalidades-telaria.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
+<diagrams/funcionalidades-telaria.pdf, id=633, 318.1787pt x 262.78174pt>
+File: diagrams/funcionalidades-telaria.pdf Graphic file (type pdf)
+<use diagrams/funcionalidades-telaria.pdf>
+Package pdftex.def Info: diagrams/funcionalidades-telaria.pdf  used on input line 108.
+(pdftex.def)             Requested size: 354.86412pt x 293.09857pt.
+[3 <./diagrams/funcionalidades-telaria.pdf>]
+Underfull \hbox (badness 1087) in paragraph at lines 176--176
 []|\T1/cmr/m/n/12 Arquitectura do sis-te-ma, di-vi-sión en com-po-
  []
 
 
-Overfull \hbox (17.62482pt too wide) in paragraph at lines 197--198
+Overfull \hbox (17.62482pt too wide) in paragraph at lines 176--177
 [][] 
  []
 
@@ -1303,7 +1309,7 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 Underfull \vbox (badness 1173) has occurred while \output is active []
 
  [5]
-Overfull \hbox (4.77434pt too wide) in paragraph at lines 239--242
+Overfull \hbox (4.77434pt too wide) in paragraph at lines 218--224
 []\T1/cmr/m/n/12 Os do-cu-men-tos com-par-ti-dos al-ma-cé-nan-se nun ser-vi-zo com-pa-ti-ble co pro-to-co-lo S3 [[]].
  []
 
@@ -1312,53 +1318,48 @@ Overfull \hbox (4.77434pt too wide) in paragraph at lines 239--242
 ]
 Cap\'{\i }tulo 2.
 
-Overfull \hbox (17.62482pt too wide) in paragraph at lines 46--47
+Overfull \hbox (17.62482pt too wide) in paragraph at lines 42--43
 [][] 
  []
 
 [9]
-Overfull \hbox (17.62482pt too wide) in paragraph at lines 91--92
+Overfull \hbox (17.62482pt too wide) in paragraph at lines 87--88
 [][] 
  []
 
 [10]
-Underfull \hbox (badness 10000) in paragraph at lines 112--112
+Underfull \hbox (badness 10000) in paragraph at lines 109--109
 []|\T1/cmr/m/n/12 Rexistro de
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 120--120
-[]|\T1/cmr/m/n/12 Documentos
- []
-
-
-Underfull \hbox (badness 1424) in paragraph at lines 124--124
-[]|\T1/cmr/m/n/12 Funcionalidade com-ple-men-ta-ria que per-mi-te
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 125--125
+Underfull \hbox (badness 10000) in paragraph at lines 112--112
 []|\T1/cmr/m/n/12 Eliminación de
  []
 
 
-Underfull \hbox (badness 4846) in paragraph at lines 128--128
+Underfull \hbox (badness 4846) in paragraph at lines 113--113
 []|\T1/cmr/m/n/12 Preferencias da
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 125--125
+[]|\T1/cmr/m/n/12 Documentos
  []
 
 [11]
 
 pdfTeX warning: pdflatex (file ./diagrams/casos-uso.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/casos-uso.pdf, id=693, 561.59813pt x 1158.3275pt>
+<diagrams/casos-uso.pdf, id=712, 561.59813pt x 1158.3275pt>
 File: diagrams/casos-uso.pdf Graphic file (type pdf)
 <use diagrams/casos-uso.pdf>
-Package pdftex.def Info: diagrams/casos-uso.pdf  used on input line 143.
+Package pdftex.def Info: diagrams/casos-uso.pdf  used on input line 146.
 (pdftex.def)             Requested size: 230.66269pt x 475.74806pt.
 
-Underfull \vbox (badness 1454) has occurred while \output is active []
+Underfull \vbox (badness 7451) has occurred while \output is active []
 
  [12] [13 <./diagrams/casos-uso.pdf>] [14] [15] [16] [17]
-LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 353.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 368.
  (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 ) [18]) (./chapters/04-deseno.tex [19] [20
@@ -1368,137 +1369,123 @@ Cap\'{\i }tulo 3.
 
 
 pdfTeX warning: pdflatex (file ./diagrams/arquitectura.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/arquitectura.pdf, id=748, 472.76625pt x 414.54875pt>
+<diagrams/arquitectura.pdf, id=770, 472.76625pt x 414.54875pt>
 File: diagrams/arquitectura.pdf Graphic file (type pdf)
 <use diagrams/arquitectura.pdf>
 Package pdftex.def Info: diagrams/arquitectura.pdf  used on input line 19.
 (pdftex.def)             Requested size: 319.37703pt x 280.05502pt.
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [21]
-
-pdfTeX warning: pdflatex (file ./diagrams/backend-componentes.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/backend-componentes.pdf, id=754, 732.67728pt x 619.0628pt>
+pdfTeX warning: pdflatex (file ./diagrams/backend-componentes.pdf): PDF inclusion: found PDF version <1.7>, but at most version <1.5> allowed
+<diagrams/backend-componentes.pdf, id=772, 983.675pt x 567.11874pt>
 File: diagrams/backend-componentes.pdf Graphic file (type pdf)
 <use diagrams/backend-componentes.pdf>
 Package pdftex.def Info: diagrams/backend-componentes.pdf  used on input line 46.
-(pdftex.def)             Requested size: 377.0444pt x 318.58003pt.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [22 <./diagrams/arquitectura.pdf>]
+(pdftex.def)             Requested size: 377.0444pt x 217.37651pt.
+[21] [22 <./diagrams/arquitectura.pdf> <./diagrams/backend-componentes.pdf>]
 
 pdfTeX warning: pdflatex (file ./diagrams/modelo-datos.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/modelo-datos.pdf, id=772, 987.13795pt x 735.54799pt>
+<diagrams/modelo-datos.pdf, id=799, 987.13795pt x 735.54799pt>
 File: diagrams/modelo-datos.pdf Graphic file (type pdf)
 <use diagrams/modelo-datos.pdf>
 Package pdftex.def Info: diagrams/modelo-datos.pdf  used on input line 81.
 (pdftex.def)             Requested size: 443.57848pt x 330.52214pt.
-[23 <./diagrams/backend-componentes.pdf>]
+[23 <./diagrams/modelo-datos.pdf>]
 Overfull \hbox (16.98952pt too wide) in paragraph at lines 102--106
 \T1/cmr/m/n/12 tru-tu-ra (via-xe, usua-rio e mar-ca tem-po-ral) a tra-vés da su-per-cla-se \T1/cmtt/m/n/12 PendingMembership\T1/cmr/m/n/12 ,
  []
 
-[24 <./diagrams/modelo-datos.pdf>] [25]
+[24]
 
 pdfTeX warning: pdflatex (file ./diagrams/frontend-arquitectura.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/frontend-arquitectura.pdf, id=833, 961.5925pt x 444.15938pt>
+<diagrams/frontend-arquitectura.pdf, id=842, 1254.6875pt x 540.0175pt>
 File: diagrams/frontend-arquitectura.pdf Graphic file (type pdf)
 <use diagrams/frontend-arquitectura.pdf>
 Package pdftex.def Info: diagrams/frontend-arquitectura.pdf  used on input line 166.
-(pdftex.def)             Requested size: 443.57848pt x 204.89186pt.
+(pdftex.def)             Requested size: 443.57848pt x 190.91238pt.
 
 
 pdfTeX warning: pdflatex (file ./diagrams/navegacion.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/navegacion.pdf, id=836, 512.3441pt x 852.03316pt>
+<diagrams/navegacion.pdf, id=845, 512.3441pt x 852.03316pt>
 File: diagrams/navegacion.pdf Graphic file (type pdf)
 <use diagrams/navegacion.pdf>
 Package pdftex.def Info: diagrams/navegacion.pdf  used on input line 189.
 (pdftex.def)             Requested size: 243.96951pt x 405.73402pt.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [26 <./diagrams/frontend-arquitectura.pdf>]
-Underfull \vbox (badness 3482) has occurred while \output is active []
-
- [27 <./diagrams/navegacion.pdf>]
-<screenshots/calendar.jpeg, id=897, 1084.05pt x 2413.015pt>
+[25 <./diagrams/frontend-arquitectura.pdf>] [26 <./diagrams/navegacion.pdf>]
+<screenshots/calendar.jpeg, id=910, 1084.05pt x 2413.015pt>
 File: screenshots/calendar.jpeg Graphic file (type jpg)
 <use screenshots/calendar.jpeg>
-Package pdftex.def Info: screenshots/calendar.jpeg  used on input line 238.
+Package pdftex.def Info: screenshots/calendar.jpeg  used on input line 239.
 (pdftex.def)             Requested size: 199.60895pt x 444.30208pt.
+ [27] [28 <./screenshots/calendar.jpeg>]
+Overfull \hbox (13.75691pt too wide) in paragraph at lines 262--267
+\T1/cmr/m/n/12 nas, me-nús, asis-ten-te de IA, bo-tóns de ac-ción, etc.) in-cor-po-ran \T1/cmtt/m/n/12 accessibilityLabel\T1/cmr/m/n/12 ,
+ []
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [28] [29 <./screenshots/calendar.jpeg>]
-<screenshots/balances-light.jpeg, id=909, 1084.05pt x 2413.015pt>
+<screenshots/balances-light.jpeg, id=921, 1084.05pt x 2413.015pt>
 File: screenshots/balances-light.jpeg Graphic file (type jpg)
 <use screenshots/balances-light.jpeg>
-Package pdftex.def Info: screenshots/balances-light.jpeg  used on input line 286.
+Package pdftex.def Info: screenshots/balances-light.jpeg  used on input line 284.
 (pdftex.def)             Requested size: 140.60062pt x 312.9803pt.
-<screenshots/balances-dark.jpeg, id=910, 1084.05pt x 2413.015pt>
+<screenshots/balances-dark.jpeg, id=922, 1084.05pt x 2413.015pt>
 File: screenshots/balances-dark.jpeg Graphic file (type jpg)
 <use screenshots/balances-dark.jpeg>
-Package pdftex.def Info: screenshots/balances-dark.jpeg  used on input line 289.
+Package pdftex.def Info: screenshots/balances-dark.jpeg  used on input line 287.
 (pdftex.def)             Requested size: 140.60062pt x 312.9803pt.
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [30]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [31 <./screenshots/balances-light.jpeg> <./screenshots/balances-dark.jpeg>]
-Overfull \vbox (4.01706pt too high) has occurred while \output is active []
-
- [32]
 
 pdfTeX warning: pdflatex (file ./diagrams/seq-auth.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/seq-auth.pdf, id=932, 593.77835pt x 644.70862pt>
+<diagrams/seq-auth.pdf, id=924, 593.77835pt x 644.70862pt>
 File: diagrams/seq-auth.pdf Graphic file (type pdf)
 <use diagrams/seq-auth.pdf>
-Package pdftex.def Info: diagrams/seq-auth.pdf  used on input line 371.
+Package pdftex.def Info: diagrams/seq-auth.pdf  used on input line 303.
 (pdftex.def)             Requested size: 310.50357pt x 337.14903pt.
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [29] [30 <./screenshots/balances-light.jpeg> <./screenshots/balances-dark.jpeg>]
 
 pdfTeX warning: pdflatex (file ./diagrams/seq-chat-sse.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/seq-chat-sse.pdf, id=934, 627.49434pt x 354.27357pt>
+<diagrams/seq-chat-sse.pdf, id=937, 627.49434pt x 354.27357pt>
 File: diagrams/seq-chat-sse.pdf Graphic file (type pdf)
 <use diagrams/seq-chat-sse.pdf>
-Package pdftex.def Info: diagrams/seq-chat-sse.pdf  used on input line 384.
+Package pdftex.def Info: diagrams/seq-chat-sse.pdf  used on input line 316.
 (pdftex.def)             Requested size: 354.86412pt x 200.35413pt.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [33 <./diagrams/seq-auth.pdf>]
+ [31 <./diagrams/seq-auth.pdf>]
 
 pdfTeX warning: pdflatex (file ./diagrams/seq-upload.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/seq-upload.pdf, id=962, 771.74321pt x 464.13399pt>
+<diagrams/seq-upload.pdf, id=965, 771.74321pt x 464.13399pt>
 File: diagrams/seq-upload.pdf Graphic file (type pdf)
 <use diagrams/seq-upload.pdf>
-Package pdftex.def Info: diagrams/seq-upload.pdf  used on input line 398.
+Package pdftex.def Info: diagrams/seq-upload.pdf  used on input line 330.
 (pdftex.def)             Requested size: 399.21791pt x 240.09753pt.
-[34 <./diagrams/seq-chat-sse.pdf> <./diagrams/seq-upload.pdf>]
+[32 <./diagrams/seq-chat-sse.pdf> <./diagrams/seq-upload.pdf>]
 
 pdfTeX warning: pdflatex (file ./diagrams/seq-ia.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/seq-ia.pdf, id=1010, 704.8433pt x 439.04024pt>
+<diagrams/seq-ia.pdf, id=1013, 704.8433pt x 439.04024pt>
 File: diagrams/seq-ia.pdf Graphic file (type pdf)
 <use diagrams/seq-ia.pdf>
-Package pdftex.def Info: diagrams/seq-ia.pdf  used on input line 412.
+Package pdftex.def Info: diagrams/seq-ia.pdf  used on input line 344.
 (pdftex.def)             Requested size: 377.0444pt x 234.86076pt.
 
-Overfull \hbox (1.23347pt too wide) in paragraph at lines 432--434
+Overfull \hbox (1.23347pt too wide) in paragraph at lines 364--366
 []\T1/cmr/bx/n/12 Contrasinais pro-te-xi-dos. \T1/cmr/m/n/12 Os con-tra-si-nais al-ma-cé-nan-se ci-fra-dos con BCrypt [[]]. 
  []
 
-[35 <./diagrams/seq-ia.pdf>]) (./chapters/05-probas.tex [36]
+[33 <./diagrams/seq-ia.pdf>]) (./chapters/05-probas.tex [34]
 Cap\'{\i }tulo 4.
-[37
+[35
 
-] [38]
+] [36] [37] [38]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [39] [40] [41]) (./chapters/06-conclusions.tex [42]
+ [39]
+Overfull \vbox (4.01706pt too high) has occurred while \output is active []
+
+ [40]) (./chapters/06-conclusions.tex [41] [42]
 Cap\'{\i }tulo 5.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -1540,12 +1527,12 @@ Overfull \hbox (133.571pt too wide) in paragraph at lines 99--102
 
 ]
 Ap\'endice B.
-<screenshots/login.jpeg, id=1140, 1084.05pt x 2413.015pt>
+<screenshots/login.jpeg, id=1158, 1084.05pt x 2413.015pt>
 File: screenshots/login.jpeg Graphic file (type jpg)
 <use screenshots/login.jpeg>
 Package pdftex.def Info: screenshots/login.jpeg  used on input line 25.
 (pdftex.def)             Requested size: 199.60895pt x 444.30208pt.
-<screenshots/register.jpeg, id=1141, 1084.05pt x 2413.015pt>
+<screenshots/register.jpeg, id=1159, 1084.05pt x 2413.015pt>
 File: screenshots/register.jpeg Graphic file (type jpg)
 <use screenshots/register.jpeg>
 Package pdftex.def Info: screenshots/register.jpeg  used on input line 31.
@@ -1554,7 +1541,7 @@ Package pdftex.def Info: screenshots/register.jpeg  used on input line 31.
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [49]
-<screenshots/main.jpeg, id=1146, 1084.05pt x 2413.015pt>
+<screenshots/main.jpeg, id=1164, 1084.05pt x 2413.015pt>
 File: screenshots/main.jpeg Graphic file (type jpg)
 <use screenshots/main.jpeg>
 Package pdftex.def Info: screenshots/main.jpeg  used on input line 45.
@@ -1563,7 +1550,7 @@ Package pdftex.def Info: screenshots/main.jpeg  used on input line 45.
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [50 <./screenshots/login.jpeg> <./screenshots/register.jpeg>]
-<screenshots/createTrip.jpeg, id=1151, 1084.05pt x 2413.015pt>
+<screenshots/createTrip.jpeg, id=1169, 1084.05pt x 2413.015pt>
 File: screenshots/createTrip.jpeg Graphic file (type jpg)
 <use screenshots/createTrip.jpeg>
 Package pdftex.def Info: screenshots/createTrip.jpeg  used on input line 56.
@@ -1572,7 +1559,7 @@ Package pdftex.def Info: screenshots/createTrip.jpeg  used on input line 56.
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [51 <./screenshots/main.jpeg>]
-<screenshots/members.jpeg, id=1156, 1084.05pt x 2413.015pt>
+<screenshots/members.jpeg, id=1174, 1084.05pt x 2413.015pt>
 File: screenshots/members.jpeg Graphic file (type jpg)
 <use screenshots/members.jpeg>
 Package pdftex.def Info: screenshots/members.jpeg  used on input line 67.
@@ -1581,7 +1568,7 @@ Package pdftex.def Info: screenshots/members.jpeg  used on input line 67.
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [52 <./screenshots/createTrip.jpeg>]
-<screenshots/expenses.jpeg, id=1161, 1084.05pt x 2413.015pt>
+<screenshots/expenses.jpeg, id=1180, 1084.05pt x 2413.015pt>
 File: screenshots/expenses.jpeg Graphic file (type jpg)
 <use screenshots/expenses.jpeg>
 Package pdftex.def Info: screenshots/expenses.jpeg  used on input line 85.
@@ -1602,7 +1589,7 @@ Package pdftex.def Info: screenshots/calendar.jpeg  used on input line 106.
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [54 <./screenshots/expenses.jpeg>]
-<screenshots/sharedDocuments.jpeg, id=1171, 1084.05pt x 2413.015pt>
+<screenshots/sharedDocuments.jpeg, id=1190, 1084.05pt x 2413.015pt>
 File: screenshots/sharedDocuments.jpeg Graphic file (type jpg)
 <use screenshots/sharedDocuments.jpeg>
 Package pdftex.def Info: screenshots/sharedDocuments.jpeg  used on input line 119.
@@ -1611,7 +1598,7 @@ Package pdftex.def Info: screenshots/sharedDocuments.jpeg  used on input line 11
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [55]
-<screenshots/groupChat.jpeg, id=1177, 1084.05pt x 2413.015pt>
+<screenshots/groupChat.jpeg, id=1195, 1084.05pt x 2413.015pt>
 File: screenshots/groupChat.jpeg Graphic file (type jpg)
 <use screenshots/groupChat.jpeg>
 Package pdftex.def Info: screenshots/groupChat.jpeg  used on input line 131.
@@ -1620,28 +1607,28 @@ Package pdftex.def Info: screenshots/groupChat.jpeg  used on input line 131.
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [56 <./screenshots/sharedDocuments.jpeg>]
-<screenshots/aiChat.jpeg, id=1182, 1084.05pt x 2413.015pt>
+<screenshots/aiChat.jpeg, id=1200, 1084.05pt x 2413.015pt>
 File: screenshots/aiChat.jpeg Graphic file (type jpg)
 <use screenshots/aiChat.jpeg>
-Package pdftex.def Info: screenshots/aiChat.jpeg  used on input line 142.
+Package pdftex.def Info: screenshots/aiChat.jpeg  used on input line 141.
 (pdftex.def)             Requested size: 199.60895pt x 444.30208pt.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [57 <./screenshots/groupChat.jpeg>]
-<screenshots/friends.jpeg, id=1187, 1084.05pt x 2413.015pt>
+<screenshots/friends.jpeg, id=1205, 1084.05pt x 2413.015pt>
 File: screenshots/friends.jpeg Graphic file (type jpg)
 <use screenshots/friends.jpeg>
-Package pdftex.def Info: screenshots/friends.jpeg  used on input line 154.
+Package pdftex.def Info: screenshots/friends.jpeg  used on input line 153.
 (pdftex.def)             Requested size: 199.60895pt x 444.30208pt.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [58 <./screenshots/aiChat.jpeg>]
-<screenshots/invitations.jpeg, id=1192, 1084.05pt x 2413.015pt>
+<screenshots/invitations.jpeg, id=1210, 1084.05pt x 2413.015pt>
 File: screenshots/invitations.jpeg Graphic file (type jpg)
 <use screenshots/invitations.jpeg>
-Package pdftex.def Info: screenshots/invitations.jpeg  used on input line 164.
+Package pdftex.def Info: screenshots/invitations.jpeg  used on input line 163.
 (pdftex.def)             Requested size: 199.60895pt x 444.30208pt.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -1652,19 +1639,19 @@ Overfull \hbox (57.63892pt too wide) has occurred while \output is active
  []
 
 [59 <./screenshots/friends.jpeg>]
-<screenshots/profile.jpeg, id=1198, 1084.05pt x 2928.9425pt>
+<screenshots/profile.jpeg, id=1216, 1084.05pt x 2928.9425pt>
 File: screenshots/profile.jpeg Graphic file (type jpg)
 <use screenshots/profile.jpeg>
-Package pdftex.def Info: screenshots/profile.jpeg  used on input line 177.
+Package pdftex.def Info: screenshots/profile.jpeg  used on input line 176.
 (pdftex.def)             Requested size: 199.60895pt x 539.29845pt.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [60 <./screenshots/invitations.jpeg>]
-<screenshots/settings.jpeg, id=1203, 1084.05pt x 2707.11375pt>
+<screenshots/settings.jpeg, id=1221, 1084.05pt x 2707.11375pt>
 File: screenshots/settings.jpeg Graphic file (type jpg)
 <use screenshots/settings.jpeg>
-Package pdftex.def Info: screenshots/settings.jpeg  used on input line 187.
+Package pdftex.def Info: screenshots/settings.jpeg  used on input line 186.
 (pdftex.def)             Requested size: 199.60895pt x 498.4537pt.
 
 Underfull \vbox (badness 7308) has occurred while \output is active []
@@ -1696,21 +1683,21 @@ LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 1.13947pt have occurred.
 
 Package rerunfilecheck Info: File `memoria.out' has not changed.
-(rerunfilecheck)             Checksum: D1C8D0DA4E994A7FD02003B3D0593806;17221.
+(rerunfilecheck)             Checksum: C5935EA3BDBE4D2E12A9EC5B56CA26DF;17142.
  ) 
 Here is how much of TeX's memory you used:
- 15877 strings out of 476120
- 252704 string characters out of 5793657
+ 15893 strings out of 476120
+ 253151 string characters out of 5793657
  2009975 words of memory out of 5000000
- 37395 multiletter control sequences out of 15000+600000
- 575501 words of font info for 68 fonts, out of 8000000 for 9000
- 40 hyphenation exceptions out of 8191
+ 37408 multiletter control sequences out of 15000+600000
+ 575838 words of font info for 69 fonts, out of 8000000 for 9000
+ 41 hyphenation exceptions out of 8191
  75i,20n,79p,526b,1278s stack positions out of 10000i,1000n,20000p,200000b,200000s
- </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecit1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbi1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbi1440.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1095.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsl1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/eccc1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx2488.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1728.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx2074.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1440.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1728.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/zapfding/uzdr.pfb>
-Output written on memoria.pdf (84 pages, 4712793 bytes).
+ </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecit1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbi1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbi1440.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1095.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsl1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/eccc1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx2488.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1728.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx2074.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1440.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1728.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/zapfding/uzdr.pfb>
+Output written on memoria.pdf (84 pages, 4974898 bytes).
 PDF statistics:
- 2056 PDF objects out of 2073 (max. 8388607)
- 1255 compressed objects within 13 object streams
- 263 named destinations out of 1000 (max. 500000)
- 872 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 2076 PDF objects out of 2487 (max. 8388607)
+ 1274 compressed objects within 13 object streams
+ 264 named destinations out of 1000 (max. 500000)
+ 869 words of extra memory for PDF output out of 10000 (max. 10000000)
 

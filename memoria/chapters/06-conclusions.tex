@@ -2,30 +2,30 @@
 
 \section{Grao de cumprimento dos obxectivos}
 
-O proxecto acadou os obxectivos formulados na introdución. Telaria centraliza nunha única
+O proxecto acadou os obxectivos formulados na introdución de forma satisfactoria. Telaria centraliza nunha única
 aplicación a xestión integral dunha viaxe en grupo, substituíndo o conxunto disperso de
-ferramentas que se empregan habitualmente. A Táboa~\ref{tab:obxectivos} resume o grao de
+ferramentas que se empregan habitualmente. O Cadro~\ref{tab:obxectivos} resume o grao de
 cumprimento de cada obxectivo.
 
 \begin{table}[H]
   \centering
+  \caption{Grao de cumprimento dos obxectivos.}
+  \label{tab:obxectivos}
   \begin{tabularx}{\textwidth}{@{}p{6.2cm}cX@{}}
     \toprule
     \textbf{Obxectivo} & \textbf{Estado} & \textbf{Observacións} \\
     \midrule
-    Gastos compartidos e liquidacións & Cumprido & Cálculo no servidor con minimización de transferencias (RF06, RF07). \\[3pt]
-    Calendario de eventos con localización & Cumprido & Eventos con data, duración e localización xeográfica (RF08). \\[3pt]
-    Documentos compartidos & Cumprido & Subida directa ao almacén con miniaturas (RF09). \\[3pt]
-    Chat de grupo & Cumprido & Mensaxería en tempo real mediante SSE (RF10). \\[3pt]
-    Asistente de IA por viaxe & Cumprido & Chatbot con historial persistente sobre Ollama (RF11). \\[3pt]
-    Rede de amizades (complementaria) & Cumprido & Solicitudes, lista de amigos e convite áxil (RF12, RF13). \\[3pt]
-    Xestión de conta & Cumprido & Perfil, contrasinal, avatar e eliminación con confirmación (RF14, RF15). \\[3pt]
+    Gastos compartidos e liquidacións & Cumprido & Cálculo no servidor con minimización de transferencias (RF10, RF11). \\[3pt]
+    Calendario de eventos con localización & Cumprido & Eventos con data, duración e localización xeográfica (RF12). \\[3pt]
+    Documentos compartidos & Cumprido & Subida directa ao almacén con miniaturas (RF13). \\[3pt]
+    Chat de grupo & Cumprido & Mensaxería en tempo real mediante SSE (RF14). \\[3pt]
+    Asistente de IA por viaxe & Cumprido & Chatbot con historial persistente sobre Ollama (RF15). \\[3pt]
+    Rede de amizades (complementaria) & Cumprido & Solicitudes, lista de amigos e convite áxil (RF16, RF17). \\[3pt]
+    Xestión de conta & Cumprido & Perfil, contrasinal, avatar e eliminación con confirmación (RF03, RF04). \\[3pt]
     Arquitectura API-first & Cumprido & Contrato OpenAPI con xeración de código en ambos os extremos. \\[3pt]
     Multiplataforma iOS/Android & Cumprido & Única base de código con React Native e Expo. \\
     \bottomrule
   \end{tabularx}
-  \caption{Grao de cumprimento dos obxectivos.}
-  \label{tab:obxectivos}
 \end{table}
 
 \section{Valoración técnica}
@@ -52,8 +52,8 @@ O sistema deixa aberto un conxunto de liñas de mellora:
   \item \textbf{Notificacións push} para invitacións, mensaxes novas e recordatorios de eventos.
   \item \textbf{Preparación para produción}: externalizar os segredos de configuración
         (actualmente en ficheiros de configuración), habilitar HTTPS/TLS e facer
-        configurable a dirección do servidor no cliente. Empregar servizos de hosting para o backend que permitan escalar a demanda
-        , mellores modelos para o asistente de IA, monitorización de métricas e alertas, etc. O frontend
+        configurable a dirección do servidor no cliente. Empregar servizos de hosting para o backend que permitan escalar a demanda,
+        mellores modelos para o asistente de IA, monitorización de métricas e alertas, etc. O frontend
             tamén debería ser empaquetado e publicado en \textit{App Store} e \textit{Google Play}.
   \item \textbf{Engadir as probas do frontend ao pipeline de desenvolvemento}: Debido a limitacións 
        de tempo e á tardía implementación das probas do frontend polo seu carácter máis propenso a cambios e
@@ -63,8 +63,6 @@ O sistema deixa aberto un conxunto de liñas de mellora:
         experiencia en destinos con conectividade limitada.
   \item \textbf{Accesibilidade}: Mellorar a accesibilidade tendo en conta diversos perfís de
         usuario con distintas dificultades (engadir un modo para daltónicos, etc.).
-  \item \textbf{Novas funcionalidades}: Engadir novas
-         funcionalidades como por exemplo maiores facilidades pra a xestión dos membros dunha viaxe, autenticación
-         mediante proveedores externos.
-  \item \textbf{Soporte web}: Aínda que a aplicación está pensada para dispositivos móbiles, un cliente web permitiría acceder á información desde calquera navegador.
+  \item \textbf{Integración de provedores de identidade}: Permitir o inicio de sesión mediante provedores externos como Google ou Meta.
+  \item \textbf{Soporte web}: Aínda que a aplicación está pensada para dispositivos móbiles, un cliente web permitiría acceder á información dende calquera navegador.
 \end{itemize}

@@ -14,7 +14,7 @@ o contrato da API, especificado con OpenAPI, é o punto de partida do desenvolve
 elemento que vincula o cliente co servidor. A Figura~\ref{fig:arquitectura} mostra a
 visión de conxunto.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=0.72\textwidth]{diagrams/arquitectura.pdf}
   \caption{Arquitectura xeral e despregamento de Telaria.}
@@ -32,9 +32,9 @@ REST que intercambia JSON e protexe cada petición cun \textit{access token} JWT
 funcionalidades en tempo real (chat de grupo e asistente de IA), o servidor emprega
 \textit{Server-Sent Events} (SSE), que permiten un fluxo unidireccional de eventos do
 servidor cara ao cliente sobre a mesma conexión HTTP. Finalmente, a subida e a descarga
-de documentos non pasan polo backend: este limítase a xerar \textit{URLs prefirmadas} co
-que o cliente fala \textbf{directamente} co almacén de obxectos, descargando o servidor
-da transferencia de ficheiros.
+de documentos non pasan polo backend: este limítase a xerar \textit{URLs prefirmadas} de
+xeito que o cliente fala \textbf{directamente} co almacén de obxectos, descargando o
+servidor da transferencia de ficheiros.
 
 \section{Arquitectura do backend}
 
@@ -63,7 +63,7 @@ responsabilidades, como se aprecia na Figura~\ref{fig:backend}.
         tokens JWT con Spring Security), a utilidade de extracción do usuario autenticado
         (\texttt{SecurityHelper}), o manexo centralizado de erros
         (\texttt{GlobalExceptionHandler}, que devolve respostas no formato
-        \textit{Problem Details}, RFC~7807)~\cite{rfc7807} e as tarefas programadas
+        \textit{Problem Details}, RFC~7807 ~\cite{rfc7807}) e as tarefas programadas
         (\textit{schedulers}) de limpeza e xeración de miniaturas.
 \end{itemize}
 
@@ -96,9 +96,9 @@ As decisións de deseño máis salientables son:
         usuarios de forma ordenada (o de identificador menor primeiro), o que garante a
         unicidade da parella e simplifica as consultas bidireccionais.
   \item \textbf{Valor embebido.} A localización dun evento (\texttt{Location}: nome,
-        enderezo, coordenadas e URL de mapa) modélase como un obxecto embebido dentro de
+        enderezo e coordenadas) modélase como un obxecto embebido dentro de
         \texttt{Event}, ao non ter identidade propia (considérase que os diferentes eventos
-         non compartirán ubicación frecuentemente).
+         non compartirán localización frecuentemente).
   \item \textbf{Xerarquía de membros pendentes.} \texttt{Invitation} e
         \texttt{JoinRequest} comparten estrutura (viaxe, usuario e marca temporal) a
         través da superclase \texttt{PendingMembership}, diferenciándose só na
@@ -109,8 +109,8 @@ As decisións de deseño máis salientables son:
 
 O esquema da base de datos non se xestiona con ferramentas de migración: emprégase a
 xeración automática de Hibernate (\texttt{ddl-auto}), apropiada para o contexto deste
-proxecto. Na sección de conclusións recóllese a adopción de migracións explícitas como
-posible mellora de cara a un entorno de produción.
+proxecto. De cara a un entorno de producción, cómpre considerar a 
+adopción de migracións explícitas.
 
 \section{Deseño da API REST}
 
@@ -130,10 +130,12 @@ A partir deste contrato xérase código automaticamente en ambos os extremos:
 
 Deste xeito, calquera cambio no contrato propágase automaticamente como tipos a ambos os
 extremos, e calquera incoherencia detéctase en tempo de compilación. Ademais, a partir
-da mesma especificación ofrécese documentación interactiva da API (Swagger UI). A
-Táboa~\ref{tab:recursos} resume os principais recursos da API.
+da mesma especificación ofrécese documentación interactiva da API (Swagger UI). O
+Cadro~\ref{tab:recursos} resume os principais recursos da API.
 
 \begin{table}[H]
+  \caption{Resumo dos principais recursos da API REST.}
+  \label{tab:recursos}
   \centering
   \begin{tabularx}{\textwidth}{@{}lX@{}}
     \toprule
@@ -150,8 +152,6 @@ Táboa~\ref{tab:recursos} resume os principais recursos da API.
     Invitacións, solicitudes, amizades & Xestión de membros e da rede social de usuarios. \\
     \bottomrule
   \end{tabularx}
-  \caption{Resumo dos principais recursos da API REST.}
-  \label{tab:recursos}
 \end{table}
 
 \section{Arquitectura do frontend}
@@ -161,7 +161,7 @@ Figura~\ref{fig:frontend}. A navegación baséase en \textbf{Expo Router}, un si
 rutas baseado na estrutura de ficheiros, que agrupa as pantallas en tres grupos
 (\texttt{(auth)}, \texttt{(main)} e \texttt{(trip)}).
 
-\begin{figure}[H]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{diagrams/frontend-arquitectura.pdf}
   \caption{Arquitectura do frontend.}
@@ -184,7 +184,7 @@ transparente e reintenta a petición. Os tokens gárdanse de forma cifrada
 (\texttt{AsyncStorage}). A Figura~\ref{fig:navegacion} mostra o mapa completo de
 navegación.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=0.55\textwidth]{diagrams/navegacion.pdf}
   \caption{Mapa de navegación da aplicación.}
@@ -195,15 +195,14 @@ navegación.
 
 Alén da súa arquitectura técnica, o frontend conta cunha linguaxe visual propia e coidada.
 Nesta sección descríbese o sistema visual, os compoñentes e patróns de interface, as
-animacións e a accesibilidade.
+animacións e as medidas de accesibilidade adoptadas.
 
 \subsection{Linguaxe visual e temas}
 
 A identidade visual de Telaria articúlase arredor dunha paleta monocromática centrada no
 violeta. A
-aplicación ofrece dous temas (claro e escuro) que o usuario selecciona manualmente e que se
-conservan entre sesións (non segue automaticamente o axuste do sistema). A
-Figura~\ref{fig:paleta} recolle as cores principais.
+aplicación ofrece dous temas (claro e escuro) que o usuario pode seleccionar e que se
+conservan entre sesións. A Figura~\ref{fig:paleta} recolle as cores principais.
 
 \begin{figure}[H]
   \centering
@@ -217,9 +216,11 @@ Figura~\ref{fig:paleta} recolle as cores principais.
   \label{fig:paleta}
 \end{figure}
 
-A tipografía emprega as fontes do sistema (sen fontes propias) e a xerarquía visual
-conséguese mediante o peso e o espazado entre letras, máis que mediante familias
-tipográficas distintas. A estética compleméntase con esquinas redondeadas e brillos sutís
+A tipografía emprega as fontes nativas do sistema, de xeito que a interface mantense
+coidada independentemente do dispositivo, evitando problemas de carga de fontes e
+alixeirando a aplicación, e contribuíndo ademais a unha apariencia máis uniforme co resto de aplicacións
+nativas. A xerarquía visual conséguese mediante o peso e o espazado entre letras, máis que
+mediante familias tipográficas distintas. A estética compleméntase con esquinas redondeadas e brillos sutís
 (\textit{glow}) de ton violeta arredor dos elementos destacados.
 
 \subsection{Compoñentes e patróns de interface}
@@ -231,10 +232,10 @@ modo de aforro de datos; e \texttt{SegmentedControl} ofrece un selector con anim
 cromo de navegación componse dunha barra de pestanas inferior que resalta a pestana activa
 cun brillo e amosa badges de notificación, e dun menú lateral que se presenta como panel
 deslizante inferior (\textit{bottom sheet}). O asistente de IA ábrese nun modal a pantalla
-completa accesible desde un botón flotante. Completan o repertorio as tarxetas, os modais e
+completa accesible dende un botón flotante. Completan o repertorio as tarxetas, os modais e
 os diálogos de confirmación. A Figura~\ref{fig:ui-pantalla} mostra unha pantalla representativa.
 
-\begin{figure}[H]\centering
+\begin{figure}[htbp]\centering
   \includegraphics[width=0.45\textwidth]{calendar.jpeg}
   \caption{Pantalla representativa da aplicación (calendario compartido da viaxe).}\label{fig:ui-pantalla}
 \end{figure}
@@ -250,37 +251,34 @@ que achega profundidade sen distraer.
 
 \subsection{Accesibilidade}
 
-No tocante á accesibilidade, a aplicación adopta varias medidas, aínda que tamén deixa marxe
-de mellora que se describe con transparencia.
+No tocante á accesibilidade, a aplicación adopta varias medidas, que se describen a continuación.
 
-\textbf{Medidas adoptadas.} A aplicación está internacionalizada en galego, castelán e inglés
-(cf.\ RNF-US-02), o que mellora a comprensión para usuarios de distintas linguas. O dobre tema
-claro/escuro axuda ás persoas sensibles á luz ou con baixa visión, e o modo de aforro de datos
-reduce a carga de imaxes. Ademais, os controis interactivos de toda a aplicación, a barra de
-pestanas (que expón a pestana seleccionada mediante \texttt{accessibilityState}), os menús, o
-asistente de IA e os botóns de acción das distintas pantallas (engadir, eliminar, navegar,
-etc.), incorporan etiquetas (\texttt{accessibilityLabel}) e roles (\texttt{accessibilityRole})
-de accesibilidade internacionalizados, de xeito que os lectores de pantalla anuncian cada
-control co seu nome; a retroalimentación de pulsación é consistente en toda a interface.
-Finalmente, a paleta de cores axustouse para que as combinacións de texto e fondo cumpran o
-limiar de contraste \mbox{WCAG~AA}. Ademais, respéctase a preferencia de movemento reducido do
-sistema (as animacións desactívanse ou acúrtanse cando o usuario a activa) e as compoñentes de
-texto compartidas limitan o factor máximo de escala da tipografía
-(\texttt{maxFontSizeMultiplier}) para que os tamaños grandes non rompan os deseños. Os controis
-interactivos amplían ademais a súa área de pulsación (\texttt{hitSlop}) ata o tamaño mínimo
-recomendado, e as accións consecuentes (saír da viaxe, eliminar a conta, pechar a sesión, etc.)
-inclúen pistas (\texttt{accessibilityHint}) que describen o seu efecto.
-
-\textbf{Limitacións.} O límite de escala da tipografía aplícase ás compoñentes de texto
-compartidas e aos controis principais, pero aínda non a todos os textos da interface.
-
-\textbf{Traballo futuro.} Unha mellora adicional incluiría estender o límite de escala da
-tipografía a todos os textos da interface (e non só ás compoñentes compartidas). Esta revisión
-pode apoiarse nas
-comprobacións de accesibilidade da ferramenta react-doctor, xa presente no proxecto. A
+\begin{itemize}
+  \item \textbf{Internacionalización.} A aplicación está dispoñible en galego, castelán e
+        inglés (cf.\ RNF-US-02), o que mellora a comprensión para usuarios de distintas linguas.
+  \item \textbf{Dobre tema.} O tema claro/escuro axuda ás persoas sensibles á luz ou con baixa
+        visión; o modo de aforro de datos reduce ademais a carga de imaxes. A
 Figura~\ref{fig:ui-temas} ilustra os dous temas.
+  \item \textbf{Etiquetas e roles de accesibilidade.} Os controis interactivos (barra de
+        pestanas, menús, asistente de IA, botóns de acción, etc.) incorporan
+        \texttt{accessibilityLabel}, \texttt{accessibilityRole} e \texttt{accessibilityState}
+        internacionalizados, de xeito que os lectores de pantalla anuncian cada control co seu
+        nome; a retroalimentación de pulsación é consistente en toda a interface.
+  \item \textbf{Contraste WCAG~AA.} A paleta de cores axustouse para que as combinacións de
+        texto e fondo cumpran o limiar de contraste.
+  \item \textbf{Movemento reducido.} As animacións desactívanse ou acúrtanse cando o usuario
+        activa esta preferencia no sistema operativo.
+  \item \textbf{Escala tipográfica.} As compoñentes de texto compartidas limitan o factor
+        máximo de escala (\texttt{maxFontSizeMultiplier}) para que os tamaños grandes non rompan
+        os deseños.
+  \item \textbf{Área de pulsación.} Os controis interactivos amplían a súa área de pulsación
+        (\texttt{hitSlop}) ata o mínimo recomendado (44×44~pt), e as accións sensibles (saír da
+        viaxe, eliminar a conta, pechar a sesión, etc.) inclúen pistas
+        (\texttt{accessibilityHint}) que describen o seu efecto.
+\end{itemize}
 
-\begin{figure}[H]
+
+\begin{figure}[htbp]
   \centering
   \subcaptionbox{Tema claro\label{fig:ui-temas-light}}{%
     \includegraphics[height=11cm]{balances-light.jpeg}}
@@ -290,72 +288,6 @@ Figura~\ref{fig:ui-temas} ilustra os dous temas.
   \caption{Comparación dos temas claro e escuro: pantalla de balances da viaxe.}
   \label{fig:ui-temas}
 \end{figure}
-
-\subsection{Análise heurística}
-
-Co obxectivo de identificar posibles problemas de usabilidade desde unha perspectiva
-experta, a interface de Telaria avaliouse segundo as \textbf{dez heurísticas de
-usabilidade de Nielsen}~\cite{nielsen1994usability}. Esta avaliación complementa as
-probas de pensamento en voz alta con usuarios reais descritas no
-capítulo~\ref{ch:probas}. A Táboa~\ref{tab:heuristicas} resume como o deseño aborda
-cada heurística.
-
-\begin{table}[H]
-  \centering
-  \begin{tabularx}{\textwidth}{@{}lX@{}}
-    \toprule
-    \textbf{Heurística} & \textbf{Aplicación en Telaria} \\
-    \midrule
-    Visibilidade do estado do sistema &
-      Indicadores de carga nas chamadas á API, progresión visual na subida de
-      documentos, actualizacións en tempo real do chat e do asistente de IA
-      (\textit{streaming}) e \textit{badges} de notificación na barra de pestanas. \\
-    \addlinespace
-    Correspondencia co mundo real &
-      Terminoloxía de viaxes familiar (gastos, membros, eventos, calendario),
-      categorías de gasto naturais e mapa interactivo para seleccionar localizacións. \\
-    \addlinespace
-    Control e liberdade do usuario &
-      Navegación cara atrás en todos os niveis, posibilidade de abandonar unha viaxe
-      e de eliminar a conta, e cancelación de calquera modal sen consecuencias. \\
-    \addlinespace
-    Consistencia e estándares &
-      Compoñentes con tema reutilizables (\texttt{ThemedText}, \texttt{ThemedButton},
-      \texttt{ThemedInput}), paleta e tipoloxía uniformes e patróns de navegación
-      estándar para plataformas móbiles (barra de pestanas, \textit{bottom sheet}). \\
-    \addlinespace
-    Prevención de erros &
-      Validación de formularios antes do envío, diálogos de confirmación para
-      operacións destrutivas (eliminar conta, saír da viaxe) e tipado estrito de
-      extremo a extremo a través do contrato OpenAPI. \\
-    \addlinespace
-    Recoñecemento antes que recordo &
-      Barra de pestanas sempre visible, historial de mensaxes e de gastos accesible
-      en todo momento e información contextual da viaxe activa presente en cada
-      pantalla. \\
-    \addlinespace
-    Flexibilidade e eficiencia &
-      Unión a viaxes por código QR, convites directos a amigos e acceso inmediato
-      aos documentos do día seleccionado no calendario. \\
-    \addlinespace
-    Deseño estético e minimalista &
-      Estética limpa, ausencia de información superflua en
-      pantalla e textura de fondo sutil que non distrae do contido principal. \\
-    \addlinespace
-    Axuda para recuperarse de erros &
-      Mensaxes de erro claras nas operacións fallidas, formato \textit{Problem
-      Details} (RFC~7807)~\cite{rfc7807} nas respostas de erro da API e
-      retroalimentación visual ante fallos de rede. \\
-    \addlinespace
-    Axuda e documentación &
-      Asistente de IA integrado que coñece o contexto da viaxe activa (eventos,
-      gastos e historial de chat) e pode responder consultas do usuario en
-      linguaxe natural. \\
-    \bottomrule
-  \end{tabularx}
-  \caption{Avaliación heurística da interface de Telaria segundo as dez heurísticas de Nielsen.}
-  \label{tab:heuristicas}
-\end{table}
 
 \section{Fluxos de comunicación entre compoñentes}
 
@@ -452,11 +384,13 @@ A seguridade do sistema descansa sobre os seguintes piares de deseño:
 
 \section{Equipamento hardware e software}
 
-O desenvolvemento e a execución do sistema requiren o seguinte equipamento, resumido na
-Táboa~\ref{tab:equipamento}. Dado que ningunha destas tecnoloxías constituía un requisito
+O desenvolvemento e a execución do sistema requiren o seguinte equipamento, resumido no
+Cadro~\ref{tab:equipamento}. Dado que ningunha destas tecnoloxías constituía un requisito
 previo, a súa elección xustifícase nas seccións anteriores e na introdución.
 
 \begin{table}[H]
+  \caption{Equipamento software e hardware do sistema.}
+  \label{tab:equipamento}
   \centering
   \begin{tabularx}{\textwidth}{@{}lX@{}}
     \toprule
@@ -471,6 +405,4 @@ previo, a súa elección xustifícase nas seccións anteriores e na introdución
     Cliente final   & Dispositivo móbil iOS ou Android con conexión á rede. \\
     \bottomrule
   \end{tabularx}
-  \caption{Equipamento software e hardware do sistema.}
-  \label{tab:equipamento}
 \end{table}

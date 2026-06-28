@@ -9,24 +9,28 @@ package "Presentación" {
   component "Compoñentes UI\n(themed, reutilizables)" as ui
 }
 
-package "Estado / Contextos" {
-  component "AuthProvider" as ctxAuth
-  component "Theme / DataSaver /\nSidebar Provider" as ctxUi
-  component "Trip / GroupChat\nProvider" as ctxTrip
+package "Estado da aplicación" as estadoApp #line.dashed {
+  package "Estado / Contextos" {
+    component "AuthProvider" as ctxAuth
+    component "Theme / DataSaver /\nSidebar Provider" as ctxUi
+    component "Trip / GroupChat\nProvider" as ctxTrip
+  }
+
+  package "Almacenamento local" {
+    component "SecureStore\n(tokens)" as secure
+    component "AsyncStorage\n(preferencias)" as async
+  }
 }
 
-package "Acceso a datos" {
-  component "Hooks React Query\n(useTrips, useExpenses, ...)" as hooks
-  component "callAuthenticated\n(fetch + Bearer + refresco 401)" as call
-  component "Tipos xerados (OpenAPI)" as types
-}
+package "Estado do servidor" as estadoSrv #line.dashed {
+  package "Acceso a datos" {
+    component "Hooks React Query\n(useTrips, useExpenses, ...)" as hooks
+    component "callAuthenticated\n(fetch + Bearer + refresco 401)" as call
+    component "Tipos xerados (OpenAPI)" as types
+  }
 
-package "Almacenamento local" {
-  component "SecureStore\n(tokens)" as secure
-  component "AsyncStorage\n(preferencias)" as async
+  cloud "Backend\nAPI REST" as api
 }
-
-cloud "Backend\nAPI REST" as api
 
 router --> ui
 router --> hooks

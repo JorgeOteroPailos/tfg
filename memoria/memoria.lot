@@ -1,19 +1,20 @@
 \babel@toc {galician}{}\relax 
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {1.1}{\ignorespaces Comparativa de funcionalidades entre Telaria e as alternativas existentes.}}{3}{table.caption.6}%
+\contentsline {table}{\numberline {1.1}{\ignorespaces Comparativa de funcionalidades entre Telaria e as alternativas existentes.}}{2}{table.caption.6}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {2.3}{\ignorespaces Datos persistidos localmente no dispositivo do cliente.}}{18}{table.2.3}%
+\contentsline {table}{\numberline {2.2}{\ignorespaces Entidades persistidas no servidor.}}{17}{table.2.2}%
+\contentsline {table}{\numberline {2.3}{\ignorespaces Datos persistidos localmente no dispositivo do cliente.}}{19}{table.2.3}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {3.1}{\ignorespaces Resumo dos principais recursos da API REST.}}{25}{table.caption.11}%
-\contentsline {table}{\numberline {3.2}{\ignorespaces Avaliación heurística da interface de Telaria segundo as dez heurísticas de Nielsen.}}{32}{table.caption.17}%
-\contentsline {table}{\numberline {3.3}{\ignorespaces Equipamento software e hardware do sistema.}}{36}{table.caption.22}%
+\contentsline {table}{\numberline {3.1}{\ignorespaces Resumo dos principais recursos da API REST.}}{25}{table.caption.12}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces Equipamento software e hardware do sistema.}}{34}{table.caption.22}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces Distribución das probas automatizadas do backend.}}{37}{table.caption.23}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces Cobertura de código do backend (JaCoCo).}}{38}{table.caption.24}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces Cobertura de código do frontend (Jest) sobre os módulos probados.}}{40}{table.caption.25}%
-\contentsline {table}{\numberline {4.4}{\ignorespaces Escenarios de validación funcional e a súa trazabilidade cos requisitos.}}{41}{table.caption.26}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Distribución das probas automatizadas do backend.}}{35}{table.caption.23}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Cobertura de código do backend (JaCoCo).}}{36}{table.caption.24}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Cobertura de código do frontend (Jest) sobre os módulos probados.}}{38}{table.caption.25}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Escenarios de validación funcional e a súa trazabilidade cos requisitos.}}{39}{table.caption.26}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Avaliación heurística da interface de Telaria segundo as dez heurísticas de Nielsen.}}{40}{table.caption.27}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {5.1}{\ignorespaces Grao de cumprimento dos obxectivos.}}{43}{table.caption.27}%
+\contentsline {table}{\numberline {5.1}{\ignorespaces Grao de cumprimento dos obxectivos.}}{43}{table.caption.28}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }

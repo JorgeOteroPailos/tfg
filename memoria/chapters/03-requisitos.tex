@@ -1,6 +1,6 @@
 \chapter{Especificación de Requisitos}
 
-A especificación de requisitos segue a estrutura do estándar \textbf{IEEE~830} para
+A especificación de requisitos segue a estrutura do estándar \textbf{IEEE~830}~\cite{ieee830} para
 documentos de especificación de requisitos software (SRS), adaptada ás necesidades
 deste proxecto: unha descrición xeral do produto, as interfaces con outros sistemas, os
 requisitos funcionais e non funcionais, os casos de uso máis relevantes e a información
@@ -18,22 +18,18 @@ compatible con S3 para os documentos compartidos.
 
 \subsection{Funcionalidade do produto}
 
-O sistema cobre os seguintes módulos funcionais:
+O sistema está composto polos seguintes módulos funcionais:
 
 \begin{itemize}
-  \item Autenticación e xestión de conta de usuario
-  \item Creación e adhesión a viaxes, xestión de membros
-  \item Rexistro de gastos compartidos e cálculo de liquidacións
-  \item Planificación de eventos con localización xeográfica
-  \item Almacenamento de documentos compartidos
-  \item Chat de grupo entre membros da viaxe
-  \item Asistente conversacional de intelixencia artificial por viaxe
+  \item Autenticación e xestión de conta de usuario.
+  \item Creación e adhesión a viaxes, xestión de membros.
+  \item Rexistro de gastos compartidos e cálculo de liquidacións.
+  \item Planificación de eventos con localización xeográfica.
+  \item Almacenamento de documentos compartidos.
+  \item Chat de grupo entre membros da viaxe.
+  \item Asistente conversacional de intelixencia artificial por viaxe.
+  \item Rede de amizades entre usuarios.
 \end{itemize}
-
-Ademais dos módulos anteriores, o sistema inclúe dúas funcionalidades complementarias:
-unha rede de amizades entre usuarios (funcionalidade de calidade de vida orientada a
-axilizar as invitacións recorrentes) e a xestión da propia conta, incluída a súa
-eliminación con confirmación de contrasinal.
 
 \subsection{Características dos usuarios}
 
@@ -41,7 +37,7 @@ eliminación con confirmación de contrasinal.
   \toprule
   \textbf{Tipo} & \textbf{Descrición} \\
   \midrule
-  Usuario & Persoa rexistrada na aplicación. Pode crear ou unirse a viaxes e, dentro delas, ten acceso completo a todas as funcionalidades de forma colaborativa e en igualdade de condicións co resto de membros. \\
+  Usuario & Persoa rexistrada na aplicación. Pode crear ou unirse a viaxes e, dentro delas, ten acceso completo a todas as funcionalidades de forma colaborativa e en igualdade de condicións que o resto de membros. \\
   \bottomrule
 \end{tabularx}
 
@@ -57,7 +53,7 @@ eliminación con confirmación de contrasinal.
 
 \begin{itemize}
   \item O servizo Ollama está dispoñible e accesible no servidor para o módulo de IA.
-  \item O servizo de almacenamento PostgreSQL está operativo e accesible para a persistencia de datos.
+  \item A base de datos PostgreSQL está operativa e accesible para a persistencia de datos.
   \item Existe un servizo de almacenamento compatible co protocolo S3 para os documentos.
   \item Os requisitos aquí descritos son estables durante o desenvolvemento.
 \end{itemize}
@@ -67,8 +63,8 @@ eliminación con confirmación de contrasinal.
 
 \subsection{Interface de usuario}
 
-Interface gráfica móbil nativa (React Native) con navegación en pestanas e pilas de
-pantallas, adaptada a iOS e Android sen necesidade de compilación separada por plataforma.
+Interface gráfica móbil nativa (React Native) adaptada a iOS e Android sen necesidade
+de compilación separada por plataforma.
 
 \subsection{Interfaces de hardware}
 
@@ -109,23 +105,30 @@ renovar o \textit{access token} sen necesidade de volver a autenticarse.
   \textbf{ID} & \textbf{Nome} & \textbf{Descrición} & \textbf{Prior.} \\
   \midrule
   \endhead
-  RF01 & Rexistro de usuario      & O sistema permite crear unha conta con nome de usuario, correo electrónico e contrasinal.                                                                                        & Alta   \\[4pt]
-  RF02 & Autenticación            & O sistema autentica usuarios mediante un \textit{access token} JWT; o \textit{refresh token} opaco invalídase no peche de sesión.                                                  & Alta   \\[4pt]
-  RF03 & Crear viaxe              & Un usuario autenticado pode crear novas viaxes.                                                                                                                                     & Alta   \\[4pt]
-  RF04 & Unirse a viaxe           & Un usuario pode unirse a unha viaxe mediante invitación recibida, solicitude de unión ou código QR.                                                                                 & Alta   \\[4pt]
-  RF05 & Xestión de membros       & Calquera membro pode invitar outros usuarios á viaxe e xestionar as solicitudes de unión pendentes.                                                                                 & Alta   \\[4pt]
-  RF06 & Xestión de gastos        & Calquera membro pode rexistrar un gasto (importe, nome, categoría, usuario pagador e conxunto de beneficiarios), ver os gastos da viaxe, ver os detalles dun gasto ou eliminalo.            & Alta   \\[4pt]
-  RF07 & Liquidacións             & O sistema calcula automaticamente as liquidacións entre membros, minimizando o número de transferencias necesarias para saldar as débedas; ademais, calquera membro pode rexistrar liquidacións xa realizadas e consultar o histórico de liquidacións da viaxe. & Alta   \\[4pt]
-  RF08 & Xestión de eventos       & Calquera membro pode crear, consultar e eliminar eventos con nome, data e hora de inicio, duración e localización xeográfica (nome, enderezo e coordenadas xeográficas).          & Alta  \\[4pt]
-  RF09 & Documentos compartidos   & Calquera membro pode subir, consultar e eliminar documentos asociados á viaxe; os documentos de imaxe mostran unha miniatura de previsualización xerada automaticamente.                                                                                                   & Media  \\[4pt]
-  RF10 & Chat de grupo            & Os membros dunha viaxe poden enviar e consultar mensaxes de texto no chat común da viaxe.                                                                                           & Media  \\[4pt]
-  RF11 & Asistente de IA          & Cada viaxe dispón dun chatbot conversacional con historial persistente entre sesións.                                                                                               & Baixa  \\[4pt]
-  RF12 & Rede de amizades         & Funcionalidade complementaria: un usuario pode enviar solicitudes de amizade a outro (polo seu identificador ou código QR), aceptalas ou rexeitalas, consultar a súa lista de amigos e eliminar amizades.   & Baixa  \\[4pt]
-  RF13 & Convidar amigos á viaxe  & Funcionalidade complementaria que permite convidar amigos a unha viaxe directamente desde a lista de amizades, como atallo ás invitacións por identificador ou QR.                  & Baixa  \\[4pt]
-  RF14 & Eliminación de conta     & Un usuario pode eliminar a súa propia conta; a operación require a confirmación do contrasinal e elimina os datos persoais asociados.                                               & Baixa  \\[4pt]
-  RF15 & Xestión do perfil        & Un usuario pode consultar e actualizar o seu nome de usuario e correo electrónico (o cambio de correo require a confirmación do contrasinal), cambiar o contrasinal e subir ou consultar o seu avatar. & Media  \\[4pt]
-  RF16 & Saír dunha viaxe         & Calquera membro pode abandonar unha viaxe; se é o último membro, a viaxe e todos os seus datos asociados elimínanse automaticamente.                                                & Media  \\[4pt]
-  RF17 & Preferencias da aplicación & O usuario pode personalizar a interface: seleccionar o tema visual (claro ou escuro), o idioma (galego, castelán ou inglés) e activar o modo de aforro de datos.                    & Baixa  \\
+  % -- Autenticación e conta --
+  RF01 & Rexistro de usuario        & O sistema permite crear unha conta con nome de usuario, correo electrónico e contrasinal.                                                                                        & Alta   \\[4pt]
+  RF02 & Autenticación              & O sistema autentica usuarios mediante un \textit{access token} JWT; o \textit{refresh token} opaco invalídase no peche de sesión.                                                  & Alta   \\[4pt]
+  RF03 & Xestión do perfil          & Un usuario pode consultar e actualizar o seu nome de usuario e correo electrónico (o cambio de correo require a confirmación do contrasinal), cambiar o contrasinal e subir ou consultar o seu avatar. & Media  \\[4pt]
+  RF04 & Eliminación de conta       & Un usuario pode eliminar a súa propia conta; a operación require a confirmación do contrasinal e elimina os datos persoais asociados.                                               & Baixa  \\[4pt]
+  RF05 & Preferencias da aplicación & O usuario pode personalizar a interface: seleccionar o tema visual (claro ou escuro), o idioma (galego, castelán ou inglés) e activar o modo de aforro de datos.                    & Baixa  \\[4pt]
+  % -- Viaxes e membros --
+  RF06 & Crear viaxe                & Un usuario autenticado pode crear novas viaxes.                                                                                                                                     & Alta   \\[4pt]
+  RF07 & Unirse a viaxe             & Un usuario pode unirse a unha viaxe mediante invitación recibida, solicitude de unión ou código QR.                                                                                 & Alta   \\[4pt]
+  RF08 & Xestión de membros         & Calquera membro pode invitar outros usuarios á viaxe e xestionar as solicitudes de unión pendentes.                                                                                 & Alta   \\[4pt]
+  RF09 & Saír dunha viaxe           & Calquera membro pode abandonar unha viaxe; se é o último membro, a viaxe e todos os seus datos asociados elimínanse automaticamente.                                                & Media  \\[4pt]
+  % -- Gastos --
+  RF10 & Xestión de gastos          & Calquera membro pode rexistrar un gasto (importe, nome, categoría, usuario pagador e conxunto de beneficiarios), ver os gastos da viaxe, ver os detalles dun gasto ou eliminalo.            & Alta   \\[4pt]
+  RF11 & Liquidacións               & O sistema calcula automaticamente as liquidacións entre membros, minimizando o número de transferencias necesarias para saldar as débedas; ademais, calquera membro pode rexistrar liquidacións xa realizadas e consultar o histórico de liquidacións da viaxe. & Alta   \\[4pt]
+  % -- Eventos --
+  RF12 & Xestión de eventos         & Calquera membro pode crear, consultar e eliminar eventos con nome, data e hora de inicio, duración e localización xeográfica (nome, enderezo e coordenadas xeográficas).          & Alta  \\[4pt]
+  % -- Documentos --
+  RF13 & Documentos compartidos     & Calquera membro pode subir, consultar e eliminar documentos asociados á viaxe; os documentos de imaxe mostran unha miniatura de previsualización xerada automaticamente.                                                                                                   & Alta   \\[4pt]
+  % -- Comunicación --
+  RF14 & Chat de grupo              & Os membros dunha viaxe poden enviar e consultar mensaxes de texto no chat común da viaxe.                                                                                           & Media  \\[4pt]
+  RF15 & Asistente de IA            & Cada viaxe dispón dun chatbot conversacional con historial persistente entre sesións.                                                                                               & Baixa  \\[4pt]
+  % -- Amizades --
+  RF16 & Rede de amizades           & Un usuario pode enviar solicitudes de amizade a outro (polo seu identificador ou código QR), aceptalas ou rexeitalas, consultar a súa lista de amigos e eliminar amizades.   & Baixa  \\[4pt]
+  RF17 & Convidar amigos á viaxe    & Permite convidar amigos a unha viaxe directamente dende a lista de amizades, como atallo ás invitacións por identificador ou QR.                  & Baixa  \\
   \bottomrule
 \end{longtable}
 
@@ -159,10 +162,10 @@ continuación detállanse os fluxos principais.
 \begin{itemize}[noitemsep,topsep=2pt]
   \item \textbf{Actor:} Usuario.
   \item \textbf{Precondicións:} usuario autenticado.
-  \item \textbf{Fluxo principal:} (1) obtén unha invitación, coñece o identificador ou escanea o código QR dunha viaxe; (2) o sistema rexistra a operación correspondente; (3) o usuario pasa a ser membro da viaxe.
-  \item \textbf{Fluxos alternativos:} por invitación (un membro convídao e o usuario acéptaa); por solicitude (o usuario solicita unirse e calquera membro a aproba); por QR (o escaneo resólvese nunha das vías anteriores).
+  \item \textbf{Fluxo principal (por invitación):} (1) un membro da viaxe convída ao usuario; (2) o usuario recibe a notificación e acepta a invitación; (3) o sistema rexistra a adhesión e o usuario pasa a ser membro da viaxe.
+  \item \textbf{Fluxos alternativos:} por solicitude (o usuario solicita unirse a partir dun identificador de viaxe e calquera membro aproba a solicitude); por QR (o usuario escanea un código QR que o sistema procesa como invitación directa).
   \item \textbf{Poscondición:} o usuario figura na lista de membros da viaxe.
-  \item \textbf{Requisitos:} RF04, RF05.
+  \item \textbf{Requisitos:} RF07, RF08.
 \end{itemize}
 
 \paragraph*{CU03. Rexistrar un gasto e liquidar débedas.}
@@ -172,7 +175,7 @@ continuación detállanse os fluxos principais.
   \item \textbf{Fluxo principal:} (1) rexistra un gasto (importe, nome, categoría, pagador e beneficiarios); (2) o sistema garda o gasto e recalcula os balances; (3) o membro consulta quen debe a quen; (4) cando se salda unha débeda, rexístrase a liquidación correspondente.
   \item \textbf{Fluxos alternativos:} o pagador ou algún beneficiario non é membro da viaxe $\rightarrow$ erro de validación.
   \item \textbf{Poscondición:} os balances reflicten o novo gasto; as liquidacións rexistradas reducen as débedas pendentes.
-  \item \textbf{Requisitos:} RF06, RF07.
+  \item \textbf{Requisitos:} RF10, RF11.
 \end{itemize}
 
 \paragraph*{CU04. Xestionar os membros da viaxe.}
@@ -182,7 +185,7 @@ continuación detállanse os fluxos principais.
   \item \textbf{Fluxo principal:} (1) convida a outro usuario (por identificador, amizade ou QR) ou consulta as solicitudes de unión pendentes; (2) acepta ou rexeita unha solicitude; (3) o sistema actualiza a lista de membros.
   \item \textbf{Fluxos alternativos:} usuario xa membro ou xa convidado $\rightarrow$ conflito.
   \item \textbf{Poscondición:} a composición da viaxe queda actualizada. Calquera membro pode realizar estas accións: non hai roles.
-  \item \textbf{Requisitos:} RF05, RF13.
+  \item \textbf{Requisitos:} RF08, RF17.
 \end{itemize}
 
 \paragraph*{CU05. Subir un documento.}
@@ -192,7 +195,7 @@ continuación detállanse os fluxos principais.
   \item \textbf{Fluxo principal:} (1) inicia a subida indicando nome e tipo de contido; (2) o sistema crea o rexistro e devolve unha URL prefirmada; (3) o cliente sobe o ficheiro directamente ao almacén de obxectos; (4) o cliente confirma a subida e o sistema marca o documento como dispoñible, xerando unha miniatura de forma asíncrona se é unha imaxe.
   \item \textbf{Fluxos alternativos:} se a subida non se confirma, unha tarefa programada verifica a existencia do arquivo no almacenamento e, de existir, a marca como confirmada; en caso contrario, elimina o rexistro orfo.
   \item \textbf{Poscondición:} o documento queda listado e descargable mediante URL prefirmada.
-  \item \textbf{Requisitos:} RF09.
+  \item \textbf{Requisitos:} RF13.
 \end{itemize}
 
 \paragraph*{CU06. Eliminar a conta.}
@@ -202,7 +205,7 @@ continuación detállanse os fluxos principais.
   \item \textbf{Fluxo principal:} (1) solicita eliminar a súa conta; (2) o sistema solicita a confirmación do contrasinal; (3) tras a verificación, elimínanse os datos persoais e os artefactos asociados (avatares, documentos) e retírase o usuario das viaxes compartidas; (4) péchase a sesión.
   \item \textbf{Fluxos alternativos:} contrasinal incorrecto $\rightarrow$ cancélase a operación.
   \item \textbf{Poscondición:} a conta e os datos persoais quedan eliminados.
-  \item \textbf{Requisitos:} RF14, RF15.
+  \item \textbf{Requisitos:} RF03, RF04.
 \end{itemize}
 
 % -----------------------------------------------------------------------
@@ -212,7 +215,7 @@ continuación detállanse os fluxos principais.
 
 \begin{itemize}
   \item \textbf{RNF-SE-01}. Control de acceso: só os membros dunha viaxe acceden aos seus datos; calquera usuario autenticado pode crear viaxes.
-  \item \textbf{RNF-SE-02}. Os contrasinais almacénanse con hash BCrypt; os \textit{access tokens} JWT teñen vida curta e os \textit{refresh tokens} opacos almacénanse no servidor para limitar a exposición ante compromisos.
+  \item \textbf{RNF-SE-02}. Os contrasinais almacénanse con hash BCrypt; os \textit{access tokens} JWT teñen vida curta e os \textit{refresh tokens} opacos almacénanse no servidor para limitar a exposición ante intrusións.
   \item \textbf{RNF-SE-03}. As operacións sensibles sobre a conta (o cambio de correo electrónico e a eliminación da conta) requiren a confirmación do contrasinal actual.
 \end{itemize}
 
@@ -236,6 +239,15 @@ continuación detállanse os fluxos principais.
 \begin{itemize}
   \item \textbf{RNF-US-01}. A interface debe ser intuitiva e usable sen formación previa.
   \item \textbf{RNF-US-02}. A aplicación estará dispoñible en galego, castelán e inglés.
+  \item \textbf{RNF-US-03}. A aplicación proporcionará retroalimentación visual inmediata
+        ante cada acción relevante (indicadores de carga, confirmacións e mensaxes de erro),
+        conforme ao heurístico de visibilidade do estado do sistema de Nielsen.
+  \item \textbf{RNF-US-04}. A interface será consistente en terminoloxía, iconas e
+        comportamento en todas as pantallas, seguindo o heurístico de coherencia e estándares
+        de Nielsen.
+  \item \textbf{RNF-US-05}. A paleta de cores respectará os estándares de accesibilidade:
+        a información crítica non dependerá unicamente da cor, de xeito que sexa interpretable
+        por usuarios con déficit de percepción cromática.
 \end{itemize}
 
 \subsection{Mantibilidade}
@@ -274,21 +286,24 @@ etc.) almacénase nunha base de datos relacional \textbf{PostgreSQL}, onde Hiber
 cada entidade á súa táboa. Os \textbf{ficheiros binarios} (documentos compartidos e
 avatares) non se gardan na base de datos, senón nun \textbf{almacén de obxectos}. Por
 último, o dispositivo do usuario conserva localmente un pequeno conxunto de datos de
-sesión e de preferencias que se detalla máis adiante. A Táboa seguinte recolle as
-principais entidades persistidas no servidor e os seus atributos.
+sesión e de preferencias que se detalla máis adiante. O Cadro~\ref{tab:entidades} recolle
+as principais entidades persistidas no servidor e os seus atributos.
 
 \begin{longtable}{@{}p{4cm}p{10.3cm}@{}}
+  \caption{Entidades persistidas no servidor.}
+  \label{tab:entidades} \\
   \toprule
   \textbf{Entidade} & \textbf{Atributos principais} \\
   \midrule
   \endfirsthead
+  \caption*{Cadro~\ref{tab:entidades} (continuación)} \\
   \toprule
   \textbf{Entidade} & \textbf{Atributos principais} \\
   \midrule
   \endhead
   Usuario                    & Identificador (UUID), nome de usuario, correo electrónico, contrasinal (hash). \\[4pt]
   Viaxe                      & Identificador (UUID), nome, data de creación, conxunto de membros (usuarios). \\[4pt]
-  Evento                     & Identificador, nome, data e hora de inicio (con fuso horario), duración en minutos, localización embebida (nome, enderezo, latitude, lonxitude, URL de mapa). \\[4pt]
+  Evento                     & Identificador, nome, data e hora de inicio (con fuso horario), duración en minutos, localización embebida (nome, enderezo, latitude, lonxitude). \\[4pt]
   Gasto                      & Identificador, importe (decimal), nome, categoría (enumeración), usuario pagador, usuario creador do rexistro, conxunto de beneficiarios, marca temporal. \\[4pt]
   Liquidación                & Identificador, importe (decimal), usuario pagador, usuario receptor, marca temporal. \\[4pt]
   Documento compartido       & Identificador, nome de ficheiro, clave no almacén de obxectos, clave da miniatura de previsualización, estado de subida (booleano), usuario creador, marca temporal. \\[4pt]
@@ -336,8 +351,8 @@ conxunto reducido de información para soster a sesión entre execucións e reco
 preferencias da persoa usuaria. As credenciais de sesión (os \textit{tokens}) gárdanse no
 \textbf{almacén seguro e cifrado do sistema operativo}, respaldado pola \textit{keychain}
 de iOS ou o \textit{keystore} de Android, mentres que o resto de valores, ao non ser
-sensibles, se persisten no almacenamento clave-valor convencional do dispositivo. A
-Táboa~\ref{tab:frontend-storage} resume o que se garda no cliente.
+sensibles, se persisten no almacenamento clave-valor convencional do dispositivo. O
+Cadro~\ref{tab:frontend-storage} resume o que se garda no cliente.
 
 \begin{longtable}{@{}p{3.6cm}p{10.7cm}@{}}
   \caption{Datos persistidos localmente no dispositivo do cliente.}

@@ -223,6 +223,11 @@ INPUT ./chapters/02-introducion.tex
 INPUT chapters/02-introducion.tex
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecrm1728.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecsl1200.tfm
+INPUT ./diagrams/funcionalidades-telaria.pdf
+INPUT ./diagrams/funcionalidades-telaria.pdf
+INPUT ./diagrams/funcionalidades-telaria.pdf
+INPUT ./diagrams/funcionalidades-telaria.pdf
+INPUT ./diagrams/funcionalidades-telaria.pdf
 INPUT ./chapters/03-requisitos.tex
 INPUT ./chapters/03-requisitos.tex
 INPUT ./chapters/03-requisitos.tex
@@ -274,6 +279,7 @@ INPUT ./screenshots/calendar.jpeg
 INPUT ./screenshots/calendar.jpeg
 INPUT ./screenshots/calendar.jpeg
 INPUT ./screenshots/calendar.jpeg
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcrm1200.tfm
 INPUT ./screenshots/balances-light.jpeg
 INPUT ./screenshots/balances-light.jpeg
 INPUT ./screenshots/balances-light.jpeg
@@ -409,6 +415,7 @@ INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.60
 INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbi1200.600pk
 INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbi1440.600pk
 INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1095.600pk
+INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1200.600pk
 INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.600pk
 INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.600pk
 INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsl1200.600pk
