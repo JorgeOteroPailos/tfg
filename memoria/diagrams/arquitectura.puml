@@ -2,6 +2,7 @@
 skinparam shadowing false
 skinparam componentStyle rectangle
 skinparam defaultTextAlignment center
+left to right direction
 
 node "Dispositivo móbil\n(iOS / Android)" as movil {
   component "Aplicación Telaria\n(React Native + Expo)" as app
@@ -14,9 +15,9 @@ node "Servidor (contedores Podman)" as servidor {
   component "Ollama\n(LLM local)" as ollama
 }
 
-app <-down-> backend : HTTPS / REST + SSE\n(JSON, JWT)
+app <--> backend : HTTPS / REST + SSE\n(JSON, JWT)
 app <..> minio : subida/descarga directa\n(URL prefirmada)
-backend <-down-> pg : JDBC
-backend -right-> minio : AWS S3 SDK\n(xera URLs prefirmadas)
-backend <-down-> ollama : HTTP (streaming)
+backend <--> pg : JDBC
+backend --> minio : AWS S3 SDK\n(xera URLs prefirmadas)
+backend <--> ollama : HTTP (streaming)
 @enduml

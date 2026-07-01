@@ -33,7 +33,7 @@ funcionalidades en tempo real (chat de grupo e asistente de IA), o servidor empr
 \textit{Server-Sent Events} (SSE), que permiten un fluxo unidireccional de eventos do
 servidor cara ao cliente sobre a mesma conexión HTTP. Finalmente, a subida e a descarga
 de documentos non pasan polo backend: este limítase a xerar \textit{URLs prefirmadas} de
-xeito que o cliente fala \textbf{directamente} co almacén de obxectos, descargando o
+xeito que o cliente se comunica \textbf{directamente} co almacén de obxectos, descargando o
 servidor da transferencia de ficheiros.
 
 \section{Arquitectura do backend}
@@ -43,7 +43,7 @@ responsabilidades, como se aprecia na Figura~\ref{fig:backend}.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.85\textwidth]{diagrams/backend-componentes.pdf}
+  \includegraphics[width=0.85\textwidth]{diagrams/backend-componentes.png}
   \caption{Compoñentes e capas do backend.}
   \label{fig:backend}
 \end{figure}
@@ -186,7 +186,7 @@ navegación.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.55\textwidth]{diagrams/navegacion.pdf}
+  \includegraphics[height=0.45\textheight,keepaspectratio]{diagrams/navegacion.pdf}
   \caption{Mapa de navegación da aplicación.}
   \label{fig:navegacion}
 \end{figure}
@@ -204,6 +204,13 @@ violeta. A
 aplicación ofrece dous temas (claro e escuro) que o usuario pode seleccionar e que se
 conservan entre sesións. A Figura~\ref{fig:paleta} recolle as cores principais.
 
+A tipografía emprega as fontes nativas do sistema, de xeito que a interface mantense
+coidada independentemente do dispositivo, evitando problemas de carga de fontes,
+alixeirando a aplicación, e contribuíndo ademais a unha apariencia máis uniforme co resto de aplicacións
+nativas. A xerarquía visual conséguese mediante o peso e o espazado entre letras, máis que
+mediante familias tipográficas distintas. A estética compleméntase con esquinas redondeadas e brillos sutís
+(\textit{glow}) de ton violeta arredor dos elementos destacados.
+
 \begin{figure}[H]
   \centering
   \renewcommand{\arraystretch}{1.3}
@@ -215,13 +222,6 @@ conservan entre sesións. A Figura~\ref{fig:paleta} recolle as cores principais.
   \caption{Paleta de cores de Telaria: cores globais e específicas de cada tema.}
   \label{fig:paleta}
 \end{figure}
-
-A tipografía emprega as fontes nativas do sistema, de xeito que a interface mantense
-coidada independentemente do dispositivo, evitando problemas de carga de fontes e
-alixeirando a aplicación, e contribuíndo ademais a unha apariencia máis uniforme co resto de aplicacións
-nativas. A xerarquía visual conséguese mediante o peso e o espazado entre letras, máis que
-mediante familias tipográficas distintas. A estética compleméntase con esquinas redondeadas e brillos sutís
-(\textit{glow}) de ton violeta arredor dos elementos destacados.
 
 \subsection{Compoñentes e patróns de interface}
 
@@ -236,7 +236,7 @@ completa accesible dende un botón flotante. Completan o repertorio as tarxetas,
 os diálogos de confirmación. A Figura~\ref{fig:ui-pantalla} mostra unha pantalla representativa.
 
 \begin{figure}[htbp]\centering
-  \includegraphics[width=0.45\textwidth]{calendar.jpeg}
+  \includegraphics[width=0.33\textwidth]{calendar.jpeg}
   \caption{Pantalla representativa da aplicación (calendario compartido da viaxe).}\label{fig:ui-pantalla}
 \end{figure}
 
@@ -257,8 +257,7 @@ No tocante á accesibilidade, a aplicación adopta varias medidas, que se descri
   \item \textbf{Internacionalización.} A aplicación está dispoñible en galego, castelán e
         inglés (cf.\ RNF-US-02), o que mellora a comprensión para usuarios de distintas linguas.
   \item \textbf{Dobre tema.} O tema claro/escuro axuda ás persoas sensibles á luz ou con baixa
-        visión; o modo de aforro de datos reduce ademais a carga de imaxes. A
-Figura~\ref{fig:ui-temas} ilustra os dous temas.
+        visión; o modo de aforro de datos reduce ademais a carga de imaxes (Figura~\ref{fig:ui-temas}).
   \item \textbf{Etiquetas e roles de accesibilidade.} Os controis interactivos (barra de
         pestanas, menús, asistente de IA, botóns de acción, etc.) incorporan
         \texttt{accessibilityLabel}, \texttt{accessibilityRole} e \texttt{accessibilityState}
@@ -268,23 +267,21 @@ Figura~\ref{fig:ui-temas} ilustra os dous temas.
         texto e fondo cumpran o limiar de contraste.
   \item \textbf{Movemento reducido.} As animacións desactívanse ou acúrtanse cando o usuario
         activa esta preferencia no sistema operativo.
-  \item \textbf{Escala tipográfica.} As compoñentes de texto compartidas limitan o factor
-        máximo de escala (\texttt{maxFontSizeMultiplier}) para que os tamaños grandes non rompan
-        os deseños.
+  \item \textbf{Escala tipográfica.} As compoñentes de texto compartidas limitan \texttt{maxFontSizeMultiplier}
+        para que os tamaños grandes non rompan os deseños.
   \item \textbf{Área de pulsación.} Os controis interactivos amplían a súa área de pulsación
-        (\texttt{hitSlop}) ata o mínimo recomendado (44×44~pt), e as accións sensibles (saír da
-        viaxe, eliminar a conta, pechar a sesión, etc.) inclúen pistas
-        (\texttt{accessibilityHint}) que describen o seu efecto.
+        (\texttt{hitSlop}) ata o mínimo recomendado (44×44~pt), e as accións sensibles (eliminar
+        conta, saír da viaxe, etc.) inclúen pistas (\texttt{accessibilityHint}) co seu efecto.
 \end{itemize}
 
 
 \begin{figure}[htbp]
   \centering
   \subcaptionbox{Tema claro\label{fig:ui-temas-light}}{%
-    \includegraphics[height=11cm]{balances-light.jpeg}}
+    \includegraphics[height=7.8cm]{balances-light.jpeg}}
   \hspace{0.8cm}
   \subcaptionbox{Tema escuro\label{fig:ui-temas-dark}}{%
-    \includegraphics[height=11cm]{balances-dark.jpeg}}
+    \includegraphics[height=7.8cm]{balances-dark.jpeg}}
   \caption{Comparación dos temas claro e escuro: pantalla de balances da viaxe.}
   \label{fig:ui-temas}
 \end{figure}
@@ -293,14 +290,24 @@ Figura~\ref{fig:ui-temas} ilustra os dous temas.
 
 \subsection{Autenticación e renovación de tokens}
 
-O inicio de sesión devolve un \textit{access token} JWT de vida curta e un
-\textit{refresh token} opaco. Cando o \textit{access token} caduca, o cliente detéctao
-ante unha resposta \texttt{401} e renóvao de forma transparente, sen requirir unha nova
-autenticación do usuario (Figura~\ref{fig:seq-auth}).
+O inicio de sesión devolve un \textit{access token} JWT válido durante 30 minutos e un
+\textit{refresh token} opaco de 32 bytes aleatorios codificados en Base64-URL, que se
+garda na base de datos. Cando o \textit{access token} caduca, o cliente detéctao ante
+unha resposta \texttt{401} e renóvao de forma transparente, sen requirir nova
+autenticación (Figura~\ref{fig:seq-auth}).
+
+O \textit{refresh token} aplica \textbf{rotación automática}: en cada uso, o servidor
+invalida o token antigo e emite un novo par, polo que un token roubado queda inutilizable
+tras o primeiro uso lexítimo. No peche de sesión —e tamén ao cambiar o contrasinal—
+elimínanse todos os \textit{refresh tokens} do usuario, revogando todas as sesións
+activas. Ao reabrir a aplicación, o \textit{refresh token} persistido intercámbiase por
+un novo \textit{access token} sen interacción do usuario. Para evitar condicións de
+carreira, as peticións concorrentes que atopan un \texttt{401} comparten unha única
+promesa de renovación en curso.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{diagrams/seq-auth.pdf}
+  \includegraphics[width=0.8\textwidth]{diagrams/seq-auth.pdf}
   \caption{Secuencia de autenticación e renovación do \textit{access token}.}
   \label{fig:seq-auth}
 \end{figure}
@@ -327,7 +334,7 @@ miniatura de forma asíncrona (Figura~\ref{fig:seq-upload}).
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.9\textwidth]{diagrams/seq-upload.pdf}
+  \includegraphics[width=0.85\textwidth]{diagrams/seq-upload.pdf}
   \caption{Secuencia de subida de documentos con URL prefirmada.}
   \label{fig:seq-upload}
 \end{figure}

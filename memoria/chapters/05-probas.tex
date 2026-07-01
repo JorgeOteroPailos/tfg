@@ -1,10 +1,12 @@
 \chapter{Probas}
 \label{ch:probas}
 
-A verificación da funcionalidade e da corrección global do sistema aborda dúas
-dimensións complementarias: as \textbf{probas automatizadas} do backend, que garanten a
-corrección técnica da lóxica e da API, e a \textbf{validación funcional} de extremo a
-extremo da aplicación, que comproba que o produto se comporta como espera o usuario.
+A verificación da funcionalidade e da corrección global do sistema estrutúrase en cinco
+dimensións complementarias: as probas automatizadas do backend e do frontend,
+que garanten a corrección técnica da lóxica e dos compoñentes; a validación
+funcional de extremo a extremo, que comproba que os fluxos de usuario se comportan como
+se especificou; e a avaliación de usabilidade, que combina unha análise
+heurística e probas con usuarios reais para detectar problemas de interacción.
 
 \section{Estratexia de probas}
 
@@ -15,33 +17,38 @@ A estratexia segue o modelo da pirámide de probas, con tres niveis:
         substituíndo as dependencias por dobres de proba (\textit{mocks}). Aplícanse tanto
         no backend (JUnit~5) como no frontend (Jest).
   \item \textbf{Probas de integración (E2E)}: executan a API completa contra unha base de
-        datos e un almacén de obxectos reais, levantados en contedores efémeros.
+        datos e un almacén de obxectos reais, levantados en contedores efémeros mediante
+        \textbf{Testcontainers}.
   \item \textbf{Validación de sistema}: comprobación manual dos fluxos de usuario completos
         sobre a aplicación en execución.
 \end{itemize}
 
+En total, o proxecto conta con \textbf{677 probas automatizadas} (410 no backend e 267
+no frontend), complementadas por unha avaliación de usabilidade con usuarios reais
+descrita nas seccións finais deste capítulo.
+
 \section{Probas automatizadas do backend}
 
 O backend conta cunha batería de \textbf{410 probas automatizadas} repartidas en 30 clases,
-que se executan co \textit{framework} JUnit~5. O Cadro~\ref{tab:probas} resume a súa
-distribución.
+que se executan co \textit{framework} JUnit~5. O Cadro~\ref{tab:probas} resume o número de
+probas e clases por tipo.
 
 \begin{table}[H]
-  \caption{Distribución das probas automatizadas do backend.}
+  \caption{Distribución das probas automatizadas do backend por tipo.}
   \label{tab:probas}
   \centering
-  \begin{tabularx}{\textwidth}{@{}lcX@{}}
+  \begin{tabular}{@{}lrrp{6.5cm}@{}}
     \toprule
-    \textbf{Tipo} & \textbf{Clases} & \textbf{Descrición} \\
+    \textbf{Tipo} & \textbf{Probas} & \textbf{Clases} & \textbf{Descrición} \\
     \midrule
-    Unitarias de servizos   & 11 & Lóxica de negocio illada con Mockito. \\
-    Integración (E2E)        & 12 & API completa con base de datos e almacén reais (Testcontainers). \\
-    Modelo                   & 4  & Lóxica propia das entidades de dominio. \\
-    Tarefas programadas      & 3  & Comportamento dos \textit{schedulers} de limpeza. \\
+    Unitarias de servizos   & 169 & 11 & Lóxica de negocio illada con Mockito. \\
+    Integración (E2E)        & 197 & 12 & API completa con base de datos e almacén reais (Testcontainers). \\
+    Modelo                   &  38 &  4 & Lóxica propia das entidades de dominio. \\
+    Tarefas programadas      &   6 &  3 & Comportamento dos \textit{schedulers} de limpeza. \\
     \midrule
-    \textbf{Total}           & \textbf{30} & \textbf{410 probas} \\
+    \textbf{Total}           & \textbf{410} & \textbf{30} & \\
     \bottomrule
-  \end{tabularx}
+  \end{tabular}
 \end{table}
 
 As probas de integración empregan \textbf{Testcontainers}~\cite{testcontainers}, que levanta
@@ -137,7 +144,7 @@ de xeito que as pantallas da aplicación (que non forman parte desta batería) n
 na análise. Polo tanto, as cifras do Cadro~\ref{tab:cobertura-frontend} reflicten a
 calidade da cobertura dentro dos módulos elixidos, non a cobertura global do frontend.
 
-\begin{table}[htbp]
+\begin{table}[H]
   \caption{Cobertura de código do frontend (Jest) sobre os módulos probados.}
   \label{tab:cobertura-frontend}
   \centering
@@ -182,19 +189,15 @@ desmonta xusto antes de que a promesa de \texttt{AccessibilityInfo} resolva, o q
 difícil de reproducir de forma determinista nun test. A cobertura baixa de
 \texttt{aiChat.tsx} (45\,\% de instrucións) débese á clase \texttt{OneShotEventSource}, que
 estende a biblioteca \texttt{react-native-sse}: dado que esta biblioteca está substituída por
-un \textit{mock} nas probas, o código da clase nunca se executa e Jest contabiliza todas as
-súas liñas como non cubertas; os \textit{hooks} exportados do módulo, que é o que se está a
-verificar, están completamente cubertos. A función \texttt{setDataSaver} de
+un \textit{mock} nas probas, o código da clase nunca se executa; os \textit{hooks}
+exportados están completamente cubertos. A función \texttt{setDataSaver} de
 \texttt{dataSaver.tsx} non está cuberta ao 100\,\% en funcións (80\,\%) porque a variante
 interna de inicialización diferida non é executada directamente polas probas. A cobertura
 parcial de \texttt{expenses.tsx}, \texttt{invitations.tsx} e \texttt{trips.tsx} débese a
 \textit{hooks} internos non exportados (\texttt{usePastSettlementsQuery},
 \texttt{useResolveInvitationMutation} e \texttt{useLeaveTripMutation}/\texttt{useTripQuery},
-respectivamente) que non se poden invocar directamente dende as probas. As liñas non
-cubertas de \texttt{auth.tsx} (92\,\% de instrucións) corresponden a ramas defensivas dentro
-das funcións privadas \texttt{loginRequest} e \texttt{registerRequest} e á garda de
-\textit{parsing} do JWT. As de \texttt{groupChat.tsx} (92\,\% de instrucións) corresponden
-ao manexador de erros SSE e algunhas ramas de estado de chat que non se activan nas
+respectivamente) que non se poden invocar directamente dende as probas. As liñas non cubertas de \texttt{auth.tsx} e \texttt{groupChat.tsx} (92\,\% ambos)
+corresponden a ramas defensivas e manexadores de erros que non se activan nas
 combinacións de proba elixidas.
 
 \section{Validación funcional do sistema}
@@ -202,7 +205,8 @@ combinacións de proba elixidas.
 Para verificar o comportamento de extremo a extremo executáronse manualmente sobre a
 aplicación os escenarios de uso descritos no Cadro~\ref{tab:escenarios}, que cubren a
 totalidade dos requisitos funcionais. Cada escenario comprende a secuencia completa de
-accións do usuario e a comprobación do resultado esperado.
+accións do usuario e a comprobación do resultado esperado. As probas executáronse sobre
+dispositivos reais con iOS e Android.
 
 \begin{table}[H]
   \caption{Escenarios de validación funcional e a súa trazabilidade cos requisitos.}
@@ -234,62 +238,72 @@ probas de pensamento en voz alta con usuarios reais descritas na
 Sección~\ref{sec:usabilidade}. O Cadro~\ref{tab:heuristicas} resume como o deseño aborda
 cada heurística.
 
-\begin{table}[H]
+\begin{longtable}{@{}p{0.30\linewidth}p{0.64\linewidth}@{}}
   \caption{Avaliación heurística da interface de Telaria segundo as dez heurísticas de Nielsen.}
-  \label{tab:heuristicas}
-  \centering
-  \begin{tabularx}{\textwidth}{@{}lX@{}}
-    \toprule
-    \textbf{Heurística} & \textbf{Aplicación en Telaria} \\
-    \midrule
-    Visibilidade do estado do sistema &
-      Indicadores de carga nas chamadas á API, progresión visual na subida de
-      documentos, actualizacións en tempo real do chat e do asistente de IA
-      (\textit{streaming}) e \textit{badges} de notificación na barra de pestanas. \\
-    \addlinespace
-    Correspondencia co mundo real &
-      Terminoloxía de viaxes familiar (gastos, membros, eventos, calendario),
-      categorías de gasto naturais e mapa interactivo para seleccionar localizacións. \\
-    \addlinespace
-    Control e liberdade do usuario &
-      Navegación cara atrás en todos os niveis, posibilidade de abandonar unha viaxe
-      e de eliminar a conta, e cancelación de calquera modal sen consecuencias. \\
-    \addlinespace
-    Consistencia e estándares &
-      Compoñentes con tema reutilizables (\texttt{ThemedText}, \texttt{ThemedButton},
-      \texttt{ThemedInput}), paleta e tipoloxía uniformes e patróns de navegación
-      estándar para plataformas móbiles (barra de pestanas, \textit{bottom sheet}). \\
-    \addlinespace
-    Prevención de erros &
-      Validación de formularios antes do envío, diálogos de confirmación para
-      operacións destrutivas (eliminar conta, saír da viaxe) e tipado estrito de
-      extremo a extremo a través do contrato OpenAPI. \\
-    \addlinespace
-    Recoñecemento antes que recordo &
-      Barra de pestanas sempre visible, historial de mensaxes e de gastos accesible
-      en todo momento e información contextual da viaxe activa presente en cada
-      pantalla. \\
-    \addlinespace
-    Flexibilidade e eficiencia &
-      Unión a viaxes por código QR, convites directos a amigos e acceso inmediato
-      aos documentos do día seleccionado no calendario. \\
-    \addlinespace
-    Deseño estético e minimalista &
-      Estética limpa, ausencia de información superflua en
-      pantalla e textura de fondo sutil que non distrae do contido principal. \\
-    \addlinespace
-    Axuda para recuperarse de erros &
-      Mensaxes de erro claras nas operacións fallidas, formato \textit{Problem
-      Details} (RFC~7807)~\cite{rfc7807} nas respostas de erro da API e
-      retroalimentación visual ante fallos de rede. \\
-    \addlinespace
-    Axuda e documentación &
-      Asistente de IA integrado que coñece o contexto da viaxe activa (eventos,
-      gastos e historial de chat) e pode responder consultas do usuario en
-      linguaxe natural. \\
-    \bottomrule
-  \end{tabularx}
-\end{table}
+  \label{tab:heuristicas} \\
+  \toprule
+  \textbf{Heurística} & \textbf{Aplicación en Telaria} \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \textbf{Heurística} & \textbf{Aplicación en Telaria} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  Visibilidade do estado do sistema &
+    Indicadores de carga nas chamadas á API, progresión visual na subida de
+    documentos, actualizacións en tempo real do chat e do asistente de IA
+    (\textit{streaming}) e \textit{badges} de notificación na barra de pestanas. \\
+  \addlinespace
+  Correspondencia co mundo real &
+    Terminoloxía de viaxes familiar (gastos, membros, eventos, calendario),
+    categorías de gasto naturais e mapa interactivo para seleccionar localizacións. \\
+  \addlinespace
+  Control e liberdade do usuario &
+    Navegación cara atrás en todos os niveis, posibilidade de abandonar unha viaxe
+    e de eliminar a conta, e cancelación de calquera modal sen consecuencias. \\
+  \addlinespace
+  Consistencia e estándares &
+    Compoñentes con tema reutilizables (\texttt{ThemedText}, \texttt{ThemedButton},
+    \texttt{ThemedInput}), paleta e tipoloxía uniformes e patróns de navegación
+    estándar para plataformas móbiles (barra de pestanas, \textit{bottom sheet}). \\
+  \addlinespace
+  Prevención de erros &
+    Validación de formularios antes do envío, diálogos de confirmación para
+    operacións destrutivas (eliminar conta, saír da viaxe) e tipado estrito de
+    extremo a extremo a través do contrato OpenAPI. \\
+  \addlinespace
+  Recoñecemento antes que recordo &
+    Barra de pestanas sempre visible, historial de mensaxes e de gastos accesible
+    en todo momento e información contextual da viaxe activa presente en cada
+    pantalla. \\
+  \addlinespace
+  Flexibilidade e eficiencia &
+    Unión a viaxes por código QR, convites directos a amigos e acceso inmediato
+    aos documentos do día seleccionado no calendario. \\
+  \addlinespace
+  Deseño estético e minimalista &
+    Estética limpa, ausencia de información superflua en
+    pantalla e textura de fondo sutil que non distrae do contido principal. \\
+  \addlinespace
+  Axuda para recuperarse de erros &
+    Mensaxes de erro claras nas operacións fallidas, formato \textit{Problem
+    Details} (RFC~7807)~\cite{rfc7807} nas respostas de erro da API e
+    retroalimentación visual ante fallos de rede. \\
+  \addlinespace
+  Axuda e documentación &
+    Asistente de IA integrado que coñece o contexto da viaxe activa (eventos,
+    gastos e historial de chat) e pode responder consultas do usuario en
+    linguaxe natural. \\
+\end{longtable}
+
+A análise non revelou incumprimentos graves en ningunha das heurísticas. As máis sólidas
+son a visibilidade do estado do sistema, a consistencia e a prevención de erros, todas
+elas respaldadas polo contrato OpenAPI e o sistema de compoñentes con tema. Os aspectos
+con máis marxe de mellora —flexibilidade e axuda contextual— están cubertos en parte polo
+asistente de IA integrado e polas melloras de interacción recollidas na avaliación con
+usuarios reais descrita na sección seguinte.
 
 \section{Avaliación de usabilidade con usuarios reais}
 \label{sec:usabilidade}

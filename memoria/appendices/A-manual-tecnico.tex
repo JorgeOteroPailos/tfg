@@ -23,7 +23,7 @@ Telaria. Diríxese a persoas que vaian continuar o desenvolvemento do sistema.
 \section{Servizos de apoio (Podman)}
 
 Os servizos auxiliares (PostgreSQL, MinIO e Ollama) defínense en
-\texttt{backend/compose.yaml}. O xeito máis sinxelo de poñelos en marcha, descargar o
+\path{backend/compose.yaml}. O xeito máis sinxelo de poñelos en marcha, descargar o
 modelo de linguaxe e arrincar o backend é o \textit{script} de inicio:
 
 \begin{lstlisting}[language=bash]
@@ -50,8 +50,8 @@ cd backend
 
 \noindent O servidor escoita no porto \texttt{8082}. A configuración (base de datos,
 \textit{keystore} de sinatura JWT, MinIO e tarefas programadas) atópase en
-\texttt{src/main/resources/application.yaml}. A documentación interactiva da API queda
-dispoñible en \texttt{/swagger-ui.html}.
+\path{src/main/resources/application.yaml}. A documentación interactiva da API queda
+dispoñible en \path{/swagger-ui.html}.
 
 \section{Execución do frontend}
 
@@ -62,13 +62,13 @@ npm start            # inicia o servidor de desenvolvemento de Expo
 \end{lstlisting}
 
 \noindent A dirección do backend configúrase na constante \texttt{BASE\_URL} de
-\texttt{frontend/constants/constants.tsx}, que debe apuntar ao enderezo accesible do
+\path{frontend/constants/constants.tsx}, que debe apuntar ao enderezo accesible do
 servidor dende o dispositivo. A aplicación pode abrirse en Expo Go ou nun emulador
 (\texttt{npm run android} / \texttt{npm run ios}).
 
 \section{Contrato OpenAPI e xeración de código}
 
-A API especifícase en \texttt{backend/src/main/resources/openapi/}, cun documento
+A API especifícase en \path{backend/src/main/resources/openapi/}, cun documento
 principal (\texttt{api.yaml}) que referencia ficheiros de rutas e esquemas. A partir del
 xérase código:
 
@@ -97,14 +97,14 @@ export TESTCONTAINERS_RYUK_DISABLED=true
 \end{lstlisting}
 
 \noindent Ao rematar, o informe de cobertura JaCoCo xérase en
-\texttt{backend/build/reports/jacoco/test/html/index.html}. A análise estática SpotBugs
+\path{backend/build/reports/jacoco/test/html/index.html}. A análise estática SpotBugs
 está dispoñible mediante a tarefa correspondente de Gradle.
 
 \section{Configuración e segredos}
 
 A configuración do backend (credenciais da base de datos, contrasinal do \textit{keystore}
 JWT, claves de acceso a MinIO e parámetros das tarefas programadas) reside en
-\texttt{application.yaml}. Para un despregamento en produción recoméndase externalizar
+\path{application.yaml}. Para un despregamento en produción recoméndase externalizar
 estes valores mediante variables de entorno e non incluílos no control de versións.
 
 \section{Integración continua}

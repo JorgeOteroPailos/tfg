@@ -1,32 +1,40 @@
-@startmindmap funcionalidades-telaria
+@startuml
+left to right direction
 skinparam shadowing false
-<style>
-mindmapDiagram {
-  rootNode {
-    BackgroundColor #2E6DA4
-    FontColor white
-    FontSize 16
-    FontStyle bold
-    BorderColor #1A4A7A
-    RoundCorner 12
-  }
-  node {
-    BackgroundColor #EAF2FB
-    BorderColor #2E6DA4
-    FontColor #1A1A1A
-    FontSize 12
-    RoundCorner 8
-  }
+skinparam usecase {
+  BackgroundColor #8b3ce0
+  BorderColor #6d28d9
+  FontColor white
+  FontStyle bold
+  FontSize 16
 }
-</style>
+skinparam rectangle {
+  BackgroundColor #ede3fd
+  BorderColor #d4c2f9
+  FontColor #3d1e7a
+  FontSize 10
+  RoundCorner 8
+}
+skinparam ArrowColor #555555
+skinparam ArrowThickness 1.2
+skinparam defaultTextAlignment center
 
-* Telaria
-** Chat de\ngrupo
-** Asistente\nde IA
-** Rede de\namizades
-left side
-** Ciclo de vida\nda viaxe
-** Gastos e\nliquidacións
-** Eventos e\ncalendario
-** Documentos\ncompartidos
-@endmindmap
+rectangle "Ciclo de vida\nda viaxe" as C
+rectangle "Gastos e\nliquidacións" as G
+rectangle "Eventos e\ncalendario" as E
+rectangle "Documentos\ncompartidos" as D
+
+usecase "Telaria" as T
+
+rectangle "Chat de\ngrupo" as CH
+rectangle "Asistente\nde IA" as AI
+rectangle "Rede de\namizades" as R
+
+C -- T
+G -- T
+E -- T
+D -- T
+T -- CH
+T -- AI
+T -- R
+@enduml

@@ -30,7 +30,6 @@ cloud "Servizos externos" as ext {
 ctrls --> L2
 svcs --> L3
 repos --> model
-svcs .down.> ext
-L3 -[hidden]down-> ext
+svcs ..> ext
 cross .right.> L1
 @enduml

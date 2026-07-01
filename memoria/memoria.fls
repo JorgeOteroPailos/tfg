@@ -253,11 +253,11 @@ INPUT ./diagrams/arquitectura.pdf
 INPUT ./diagrams/arquitectura.pdf
 INPUT ./diagrams/arquitectura.pdf
 INPUT ./diagrams/arquitectura.pdf
-INPUT ./diagrams/backend-componentes.pdf
-INPUT ./diagrams/backend-componentes.pdf
-INPUT ./diagrams/backend-componentes.pdf
-INPUT ./diagrams/backend-componentes.pdf
-INPUT ./diagrams/backend-componentes.pdf
+INPUT ./diagrams/backend-componentes.png
+INPUT ./diagrams/backend-componentes.png
+INPUT ./diagrams/backend-componentes.png
+INPUT ./diagrams/backend-componentes.png
+INPUT ./diagrams/backend-componentes.png
 INPUT ./diagrams/modelo-datos.pdf
 INPUT ./diagrams/modelo-datos.pdf
 INPUT ./diagrams/modelo-datos.pdf

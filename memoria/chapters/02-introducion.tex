@@ -91,74 +91,85 @@ ningunha das alternativas ofrece. O cadro~\ref{tab:comparativa} resume esta comp
 
 \section{Obxectivos e descrición do sistema}
 
-Telaria é unha aplicación móbil orientada a grupos de persoas que realizan viaxes
-conxuntas. Calquera usuario pode rexistrarse na plataforma e, a partir de aí, crear
-novas viaxes ou unirse a viaxes existentes mediante invitación, solicitude ou código QR.
+O obxectivo principal deste traballo é deseñar e desenvolver Telaria, unha aplicación 
+móbil para a xestión integral de viaxes en grupo que cubra todo o ciclo de vida dunha 
+viaxe nun único espazo compartido e que resolva a fragmentación e as carencias das 
+solucións existentes descritas no apartado anterior. Non se trata só de implementar 
+un conxunto de funcionalidades illadas, senón de ofrecer un produto integrado e 
+coherente que substitúa o uso disperso de varias aplicacións xenéricas.
 
-Dentro de cada viaxe, todos os membros teñen acceso completo e en igualdade de
-condicións ás funcionalidades da aplicación. Non existe distinción de roles: o sistema
-está deseñado baixo un modelo plenamente colaborativo no que calquera participante pode
-rexistrar gastos, crear eventos, subir documentos, enviar mensaxes ao chat e interactuar
-co asistente de IA. A continuación descríbense, dende o punto de vista do usuario, as
-principais funcionalidades que compoñen este espazo de viaxe, cuxa implementación consiste no
-principal obxectivo deste traballo.
+Este obxectivo principal concrétase nos seguintes subobxectivos funcionais:
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.80\textwidth]{diagrams/funcionalidades-telaria.pdf}
+  \includegraphics[width=0.95\textwidth]{diagrams/funcionalidades-telaria.pdf}
   \caption{Funcionalidades principais de Telaria.}
   \label{fig:funcionalidades-telaria}
 \end{figure}
 
-\textbf{Ciclo de vida da viaxe.} A viaxe é a unidade central arredor da que se organiza
-todo o demais. Un usuario crea unha viaxe e convida a outras persoas, que poden
-incorporarse por invitación directa, solicitando o acceso ou escaneando un código QR;
-calquera membro pode abandonala e xestionar as solicitudes pendentes.
+\begin{itemize}
+  \item \textbf{Ciclo de vida da viaxe.} A viaxe é a unidade central arredor da que se organiza
+        todo o demais. Un usuario crea unha viaxe e convida a outras persoas, que poden
+        incorporarse por invitación directa, solicitando o acceso ou escaneando un código QR;
+        calquera membro pode abandonala e xestionar as solicitudes pendentes.
 
-\textbf{Gastos e liquidacións.} Cada membro pode rexistrar os gastos que paga, indicando
-os beneficiarios e unha categoría (aloxamento, transporte, comida, etc.). A partir deses
-rexistros, o módulo calcula automaticamente o balance de cada persoa e propón un conxunto
-de liquidacións aplicando un algoritmo de minimización de débedas, de xeito que o número
-de transferencias necesarias para saldar todos os saldos sexa o mínimo posible. As
-liquidacións xa realizadas consérvanse nun historial.
+  \item \textbf{Gastos e liquidacións.} Cada membro pode rexistrar os gastos que paga, indicando
+        os beneficiarios e unha categoría (aloxamento, transporte, comida, etc.). A partir deses
+        rexistros, o módulo calcula automaticamente o balance de cada persoa e propón un conxunto
+        de liquidacións aplicando un algoritmo de minimización de débedas, de xeito que o número
+        de transferencias necesarias para saldar todos os saldos sexa o mínimo posible. As
+        liquidacións xa realizadas consérvanse nun historial.
 
-\textbf{Eventos e calendario.} O grupo constrúe un itinerario común sobre un calendario
-compartido. Cada evento pode ter data, hora, duración e unha localización xeográfica,
-que se pode escoller buscando un enderezo ou seleccionándoo directamente nun mapa
-interactivo.
+  \item \textbf{Eventos e calendario.} O grupo constrúe un itinerario común sobre un calendario
+        compartido. Cada evento pode ter data, hora, duración e unha localización xeográfica,
+        que se pode escoller buscando un enderezo ou seleccionándoo directamente nun mapa
+        interactivo.
 
-\textbf{Documentos compartidos.} A viaxe dispón dun repositorio de documentos relevantes
-(reservas, billetes, fotos, etc.) que calquera membro pode subir, descargar ou eliminar.
-Para os documentos de imaxe xérase de forma asíncrona unha miniatura de previsualización,
-de modo que a listaxe se mostre con axilidade sen descargar os ficheiros orixinais.
+  \item \textbf{Documentos compartidos.} A viaxe dispón dun repositorio de documentos relevantes
+        (reservas, billetes, fotos, etc.) que calquera membro pode subir, descargar ou eliminar.
+        Para os documentos de imaxe xérase de forma asíncrona unha miniatura de previsualización,
+        de modo que a listaxe se mostre con axilidade sen descargar os ficheiros orixinais.
 
-\textbf{Chat de grupo.} Cada viaxe inclúe unha sala de conversa propia para a
-coordinación entre os membros, con entrega de mensaxes en tempo real e aviso de mensaxes
-sen ler. As mensaxes son almacenadas no servidor durante 30 días
-e despois son eliminadas automaticamente.
+  \item \textbf{Chat de grupo.} Cada viaxe inclúe unha sala de conversa propia para a
+        coordinación entre os membros, con entrega de mensaxes en tempo real e aviso de mensaxes
+        sen ler. As mensaxes son almacenadas no servidor durante 30 días
+        e despois son eliminadas automaticamente.
 
-\textbf{Asistente de intelixencia artificial.} Cada viaxe conta cun asistente
-conversacional que axuda na planificación e responde consultas. Mantén un historial de
-conversa independente por viaxe e por usuario, de modo que o contexto se preserve entre sesións.
-Por razóns de rendemento do modelo local, este só recibe como contexto as últimas 5 mensaxes do
-chat (ademais do contexto da viaxe),
-se ben as demais mensaxes quedan almacenadas e dispoñibles para consulta. O historial completo de conversa mantense durante 30 días.
+  \item \textbf{Asistente de intelixencia artificial.} Cada viaxe conta cun asistente
+        conversacional que axuda na planificación e responde consultas. Mantén un historial de
+        conversa independente por viaxe e por usuario, de modo que o contexto se preserve entre sesións.
+        Por razóns de rendemento do modelo local, este só recibe como contexto as últimas 5 mensaxes do
+        chat (ademais do contexto da viaxe),
+        se ben as demais mensaxes quedan almacenadas e dispoñibles para consulta. O historial completo de conversa mantense durante 30 días.
 
-\textbf{Rede de amizades e xestión de conta.} De maneira complementaria, a plataforma
-ofrece unha rede de amizades entre usuarios: calquera usuario pode engadir outros como
-amigos e, a partir de aí, convidalos ás súas viaxes de forma máis áxil que mediante o
-identificador ou o código QR. Esta funcionalidade non altera o modelo colaborativo
-descrito, senón que actúa como atallo para os usuarios habituais. Cada usuario xestiona
-ademais o seu propio perfil (nome, correo, avatar e contrasinal) e pode eliminar a súa
-conta, operación que require a confirmación do contrasinal. A aplicación está dispoñible
-en tres idiomas (galego, español e inglés) e ofrece temas de aparencia clara e escura.
+  \item \textbf{Rede de amizades e xestión de conta.} De maneira complementaria, a plataforma
+        ofrece unha rede de amizades entre usuarios: calquera usuario pode engadir outros como
+        amigos e, a partir de aí, convidalos ás súas viaxes de forma máis áxil que mediante o
+        identificador ou o código QR. Esta funcionalidade non altera o modelo colaborativo
+        descrito, senón que actúa como atallo para os usuarios habituais. Cada usuario xestiona
+        ademais o seu propio perfil (nome, correo, avatar e contrasinal) e pode eliminar a súa
+        conta, operación que require a confirmación do contrasinal. A aplicación está dispoñible
+        en tres idiomas (galego, español e inglés) e ofrece temas de aparencia clara e escura.
+\end{itemize}
 
-Como obxectivos técnicos, o proxecto busca aplicar unha arquitectura
-\textit{API-first} e tecnoloxías multiplataforma modernas, de xeito que a solución
-sexa funcional tanto en iOS como en Android dende unha única base de código.
+A estes súmanse dous subobxectivos de carácter técnico: aplicar unha arquitectura 
+API-first que estableza un contrato explícito entre frontend e backend, e empregar 
+tecnoloxías multiplataforma modernas que permitan que a solución funcione tanto en iOS 
+como en Android dende unha única base de código.
 
+Para acadar estes obxectivos, Telaria deséñase como unha aplicación orientada a grupos 
+de persoas que realizan viaxes conxuntas. Calquera usuario pode rexistrarse na 
+plataforma e, a partir de aí, crear novas viaxes ou unirse a viaxes existentes 
+mediante invitación, solicitude ou código QR. Dentro de cada viaxe, todos os membros 
+acceden en igualdade de condicións ás funcionalidades da aplicación, sen distinción de 
+roles nin dependencia dun organizador.
+
+\newpage
 \section{Relación da documentación que conforma a memoria}
 
+A continuación descríbese brevemente o contido de cada sección e apéndice que conforma esta memoria.
+
+\vspace{0.5em}
 \begin{tabularx}{\textwidth}{@{}lX@{}}
   \toprule
   \textbf{Sección} & \textbf{Contido} \\

@@ -33,6 +33,13 @@ O sistema está composto polos seguintes módulos funcionais:
 
 \subsection{Características dos usuarios}
 
+Como se mencionou anteriormente, Telaria non traballa con roles: o sistema 
+recoñece un único tipo de actor, o usuario rexistrado. Todos os membros dunha 
+viaxe teñen as mesmas capacidades e acceden en igualdade de condicións a todas 
+as funcionalidades, sen que ningún dependa doutro, o que reforza o modelo 
+colaborativo.
+
+\vspace{0.5em}
 \begin{tabularx}{\textwidth}{@{}lX@{}}
   \toprule
   \textbf{Tipo} & \textbf{Descrición} \\
@@ -75,6 +82,9 @@ de compilación separada por plataforma.
 
 \subsection{Interfaces de software}
 
+As interfaces de software coas que interactúa o sistema son as seguintes:
+
+\vspace{0.5em}
 \begin{tabularx}{\textwidth}{@{}lX@{}}
   \toprule
   \textbf{Sistema} & \textbf{Descrición} \\
@@ -96,11 +106,20 @@ renovar o \textit{access token} sen necesidade de volver a autenticarse.
 % -----------------------------------------------------------------------
 \section{Requisitos funcionais}
 
-\begin{longtable}{@{}p{1.2cm}p{3cm}p{8.5cm}p{1.5cm}@{}}
+Os requisitos funcionais da aplicación amósanse no Cadro~\ref{tab:requisitos-funcionais},
+agrupados en sete áreas: autenticación e conta (RF01-RF05), viaxes e membros (RF06-RF09),
+gastos e liquidacións (RF10-RF11), eventos (RF12), documentos (RF13), chat e asistente
+de IA (RF14-RF15) e amizades (RF16-RF17). A prioridade asignada a cada requisito
+(alta, media ou baixa) reflicte a súa relevancia para a funcionalidade nuclear do produto.
+
+\begin{longtable}{@{}p{1.2cm}>{\raggedright\arraybackslash}p{3cm}p{8.5cm}p{1.5cm}@{}}
+  \caption{Requisitos funcionais da aplicación.}
+  \label{tab:requisitos-funcionais} \\
   \toprule
   \textbf{ID} & \textbf{Nome} & \textbf{Descrición} & \textbf{Prior.} \\
   \midrule
   \endfirsthead
+  \caption*{Cadro~\ref{tab:requisitos-funcionais} (continuación)} \\
   \toprule
   \textbf{ID} & \textbf{Nome} & \textbf{Descrición} & \textbf{Prior.} \\
   \midrule
@@ -211,6 +230,15 @@ continuación detállanse os fluxos principais.
 % -----------------------------------------------------------------------
 \section{Requisitos non funcionais}
 
+Os requisitos non funcionais definen as calidades que debe presentar o sistema con
+independencia das funcionalidades que ofrece: non describen \textit{que} fai a
+aplicación, senón \textit{como} debe comportarse. Agrúpanse en sete categorías:
+seguridade, privacidade e protección de datos, rendemento, usabilidade, mantibilidade,
+portabilidade e despregamento, interoperabilidade e fiabilidade. Dado o carácter
+colaborativo de Telaria —onde varios usuarios comparten datos sensibles dentro dunha
+viaxe—, os requisitos de seguridade e privacidade teñen un peso especial no deseño
+do sistema.
+
 \subsection{Seguridade}
 
 \begin{itemize}
@@ -229,9 +257,8 @@ continuación detállanse os fluxos principais.
 \subsection{Rendemento}
 
 \begin{itemize}
-  \item \textbf{RNF-RE-01}. O cálculo de liquidacións realízase no servidor, evitando sobrecargar o dispositivo cliente.
-  \item \textbf{RNF-RE-02}. A entrega de mensaxes do chat e das respostas do asistente de IA realízase en tempo real mediante eventos enviados polo servidor (SSE).
-  \item \textbf{RNF-RE-03}. A xeración de miniaturas dos documentos de imaxe execútase de forma asíncrona, fóra da ruta de petición, para non penalizar a latencia da subida nin da listaxe.
+  \item \textbf{RNF-RE-01}. A entrega de mensaxes do chat e das respostas do asistente de IA realízase en tempo real mediante eventos enviados polo servidor (SSE).
+  \item \textbf{RNF-RE-02}. A xeración de miniaturas dos documentos de imaxe execútase de forma asíncrona, fóra da ruta de petición, para non penalizar a latencia da subida nin da listaxe.
 \end{itemize}
 
 \subsection{Usabilidade}
@@ -274,7 +301,7 @@ continuación detállanse os fluxos principais.
 
 \begin{itemize}
   \item \textbf{RNF-FI-01}. O sistema valida os datos de entrada na API e devolve mensaxes de erro claras e estruturadas ao cliente.
-  \item \textbf{RNF-FI-02}. Unha tarefa programada reconcilia periodicamente as subidas de documentos non confirmadas (orfas): confirma as que efectivamente existen no almacén de obxectos e elimina os rexistros sen ficheiro asociado, evitando entradas inconsistentes na base de datos.
+  \item \textbf{RNF-FI-02}. O sistema debe garantir a consistencia entre os rexistros de documentos da base de datos e os ficheiros presentes no almacén de obxectos, evitando a acumulación de datos inconsistentes.
 \end{itemize}
 
 % -----------------------------------------------------------------------
@@ -325,9 +352,9 @@ seguranza e penalizarían o rendemento das consultas. Por iso o sistema delega a
 custodia nun \textbf{almacén de obxectos compatible coa API de Amazon~S3}, para o que se
 emprega \textbf{MinIO}, unha solución de código aberto. A vantaxe de MinIO é que é
 \textbf{autoxestionado}: en lugar de contratar un servizo de almacenamento na nube como
-Amazon~S3 (onde os ficheiros residen na infraestrutura dun provedor externo e o seu uso se
-factura por consumo), MinIO execútase na propia infraestrutura do proxecto, despregándose
-de xeito sinxelo como un contedor (Docker / Podman) xunto co resto de servizos. Isto
+Amazon~S3 (onde o seu uso se factura por consumo), MinIO execútase na propia
+infraestrutura do proxecto, despregándose como un contedor (Docker / Podman) xunto co
+resto de servizos. Isto
 elimina a dependencia e os custos dun provedor comercial e, ao expoñer a mesma API que
 S3, permitiría migrar a ese servizo no futuro sen apenas cambios no código.
 

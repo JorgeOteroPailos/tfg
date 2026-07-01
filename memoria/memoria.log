@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.2.10)  28 JUN 2026 23:14
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.2.10)  30 JUN 2026 18:53
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1283,33 +1283,27 @@ l.42
 pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.98 D
-      entro de cada viaxe, todos os membros teÃ±en acceso completo e en igua... [2]
+l.100 
+       [2]
 
 pdfTeX warning: pdflatex (file ./diagrams/funcionalidades-telaria.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/funcionalidades-telaria.pdf, id=633, 318.1787pt x 262.78174pt>
+<diagrams/funcionalidades-telaria.pdf, id=635, 335.47333pt x 278.03876pt>
 File: diagrams/funcionalidades-telaria.pdf Graphic file (type pdf)
 <use diagrams/funcionalidades-telaria.pdf>
-Package pdftex.def Info: diagrams/funcionalidades-telaria.pdf  used on input line 108.
-(pdftex.def)             Requested size: 354.86412pt x 293.09857pt.
-[3 <./diagrams/funcionalidades-telaria.pdf>]
-Underfull \hbox (badness 1087) in paragraph at lines 176--176
+Package pdftex.def Info: diagrams/funcionalidades-telaria.pdf  used on input line 105.
+(pdftex.def)             Requested size: 421.3982pt x 349.25308pt.
+[3 <./diagrams/funcionalidades-telaria.pdf>] [4]
+Underfull \hbox (badness 1087) in paragraph at lines 187--187
 []|\T1/cmr/m/n/12 Arquitectura do sis-te-ma, di-vi-sión en com-po-
  []
 
 
-Overfull \hbox (17.62482pt too wide) in paragraph at lines 176--177
+Overfull \hbox (17.62482pt too wide) in paragraph at lines 187--188
 [][] 
  []
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [4]
-Underfull \vbox (badness 1173) has occurred while \output is active []
-
- [5]
-Overfull \hbox (4.77434pt too wide) in paragraph at lines 218--224
+[5]
+Overfull \hbox (4.77434pt too wide) in paragraph at lines 229--235
 []\T1/cmr/m/n/12 Os do-cu-men-tos com-par-ti-dos al-ma-cé-nan-se nun ser-vi-zo com-pa-ti-ble co pro-to-co-lo S3 [[]].
  []
 
@@ -1317,88 +1311,66 @@ Overfull \hbox (4.77434pt too wide) in paragraph at lines 218--224
 
 ]
 Cap\'{\i }tulo 2.
-
-Overfull \hbox (17.62482pt too wide) in paragraph at lines 42--43
-[][] 
- []
-
 [9]
-Overfull \hbox (17.62482pt too wide) in paragraph at lines 87--88
+Overfull \hbox (17.62482pt too wide) in paragraph at lines 49--50
 [][] 
  []
 
-[10]
-Underfull \hbox (badness 10000) in paragraph at lines 109--109
-[]|\T1/cmr/m/n/12 Rexistro de
+
+Overfull \hbox (17.62482pt too wide) in paragraph at lines 97--98
+[][] 
  []
 
+[10] [11]
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
-Underfull \hbox (badness 10000) in paragraph at lines 112--112
-[]|\T1/cmr/m/n/12 Eliminación de
- []
-
-
-Underfull \hbox (badness 4846) in paragraph at lines 113--113
-[]|\T1/cmr/m/n/12 Preferencias da
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 125--125
-[]|\T1/cmr/m/n/12 Documentos
- []
-
-[11]
+ [12]
 
 pdfTeX warning: pdflatex (file ./diagrams/casos-uso.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/casos-uso.pdf, id=712, 561.59813pt x 1158.3275pt>
+<diagrams/casos-uso.pdf, id=707, 561.59813pt x 1158.3275pt>
 File: diagrams/casos-uso.pdf Graphic file (type pdf)
 <use diagrams/casos-uso.pdf>
-Package pdftex.def Info: diagrams/casos-uso.pdf  used on input line 146.
+Package pdftex.def Info: diagrams/casos-uso.pdf  used on input line 165.
 (pdftex.def)             Requested size: 230.66269pt x 475.74806pt.
-
-Underfull \vbox (badness 7451) has occurred while \output is active []
-
- [12] [13 <./diagrams/casos-uso.pdf>] [14] [15] [16] [17]
-LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 368.
+[13 <./diagrams/casos-uso.pdf>] [14] [15] [16] [17] [18]
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 395.
  (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
-) [18]) (./chapters/04-deseno.tex [19] [20
+)) (./chapters/04-deseno.tex [19] [20
 
 ]
 Cap\'{\i }tulo 3.
 
 
 pdfTeX warning: pdflatex (file ./diagrams/arquitectura.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/arquitectura.pdf, id=770, 472.76625pt x 414.54875pt>
+<diagrams/arquitectura.pdf, id=760, 829.0975pt x 276.03125pt>
 File: diagrams/arquitectura.pdf Graphic file (type pdf)
 <use diagrams/arquitectura.pdf>
 Package pdftex.def Info: diagrams/arquitectura.pdf  used on input line 19.
-(pdftex.def)             Requested size: 319.37703pt x 280.05502pt.
+(pdftex.def)             Requested size: 319.37703pt x 106.32921pt.
+[21 <./diagrams/arquitectura.pdf>]
+<diagrams/backend-componentes.png, id=777, 3309.36375pt x 1991.44pt>
+File: diagrams/backend-componentes.png Graphic file (type png)
+<use diagrams/backend-componentes.png>
+Package pdftex.def Info: diagrams/backend-componentes.png  used on input line 46.
+(pdftex.def)             Requested size: 377.0444pt x 226.8685pt.
 
-
-pdfTeX warning: pdflatex (file ./diagrams/backend-componentes.pdf): PDF inclusion: found PDF version <1.7>, but at most version <1.5> allowed
-<diagrams/backend-componentes.pdf, id=772, 983.675pt x 567.11874pt>
-File: diagrams/backend-componentes.pdf Graphic file (type pdf)
-<use diagrams/backend-componentes.pdf>
-Package pdftex.def Info: diagrams/backend-componentes.pdf  used on input line 46.
-(pdftex.def)             Requested size: 377.0444pt x 217.37651pt.
-[21] [22 <./diagrams/arquitectura.pdf> <./diagrams/backend-componentes.pdf>]
 
 pdfTeX warning: pdflatex (file ./diagrams/modelo-datos.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/modelo-datos.pdf, id=799, 987.13795pt x 735.54799pt>
+<diagrams/modelo-datos.pdf, id=780, 987.13795pt x 735.54799pt>
 File: diagrams/modelo-datos.pdf Graphic file (type pdf)
 <use diagrams/modelo-datos.pdf>
 Package pdftex.def Info: diagrams/modelo-datos.pdf  used on input line 81.
 (pdftex.def)             Requested size: 443.57848pt x 330.52214pt.
-[23 <./diagrams/modelo-datos.pdf>]
+[22 <./diagrams/backend-componentes.png>]
 Overfull \hbox (16.98952pt too wide) in paragraph at lines 102--106
 \T1/cmr/m/n/12 tru-tu-ra (via-xe, usua-rio e mar-ca tem-po-ral) a tra-vés da su-per-cla-se \T1/cmtt/m/n/12 PendingMembership\T1/cmr/m/n/12 ,
  []
 
-[24]
+[23 <./diagrams/modelo-datos.pdf>] [24]
 
 pdfTeX warning: pdflatex (file ./diagrams/frontend-arquitectura.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/frontend-arquitectura.pdf, id=842, 1254.6875pt x 540.0175pt>
+<diagrams/frontend-arquitectura.pdf, id=828, 1254.6875pt x 540.0175pt>
 File: diagrams/frontend-arquitectura.pdf Graphic file (type pdf)
 <use diagrams/frontend-arquitectura.pdf>
 Package pdftex.def Info: diagrams/frontend-arquitectura.pdf  used on input line 166.
@@ -1406,97 +1378,117 @@ Package pdftex.def Info: diagrams/frontend-arquitectura.pdf  used on input line 
 
 
 pdfTeX warning: pdflatex (file ./diagrams/navegacion.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/navegacion.pdf, id=845, 512.3441pt x 852.03316pt>
+<diagrams/navegacion.pdf, id=831, 487.3708pt x 852.03316pt>
 File: diagrams/navegacion.pdf Graphic file (type pdf)
 <use diagrams/navegacion.pdf>
 Package pdftex.def Info: diagrams/navegacion.pdf  used on input line 189.
-(pdftex.def)             Requested size: 243.96951pt x 405.73402pt.
-[25 <./diagrams/frontend-arquitectura.pdf>] [26 <./diagrams/navegacion.pdf>]
-<screenshots/calendar.jpeg, id=910, 1084.05pt x 2413.015pt>
+(pdftex.def)             Requested size: 175.33437pt x 306.51945pt.
+[25 <./diagrams/frontend-arquitectura.pdf>]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [26 <./diagrams/navegacion.pdf>]
+<screenshots/calendar.jpeg, id=897, 1084.05pt x 2413.015pt>
 File: screenshots/calendar.jpeg Graphic file (type jpg)
 <use screenshots/calendar.jpeg>
 Package pdftex.def Info: screenshots/calendar.jpeg  used on input line 239.
-(pdftex.def)             Requested size: 199.60895pt x 444.30208pt.
- [27] [28 <./screenshots/calendar.jpeg>]
-Overfull \hbox (13.75691pt too wide) in paragraph at lines 262--267
+(pdftex.def)             Requested size: 146.3817pt x 325.8166pt.
+ [27 <./screenshots/calendar.jpeg>]
+Overfull \hbox (13.75691pt too wide) in paragraph at lines 261--266
 \T1/cmr/m/n/12 nas, me-nús, asis-ten-te de IA, bo-tóns de ac-ción, etc.) in-cor-po-ran \T1/cmtt/m/n/12 accessibilityLabel\T1/cmr/m/n/12 ,
  []
 
-<screenshots/balances-light.jpeg, id=921, 1084.05pt x 2413.015pt>
+
+Overfull \hbox (56.87283pt too wide) in paragraph at lines 270--272
+[]\T1/cmr/bx/n/12 Escala ti-po-grá-fi-ca. \T1/cmr/m/n/12 As com-po-ñen-tes de tex-to com-par-ti-das li-mi-tan \T1/cmtt/m/n/12 maxFontSizeMultiplier
+ []
+
+<screenshots/balances-light.jpeg, id=903, 1084.05pt x 2413.015pt>
 File: screenshots/balances-light.jpeg Graphic file (type jpg)
 <use screenshots/balances-light.jpeg>
-Package pdftex.def Info: screenshots/balances-light.jpeg  used on input line 284.
-(pdftex.def)             Requested size: 140.60062pt x 312.9803pt.
-<screenshots/balances-dark.jpeg, id=922, 1084.05pt x 2413.015pt>
+Package pdftex.def Info: screenshots/balances-light.jpeg  used on input line 281.
+(pdftex.def)             Requested size: 99.6941pt x 221.93158pt.
+<screenshots/balances-dark.jpeg, id=904, 1084.05pt x 2413.015pt>
 File: screenshots/balances-dark.jpeg Graphic file (type jpg)
 <use screenshots/balances-dark.jpeg>
-Package pdftex.def Info: screenshots/balances-dark.jpeg  used on input line 287.
-(pdftex.def)             Requested size: 140.60062pt x 312.9803pt.
-
+Package pdftex.def Info: screenshots/balances-dark.jpeg  used on input line 284.
+(pdftex.def)             Requested size: 99.6941pt x 221.93158pt.
+[28 <./screenshots/balances-light.jpeg> <./screenshots/balances-dark.jpeg>]
 
 pdfTeX warning: pdflatex (file ./diagrams/seq-auth.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/seq-auth.pdf, id=924, 593.77835pt x 644.70862pt>
+<diagrams/seq-auth.pdf, id=912, 593.77835pt x 644.70862pt>
 File: diagrams/seq-auth.pdf Graphic file (type pdf)
 <use diagrams/seq-auth.pdf>
-Package pdftex.def Info: diagrams/seq-auth.pdf  used on input line 303.
-(pdftex.def)             Requested size: 310.50357pt x 337.14903pt.
+Package pdftex.def Info: diagrams/seq-auth.pdf  used on input line 310.
+(pdftex.def)             Requested size: 354.86412pt x 385.31319pt.
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \vbox (badness 8113) has occurred while \output is active []
 
- [29] [30 <./screenshots/balances-light.jpeg> <./screenshots/balances-dark.jpeg>]
+ [29 <./diagrams/seq-auth.pdf>]
 
 pdfTeX warning: pdflatex (file ./diagrams/seq-chat-sse.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/seq-chat-sse.pdf, id=937, 627.49434pt x 354.27357pt>
+<diagrams/seq-chat-sse.pdf, id=941, 627.49434pt x 354.27357pt>
 File: diagrams/seq-chat-sse.pdf Graphic file (type pdf)
 <use diagrams/seq-chat-sse.pdf>
-Package pdftex.def Info: diagrams/seq-chat-sse.pdf  used on input line 316.
+Package pdftex.def Info: diagrams/seq-chat-sse.pdf  used on input line 323.
 (pdftex.def)             Requested size: 354.86412pt x 200.35413pt.
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [31 <./diagrams/seq-auth.pdf>]
 
 pdfTeX warning: pdflatex (file ./diagrams/seq-upload.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/seq-upload.pdf, id=965, 771.74321pt x 464.13399pt>
+<diagrams/seq-upload.pdf, id=943, 771.74321pt x 464.13399pt>
 File: diagrams/seq-upload.pdf Graphic file (type pdf)
 <use diagrams/seq-upload.pdf>
-Package pdftex.def Info: diagrams/seq-upload.pdf  used on input line 330.
-(pdftex.def)             Requested size: 399.21791pt x 240.09753pt.
-[32 <./diagrams/seq-chat-sse.pdf> <./diagrams/seq-upload.pdf>]
+Package pdftex.def Info: diagrams/seq-upload.pdf  used on input line 337.
+(pdftex.def)             Requested size: 377.0444pt x 226.76192pt.
+[30 <./diagrams/seq-chat-sse.pdf> <./diagrams/seq-upload.pdf>]
 
 pdfTeX warning: pdflatex (file ./diagrams/seq-ia.pdf): PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-<diagrams/seq-ia.pdf, id=1013, 704.8433pt x 439.04024pt>
+<diagrams/seq-ia.pdf, id=990, 704.8433pt x 439.04024pt>
 File: diagrams/seq-ia.pdf Graphic file (type pdf)
 <use diagrams/seq-ia.pdf>
-Package pdftex.def Info: diagrams/seq-ia.pdf  used on input line 344.
+Package pdftex.def Info: diagrams/seq-ia.pdf  used on input line 351.
 (pdftex.def)             Requested size: 377.0444pt x 234.86076pt.
 
-Overfull \hbox (1.23347pt too wide) in paragraph at lines 364--366
+Overfull \hbox (1.23347pt too wide) in paragraph at lines 371--373
 []\T1/cmr/bx/n/12 Contrasinais pro-te-xi-dos. \T1/cmr/m/n/12 Os con-tra-si-nais al-ma-cé-nan-se ci-fra-dos con BCrypt [[]]. 
  []
 
-[33 <./diagrams/seq-ia.pdf>]) (./chapters/05-probas.tex [34]
+[31 <./diagrams/seq-ia.pdf>]) (./chapters/05-probas.tex [32]
 Cap\'{\i }tulo 4.
-[35
+[33
 
-] [36] [37] [38]
-Underfull \vbox (badness 10000) has occurred while \output is active []
+]
+Underfull \vbox (badness 6775) has occurred while \output is active []
 
- [39]
-Overfull \vbox (4.01706pt too high) has occurred while \output is active []
+ [34] [35]
+Underfull \vbox (badness 2351) has occurred while \output is active []
 
- [40]) (./chapters/06-conclusions.tex [41] [42]
+ [36]
+Underfull \hbox (badness 2671) in paragraph at lines 263--263
+[]|\T1/cmr/m/n/12 Control e li-ber-da-de do
+ []
+
+
+Underfull \hbox (badness 3219) in paragraph at lines 268--271
+[]|\T1/cmr/m/n/12 Compoñentes con te-ma re-uti-li-za-bles (\T1/cmtt/m/n/12 ThemedText\T1/cmr/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 1661) in paragraph at lines 290--290
+[]|\T1/cmr/m/n/12 Axuda pa-ra re-cu-pe-rar-se
+ []
+
+[37] [38]) (./chapters/06-conclusions.tex [39] [40
+
+]
 Cap\'{\i }tulo 5.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [43
-
-]) (./appendices/A-manual-tecnico.tex [44]
+ [41]) (./appendices/A-manual-tecnico.tex [42]
 Ap\'endice A.
 
-Overfull \hbox (34.97127pt too wide) in paragraph at lines 25--28
-[]\T1/cmr/m/n/12 Os ser-vi-zos au-xi-lia-res (Post-greSQL, Mi-nIO e Olla-ma) de-fí-nen-se en \T1/cmtt/m/n/12 backend/compose.yaml\T1/cmr/m/n/12 .
+Overfull \hbox (7.01422pt too wide) in paragraph at lines 25--28
+[]\T1/cmr/m/n/12 Os ser-vi-zos au-xi-lia-res (Post-greSQL, Mi-nIO e Olla-ma) de-fí-nen-se en $\T1/cmtt/m/n/12 backend / compose .
  []
 
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
@@ -1506,33 +1498,23 @@ File: lstlang1.sty 2023/02/27 1.9 listings language file
 )
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <10> not available
 (Font)              Font shape `T1/cmtt/m/n' tried instead on input line 30.
- [45
+ [43
 
 ]
-Overfull \hbox (18.22137pt too wide) in paragraph at lines 51--55
-\T1/cmr/m/n/12 JWT, Mi-nIO e ta-re-fas pro-gra-ma-das) ató-pa-se en \T1/cmtt/m/n/12 src/main/resources/application.yaml\T1/cmr/m/n/12 .
+Overfull \hbox (6.83807pt too wide) in paragraph at lines 99--102
+\T1/cmr/m/n/12 Ao re-ma-tar, o in-for-me de co-ber-tu-ra Ja-Co-Co xé-ra-se en $\T1/cmtt/m/n/12 backend / build / reports / jacoco /
  []
 
-
-Overfull \hbox (68.1218pt too wide) in paragraph at lines 64--68
-\T1/cmr/m/n/12 A di-rec-ción do bac-kend con-fi-gú-ra-se na cons-tan-te \T1/cmtt/m/n/12 BASE_URL \T1/cmr/m/n/12 de \T1/cmtt/m/n/12 frontend/constants/constants.tsx\T1/cmr/m/n/12 ,
- []
-
-
-Overfull \hbox (133.571pt too wide) in paragraph at lines 99--102
-\T1/cmr/m/n/12 Ao re-ma-tar, o in-for-me de co-ber-tu-ra Ja-Co-Co xé-ra-se en \T1/cmtt/m/n/12 backend/build/reports/jacoco/test/html/index.html\T1/cmr/m/n/12 .
- []
-
-[46]) (./appendices/B-manual-usuario.tex [47] [48
+[44]) (./appendices/B-manual-usuario.tex [45] [46
 
 ]
 Ap\'endice B.
-<screenshots/login.jpeg, id=1158, 1084.05pt x 2413.015pt>
+<screenshots/login.jpeg, id=1133, 1084.05pt x 2413.015pt>
 File: screenshots/login.jpeg Graphic file (type jpg)
 <use screenshots/login.jpeg>
 Package pdftex.def Info: screenshots/login.jpeg  used on input line 25.
 (pdftex.def)             Requested size: 199.60895pt x 444.30208pt.
-<screenshots/register.jpeg, id=1159, 1084.05pt x 2413.015pt>
+<screenshots/register.jpeg, id=1134, 1084.05pt x 2413.015pt>
 File: screenshots/register.jpeg Graphic file (type jpg)
 <use screenshots/register.jpeg>
 Package pdftex.def Info: screenshots/register.jpeg  used on input line 31.
@@ -1540,8 +1522,8 @@ Package pdftex.def Info: screenshots/register.jpeg  used on input line 31.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [49]
-<screenshots/main.jpeg, id=1164, 1084.05pt x 2413.015pt>
+ [47]
+<screenshots/main.jpeg, id=1140, 1084.05pt x 2413.015pt>
 File: screenshots/main.jpeg Graphic file (type jpg)
 <use screenshots/main.jpeg>
 Package pdftex.def Info: screenshots/main.jpeg  used on input line 45.
@@ -1549,8 +1531,8 @@ Package pdftex.def Info: screenshots/main.jpeg  used on input line 45.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [50 <./screenshots/login.jpeg> <./screenshots/register.jpeg>]
-<screenshots/createTrip.jpeg, id=1169, 1084.05pt x 2413.015pt>
+ [48 <./screenshots/login.jpeg> <./screenshots/register.jpeg>]
+<screenshots/createTrip.jpeg, id=1145, 1084.05pt x 2413.015pt>
 File: screenshots/createTrip.jpeg Graphic file (type jpg)
 <use screenshots/createTrip.jpeg>
 Package pdftex.def Info: screenshots/createTrip.jpeg  used on input line 56.
@@ -1558,8 +1540,8 @@ Package pdftex.def Info: screenshots/createTrip.jpeg  used on input line 56.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [51 <./screenshots/main.jpeg>]
-<screenshots/members.jpeg, id=1174, 1084.05pt x 2413.015pt>
+ [49 <./screenshots/main.jpeg>]
+<screenshots/members.jpeg, id=1150, 1084.05pt x 2413.015pt>
 File: screenshots/members.jpeg Graphic file (type jpg)
 <use screenshots/members.jpeg>
 Package pdftex.def Info: screenshots/members.jpeg  used on input line 67.
@@ -1567,8 +1549,8 @@ Package pdftex.def Info: screenshots/members.jpeg  used on input line 67.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [52 <./screenshots/createTrip.jpeg>]
-<screenshots/expenses.jpeg, id=1180, 1084.05pt x 2413.015pt>
+ [50 <./screenshots/createTrip.jpeg>]
+<screenshots/expenses.jpeg, id=1155, 1084.05pt x 2413.015pt>
 File: screenshots/expenses.jpeg Graphic file (type jpg)
 <use screenshots/expenses.jpeg>
 Package pdftex.def Info: screenshots/expenses.jpeg  used on input line 85.
@@ -1580,7 +1562,7 @@ Package pdftex.def Info: screenshots/balances-light.jpeg  used on input line 91.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [53 <./screenshots/members.jpeg>]
+ [51 <./screenshots/members.jpeg>]
 File: screenshots/calendar.jpeg Graphic file (type jpg)
 <use screenshots/calendar.jpeg>
 Package pdftex.def Info: screenshots/calendar.jpeg  used on input line 106.
@@ -1588,8 +1570,8 @@ Package pdftex.def Info: screenshots/calendar.jpeg  used on input line 106.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [54 <./screenshots/expenses.jpeg>]
-<screenshots/sharedDocuments.jpeg, id=1190, 1084.05pt x 2413.015pt>
+ [52 <./screenshots/expenses.jpeg>]
+<screenshots/sharedDocuments.jpeg, id=1164, 1084.05pt x 2413.015pt>
 File: screenshots/sharedDocuments.jpeg Graphic file (type jpg)
 <use screenshots/sharedDocuments.jpeg>
 Package pdftex.def Info: screenshots/sharedDocuments.jpeg  used on input line 119.
@@ -1597,8 +1579,8 @@ Package pdftex.def Info: screenshots/sharedDocuments.jpeg  used on input line 11
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [55]
-<screenshots/groupChat.jpeg, id=1195, 1084.05pt x 2413.015pt>
+ [53]
+<screenshots/groupChat.jpeg, id=1170, 1084.05pt x 2413.015pt>
 File: screenshots/groupChat.jpeg Graphic file (type jpg)
 <use screenshots/groupChat.jpeg>
 Package pdftex.def Info: screenshots/groupChat.jpeg  used on input line 131.
@@ -1606,8 +1588,8 @@ Package pdftex.def Info: screenshots/groupChat.jpeg  used on input line 131.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [56 <./screenshots/sharedDocuments.jpeg>]
-<screenshots/aiChat.jpeg, id=1200, 1084.05pt x 2413.015pt>
+ [54 <./screenshots/sharedDocuments.jpeg>]
+<screenshots/aiChat.jpeg, id=1176, 1084.05pt x 2413.015pt>
 File: screenshots/aiChat.jpeg Graphic file (type jpg)
 <use screenshots/aiChat.jpeg>
 Package pdftex.def Info: screenshots/aiChat.jpeg  used on input line 141.
@@ -1615,8 +1597,8 @@ Package pdftex.def Info: screenshots/aiChat.jpeg  used on input line 141.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [57 <./screenshots/groupChat.jpeg>]
-<screenshots/friends.jpeg, id=1205, 1084.05pt x 2413.015pt>
+ [55 <./screenshots/groupChat.jpeg>]
+<screenshots/friends.jpeg, id=1181, 1084.05pt x 2413.015pt>
 File: screenshots/friends.jpeg Graphic file (type jpg)
 <use screenshots/friends.jpeg>
 Package pdftex.def Info: screenshots/friends.jpeg  used on input line 153.
@@ -1624,8 +1606,8 @@ Package pdftex.def Info: screenshots/friends.jpeg  used on input line 153.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [58 <./screenshots/aiChat.jpeg>]
-<screenshots/invitations.jpeg, id=1210, 1084.05pt x 2413.015pt>
+ [56 <./screenshots/aiChat.jpeg>]
+<screenshots/invitations.jpeg, id=1186, 1084.05pt x 2413.015pt>
 File: screenshots/invitations.jpeg Graphic file (type jpg)
 <use screenshots/invitations.jpeg>
 Package pdftex.def Info: screenshots/invitations.jpeg  used on input line 163.
@@ -1635,11 +1617,11 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (57.63892pt too wide) has occurred while \output is active
- \T1/cmr/m/sl/12 B.12.  CAIXA DE ENTRADA DE INVITACIÓNS A VIAXES E SOLICITUDES DE AMIZADE \T1/cmr/m/n/12 59
+ \T1/cmr/m/sl/12 B.12.  CAIXA DE ENTRADA DE INVITACIÓNS A VIAXES E SOLICITUDES DE AMIZADE \T1/cmr/m/n/12 57
  []
 
-[59 <./screenshots/friends.jpeg>]
-<screenshots/profile.jpeg, id=1216, 1084.05pt x 2928.9425pt>
+[57 <./screenshots/friends.jpeg>]
+<screenshots/profile.jpeg, id=1191, 1084.05pt x 2928.9425pt>
 File: screenshots/profile.jpeg Graphic file (type jpg)
 <use screenshots/profile.jpeg>
 Package pdftex.def Info: screenshots/profile.jpeg  used on input line 176.
@@ -1647,8 +1629,8 @@ Package pdftex.def Info: screenshots/profile.jpeg  used on input line 176.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [60 <./screenshots/invitations.jpeg>]
-<screenshots/settings.jpeg, id=1221, 1084.05pt x 2707.11375pt>
+ [58 <./screenshots/invitations.jpeg>]
+<screenshots/settings.jpeg, id=1196, 1084.05pt x 2707.11375pt>
 File: screenshots/settings.jpeg Graphic file (type jpg)
 <use screenshots/settings.jpeg>
 Package pdftex.def Info: screenshots/settings.jpeg  used on input line 186.
@@ -1656,23 +1638,23 @@ Package pdftex.def Info: screenshots/settings.jpeg  used on input line 186.
 
 Underfull \vbox (badness 7308) has occurred while \output is active []
 
- [61 <./screenshots/profile.jpeg>]
+ [59 <./screenshots/profile.jpeg>]
 Underfull \vbox (badness 1033) has occurred while \output is active []
 
- [62 <./screenshots/settings.jpeg>] [63] [64]) (./appendices/C-licenza.tex [65] [66
+ [60 <./screenshots/settings.jpeg>] [61] [62]) (./appendices/C-licenza.tex [63] [64
 
 ]
 Ap\'endice C.
-) [67] [68
+) [65] [66
 
 ] (./chapters/07-bibliografia.tex
 Underfull \hbox (badness 10000) in paragraph at lines 30--31
 []\T1/cmr/m/n/12 AtomicJar / Doc-ker, Inc. \T1/cmr/m/it/12 Test-con-tai-ners for Ja-va\T1/cmr/m/n/12 . [][]$\T1/cmtt/m/n/12 https : / / java .
  []
 
-[69
+[67
 
-]) [70] (./memoria.aux)
+]) [68] (./memoria.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -1687,17 +1669,17 @@ Package rerunfilecheck Info: File `memoria.out' has not changed.
  ) 
 Here is how much of TeX's memory you used:
  15893 strings out of 476120
- 253151 string characters out of 5793657
- 2009975 words of memory out of 5000000
- 37408 multiletter control sequences out of 15000+600000
+ 253138 string characters out of 5793657
+ 2010975 words of memory out of 5000000
+ 37410 multiletter control sequences out of 15000+600000
  575838 words of font info for 69 fonts, out of 8000000 for 9000
  41 hyphenation exceptions out of 8191
  75i,20n,79p,526b,1278s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecit1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbi1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbi1440.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1095.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsl1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/eccc1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx2488.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1728.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx2074.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1440.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1728.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/zapfding/uzdr.pfb>
-Output written on memoria.pdf (84 pages, 4974898 bytes).
+Output written on memoria.pdf (82 pages, 5065625 bytes).
 PDF statistics:
- 2076 PDF objects out of 2487 (max. 8388607)
- 1274 compressed objects within 13 object streams
- 264 named destinations out of 1000 (max. 500000)
+ 2053 PDF objects out of 2073 (max. 8388607)
+ 1252 compressed objects within 13 object streams
+ 262 named destinations out of 1000 (max. 500000)
  869 words of extra memory for PDF output out of 10000 (max. 10000000)
 
