@@ -47,4 +47,4 @@ scheduling:
 
 ollama:
   base-url: http://localhost:11434
-  model: qwen2.5:14b
+  model: llama3.2:3b

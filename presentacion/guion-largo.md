@@ -1,199 +1,252 @@
 # GUIÓN DEFENSA TFG — TELARIA
-# Tempo total obxectivo: 20:00
+# Tempo total obxectivo: 20:00 (16 diapositivas)
 
 ---
 
-## 1. PRESENTACIÓN (0:00–0:30) · Diapo 1
+## Diapo 1 · PORTADA (0:00–0:30)
 
 Ola, bos días. Son Jorge Otero Pailos, e veño presentar o meu Traballo de Fin
-de Grao: Telaria, unha aplicación de planificación colaborativa de viaxes,
-tutorizado por Víctor José Gallego Fontenla e Pedro Gamallo Fernández.
+de Grao: Telaria, unha aplicación móbil colaborativa para a xestión integral
+de viaxes en grupo, tutorizado por Víctor José Gallego Fontenla e Pedro
+Gamallo Fernández.
 
 ---
 
-## 2. MOTIVACIÓN E PROBLEMA (0:30–2:00) · Diapo 2
+## Diapo 2 · MOTIVACIÓN E PROBLEMA (0:30–1:45)
 
 Telaria xurde dunha necesidade moi natural: a de organizar mellor as viaxes
 en grupo. Cando se fan estas viaxes, eu mesmo, e seguro que vós tamén,
 atopámonos a miúdo cun problema: ninguén sabe onde está nada, porque cada
-cousa está nun sitio distinto. Explícome: ao principio mércanse os billetes,
-resérvase o aloxamento, decídese que se quere visitar... pero co paso do
-tempo xorden dúbidas inevitábeis: quen pagou a comida de todos? A quen lle
-debo cartos? Onde están os billetes de avión? É hoxe o día deste plan ou
-deste outro? Pásasme as fotos que fixeches?
+cousa está nun sitio distinto. Ao principio mércanse os billetes, resérvase o
+aloxamento, decídese que se quere visitar... pero co paso do tempo xorden as
+preguntas de sempre, as que tedes aí á esquerda: quen pagou a comida de
+todos? A quen lle debo cartos? Onde están os billetes de avión? É hoxe este
+plan ou o outro? Pásasme as fotos que fixeches?
 
-A raíz do problema é que organizamos cada parte da viaxe de xeito diferente,
-ao non dispor dun bo mecanismo unificador. No mellor dos casos, todo remata
-nun monolítico grupo de WhatsApp no que é imposíbel atopar nada; e no peor,
-pérdense datos irrecuperabelmente entre o calendario de Google, o Tricount e
-un SharePoint.
-
----
-
-## 3. SOLUCIÓN E DIFERENCIACIÓN (2:00–3:30) · Diapo 3
-
-Telaria nace como solución a este problema: unha aplicación que integra
-todos os servizos necesarios para a planificación dunha viaxe nun mesmo
-lugar, aforrando esforzo e previndo erros. As súas funcionalidades combinan
-as de todas as aplicacións que normalmente usariamos na organización: un
-xestor de gastos con calculadora automática de débedas, un calendario
-compartido, unha nube de documentos e un chat, ademais dun asistente de
-intelixencia artificial que xa conta con todo o contexto da viaxe.
-
-Xa existen ferramentas que cobren parte disto — Tricount para os gastos,
-Google Calendar para as datas, WhatsApp para a comunicación — pero ningunha
-o fai de xeito conxunto nin pensado especificamente para unha viaxe en
-grupo.
-
-Ademais, a diferenza doutras ferramentas, en Telaria todos os membros teñen as mesmas
-capacidades, non hai un "organizador" do que dependan os demais, evitando así cuellos de botella 
-ou a necesidade de atopar alguén disposto a cargar con toda a xestión.
-
-O obxectivo deste traballo foi, polo tanto, deseñar e desenvolver Telaria
-como unha aplicación móbil multiplataforma que resolva esta fragmentación
-nun único espazo colaborativo.
+A raíz do problema é que cada parte da viaxe se organiza por separado, ao non
+dispor dun bo mecanismo unificador. E entón a información acaba dispersa
+—como se ve á dereita— entre un grupo de WhatsApp no que é imposíbel atopar
+nada, o calendario de Google, o Tricount dos gastos e un SharePoint cos
+documentos. No peor dos casos, pérdense datos de forma irrecuperábel.
 
 ---
 
-## 4. FUNCIONALIDADES PRINCIPAIS (3:30–4:30) · Diapo 4 [Fig. 1.1]
+## Diapo 3 · SOLUCIÓN E DIFERENCIACIÓN (1:45–3:00)
+
+Telaria nace como solución: unha aplicación que integra nun só lugar todo o
+que precisa unha viaxe en grupo, aforrando esforzo e previndo erros. As súas
+funcionalidades —á esquerda— combinan as de todas as aplicacións que
+normalmente usariamos: un xestor de gastos con cálculo automático de débedas,
+un calendario compartido de eventos, unha nube de documentos, un chat de
+grupo, e un asistente de intelixencia artificial que xa conta con todo o
+contexto da viaxe.
+
+Que a fai diferente? Xa existen ferramentas que cobren parte disto —Tricount
+para os gastos, Google Calendar para as datas, WhatsApp para a comunicación—
+pero ningunha o fai de xeito conxunto nin pensado especificamente para unha
+viaxe en grupo. E, ademais, en Telaria non hai un "organizador": todos os
+membros teñen exactamente as mesmas capacidades, o que evita atrancos e a
+dependencia dunha soa persoa disposta a cargar con toda a xestión.
+
+O obxectivo do traballo foi, polo tanto, deseñar e desenvolver unha
+aplicación móbil multiplataforma que resolva esta fragmentación nun único
+espazo colaborativo.
+
+---
+
+## Diapo 4 · FUNCIONALIDADES PRINCIPAIS (3:00–3:50) [Fig. 1.1]
 
 Como se pode ver neste esquema, Telaria artéllase arredor da viaxe como
 unidade central, e a partir de aí despréganse sete módulos: a xestión do
-ciclo de vida da viaxe, os gastos e liquidacións, os eventos e calendario,
-os documentos compartidos, o chat de grupo, o asistente de intelixencia
+ciclo de vida da viaxe, os gastos e liquidacións, os eventos e calendario, os
+documentos compartidos, o chat de grupo, o asistente de intelixencia
 artificial, e a rede de amizades como funcionalidade complementaria.
 
 ---
 
-## 5. ARQUITECTURA XERAL (4:30–6:30) · Diapo 5 [Fig. 3.1]
+## Diapo 5 · ARQUITECTURA XERAL (3:50–5:20) [Fig. 3.1]
 
 Escollemos unha arquitectura cliente-servidor porque Telaria xestiona datos
-compartidos entre varios usuarios en tempo real — gastos, eventos, chat —
-que deben estar sempre sincronizados e consistentes para todos os membros
-da viaxe. Un modelo local ou peer-to-peer complicaría moito garantir que
-todos vexan a mesma información actualizada, ademais de dificultar aspectos
-como a autorización, verificar que só os membros da viaxe acceden aos seus
-datos, ou a persistencia fiable dos documentos.
+compartidos entre varios usuarios en tempo real —gastos, eventos, chat— que
+deben estar sempre sincronizados e consistentes para todos os membros da
+viaxe. Un modelo local ou peer-to-peer complicaría moito garantir que todos
+vexan a mesma información actualizada, ademais de dificultar a autorización
+—verificar que só os membros da viaxe acceden aos seus datos— e a
+persistencia fiábel dos documentos.
 
 O cliente é unha aplicación móbil multiplataforma feita con React Native e
-Expo. O servidor agrupa, en contedores Podman, un backend en Spring Boot e
-tres servizos de apoio: PostgreSQL para a persistencia, MinIO como almacén
-de obxectos compatible con S3 para os documentos, e Ollama como motor de
+Expo. O servidor é un backend en Spring Boot apoiado en tres servizos
+contenedorizados: PostgreSQL para a persistencia, MinIO como almacén de
+obxectos compatible con S3 para os documentos, e Ollama como motor de
 inferencia local para o asistente de intelixencia artificial.
 
-Todo o desenvolvemento parte dun enfoque API-first: a especificación
+E todo o desenvolvemento parte dun enfoque API-first: a especificación
 OpenAPI é o contrato que se escribe primeiro, antes de calquera
-implementación, e vincula explicitamente o frontend co backend.
+implementación, e vincula explicitamente o frontend co backend. Precisamente
+por aí empezo as decisións técnicas.
 
 ---
 
-## 6. DECISIÓNS TÉCNICAS CLAVE (6:30–10:00) · Diapos 6, 7, 8
+## Diapo 6 · DECISIÓNS TÉCNICAS 1/5 — API-FIRST CON OPENAPI (5:20–6:20)
 
-*(Tres diapositivas, ~55 segundos por punto)*
+O contrato OpenAPI escríbese primeiro e é a única fonte de verdade. A partir
+del xérase automaticamente código nos dous extremos: no backend, as
+interfaces dos controladores e os DTO; no frontend, os tipos de TypeScript.
 
-**Contrato OpenAPI xerado a ambos lados.**
-A partir dun único documento OpenAPI xérase automaticamente código nos dous
-extremos: no backend, as interfaces dos controladores e os DTO; no
-frontend, os tipos de TypeScript. Isto significa que calquera cambio na API
-propágase automaticamente e calquera incoherencia detéctase en tempo de
-compilación, en vez de en produción.
+Isto significa que calquera cambio na API se propaga automaticamente aos dous
+lados, e que calquera incoherencia entre eles salta en tempo de compilación,
+en vez de en produción. Como efecto colateral obtemos ademais documentación
+viva, a través de Swagger UI, que nunca se desincroniza do código porque nace
+do mesmo documento.
 
-**Autenticación con JWT e rotación de refresh tokens.**
-O acceso á API protéxese cun access token JWT de vida curta, que o backend
-asina cunha clave privada RSA e valida sen consultar a base de datos. Para
-renovalo sen que o usuario teña que volver iniciar sesión, empregamos un
-refresh token opaco gardado no servidor, que aplica rotación automática: en
-cada uso invalídase o anterior e emítese un novo, de xeito que un token
-roubado queda inutilizábel tras o primeiro uso lexítimo.
+---
 
-**Server-Sent Events para o chat e o asistente de IA.**
-Tanto o chat de grupo coma a resposta do asistente de intelixencia
-artificial requiren entrega en tempo real. En vez de WebSockets, optamos
-por Server-Sent Events, que abondan para un fluxo unidireccional
-servidor-cliente e simplifican moito a implementación fronte a unha
-conexión bidireccional que aquí non necesitamos.
+## Diapo 7 · DECISIÓNS TÉCNICAS 2/5 — AUTENTICACIÓN (6:20–7:40)
 
-**URLs prefirmadas para os documentos.**
-Os ficheiros que sobe o usuario nunca pasan polo backend: este limítase a
-xerar unha URL temporal e asinada contra MinIO, e o cliente sobe ou
-descarga o ficheiro directamente contra ese almacén. Isto descarga o
-servidor de aplicación da transferencia de bytes e mellora a
+Para a autenticación empregamos dous tokens de natureza distinta, e a
+distinción non é caprichosa.
+
+O access token, arriba, viaxa en cada petición á API: úsase constantemente.
+Por iso interésanos validalo sen consultar a base de datos, e faise cun JWT
+que o backend asina cunha clave privada RSA e verifica só coa sinatura. É
+rápido e escalable, pero ten unha contrapartida: un JWT asinado non se pode
+revogar antes de que caduque.
+
+O refresh token, abaixo, úsase moi poucas veces —só cando caduca o access—,
+así que o custo de ir á base de datos é irrelevante. Aproveitamos iso para
+facelo opaco: unha cadea aleatoria gardada no servidor. E, precisamente por
+estar gardada, pódese invalidar: no peche de sesión, ou nun cambio de
+contrasinal. Algo imposíbel cun JWT.
+
+Aplicámoslle ademais rotación automática: en cada uso invalídase o anterior e
+emítese un novo, de xeito que un token roubado queda inutilizábel en canto o
+usuario lexítimo o emprega.
+
+---
+
+## Diapo 8 · DECISIÓNS TÉCNICAS 3/5 — CHAT EN TEMPO REAL CON SSE (7:40–8:40)
+
+Tanto o chat de grupo coma a resposta do asistente de intelixencia artificial
+requiren entrega en tempo real. No diagrama vese o fluxo: un membro envía a
+mensaxe ao servidor por unha petición normal, o servidor persístea na base de
+datos e difúndea ao instante ao resto de subscritores.
+
+Esa difusión é o único que necesita ser en tempo real, e é unidireccional, do
+servidor ao cliente. Por iso optamos por Server-Sent Events en vez de
+WebSockets: unha conexión bidireccional aquí sobra, e SSE simplifica moito a
+implementación.
+
+---
+
+## Diapo 9 · DECISIÓNS TÉCNICAS 4/5 — URLS PREFIRMADAS (8:40–9:40)
+
+Cos documentos seguimos un principio parecido: que o backend faga só o que
+lle corresponde.
+
+Cando o usuario quere subir un ficheiro, o cliente pídello ao backend, e este
+devólvelle unha URL temporal e asinada contra MinIO. Coa URL na man, o
+cliente sobe —ou descarga— o ficheiro directamente contra o almacén.
+
+O importante é o que non ocorre: os bytes non pasan nunca polo backend. Iso
+descarga o servidor de aplicación da transferencia e mellora notablemente a
 escalabilidade.
 
 ---
 
-## 7. DESEÑO UI/UX E ACCESIBILIDADE (10:00–11:30) · Diapo 9 [Fig. 3.8]
+## Diapo 10 · DECISIÓNS TÉCNICAS 5/5 — SEPARACIÓN EN CONTEDORES (9:40–10:50)
 
-No plano visual, Telaria emprega unha paleta monocromática centrada no
-violeta, con tema claro e escuro seleccionábeis polo usuario, e tipografía
-nativa do sistema para manter unha aparencia coidada sen penalizar o
-rendemento.
+As tres dependencias —PostgreSQL, MinIO e Ollama— corren cada unha no seu
+propio contedor, orquestradas con Podman; o backend execútase no host e
+conéctase a elas. Isto dá illamento entre servizos e un despregamento
+reproducíbel cun só ficheiro compose.
 
-En canto á accesibilidade, a interface cumpre o limiar de contraste WCAG
-AA, incorpora etiquetas e roles de accesibilidade para lectores de
-pantalla, respecta a preferencia de movemento reducido do sistema operativo
-e amplía a área de pulsación dos controis ao mínimo recomendado.
+Pero o interesante é como se comunican: sempre a través de APIs ben
+definidas. O almacén fala a API de S3, que é un estándar, así que migrar a
+AWS S3 non requiriría tocar código. E a IA fala a API REST de Ollama, que
+serve calquera modelo local.
+
+O resultado é que non hai vendor lock-in: execución local hoxe, portable
+mañá.
 
 ---
 
-## 8. DEMOSTRACIÓN (11:30–14:30) · Diapo 10 [vídeo]
+## Diapo 11 · DESEÑO UI/UX E ACCESIBILIDADE (10:50–12:00) [Fig. 3.8]
 
-*(Reproducir vídeo silenciado, narrar en directo por riba)*
+No plano visual, Telaria emprega unha paleta monocromática centrada no
+violeta —téndela abaixo á esquerda—, reservando o vermello exclusivamente
+para as accións destrutivas: eliminar a conta, saír da viaxe. Hai tema claro
+e escuro seleccionábeis polo usuario, e tipografía nativa do sistema, para
+manter unha aparencia coidada sen penalizar o rendemento.
+
+En canto á accesibilidade, a interface cumpre o limiar de contraste WCAG AA,
+incorpora etiquetas e roles de accesibilidade para lectores de pantalla,
+respecta a preferencia de movemento reducido do sistema operativo e amplía a
+área de pulsación dos controis ao mínimo recomendado.
+
+---
+
+## Diapo 12 · DEMOSTRACIÓN (12:00–15:00)
+
+*(Premer o botón e reproducir o vídeo silenciado; narrar en directo por riba)*
 
 Aquí podedes ver un percorrido rápido pola aplicación. Primeiro, unímonos a
 unha viaxe escaneando un código QR. A continuación, rexistramos un gasto e
-vemos como se recalculan automaticamente os balances e a liquidación
-suxerida entre membros. Despois, creamos un evento no calendario
-seleccionando a localización directamente nun mapa interactivo. E por
-último, o asistente de intelixencia artificial, que responde en streaming
-tendo en conta o contexto da propia viaxe.
+vemos como se recalculan automaticamente os balances e a liquidación suxerida
+entre membros. Despois, creamos un evento no calendario seleccionando a
+localización directamente nun mapa interactivo. E por último, o asistente de
+intelixencia artificial, que responde en streaming tendo en conta o contexto
+da propia viaxe.
 
 ---
 
-## 9. PROBAS E RESULTADOS (14:30–17:30) · Diapos 11, 12
+## Diapo 13 · PROBAS E RESULTADOS (15:00–16:45)
 
 O proxecto conta con 677 probas automatizadas: 410 no backend con JUnit 5,
 incluíndo probas de integración contra PostgreSQL e MinIO reais mediante
 Testcontainers, e 267 no frontend con Jest. A cobertura do backend supera o
 90% de liñas sobre o código propio.
 
-Ademais das probas automatizadas, fixemos unha avaliación heurística
-segundo as dez heurísticas de Nielsen, e unha avaliación de usabilidade con
-15 usuarios reais mediante o protocolo de pensar en voz alta. Desta última
-saíron melloras concretas que xa están incorporadas na aplicación: por
-exemplo, o acceso directo aos documentos do día seleccionado dende o
-calendario, a ordenación das viaxes por data de creación, ou a
-incorporación dun mapa interactivo para escoller a localización dun
-evento. As sesións continuaron ata acadar a saturación, é dicir, ata que
-deixaron de xurdir problemas novos significativos.
+Pero as probas automatizadas non din nada sobre se a aplicación se entende.
+Por iso fixemos tamén unha avaliación heurística segundo as dez heurísticas
+de Nielsen, e unha avaliación de usabilidade con 15 usuarios reais mediante o
+protocolo de pensar en voz alta. As sesións continuaron ata acadar a
+saturación, é dicir, ata que deixaron de xurdir problemas novos
+significativos.
+
+Desta última saíron melloras concretas que xa están incorporadas na
+aplicación: o acceso directo aos documentos do día seleccionado dende o
+calendario, a ordenación das viaxes por data de creación, e o mapa
+interactivo para escoller a localización dun evento que acabades de ver na
+demostración.
 
 ---
 
-## 10. CONCLUSIÓNS (17:30–18:30) · Diapo 13
+## Diapo 14 · CONCLUSIÓNS (16:45–17:45)
 
-Os obxectivos formulados ao inicio do traballo cumpríronse na súa
-totalidade: Telaria centraliza nunha única aplicación a xestión integral
-dunha viaxe en grupo, cunha arquitectura API-first que demostrou ser un
-acerto ao manter sincronizados frontend e backend, e cunha execución local
-do modelo de linguaxe que evita a dependencia de servizos externos de pago
-e preserva a privacidade dos usuarios. A principal dificultade técnica foi
-a integración de Testcontainers cun entorno de contedores sen daemon como
-Podman.
+Os obxectivos formulados ao inicio do traballo cumpríronse na súa totalidade.
+Telaria centraliza nunha única aplicación a xestión integral dunha viaxe en
+grupo. A arquitectura API-first demostrou ser un acerto ao manter
+sincronizados frontend e backend ao longo de todo o desenvolvemento. E a
+execución local do modelo de linguaxe evita a dependencia de servizos
+externos de pago e preserva a privacidade dos usuarios.
+
+A principal dificultade técnica foi a integración de Testcontainers cun
+entorno de contedores sen daemon como Podman.
 
 ---
 
-## 11. AMPLIACIÓNS FUTURAS (18:30–19:20) · Diapo 14
+## Diapo 15 · AMPLIACIÓNS FUTURAS (17:45–18:40)
 
 Como liñas de mellora futuras destacan: a incorporación de notificacións
-push, a preparación do sistema para un entorno de produción real
-—externalizando segredos e habilitando HTTPS—, a integración das probas do
-frontend no pipeline de integración continua, e un modo sen conexión con
-sincronización posterior para mellorar a experiencia en destinos con
+push; a preparación do sistema para un entorno de produción real,
+externalizando segredos e habilitando HTTPS; a integración das probas do
+frontend no pipeline de integración continua; e un modo sen conexión con
+sincronización posterior, para mellorar a experiencia en destinos con
 conectividade limitada.
 
 ---
 
-## 12. PECHE (19:20–20:00) · Diapo 15
+## Diapo 16 · PECHE (18:40–19:10)
 
-Isto é todo pola miña parte. Moitas grazas pola vosa atención, e quedo á
-vosa disposición para calquera pregunta.
+Isto é todo pola miña parte. Moitas grazas pola vosa atención, e quedo á vosa
+disposición para calquera pregunta.

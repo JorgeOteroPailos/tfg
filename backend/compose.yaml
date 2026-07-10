@@ -41,7 +41,7 @@ services:
         condition: service_started
     entrypoint: >
       sh -c "sleep 3 &&
-             curl -sf http://ollama:11434/api/pull -d '{\"name\":\"qwen2.5:14b\"}'"
+             curl -sf http://ollama:11434/api/pull -d '{\"name\":\"llama3.2:3b\"}'"
     restart: "no"
 
   ollama-gpu:
