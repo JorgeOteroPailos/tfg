@@ -124,56 +124,67 @@
 
 %============================== 2. MOTIVACIÓN ===============================
 \begin{frame}{Motivación e problema}
-  \begin{columns}[T]
-    \begin{column}{0.54\textwidth}
-      \textbf{Organizar unha viaxe en grupo é un caos disperso.}
-      \medskip
+  \centering
+  \begin{tikzpicture}[
+    logo/.style={inner sep=0pt},
+    capt/.style={align=center, text width=3.6cm, font=\scriptsize, text=telInk},
+    disp/.style={-{Latex[length=2.2mm]}, telWarning, line width=1pt, dashed, opacity=0.85}]
 
-      Coa viaxe en marcha xorden as preguntas de sempre:
-      \begin{itemize}
-        \item Quen pagou a comida de todos? A quen lle debo cartos?
-        \item Onde están os billetes de avión?
-        \item É hoxe este plan... ou o outro?
-        \item Pásasme as fotos que fixeches?
-      \end{itemize}
-      \medskip
-      A raíz: \textbf{cada parte da viaxe organízase por separado}, sen un mecanismo unificador.
-    \end{column}
-    \begin{column}{0.46\textwidth}
-      \begin{block}{A información pérdese entre...}
-        \begin{itemize}
-          \item[\textcolor{telWarning}{\textbullet}] un grupo de \textbf{WhatsApp} onde non se atopa nada
-          \item[\textcolor{telWarning}{\textbullet}] o \textbf{calendario} de Google
-          \item[\textcolor{telWarning}{\textbullet}] \textbf{Tricount} para os gastos
-          \item[\textcolor{telWarning}{\textbullet}] un \textbf{SharePoint} cos documentos
-        \end{itemize}
-        \medskip
-        \centering\itshape No peor caso, pérdense datos de forma irrecuperable.
-      \end{block}
-    \end{column}
-  \end{columns}
+    % --- Logos nas catro esquinas, coa súa pregunta debaixo ---
+    \node[logo] (wa)  at (-5.3, 2.45) {\includegraphics[height=1.45cm]{assets/whatsapp.png}};
+    \node[capt, below=2pt of wa] {\itshape «Avisaches a Laura?»\\ «Pásasme as fotos?»};
+    \node[logo] (cal) at ( 5.3, 2.45) {\includegraphics[height=1.1cm]{assets/gcalendar.png}};
+    \node[capt, below=2pt of cal] {\itshape «É hoxe este plan... ou o outro?»};
+    \node[logo] (dr)  at (-5.3,-2.15) {\includegraphics[height=1.1cm]{assets/gdrive.png}};
+    \node[capt, below=2pt of dr] {\itshape «Onde están os billetes?»};
+    \node[logo] (tri) at ( 5.3,-2.15) {\includegraphics[height=1.45cm]{assets/tricount.png}};
+    \node[capt, below=2pt of tri] {\itshape «Quen pagou a comida? A quen lle debo cartos?»};
+
+    % --- Texto central: só a primeira e a última frase ---
+    \node[align=center, text width=6.4cm, text=telInk] (txt) at (0,0) {%
+      {\bfseries\color{telDeep} Organizar unha viaxe en grupo é un caos disperso}\\[10pt]
+      {\small Cada parte organízase por separado e a información acaba \textbf{espallada —e ás veces pérdese—} entre apps distintas:}};
+
+    % --- Frechas: a información dispérsase cara a cada app ---
+    \draw[disp] (txt.north west) to[bend left=8]  (wa.east);
+    \draw[disp] (txt.north east) to[bend right=8] (cal.west);
+    \draw[disp] (txt.south west) to[bend right=8] (dr.east);
+    \draw[disp] (txt.south east) to[bend left=8]  (tri.west);
+  \end{tikzpicture}
 \end{frame}
 
 %============================== 3. SOLUCIÓN =================================
 \begin{frame}{Solución e diferenciación}
   \textbf{Telaria integra nun só lugar todo o que precisa unha viaxe en grupo,} aforrando esforzo e previndo erros:
   \medskip
-  \begin{columns}[T]
+  \begin{columns}[c]
     \begin{column}{0.5\textwidth}
-      \begin{itemize}
-        \item Xestor de gastos con \textbf{cálculo automático de débedas}
-        \item Calendario compartido de eventos
-        \item Nube de documentos
-        \item Chat de grupo
-        \item Asistente de \textbf{IA} con todo o contexto da viaxe
-      \end{itemize}
+      \centering
+      \begin{tikzpicture}[
+        mod/.style={draw=telBorder, line width=0.9pt, fill=telLui, text=telDeep,
+                    rounded corners=6pt, align=center, font=\footnotesize\bfseries,
+                    inner sep=3.5pt, text width=1.85cm, minimum height=0.72cm},
+        hub/.style={ellipse, fill=telPrimary, text=white, font=\normalsize\bfseries, inner sep=5pt},
+        rama/.style={telGrey, line width=1pt}]
+        \def\R{2.2cm}
+        \node[hub] (T) at (0,0) {Telaria};
+        \node[mod] (m1) at (90:\R)  {Ciclo de vida da viaxe};
+        \node[mod] (m2) at (141:\R) {Gastos e liquidacións};
+        \node[mod] (m3) at (193:\R) {Eventos e calendario};
+        \node[mod] (m4) at (244:\R) {Documentos compartidos};
+        \node[mod] (m5) at (296:\R) {Chat de grupo};
+        \node[mod] (m6) at (347:\R) {Asistente de IA};
+        \node[mod] (m7) at (38:\R)  {Rede de amizades};
+        \begin{scope}[on background layer]
+          \foreach \m in {m1,m2,m3,m4,m5,m6,m7} \draw[rama] (T) -- (\m);
+        \end{scope}
+      \end{tikzpicture}
     \end{column}
     \begin{column}{0.5\textwidth}
-      \begin{block}{Que a fai diferente}
+      \begin{block}{Ademais}
         \begin{itemize}
           \item Todo \textbf{nunha soa aplicación}, pensada para viaxes en grupo
-          \item \textbf{Sen ``organizador''}: todos os membros teñen as mesmas capacidades
-          \item Evita cuellos de botella e dependencias dunha soa persoa
+          \item \textbf{Sen ``organizador''}: todos os membros teñen as mesmas capacidades, evitando atrancos e dependencias dunha soa persoa
         \end{itemize}
       \end{block}
     \end{column}
@@ -182,30 +193,7 @@
   \centering\small\color{telGrey} Obxectivo: unha app móbil multiplataforma que resolva a fragmentación nun único espazo colaborativo.
 \end{frame}
 
-%============================== 4. FUNCIONALIDADES ==========================
-\begin{frame}{Funcionalidades principais}
-  \begin{columns}[c]
-    \begin{column}{0.62\textwidth}
-      \centering
-      \includegraphics[height=0.74\textheight]{funcionalidades-telaria.pdf}
-    \end{column}
-    \begin{column}{0.38\textwidth}
-      A \textbf{viaxe} é a unidade central. Ao seu redor, sete módulos:
-      \smallskip
-      \begin{enumerate}\small
-        \item Xestión do ciclo de vida da viaxe
-        \item Gastos e liquidacións
-        \item Eventos e calendario
-        \item Documentos compartidos
-        \item Chat de grupo
-        \item Asistente de IA
-        \item Rede de amizades
-      \end{enumerate}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-%============================== 5. ARQUITECTURA =============================
+%============================== 4. ARQUITECTURA =============================
 \begin{frame}{Arquitectura xeral}
   \begin{center}
     \includegraphics[width=0.98\textwidth]{arquitectura.pdf}
@@ -227,8 +215,27 @@
 
 %============================== 6. DECISIÓNS TÉCNICAS =======================
 
+% --- 6.0 Elección de tecnoloxías ---
+\begin{frame}{Decisións técnicas · Elección de tecnoloxías (1/6)}
+  \small
+  \renewcommand{\arraystretch}{1.4}
+  \begin{center}
+  \begin{tabular}{@{}l p{8.4cm}@{}}
+    \toprule
+    {\bfseries\color{telDeep}Tecnoloxía} & {\bfseries\color{telDeep}Por que a escollemos} \\
+    \midrule
+    {\bfseries\color{telTint}React Native + Expo} & Cliente \textbf{iOS e Android} cunha soa base de código TypeScript; Expo simplifica o \textit{build} e o acceso ás APIs nativas. \\
+    {\bfseries\color{telTint}Spring Boot} & Ecosistema \textbf{Java} maduro: inxección de dependencias, seguridade e integración natural coa xeración de código \textbf{OpenAPI}. \\
+    {\bfseries\color{telTint}PostgreSQL} & Base relacional \textbf{ACID}, idónea para datos moi relacionados (viaxes, membros, gastos) con integridade referencial. \\
+    {\bfseries\color{telTint}MinIO} & Almacén de obxectos \textbf{compatible con S3} e autohospedable: documentos fóra da BD e migración a S3 \textbf{sen tocar código}. \\
+    {\bfseries\color{telTint}Ollama} & \textbf{LLM en local}: privacidade, sen custos de APIs externas e API REST estándar que serve calquera modelo. \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+\end{frame}
+
 % --- 6.1 API-first / OpenAPI (logo oficial) ---
-\begin{frame}{Decisións técnicas · API-first con OpenAPI (1/5)}
+\begin{frame}{Decisións técnicas · API-first con OpenAPI (2/6)}
   \begin{columns}[c]
     \begin{column}{0.44\textwidth}
       \centering
@@ -247,7 +254,7 @@
 \end{frame}
 
 % --- 6.2 Autenticación: access JWT + refresh opaco ---
-\begin{frame}{Decisións técnicas · Autenticación: JWT + refresh opaco (2/5)}
+\begin{frame}{Decisións técnicas · Autenticación: JWT + refresh opaco (3/6)}
   \begin{columns}[c]
     \begin{column}{0.52\textwidth}
       \centering
@@ -276,7 +283,7 @@
 \end{frame}
 
 % --- 6.3 SSE chat (hub simplificado) ---
-\begin{frame}{Decisións técnicas · Chat en tempo real con SSE (3/5)}
+\begin{frame}{Decisións técnicas · Chat en tempo real con SSE (4/6)}
   \begin{columns}[c]
     \begin{column}{0.6\textwidth}
       \centering
@@ -309,7 +316,7 @@
 \end{frame}
 
 % --- 6.4 URLs prefirmadas (simplificado) ---
-\begin{frame}{Decisións técnicas · URLs prefirmadas (4/5)}
+\begin{frame}{Decisións técnicas · URLs prefirmadas (5/6)}
   \begin{columns}[c]
     \begin{column}{0.6\textwidth}
       \centering
@@ -340,7 +347,7 @@
 \end{frame}
 
 % --- 6.5 Separación en contedores ---
-\begin{frame}{Decisións técnicas · Separación en contedores (5/5)}
+\begin{frame}{Decisións técnicas · Separación en contedores (6/6)}
   \begin{columns}[c]
     \begin{column}{0.5\textwidth}
       \centering

@@ -31,15 +31,17 @@ documentos. No peor dos casos, pérdense datos de forma irrecuperábel.
 
 ---
 
-## Diapo 3 · SOLUCIÓN E DIFERENCIACIÓN (1:45–3:00)
+## Diapo 3 · SOLUCIÓN E DIFERENCIACIÓN (1:45–3:20) [Fig. 1.1]
 
 Telaria nace como solución: unha aplicación que integra nun só lugar todo o
-que precisa unha viaxe en grupo, aforrando esforzo e previndo erros. As súas
-funcionalidades —á esquerda— combinan as de todas as aplicacións que
-normalmente usariamos: un xestor de gastos con cálculo automático de débedas,
-un calendario compartido de eventos, unha nube de documentos, un chat de
-grupo, e un asistente de intelixencia artificial que xa conta con todo o
-contexto da viaxe.
+que precisa unha viaxe en grupo, aforrando esforzo e previndo erros. Como se
+ve no esquema da esquerda, artéllase arredor da viaxe como unidade central, e
+ao seu redor despréganse sete módulos que combinan o que normalmente
+usariamos en aplicacións distintas: a xestión do ciclo de vida da viaxe, os
+gastos e liquidacións con cálculo automático de débedas, os eventos e o
+calendario, os documentos compartidos, o chat de grupo, o asistente de
+intelixencia artificial —que xa conta con todo o contexto da viaxe— e a rede
+de amizades como funcionalidade complementaria.
 
 Que a fai diferente? Xa existen ferramentas que cobren parte disto —Tricount
 para os gastos, Google Calendar para as datas, WhatsApp para a comunicación—
@@ -54,17 +56,7 @@ espazo colaborativo.
 
 ---
 
-## Diapo 4 · FUNCIONALIDADES PRINCIPAIS (3:00–3:50) [Fig. 1.1]
-
-Como se pode ver neste esquema, Telaria artéllase arredor da viaxe como
-unidade central, e a partir de aí despréganse sete módulos: a xestión do
-ciclo de vida da viaxe, os gastos e liquidacións, os eventos e calendario, os
-documentos compartidos, o chat de grupo, o asistente de intelixencia
-artificial, e a rede de amizades como funcionalidade complementaria.
-
----
-
-## Diapo 5 · ARQUITECTURA XERAL (3:50–5:20) [Fig. 3.1]
+## Diapo 4 · ARQUITECTURA XERAL (3:20–5:00) [Fig. 3.1]
 
 Escollemos unha arquitectura cliente-servidor porque Telaria xestiona datos
 compartidos entre varios usuarios en tempo real —gastos, eventos, chat— que
@@ -87,7 +79,30 @@ por aí empezo as decisións técnicas.
 
 ---
 
-## Diapo 6 · DECISIÓNS TÉCNICAS 1/5 — API-FIRST CON OPENAPI (5:20–6:20)
+## Diapo 5 · DECISIÓNS TÉCNICAS 1/6 — ELECCIÓN DE TECNOLOXÍAS (5:00–5:55)
+
+Antes de entrar en como resolvemos cada problema, unhas palabras sobre con que
+o fixemos e por que.
+
+No cliente, React Native con Expo: permite cubrir iOS e Android cunha soa base
+de código en TypeScript, e Expo simplifica moito o desenvolvemento, a
+compilación e o acceso ás APIs nativas do dispositivo.
+
+No servidor, Spring Boot, por ser un ecosistema Java maduro que nos dá
+inxección de dependencias, seguridade e unha integración moi natural coa
+xeración de código a partir de OpenAPI. Para os datos, PostgreSQL: unha base
+relacional ACID, idónea para información moi relacionada —viaxes, membros,
+gastos— onde a integridade referencial importa.
+
+Os documentos gárdanse en MinIO, un almacén de obxectos compatible con S3 e
+autohospedable, o que nos permite sacalos da base de datos e, chegado o caso,
+migrar a S3 sen tocar código. E para o asistente, Ollama, que executa o modelo
+de linguaxe en local: preserva a privacidade, evita custos de APIs externas e
+ofrece unha API REST estándar que serve calquera modelo.
+
+---
+
+## Diapo 6 · DECISIÓNS TÉCNICAS 2/6 — API-FIRST CON OPENAPI (5:55–6:45)
 
 O contrato OpenAPI escríbese primeiro e é a única fonte de verdade. A partir
 del xérase automaticamente código nos dous extremos: no backend, as
@@ -101,7 +116,7 @@ do mesmo documento.
 
 ---
 
-## Diapo 7 · DECISIÓNS TÉCNICAS 2/5 — AUTENTICACIÓN (6:20–7:40)
+## Diapo 7 · DECISIÓNS TÉCNICAS 3/6 — AUTENTICACIÓN (6:45–7:55)
 
 Para a autenticación empregamos dous tokens de natureza distinta, e a
 distinción non é caprichosa.
@@ -124,7 +139,7 @@ usuario lexítimo o emprega.
 
 ---
 
-## Diapo 8 · DECISIÓNS TÉCNICAS 3/5 — CHAT EN TEMPO REAL CON SSE (7:40–8:40)
+## Diapo 8 · DECISIÓNS TÉCNICAS 4/6 — CHAT EN TEMPO REAL CON SSE (7:55–8:50)
 
 Tanto o chat de grupo coma a resposta do asistente de intelixencia artificial
 requiren entrega en tempo real. No diagrama vese o fluxo: un membro envía a
@@ -138,7 +153,7 @@ implementación.
 
 ---
 
-## Diapo 9 · DECISIÓNS TÉCNICAS 4/5 — URLS PREFIRMADAS (8:40–9:40)
+## Diapo 9 · DECISIÓNS TÉCNICAS 5/6 — URLS PREFIRMADAS (8:50–9:45)
 
 Cos documentos seguimos un principio parecido: que o backend faga só o que
 lle corresponde.
@@ -153,7 +168,7 @@ escalabilidade.
 
 ---
 
-## Diapo 10 · DECISIÓNS TÉCNICAS 5/5 — SEPARACIÓN EN CONTEDORES (9:40–10:50)
+## Diapo 10 · DECISIÓNS TÉCNICAS 6/6 — SEPARACIÓN EN CONTEDORES (9:45–10:50)
 
 As tres dependencias —PostgreSQL, MinIO e Ollama— corren cada unha no seu
 propio contedor, orquestradas con Podman; o backend execútase no host e
