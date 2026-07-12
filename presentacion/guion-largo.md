@@ -81,38 +81,29 @@ por aí empezo as decisións técnicas.
 
 ## Diapo 5 · DECISIÓNS TÉCNICAS 1/6 — ELECCIÓN DE TECNOLOXÍAS (5:00–5:55)
 
-Antes de entrar en como resolvemos cada problema, unhas palabras sobre con que
-o fixemos e por que.
+Antes de nada, vexamos a razón pola que foi escollida cada 
+tecnoloxía empregada no traballo
 
-No cliente, React Native con Expo: permite cubrir iOS e Android cunha soa base
-de código en TypeScript, e Expo simplifica moito o desenvolvemento, a
+No cliente, React Native con Expo: React é un framework moderno que permite o desenvolvemento pra iOS e Android a partir dun mesmo  código en TypeScript, e Expo simplifica moito o desenvolvemento, a
 compilación e o acceso ás APIs nativas do dispositivo.
 
 No servidor, Spring Boot, por ser un ecosistema Java maduro que nos dá
 inxección de dependencias, seguridade e unha integración moi natural coa
-xeración de código a partir de OpenAPI. Para os datos, PostgreSQL: unha base
-relacional ACID, idónea para información moi relacionada —viaxes, membros,
-gastos— onde a integridade referencial importa.
+xeración de código a partir de OpenAPI. Ademais, como pasa con Postgre, emprégase na carreira polo que xa dispoñía de coñecemento previo.
 
 Os documentos gárdanse en MinIO, un almacén de obxectos compatible con S3 e
 autohospedable, o que nos permite sacalos da base de datos e, chegado o caso,
 migrar a S3 sen tocar código. E para o asistente, Ollama, que executa o modelo
-de linguaxe en local: preserva a privacidade, evita custos de APIs externas e
-ofrece unha API REST estándar que serve calquera modelo.
+de linguaxe en local: preserva a privacidade, evita custos de APIs externas e permite cambiar o modelo de maneira sinxela.
 
 ---
 
 ## Diapo 6 · DECISIÓNS TÉCNICAS 2/6 — API-FIRST CON OPENAPI (5:55–6:45)
 
-O contrato OpenAPI escríbese primeiro e é a única fonte de verdade. A partir
-del xérase automaticamente código nos dous extremos: no backend, as
-interfaces dos controladores e os DTO; no frontend, os tipos de TypeScript.
+Dende o principio o proxecto foi plantexado cun enfoque API-first, é dicir, escribindo de maneira declarativa un ficheiro de definición a partir do cal se xerarán os controladores e os DTOs. 
 
-Isto significa que calquera cambio na API se propaga automaticamente aos dous
-lados, e que calquera incoherencia entre eles salta en tempo de compilación,
-en vez de en produción. Como efecto colateral obtemos ademais documentación
-viva, a través de Swagger UI, que nunca se desincroniza do código porque nace
-do mesmo documento.
+Conseguimos así unha única fonte de verdade entre o back e o frontend, aforramos tempo de desenvolvemento e posíbeis erros que poderían aparecer
+de escribir o código a man, ademáis de documentación sempre actualizada.
 
 ---
 
@@ -125,31 +116,32 @@ O access token, arriba, viaxa en cada petición á API: úsase constantemente.
 Por iso interésanos validalo sen consultar a base de datos, e faise cun JWT
 que o backend asina cunha clave privada RSA e verifica só coa sinatura. É
 rápido e escalable, pero ten unha contrapartida: un JWT asinado non se pode
-revogar antes de que caduque.
+revocar antes de que caduque.
 
 O refresh token, abaixo, úsase moi poucas veces —só cando caduca o access—,
 así que o custo de ir á base de datos é irrelevante. Aproveitamos iso para
 facelo opaco: unha cadea aleatoria gardada no servidor. E, precisamente por
-estar gardada, pódese invalidar: no peche de sesión, ou nun cambio de
-contrasinal. Algo imposíbel cun JWT.
-
-Aplicámoslle ademais rotación automática: en cada uso invalídase o anterior e
-emítese un novo, de xeito que un token roubado queda inutilizábel en canto o
-usuario lexítimo o emprega.
+estar gardada, pódese invalidar: no peche de sesión, nun cambio de contrasinal ou mesmo tras calquera uso, xerando así rotación e dificultando ataques mediante o roubo deste token.
 
 ---
 
-## Diapo 8 · DECISIÓNS TÉCNICAS 4/6 — CHAT EN TEMPO REAL CON SSE (7:55–8:50)
+## Diapo 8 · DECISIÓNS TÉCNICAS 4/6 — TEMPO REAL CON SSE: CHAT E IA (7:55–8:50)
 
-Tanto o chat de grupo coma a resposta do asistente de intelixencia artificial
-requiren entrega en tempo real. No diagrama vese o fluxo: un membro envía a
-mensaxe ao servidor por unha petición normal, o servidor persístea na base de
-datos e difúndea ao instante ao resto de subscritores.
+No diagrama vese o fluxo do chat de grupo: un membro envía a mensaxe ao
+servidor por unha petición normal, e o servidor difúndea ao instante ao resto
+de subscritores.
 
-Esa difusión é o único que necesita ser en tempo real, e é unidireccional, do
-servidor ao cliente. Por iso optamos por Server-Sent Events en vez de
-WebSockets: unha conexión bidireccional aquí sobra, e SSE simplifica moito a
-implementación.
+Esa difusión é unidireccional, do servidor ao cliente. Por iso optamos por
+Server-Sent Events en vez de WebSockets: unha conexión bidireccional aquí
+sobra, e SSE simplifica moito a implementación.
+
+E o mesmo mecanismo resólvenos a segunda necesidade de tempo real do
+proxecto —a do asistente de intelixencia artificial— sen ter que introducir
+unha tecnoloxía distinta. Grazas a SSE, a resposta da IA chega token a token,
+a medida que o modelo a vai xerando, en vez de agardar pola resposta completa.
+Iso produce o efecto de escritura progresiva ao que xa están afeitos os
+usuarios de chatbots como ChatGPT, e fai que a resposta se perciba como
+inmediata.
 
 ---
 

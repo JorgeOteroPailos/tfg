@@ -160,25 +160,7 @@
   \begin{columns}[c]
     \begin{column}{0.5\textwidth}
       \centering
-      \begin{tikzpicture}[
-        mod/.style={draw=telBorder, line width=0.9pt, fill=telLui, text=telDeep,
-                    rounded corners=6pt, align=center, font=\footnotesize\bfseries,
-                    inner sep=3.5pt, text width=1.85cm, minimum height=0.72cm},
-        hub/.style={ellipse, fill=telPrimary, text=white, font=\normalsize\bfseries, inner sep=5pt},
-        rama/.style={telGrey, line width=1pt}]
-        \def\R{2.2cm}
-        \node[hub] (T) at (0,0) {Telaria};
-        \node[mod] (m1) at (90:\R)  {Ciclo de vida da viaxe};
-        \node[mod] (m2) at (141:\R) {Gastos e liquidacións};
-        \node[mod] (m3) at (193:\R) {Eventos e calendario};
-        \node[mod] (m4) at (244:\R) {Documentos compartidos};
-        \node[mod] (m5) at (296:\R) {Chat de grupo};
-        \node[mod] (m6) at (347:\R) {Asistente de IA};
-        \node[mod] (m7) at (38:\R)  {Rede de amizades};
-        \begin{scope}[on background layer]
-          \foreach \m in {m1,m2,m3,m4,m5,m6,m7} \draw[rama] (T) -- (\m);
-        \end{scope}
-      \end{tikzpicture}
+      \includegraphics[height=52mm]{assets/funcionalidades-pres.pdf}
     \end{column}
     \begin{column}{0.5\textwidth}
       \begin{block}{Ademais}
@@ -283,7 +265,7 @@
 \end{frame}
 
 % --- 6.3 SSE chat (hub simplificado) ---
-\begin{frame}{Decisións técnicas · Chat en tempo real con SSE (4/6)}
+\begin{frame}{Decisións técnicas · Tempo real con SSE: chat e IA (4/6)}
   \begin{columns}[c]
     \begin{column}{0.6\textwidth}
       \centering
@@ -307,9 +289,9 @@
     \begin{column}{0.4\textwidth}
       \textbf{Por que SSE}
       \begin{itemize}\small
-        \item Só fai falta un fluxo \textbf{unidireccional} servidor$\to$cliente.
-        \item Máis simple que WebSockets (bidireccional), que aquí sobra.
-        \item O servidor \textbf{persiste} a mensaxe e \textbf{difúndea} ao instante a todos os subscritores.
+        \item Só fai falta un fluxo \textbf{unidireccional} servidor$\to$cliente: WebSockets (bidireccional) sobra, e SSE é máis simple.
+        \item \textbf{Un só mecanismo} para as dúas necesidades de tempo real (chat e IA), sen engadir unha segunda tecnoloxía.
+        \item A resposta da \textbf{IA} chega \textbf{token a token}: escritura progresiva, como nos chatbots tipo ChatGPT.
       \end{itemize}
     \end{column}
   \end{columns}

@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1783707412.01236 "presentacion.tex" "presentacion.pdf" "presentacion" 1783707413.67448 0
+["pdflatex"] 1783874431.05533 "presentacion.tex" "presentacion.pdf" "presentacion" 1783874432.7238 0
   "../memoria/diagrams/arquitectura.pdf" 1782822041.41137 3072 d6cb7b4529dc06fb666195cb21dd2377 ""
   "../memoria/screenshots/aiChat.jpeg" 1782162105.21122 269671 171c186476ae597555974b692c6212c8 ""
   "../memoria/screenshots/expenses.jpeg" 1782139198.15034 308129 b1ef87a8570f3a562ba45a3231393a0a ""
@@ -260,15 +260,16 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1707919699 40399 f2c302f7d2af602abb742093540a5834 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1770729823.40751 128028 f533b797fba58d231669ea19e894e23e ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1770729944 6822886 8a59dbb4f14592574ac5e5ef4fbf3a36 ""
+  "assets/funcionalidades-pres.pdf" 1783873016.70978 2236 7c6ccc3e87510b03333b54d77029051a ""
   "assets/gcalendar.png" 1783704023.29108 19773 8c7477edc23dc13638309842c799d0cc ""
   "assets/gdrive.png" 1783704022.57917 35598 7dc8d29bb7f05e02526f9c7f4658baa6 ""
   "assets/openapi-logo.png" 1783556091.48351 35585 1107df14ef1dce5a68b544c646281d04 ""
   "assets/tricount.png" 1783704040.41454 1388 7dc3c17eabb497f810e981cc043e12ed ""
   "assets/whatsapp.png" 1783704021.61929 150875 025bb60cae215ae9a5c6677bc92daf49 ""
-  "presentacion.aux" 1783707413.52068 2684 5ff0a3dd443fea69e659a4b914ccf4ae "pdflatex"
-  "presentacion.nav" 1783707413.52139 1667 3c7ff322be04632c18ccc338a5a43ab4 "pdflatex"
-  "presentacion.out" 1783707412.62501 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "presentacion.tex" 1783707109.78129 24823 d67a5acd02ff5e78533aa765661ba58b ""
+  "presentacion.aux" 1783874432.57936 2684 5ff0a3dd443fea69e659a4b914ccf4ae "pdflatex"
+  "presentacion.nav" 1783874432.58013 1667 3c7ff322be04632c18ccc338a5a43ab4 "pdflatex"
+  "presentacion.out" 1783874431.69732 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "presentacion.tex" 1783874418.20789 23965 7230daaea6e1b846a5b78de88ec8dcc6 ""
   (generated)
   "presentacion.aux"
   "presentacion.log"

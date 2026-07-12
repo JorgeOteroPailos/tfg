@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.2.10)  10 JUL 2026 20:16
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.2.10)  12 JUL 2026 18:40
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -979,30 +979,39 @@ Overfull \hbox (12.9433pt too wide) in paragraph at lines 154--154
 
  <./assets/whatsapp.png> <./assets/gcalendar.png> <./assets/gdrive.png> <./asse
 ts/tricount.png>]
-LaTeX Font Info:    Trying to load font information for U+msa on input line 194
+
+pdfTeX warning: pdflatex (file ./assets/funcionalidades-pres.pdf): PDF inclusio
+n: found PDF version <2.0>, but at most version <1.5> allowed
+<assets/funcionalidades-pres.pdf, id=42, 344.9989pt x 260.5735pt>
+File: assets/funcionalidades-pres.pdf Graphic file (type pdf)
+<use assets/funcionalidades-pres.pdf>
+Package pdftex.def Info: assets/funcionalidades-pres.pdf  used on input line 17
+6.
+(pdftex.def)             Requested size: 195.89862pt x 147.95433pt.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 176
 .
- (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 194
+LaTeX Font Info:    Trying to load font information for U+msb on input line 176
 .
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [3
 
-]
+ <./assets/funcionalidades-pres.pdf>]
 
 pdfTeX warning: pdflatex (file ../memoria/diagrams/arquitectura.pdf): PDF inclu
 sion: found PDF version <2.0>, but at most version <1.5> allowed
-<../memoria/diagrams/arquitectura.pdf, id=50, 829.0975pt x 276.03125pt>
+<../memoria/diagrams/arquitectura.pdf, id=53, 829.0975pt x 276.03125pt>
 File: ../memoria/diagrams/arquitectura.pdf Graphic file (type pdf)
 <use ../memoria/diagrams/arquitectura.pdf>
 Package pdftex.def Info: ../memoria/diagrams/arquitectura.pdf  used on input li
-ne 214.
+ne 196.
 (pdftex.def)             Requested size: 390.37012pt x 129.96214pt.
 
-Overfull \vbox (7.00563pt too high) detected at line 214
+Overfull \vbox (7.00563pt too high) detected at line 196
  []
 
 [4
@@ -1010,10 +1019,10 @@ Overfull \vbox (7.00563pt too high) detected at line 214
  <../memoria/diagrams/arquitectura.pdf>] [5
 
 ]
-<assets/openapi-logo.png, id=73, 433.1382pt x 130.8087pt>
+<assets/openapi-logo.png, id=76, 433.1382pt x 130.8087pt>
 File: assets/openapi-logo.png Graphic file (type png)
 <use assets/openapi-logo.png>
-Package pdftex.def Info: assets/openapi-logo.png  used on input line 254.
+Package pdftex.def Info: assets/openapi-logo.png  used on input line 236.
 (pdftex.def)             Requested size: 161.24802pt x 48.69785pt.
  [6
 
@@ -1027,26 +1036,26 @@ Package pdftex.def Info: assets/openapi-logo.png  used on input line 254.
 ] [10
 
 ]
-<../memoria/screenshots/main.jpeg, id=107, 1084.05pt x 2413.015pt>
+<../memoria/screenshots/main.jpeg, id=111, 1084.05pt x 2413.015pt>
 File: ../memoria/screenshots/main.jpeg Graphic file (type jpg)
 <use ../memoria/screenshots/main.jpeg>
-Package pdftex.def Info: ../memoria/screenshots/main.jpeg  used on input line 4
-15.
+Package pdftex.def Info: ../memoria/screenshots/main.jpeg  used on input line 3
+97.
 (pdftex.def)             Requested size: 85.3363pt x 189.95793pt.
  [11
 
  <../memoria/screenshots/main.jpeg>]
-<../memoria/screenshots/expenses.jpeg, id=113, 1084.05pt x 2413.015pt>
+<../memoria/screenshots/expenses.jpeg, id=117, 1084.05pt x 2413.015pt>
 File: ../memoria/screenshots/expenses.jpeg Graphic file (type jpg)
 <use ../memoria/screenshots/expenses.jpeg>
 Package pdftex.def Info: ../memoria/screenshots/expenses.jpeg  used on input li
-ne 439.
+ne 421.
 (pdftex.def)             Requested size: 78.76942pt x 175.34634pt.
-<../memoria/screenshots/aiChat.jpeg, id=114, 1084.05pt x 2413.015pt>
+<../memoria/screenshots/aiChat.jpeg, id=118, 1084.05pt x 2413.015pt>
 File: ../memoria/screenshots/aiChat.jpeg Graphic file (type jpg)
 <use ../memoria/screenshots/aiChat.jpeg>
 Package pdftex.def Info: ../memoria/screenshots/aiChat.jpeg  used on input line
- 439.
+ 421.
 (pdftex.def)             Requested size: 78.76942pt x 175.34634pt.
  [12
 
@@ -1079,10 +1088,10 @@ Package rerunfilecheck Info: File `presentacion.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 27260 strings out of 476120
- 537156 string characters out of 5793657
- 1939975 words of memory out of 5000000
- 48701 multiletter control sequences out of 15000+600000
+ 27192 strings out of 476120
+ 536388 string characters out of 5793657
+ 1937975 words of memory out of 5000000
+ 48633 multiletter control sequences out of 15000+600000
  582373 words of font info for 93 fonts, out of 8000000 for 9000
  40 hyphenation exceptions out of 8191
  101i,14n,107p,387b,1218s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1094,10 +1103,10 @@ pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss1095.60
 .600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss090
 0.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss09
 00.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx0
-900.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi
-1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcs
-x1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ec
-sx0900.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/e
+900.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx
+0900.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecs
+i1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tc
+sx1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/e
 css1095.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/
 ecss0800.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec
 /ecsx1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/e
@@ -1110,10 +1119,10 @@ pen/ec/ecss1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jkna
 ppen/ec/ecsx2488.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfon
 ts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/sym
 bols/msam10.pfb>
-Output written on presentacion.pdf (16 pages, 1320154 bytes).
+Output written on presentacion.pdf (16 pages, 1318545 bytes).
 PDF statistics:
- 769 PDF objects out of 1000 (max. 8388607)
- 182 compressed objects within 2 object streams
+ 766 PDF objects out of 1000 (max. 8388607)
+ 184 compressed objects within 2 object streams
  33 named destinations out of 1000 (max. 500000)
- 88 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 93 words of extra memory for PDF output out of 10000 (max. 10000000)
 

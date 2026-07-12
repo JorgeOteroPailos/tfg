@@ -1,0 +1,46 @@
+@startuml
+' Variante para a presentación: ramas máis curtas e letra máis grande
+' (o diagrama da memoria queda intacto en memoria/diagrams/funcionalidades-telaria.puml)
+left to right direction
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #8b3ce0
+  BorderColor #6d28d9
+  FontColor white
+  FontStyle bold
+  FontSize 20
+}
+skinparam rectangle {
+  BackgroundColor #ede3fd
+  BorderColor #d4c2f9
+  FontColor #3d1e7a
+  FontStyle bold
+  FontSize 16
+  RoundCorner 8
+}
+skinparam ArrowColor #555555
+skinparam ArrowThickness 1.2
+skinparam defaultTextAlignment center
+' ramas máis curtas
+skinparam ranksep 25
+skinparam nodesep 12
+
+rectangle "Ciclo de vida\nda viaxe" as C
+rectangle "Gastos e\nliquidacións" as G
+rectangle "Eventos e\ncalendario" as E
+rectangle "Documentos\ncompartidos" as D
+
+usecase "Telaria" as T
+
+rectangle "Chat de\ngrupo" as CH
+rectangle "Asistente\nde IA" as AI
+rectangle "Rede de\namizades" as R
+
+C -- T
+G -- T
+E -- T
+D -- T
+T -- CH
+T -- AI
+T -- R
+@enduml

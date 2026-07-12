@@ -402,8 +402,11 @@ INPUT ./assets/tricount.png
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecsx1000.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecsx1200.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecss0500.tfm
-INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecss0900.tfm
-INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecsx0900.tfm
+INPUT ./assets/funcionalidades-pres.pdf
+INPUT ./assets/funcionalidades-pres.pdf
+INPUT ./assets/funcionalidades-pres.pdf
+INPUT ./assets/funcionalidades-pres.pdf
+INPUT ./assets/funcionalidades-pres.pdf
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr8.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr6.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmmi10.tfm
@@ -446,6 +449,8 @@ INPUT ./assets/openapi-logo.png
 INPUT ./assets/openapi-logo.png
 INPUT ./assets/openapi-logo.png
 INPUT ./assets/openapi-logo.png
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecss0900.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecsx0900.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcsx0900.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcss0900.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecsi0900.tfm
@@ -485,9 +490,9 @@ INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi0900.60
 INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss0900.600pk
 INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss0900.600pk
 INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx0900.600pk
+INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx0900.600pk
 INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi1000.600pk
 INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx1200.600pk
-INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx0900.600pk
 INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss1095.600pk
 INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss0800.600pk
 INPUT /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx1000.600pk
