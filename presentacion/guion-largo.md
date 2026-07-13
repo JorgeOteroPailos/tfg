@@ -56,7 +56,32 @@ espazo colaborativo.
 
 ---
 
-## Diapo 4 · ARQUITECTURA XERAL (3:20–5:00) [Fig. 3.1]
+## Diapo 4 · REQUISITOS (3:20–4:30)
+
+Antes de entrar no deseño, resumo os requisitos, porque son os que o
+condicionan.
+
+Recolléronse dezasete requisitos funcionais, agrupados en sete áreas: 
+autenticación e conta, viaxes e membros, gastos e liquidacións, eventos, 
+documentos compartidos, chat e asistente de IA, e amizades. A cada un
+asignóuselle unha prioridade —alta, media ou baixa—, e esa prioridade foi a
+que guiou a orde de implementación: primeiro o núcleo da viaxe e os gastos,
+e xa despois os engadidos como as amizades ou o asistente.
+
+Os non funcionais agrúpanse en sete categorías, pero quero destacar as dúas
+que máis condicionaron o deseño: seguridade e privacidade. Ao ser unha
+aplicación colaborativa, varios usuarios comparten datos sensibles dentro
+dunha viaxe, así que o control de acceso por pertenza, o borrado real dos
+datos ao eliminar a conta e a retención limitada das mensaxes non son
+detalles: son requisitos que atravesan toda a arquitectura.
+
+O resto —rendemento, usabilidade e accesibilidade, mantibilidade,
+portabilidade, interoperabilidade e fiabilidade— tamén deixaron pegada, e
+iranse vendo nas decisións técnicas que veñen a continuación.
+
+---
+
+## Diapo 5 · ARQUITECTURA XERAL (4:30–6:10) [Fig. 3.1]
 
 Escollemos unha arquitectura cliente-servidor porque Telaria xestiona datos
 compartidos entre varios usuarios en tempo real —gastos, eventos, chat— que
@@ -70,7 +95,9 @@ O cliente é unha aplicación móbil multiplataforma feita con React Native e
 Expo. O servidor é un backend en Spring Boot apoiado en tres servizos
 contenedorizados: PostgreSQL para a persistencia, MinIO como almacén de
 obxectos compatible con S3 para os documentos, e Ollama como motor de
-inferencia local para o asistente de intelixencia artificial.
+inferencia local para o asistente de intelixencia artificial. Cada un corre
+no seu propio contedor, o que dá illamento entre servizos e un despregamento
+reproducíbel cun só ficheiro compose.
 
 E todo o desenvolvemento parte dun enfoque API-first: a especificación
 OpenAPI é o contrato que se escribe primeiro, antes de calquera
@@ -79,7 +106,7 @@ por aí empezo as decisións técnicas.
 
 ---
 
-## Diapo 5 · DECISIÓNS TÉCNICAS 1/6 — ELECCIÓN DE TECNOLOXÍAS (5:00–5:55)
+## Diapo 6 · DECISIÓNS TÉCNICAS 1/5 — ELECCIÓN DE TECNOLOXÍAS (6:10–7:05)
 
 Antes de nada, vexamos a razón pola que foi escollida cada 
 tecnoloxía empregada no traballo
@@ -98,7 +125,7 @@ de linguaxe en local: preserva a privacidade, evita custos de APIs externas e pe
 
 ---
 
-## Diapo 6 · DECISIÓNS TÉCNICAS 2/6 — API-FIRST CON OPENAPI (5:55–6:45)
+## Diapo 7 · DECISIÓNS TÉCNICAS 2/5 — API-FIRST CON OPENAPI (7:05–7:55)
 
 Dende o principio o proxecto foi plantexado cun enfoque API-first, é dicir, escribindo de maneira declarativa un ficheiro de definición a partir do cal se xerarán os controladores e os DTOs. 
 
@@ -107,7 +134,7 @@ de escribir o código a man, ademáis de documentación sempre actualizada.
 
 ---
 
-## Diapo 7 · DECISIÓNS TÉCNICAS 3/6 — AUTENTICACIÓN (6:45–7:55)
+## Diapo 8 · DECISIÓNS TÉCNICAS 3/5 — AUTENTICACIÓN (7:55–9:05)
 
 Para a autenticación empregamos dous tokens de natureza distinta, e a
 distinción non é caprichosa.
@@ -125,7 +152,7 @@ estar gardada, pódese invalidar: no peche de sesión, nun cambio de contrasinal
 
 ---
 
-## Diapo 8 · DECISIÓNS TÉCNICAS 4/6 — TEMPO REAL CON SSE: CHAT E IA (7:55–8:50)
+## Diapo 9 · DECISIÓNS TÉCNICAS 4/5 — TEMPO REAL CON SSE: CHAT E IA (9:05–10:00)
 
 No diagrama vese o fluxo do chat de grupo: un membro envía a mensaxe ao
 servidor por unha petición normal, e o servidor difúndea ao instante ao resto
@@ -145,7 +172,7 @@ inmediata.
 
 ---
 
-## Diapo 9 · DECISIÓNS TÉCNICAS 5/6 — URLS PREFIRMADAS (8:50–9:45)
+## Diapo 10 · DECISIÓNS TÉCNICAS 5/5 — URLS PREFIRMADAS (10:00–10:55)
 
 Cos documentos seguimos un principio parecido: que o backend faga só o que
 lle corresponde.
@@ -160,24 +187,7 @@ escalabilidade.
 
 ---
 
-## Diapo 10 · DECISIÓNS TÉCNICAS 6/6 — SEPARACIÓN EN CONTEDORES (9:45–10:50)
-
-As tres dependencias —PostgreSQL, MinIO e Ollama— corren cada unha no seu
-propio contedor, orquestradas con Podman; o backend execútase no host e
-conéctase a elas. Isto dá illamento entre servizos e un despregamento
-reproducíbel cun só ficheiro compose.
-
-Pero o interesante é como se comunican: sempre a través de APIs ben
-definidas. O almacén fala a API de S3, que é un estándar, así que migrar a
-AWS S3 non requiriría tocar código. E a IA fala a API REST de Ollama, que
-serve calquera modelo local.
-
-O resultado é que non hai vendor lock-in: execución local hoxe, portable
-mañá.
-
----
-
-## Diapo 11 · DESEÑO UI/UX E ACCESIBILIDADE (10:50–12:00) [Fig. 3.8]
+## Diapo 11 · DESEÑO UI/UX E ACCESIBILIDADE (10:55–12:00) [Fig. 3.8]
 
 No plano visual, Telaria emprega unha paleta monocromática centrada no
 violeta —téndela abaixo á esquerda—, reservando o vermello exclusivamente

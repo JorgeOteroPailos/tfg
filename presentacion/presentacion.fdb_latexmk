@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1783874431.05533 "presentacion.tex" "presentacion.pdf" "presentacion" 1783874432.7238 0
+["pdflatex"] 1783906102.08554 "presentacion.tex" "presentacion.pdf" "presentacion" 1783906103.86303 0
   "../memoria/diagrams/arquitectura.pdf" 1782822041.41137 3072 d6cb7b4529dc06fb666195cb21dd2377 ""
   "../memoria/screenshots/aiChat.jpeg" 1782162105.21122 269671 171c186476ae597555974b692c6212c8 ""
   "../memoria/screenshots/expenses.jpeg" 1782139198.15034 308129 b1ef87a8570f3a562ba45a3231393a0a ""
@@ -23,7 +23,6 @@
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss0900.600pk" 1783561281.5594 9524 4d96c9786debe164c8714188009470ec ""
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss1000.600pk" 1783524332.52549 10604 3eea95db568fe1377ac23ef09c82d34a ""
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss1095.600pk" 1783524331.71446 11620 0ec2116fad8e3a63b73b28c6be833564 ""
-  "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx0800.600pk" 1783552208.05631 8756 6c8b5473ebb7d34ebe539f2db048fa68 ""
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx0900.600pk" 1783561281.80733 9672 22dc9d50cf0a7c358d4ce99a7c1b9a7c ""
   "/home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx1200.600pk" 1783552208.86018 14196 36832abf6c61d593d8a7cbf263f93021 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -48,7 +47,6 @@
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcss0900.tfm" 1136768653 1536 ba0169ee8bc017972775b933313cbbb0 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcss1000.tfm" 1136768653 1536 293044035fd171bb1d18cf655049b101 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcss1095.tfm" 1136768653 1536 f0fa079cdc83a6ffeda21e42352cf1ea ""
-  "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcsx0800.tfm" 1136768653 1536 c364ee17c356bea65639799c24c1a931 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcsx0900.tfm" 1136768653 1536 ed8f68e77ef90308ead07862ec0dc28f ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcsx1200.tfm" 1136768653 1536 af648657788fd77239d1f9e0a2b79b39 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
@@ -266,10 +264,10 @@
   "assets/openapi-logo.png" 1783556091.48351 35585 1107df14ef1dce5a68b544c646281d04 ""
   "assets/tricount.png" 1783704040.41454 1388 7dc3c17eabb497f810e981cc043e12ed ""
   "assets/whatsapp.png" 1783704021.61929 150875 025bb60cae215ae9a5c6677bc92daf49 ""
-  "presentacion.aux" 1783874432.57936 2684 5ff0a3dd443fea69e659a4b914ccf4ae "pdflatex"
-  "presentacion.nav" 1783874432.58013 1667 3c7ff322be04632c18ccc338a5a43ab4 "pdflatex"
-  "presentacion.out" 1783874431.69732 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "presentacion.tex" 1783874418.20789 23965 7230daaea6e1b846a5b78de88ec8dcc6 ""
+  "presentacion.aux" 1783906103.72641 2684 5ff0a3dd443fea69e659a4b914ccf4ae "pdflatex"
+  "presentacion.nav" 1783906103.7273 1667 3c7ff322be04632c18ccc338a5a43ab4 "pdflatex"
+  "presentacion.out" 1783906102.80778 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "presentacion.tex" 1783905648.75117 23463 6ff5630806aed8019a62e378b2612e67 ""
   (generated)
   "presentacion.aux"
   "presentacion.log"

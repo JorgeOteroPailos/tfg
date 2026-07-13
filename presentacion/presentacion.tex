@@ -175,7 +175,39 @@
   \centering\small\color{telGrey} Obxectivo: unha app móbil multiplataforma que resolva a fragmentación nun único espazo colaborativo.
 \end{frame}
 
-%============================== 4. ARQUITECTURA =============================
+%============================== 4. REQUISITOS ===============================
+\begin{frame}{Requisitos}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \textbf{Funcionais} \ \chip{17 RF · 7 áreas}
+      \begin{itemize}\small
+        \item Autenticación e conta \hfill{\scriptsize\color{telGrey}RF01–05}
+        \item Viaxes e membros \hfill{\scriptsize\color{telGrey}RF06–09}
+        \item Gastos e liquidacións \hfill{\scriptsize\color{telGrey}RF10–11}
+        \item Eventos \hfill{\scriptsize\color{telGrey}RF12}
+        \item Documentos compartidos \hfill{\scriptsize\color{telGrey}RF13}
+        \item Chat e asistente de IA \hfill{\scriptsize\color{telGrey}RF14–15}
+        \item Amizades \hfill{\scriptsize\color{telGrey}RF16–17}
+      \end{itemize}
+      \vspace{0.2em}
+      {\scriptsize\color{telGrey} Cada requisito ten prioridade \textbf{alta}, \textbf{media} ou \textbf{baixa}, que guiou a orde de implementación.}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \textbf{Non funcionais} \ \chip{7 categorías}
+      \begin{itemize}\small
+        \item \textbf{Seguridade e privacidade}: acceso só a membros, BCrypt, borrado de conta, retención do chat.
+        \item \textbf{Rendemento}: entrega en tempo real; traballo pesado fóra da ruta de petición.
+        \item \textbf{Usabilidade e accesibilidade}: 3 idiomas, contraste, heurísticos de Nielsen.
+        \item \textbf{Mantibilidade}: OpenAPI como fonte de verdade; probas automatizadas.
+        \item \textbf{Portabilidade, interoperabilidade e fiabilidade}: iOS/Android, protocolo S3, validación e consistencia.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \vspace{0.3em}
+  \centering\small\color{telGrey} Seguridade e privacidade son os requisitos que máis condicionaron o deseño.
+\end{frame}
+
+%============================== 5. ARQUITECTURA =============================
 \begin{frame}{Arquitectura xeral}
   \begin{center}
     \includegraphics[width=0.98\textwidth]{arquitectura.pdf}
@@ -198,7 +230,7 @@
 %============================== 6. DECISIÓNS TÉCNICAS =======================
 
 % --- 6.0 Elección de tecnoloxías ---
-\begin{frame}{Decisións técnicas · Elección de tecnoloxías (1/6)}
+\begin{frame}{Decisións técnicas · Elección de tecnoloxías (1/5)}
   \small
   \renewcommand{\arraystretch}{1.4}
   \begin{center}
@@ -217,7 +249,7 @@
 \end{frame}
 
 % --- 6.1 API-first / OpenAPI (logo oficial) ---
-\begin{frame}{Decisións técnicas · API-first con OpenAPI (2/6)}
+\begin{frame}{Decisións técnicas · API-first con OpenAPI (2/5)}
   \begin{columns}[c]
     \begin{column}{0.44\textwidth}
       \centering
@@ -236,7 +268,7 @@
 \end{frame}
 
 % --- 6.2 Autenticación: access JWT + refresh opaco ---
-\begin{frame}{Decisións técnicas · Autenticación: JWT + refresh opaco (3/6)}
+\begin{frame}{Decisións técnicas · Autenticación: JWT + refresh opaco (3/5)}
   \begin{columns}[c]
     \begin{column}{0.52\textwidth}
       \centering
@@ -265,7 +297,7 @@
 \end{frame}
 
 % --- 6.3 SSE chat (hub simplificado) ---
-\begin{frame}{Decisións técnicas · Tempo real con SSE: chat e IA (4/6)}
+\begin{frame}{Decisións técnicas · Tempo real con SSE: chat e IA (4/5)}
   \begin{columns}[c]
     \begin{column}{0.6\textwidth}
       \centering
@@ -298,7 +330,7 @@
 \end{frame}
 
 % --- 6.4 URLs prefirmadas (simplificado) ---
-\begin{frame}{Decisións técnicas · URLs prefirmadas (5/6)}
+\begin{frame}{Decisións técnicas · URLs prefirmadas (5/5)}
   \begin{columns}[c]
     \begin{column}{0.6\textwidth}
       \centering
@@ -323,40 +355,6 @@
         \item Os \textbf{bytes non pasan polo backend}: el só emite unha URL temporal asinada.
         \item O cliente sobe/descarga \textbf{directamente} contra MinIO.
         \item Descarga o servidor da transferencia → mellor \textbf{escalabilidade}.
-      \end{itemize}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-% --- 6.5 Separación en contedores ---
-\begin{frame}{Decisións técnicas · Separación en contedores (6/6)}
-  \begin{columns}[c]
-    \begin{column}{0.5\textwidth}
-      \centering
-      \resizebox{\linewidth}{!}{%
-      \begin{tikzpicture}[font=\footnotesize,
-        be/.style={draw=telPrimary, line width=1pt, fill=telLui, rounded corners=5pt, text=telDeep, align=center, font=\bfseries, minimum width=2.1cm, minimum height=1.1cm},
-        svc/.style={draw=telBorder, line width=0.8pt, fill=white, rounded corners=4pt, text=telInk, align=center, minimum width=2.5cm, minimum height=0.9cm},
-        arr/.style={-{Latex[length=2mm]}, telTint, line width=1pt}]
-        \node[svc] (mn) {\textbf{MinIO}\\{\scriptsize almacén S3}};
-        \node[svc, above=0.3cm of mn] (pg) {\textbf{PostgreSQL}\\{\scriptsize persistencia}};
-        \node[svc, below=0.3cm of mn] (ol) {\textbf{Ollama}\\{\scriptsize LLM local}};
-        \begin{scope}[on background layer]
-          \node[draw=telPrimary, line width=1pt, rounded corners=8pt, fill=telLui, inner sep=10pt, fit=(pg)(mn)(ol)] (pod) {};
-        \end{scope}
-        \node[text=telDeep, font=\bfseries\scriptsize, above=1pt of pod.north] {Contedores (Podman)};
-        \node[be, left=2.5cm of mn] (be) {Backend\\{\scriptsize Spring Boot · host}};
-        \draw[arr] (be) -- node[sloped, above, font=\scriptsize, text=telGrey]{JDBC} (pg.west);
-        \draw[arr] (be) -- node[above, font=\scriptsize, text=telGrey]{S3} (mn.west);
-        \draw[arr] (be) -- node[sloped, below, font=\scriptsize, text=telGrey]{REST} (ol.west);
-      \end{tikzpicture}}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \textbf{Por que}
-      \begin{itemize}\small
-        \item As dependencias —\textbf{PostgreSQL, MinIO e Ollama}— corren cada unha no \textbf{seu propio contedor}; o backend execútase no host e conéctase a elas. Illamento e despregamento reproducible cun só \textit{compose}.
-        \item Comunícanse por \textbf{APIs ben definidas}: o almacén fala a \textbf{API S3} (estándar → migrable a AWS S3 \textbf{sen tocar código}); a IA, a \textbf{API REST de Ollama}, que serve calquera modelo local.
-        \item Resultado: \textbf{sen vendor lock-in}. Execución local hoxe, portable mañá.
       \end{itemize}
     \end{column}
   \end{columns}
