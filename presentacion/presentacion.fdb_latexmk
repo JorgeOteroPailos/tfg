@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1783906102.08554 "presentacion.tex" "presentacion.pdf" "presentacion" 1783906103.86303 0
+["pdflatex"] 1784042710.97656 "presentacion.tex" "presentacion.pdf" "presentacion" 1784042712.38172 0
   "../memoria/diagrams/arquitectura.pdf" 1782822041.41137 3072 d6cb7b4529dc06fb666195cb21dd2377 ""
   "../memoria/screenshots/aiChat.jpeg" 1782162105.21122 269671 171c186476ae597555974b692c6212c8 ""
   "../memoria/screenshots/expenses.jpeg" 1782139198.15034 308129 b1ef87a8570f3a562ba45a3231393a0a ""
@@ -264,10 +264,10 @@
   "assets/openapi-logo.png" 1783556091.48351 35585 1107df14ef1dce5a68b544c646281d04 ""
   "assets/tricount.png" 1783704040.41454 1388 7dc3c17eabb497f810e981cc043e12ed ""
   "assets/whatsapp.png" 1783704021.61929 150875 025bb60cae215ae9a5c6677bc92daf49 ""
-  "presentacion.aux" 1783906103.72641 2684 5ff0a3dd443fea69e659a4b914ccf4ae "pdflatex"
-  "presentacion.nav" 1783906103.7273 1667 3c7ff322be04632c18ccc338a5a43ab4 "pdflatex"
-  "presentacion.out" 1783906102.80778 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "presentacion.tex" 1783905648.75117 23463 6ff5630806aed8019a62e378b2612e67 ""
+  "presentacion.aux" 1784042712.26035 2684 5ff0a3dd443fea69e659a4b914ccf4ae "pdflatex"
+  "presentacion.nav" 1784042712.26176 1667 3c7ff322be04632c18ccc338a5a43ab4 "pdflatex"
+  "presentacion.out" 1784042711.52857 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "presentacion.tex" 1784040770.95032 23285 231336b67cbbd5b10e88d25d238e29c4 ""
   (generated)
   "presentacion.aux"
   "presentacion.log"

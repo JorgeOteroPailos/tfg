@@ -247,8 +247,10 @@ sincronizados frontend e backend ao longo de todo o desenvolvemento. E a
 execución local do modelo de linguaxe evita a dependencia de servizos
 externos de pago e preserva a privacidade dos usuarios.
 
-A principal dificultade técnica foi a integración de Testcontainers cun
-entorno de contedores sen daemon como Podman.
+A principal dificultade técnica foi deseñar e implementar o fluxo de subida de
+ficheiros: evitar que os bytes pasasen polo backend obrigou a coordinalo en
+tres pasos —pedir a URL prefirmada, subir ao almacén e confirmar—, e a
+asegurar a consistencia entre a base de datos e o almacén de obxectos.
 
 ---
 
