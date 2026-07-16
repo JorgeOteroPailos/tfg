@@ -207,7 +207,24 @@
   \centering\small\color{telGrey} Seguridade e privacidade son os requisitos que máis condicionaron o deseño.
 \end{frame}
 
-%============================== 5. ARQUITECTURA =============================
+%============================== 5. MODELO DE DATOS ==========================
+\begin{frame}{Modelo de datos}
+  \begin{columns}[c]
+    \begin{column}{0.68\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=0.9\textheight,keepaspectratio]{modelo-datos.pdf}
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \begin{itemize}\small
+        \item \textbf{15 clases} no dominio.
+        \item \textbf{ID} como clave primaria.
+        \item \texttt{RefreshToken} persistido → \textbf{revogable}.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+%============================== 6. ARQUITECTURA =============================
 \begin{frame}{Arquitectura xeral}
   \begin{center}
     \includegraphics[width=0.98\textwidth]{arquitectura.pdf}
@@ -227,29 +244,42 @@
   \end{columns}
 \end{frame}
 
-%============================== 6. DECISIÓNS TÉCNICAS =======================
+%============================== 7. DECISIÓNS TÉCNICAS =======================
 
-% --- 6.0 Elección de tecnoloxías ---
-\begin{frame}{Decisións técnicas · Elección de tecnoloxías (1/5)}
-  \small
-  \renewcommand{\arraystretch}{1.4}
-  \begin{center}
-  \begin{tabular}{@{}l p{8.4cm}@{}}
-    \toprule
-    {\bfseries\color{telDeep}Tecnoloxía} & {\bfseries\color{telDeep}Por que a escollemos} \\
-    \midrule
-    {\bfseries\color{telTint}React Native + Expo} & Cliente \textbf{iOS e Android} cunha soa base de código TypeScript; Expo simplifica o \textit{build} e o acceso ás APIs nativas. \\
-    {\bfseries\color{telTint}Spring Boot} & Ecosistema \textbf{Java} maduro: inxección de dependencias, seguridade e integración natural coa xeración de código \textbf{OpenAPI}. \\
-    {\bfseries\color{telTint}PostgreSQL} & Base relacional \textbf{ACID}, idónea para datos moi relacionados (viaxes, membros, gastos) con integridade referencial. \\
-    {\bfseries\color{telTint}MinIO} & Almacén de obxectos \textbf{compatible con S3} e autohospedable: documentos fóra da BD e migración a S3 \textbf{sen tocar código}. \\
-    {\bfseries\color{telTint}Ollama} & \textbf{LLM en local}: privacidade, sen custos de APIs externas e API REST estándar que serve calquera modelo. \\
-    \bottomrule
-  \end{tabular}
-  \end{center}
+% --- 6.0 Pila tecnolóxica: unha diapo por tecnoloxía. ---
+% Cada unha usa unha copia editable do diagrama de «Arquitectura xeral»
+% (assets/arquitectura-*.png) na que se pegan os logos manualmente.
+% #1 imaxe do diagrama  #2 frase de xustificación (co nome en cursiva)
+\newcommand{\pilaSlide}[2]{%
+  \centering
+  \includegraphics[width=0.84\textwidth]{assets/#1}\par
+  \vspace{0.5em}
+  \begin{minipage}{0.9\textwidth}\centering\small
+    #2
+  \end{minipage}}
+
+\begin{frame}{Decisións técnicas · Pila tecnolóxica · Cliente (1/5)}
+  \pilaSlide{arquitectura-cliente.png}{\textbf{React Native + Expo} permite desenvolver o cliente para iOS e Android cunha soa base de código en TypeScript, e Expo simplifica o build e o acceso ás APIs nativas do dispositivo.}
+\end{frame}
+
+\begin{frame}{Decisións técnicas · Pila tecnolóxica · Backend (2/5)}
+  \pilaSlide{arquitectura-backend.png}{\textbf{Spring Boot} achega un ecosistema Java maduro con inxección de dependencias, seguridade e integración natural coa xeración de código a partir de OpenAPI.}
+\end{frame}
+
+\begin{frame}{Decisións técnicas · Pila tecnolóxica · Base de datos (3/5)}
+  \pilaSlide{arquitectura-bd.png}{\textbf{PostgreSQL} é unha base relacional ACID, idónea para datos moi relacionados como viaxes, membros e gastos grazas á súa integridade referencial.}
+\end{frame}
+
+\begin{frame}{Decisións técnicas · Pila tecnolóxica · Almacenamento (4/5)}
+  \pilaSlide{arquitectura-almacenamento.png}{\textbf{MinIO} é un almacén de obxectos compatible con S3 e autohospedable, que saca os documentos da base de datos e permite migrar a S3 sen tocar código.}
+\end{frame}
+
+\begin{frame}{Decisións técnicas · Pila tecnolóxica · Asistente IA (5/5)}
+  \pilaSlide{arquitectura-ia.png}{\textbf{Ollama} aporta privacidade, evita custos de APIs externas e permite cambiar facilmente o modelo durante o desenvolvemento.}
 \end{frame}
 
 % --- 6.1 API-first / OpenAPI (logo oficial) ---
-\begin{frame}{Decisións técnicas · API-first con OpenAPI (2/5)}
+\begin{frame}{Decisións técnicas · API-first con OpenAPI (1/4)}
   \begin{columns}[c]
     \begin{column}{0.44\textwidth}
       \centering
@@ -268,7 +298,7 @@
 \end{frame}
 
 % --- 6.2 Autenticación: access JWT + refresh opaco ---
-\begin{frame}{Decisións técnicas · Autenticación: JWT + refresh opaco (3/5)}
+\begin{frame}{Decisións técnicas · Autenticación: JWT + refresh opaco (2/4)}
   \begin{columns}[c]
     \begin{column}{0.52\textwidth}
       \centering
@@ -297,7 +327,7 @@
 \end{frame}
 
 % --- 6.3 SSE chat (hub simplificado) ---
-\begin{frame}{Decisións técnicas · Tempo real con SSE: chat e IA (4/5)}
+\begin{frame}{Decisións técnicas · Tempo real con SSE: chat e IA (3/4)}
   \begin{columns}[c]
     \begin{column}{0.6\textwidth}
       \centering
@@ -321,7 +351,6 @@
     \begin{column}{0.4\textwidth}
       \textbf{Por que SSE}
       \begin{itemize}\small
-        \item Só fai falta un fluxo \textbf{unidireccional} servidor$\to$cliente: WebSockets (bidireccional) sobra, e SSE é máis simple.
         \item \textbf{Un só mecanismo} para as dúas necesidades de tempo real (chat e IA), sen engadir unha segunda tecnoloxía.
         \item A resposta da \textbf{IA} chega \textbf{token a token}: escritura progresiva, como nos chatbots tipo ChatGPT.
       \end{itemize}
@@ -330,7 +359,7 @@
 \end{frame}
 
 % --- 6.4 URLs prefirmadas (simplificado) ---
-\begin{frame}{Decisións técnicas · URLs prefirmadas (5/5)}
+\begin{frame}{Decisións técnicas · URLs prefirmadas (4/4)}
   \begin{columns}[c]
     \begin{column}{0.6\textwidth}
       \centering
@@ -360,7 +389,7 @@
   \end{columns}
 \end{frame}
 
-%============================== 7. UI/UX ===================================
+%============================== 8. UI/UX ===================================
 \begin{frame}{Deseño UI/UX e accesibilidade}
   \begin{columns}[c]
     \begin{column}{0.6\textwidth}
@@ -394,7 +423,7 @@
   \end{columns}
 \end{frame}
 
-%============================== 8. DEMOSTRACIÓN ============================
+%============================== 9. DEMOSTRACIÓN ============================
 \begin{frame}{Demostración}
   \begin{columns}[c]
     \begin{column}{0.5\textwidth}
@@ -407,7 +436,7 @@
       \end{enumerate}
       \vspace{0.8em}
       \begin{center}
-        \chip{$\blacktriangleright$\; Reproducir vídeo da demostración}
+        \href{run:assets/demo.mp4}{\chip{$\blacktriangleright$\; Reproducir vídeo da demostración}}
       \end{center}
     \end{column}
     \begin{column}{0.5\textwidth}
@@ -418,7 +447,7 @@
   \end{columns}
 \end{frame}
 
-%============================== 9. PROBAS ==================================
+%============================== 10. PROBAS =================================
 \begin{frame}{Probas e resultados}
   \begin{columns}[T]
     \begin{column}{0.46\textwidth}
@@ -448,7 +477,7 @@
   \end{columns}
 \end{frame}
 
-%============================== 10. CONCLUSIÓNS ============================
+%============================== 11. CONCLUSIÓNS ===========================
 \begin{frame}{Conclusións}
   \textbf{Os obxectivos cumpríronse na súa totalidade:}
   \medskip
@@ -459,7 +488,7 @@
   \end{itemize}
 \end{frame}
 
-%============================== 11. AMPLIACIÓNS ===========================
+%============================== 12. AMPLIACIÓNS ===========================
 \begin{frame}{Ampliacións futuras}
   \begin{itemize}
     \item Notificacións \textbf{push}.
@@ -469,7 +498,7 @@
   \end{itemize}
 \end{frame}
 
-%============================== 12. PECHE =================================
+%============================== 13. PECHE =================================
 \begin{frame}[plain,noframenumbering]
   \vfill
   \begin{center}

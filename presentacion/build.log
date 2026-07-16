@@ -12,7 +12,7 @@ Category 'changed_user':
 Run number 1 of rule 'pdflatex'
 ------------
 ------------
-Running 'pdflatex  -interaction=nonstopmode -halt-on-error -recorder  "presentacion.tex"'
+Running 'pdflatex  -interaction=nonstopmode -recorder  "presentacion.tex"'
 ------------
 This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex)
  restricted \write18 enabled.
@@ -245,167 +245,58 @@ ry-English.dict)
 ry-English.dict) (./presentacion.nav)
 (/usr/share/texlive/texmf-dist/tex/latex/base/ts1cmss.fd) [1{/var/lib/texmf/fon
 ts/map/pdftex/updmap/pdftex.map}]
-(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd)
-(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd) [2] [3]
+Overfull \hbox (12.9433pt too wide) in paragraph at lines 154--154
+ [][] 
+[2 <./assets/whatsapp.png> <./assets/gcalendar.png> <./assets/gdrive.png> <./as
+sets/tricount.png>]
 
-pdfTeX warning: pdflatex (file ../memoria/diagrams/funcionalidades-telaria.pdf)
-: PDF inclusion: found PDF version <2.0>, but at most version <1.5> allowed
-[4 <../memoria/diagrams/funcionalidades-telaria.pdf>]
+pdfTeX warning: pdflatex (file ./assets/funcionalidades-pres.pdf): PDF inclusio
+n: found PDF version <2.0>, but at most version <1.5> allowed
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd) [3 <./assets/funcion
+alidades-pres.pdf>] [4]
+
+pdfTeX warning: pdflatex (file ../memoria/diagrams/modelo-datos.pdf): PDF inclu
+sion: found PDF version <2.0>, but at most version <1.5> allowed
+(/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd) [5 <../memoria/diagram
+s/modelo-datos.pdf>]
 
 pdfTeX warning: pdflatex (file ../memoria/diagrams/arquitectura.pdf): PDF inclu
 sion: found PDF version <2.0>, but at most version <1.5> allowed
 
-Overfull \vbox (7.00563pt too high) detected at line 226
-[5 <../memoria/diagrams/arquitectura.pdf>] [6 <./assets/openapi-logo.png>]
-[7] [8] [9] [10] [11 <../memoria/screenshots/main.jpeg>] [12 <../memoria/screen
-shots/expenses.jpeg> <../memoria/screenshots/aiChat.jpeg>] [13] [14] [15]
-[16] (./presentacion.aux) )
+Overfull \vbox (7.00563pt too high) detected at line 245
+[6 <../memoria/diagrams/arquitectura.pdf>] [7 <./assets/arquitectura-cliente.pn
+g (PNG copy)>] [8 <./assets/arquitectura-backend.png (PNG copy)>] [9 <./assets/
+arquitectura-bd.png (PNG copy)>] [10 <./assets/arquitectura-almacenamento.png (
+PNG copy)>] [11 <./assets/arquitectura-ia.png (PNG copy)>] [12 <./assets/openap
+i-logo.png>] [13] [14] [15] [16 <../memoria/screenshots/main.jpeg>] [17 <../mem
+oria/screenshots/expenses.jpeg> <../memoria/screenshots/aiChat.jpeg>] [18]
+[19] [20] [21] (./presentacion.aux) )
 (see the transcript file for additional information) </home/jorge/.texlive2023/
-texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx0800.600pk> </home/jorge/.texlive2023
-/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx0800.600pk> </home/jorge/.texlive202
-3/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi1000.600pk>
-kpathsea: Running mktexpk --mfmode / --bdpi 600 --mag 1+0/600 --dpi 600 ecsi0900
-mktexpk: Running mf-nowin -progname=mf \mode:=ljfour; mag:=1+0/600; nonstopmode; input ecsi0900
-This is METAFONT, Version 2.71828182 (TeX Live 2023/Debian) (preloaded base=mf)
-
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/ecsi0900.mf
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exbase.mf)
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/ecsi.mf
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exroman.mf
- Ok (/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exaccess.mf
- Ok) (/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/expseudo.mf
- Ok) (/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exruwest.mf
- Ok [192] [193] [194] [195] [196] [197] [198] [199] [200] [201] [202] [203]
-[204] [205] [206] [207] [208] [209] [210] [211] [212] [213] [214] [215]
-[216] [217] [218] [219] [220] [221] [222] [223])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exrlwest.mf
- Ok [224] [225] [226] [227] [228] [229] [230] [231] [232] [233] [234] [235]
-[236] [237] [238] [239] [240] [241] [242] [243] [244] [245] [246] [247]
-[248] [249] [250] [251] [252] [253] [254] [255])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exrueast.mf
- Ok [128] [129] [130] [131] [132] [133] [134] [135] [136] [137] [138] [139]
-[140] [141] [142] [143] [144] [145] [146] [147] [148] [149] [150] [151]
-[152] [153] [154] [155] [156] [157])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exrleast.mf
- Ok [158] [160] [161] [162] [163] [164] [165] [166] [167] [168] [169] [170]
-[171] [172] [173] [174] [175] [176] [177] [178] [179] [180] [181] [182]
-[183] [184] [185] [186] [187] [188])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exbraces.mf
- Ok [94] [126] [23] [40] [41] [60] [124] [62] [91] [93] [92] [123] [125]
-[95] [127] [32])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/expunct.mf
- Ok [14] [15] [19] [20] [13] [18] [33] [39] [42] [43] [44] [46] [47] [58]
-[59] [61] [96] [189] [17] [45] [16] [21] [22])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exaccent.mf
- Ok [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exsign.mf
- Ok [24] [34] [35] [36] [37] [64] [191] [159])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exrlig.mf
- Ok [25] [26] [28] [27] [29] [30] [31])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exromp.mf
- Ok [38] [63] [190])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exrulett.mf
- Ok [65] [66] [67] [68] [69] [70] [71] [72] [73] [74] [75] [76] [77] [78]
-[79] [80] [81] [82] [83] [84] [85] [86] [87] [88] [89] [90])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exrllett.mf
- Ok [97] [98] [99] [100] [101] [102] [103] [104] [105] [106] [107] [108]
-[109] [110] [111] [112] [113] [114] [115] [116] [117] [118] [119] [120]
-[121] [122])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exrdigit.mf
- Ok [48] [49] [50] [51] [52] [53] [54] [55] [56] [57])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exrligtb.mf
- Ok) ) ) )
-Font metrics written on ecsi0900.tfm.
-Output written on ecsi0900.600gf (256 characters, 42056 bytes).
-Transcript written on ecsi0900.log.
-mktexpk: /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi0900.600pk: successfully generated.
- </home/jorge/.texlive20
+texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi1095.600pk> </home/jorge/.texlive2023
+/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss1095.600pk> </home/jorge/.texlive202
+3/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi1000.600pk> </home/jorge/.texlive20
 23/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi0900.600pk> </home/jorge/.texlive2
-023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss0900.600pk>
-kpathsea: Running mktexpk --mfmode / --bdpi 600 --mag 1+0/600 --dpi 600 tcss0900
-mktexpk: Running mf-nowin -progname=mf \mode:=ljfour; mag:=1+0/600; nonstopmode; input tcss0900
-This is METAFONT, Version 2.71828182 (TeX Live 2023/Debian) (preloaded base=mf)
-
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/tcss0900.mf
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exbase.mf)
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/tcss.mf
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txsymb.mf
- Ok (/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exaccess.mf
- Ok) (/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txpseudo.mf
- Ok) (/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txaccent.mf
- Ok [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12] [27] [29])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txgen.mf
- Ok [100] [109] [98] [99] [108])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txsymbol.mf
- Ok [13] [18] [21] [22] [23] [24] [25] [26] [28] [31] [32] [36] [39] [44]
-[45] [46] [42] [47] [60] [61] [62] [77] [79] [87] [110] [91] [93] [94] [95]
-[96] [126] [127] [128] [129] [130] [131] [132] [133] [134] [135] [136] [137]
-[138] [139] [140] [141] [142] [143] [144] [145] [146] [147] [148] [149]
-[150] [151] [152] [153] [154] [155] [156] [157] [158] [159] [160] [161]
-[162] [163] [164] [165] [166] [167] [168] [169] [171] [172] [173] [174]
-[175] [177] [176] [180] [181] [182] [183] [184] [187] [191] [214] [246])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txromod.mf
- Ok [48] [49] [50] [51] [52] [53] [54] [55] [56] [57])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txrsuper.mf
- Ok [185] [178] [179] [170] [186])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txrfract.mf
- Ok [188] [189] [190]) ) ) )
-Font metrics written on tcss0900.tfm.
-Output written on tcss0900.600gf (128 characters, 20088 bytes).
-Transcript written on tcss0900.log.
-mktexpk: /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss0900.600pk: successfully generated.
- </home/jorge/.texlive
-2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss0900.600pk>
-kpathsea: Running mktexpk --mfmode / --bdpi 600 --mag 1+0/600 --dpi 600 tcsx0900
-mktexpk: Running mf-nowin -progname=mf \mode:=ljfour; mag:=1+0/600; nonstopmode; input tcsx0900
-This is METAFONT, Version 2.71828182 (TeX Live 2023/Debian) (preloaded base=mf)
-
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/tcsx0900.mf
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exbase.mf)
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/tcsx.mf
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txsymb.mf
- Ok (/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/exaccess.mf
- Ok) (/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txpseudo.mf
- Ok) (/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txaccent.mf
- Ok [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12] [27] [29])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txgen.mf
- Ok [100] [109] [98] [99] [108])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txsymbol.mf
- Ok [13] [18] [21] [22] [23] [24] [25] [26] [28] [31] [32] [36] [39] [44]
-[45] [46] [42] [47] [60] [61] [62] [77] [79] [87] [110] [91] [93] [94] [95]
-[96] [126] [127] [128] [129] [130] [131] [132] [133] [134] [135] [136] [137]
-[138] [139] [140] [141] [142] [143] [144] [145] [146] [147] [148] [149]
-[150] [151] [152] [153] [154] [155] [156] [157] [158] [159] [160] [161]
-[162] [163] [164] [165] [166] [167] [168] [169] [171] [172] [173] [174]
-[175] [177] [176] [180] [181] [182] [183] [184] [187] [191] [214] [246])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txromod.mf
- Ok [48] [49] [50] [51] [52] [53] [54] [55] [56] [57])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txrsuper.mf
- Ok [185] [178] [179] [170] [186])
-(/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/txrfract.mf
- Ok [188] [189] [190]) ) ) )
-Font metrics written on tcsx0900.tfm.
-Output written on tcsx0900.600gf (128 characters, 19396 bytes).
-Transcript written on tcsx0900.log.
-mktexpk: /home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx0900.600pk: successfully generated.
- </home/jorge/.texliv
-e2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx0900.600pk> </home/jorge/.texli
-ve2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx0900.600pk> </home/jorge/.texl
-ive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx1200.600pk> </home/jorge/.tex
-live2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx1000.600pk> </home/jorge/.te
-xlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss0800.600pk> </home/jorge/.t
-exlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi1095.600pk> </home/jorge/.
-texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss1095.600pk> </home/jorge/
-.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss1095.600pk> </home/jorge
-/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx1200.600pk> </home/jorg
-e/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss1000.600pk> </home/jor
-ge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss1000.600pk> </home/jo
-rge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx1095.600pk> </home/j
-orge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss1200.600pk> </home/
-jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx2488.600pk></usr/s
-hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/t
-exlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on presentacion.pdf (16 pages, 1130036 bytes).
+023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss0900.600pk> </home/jorge/.texlive
+2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss0900.600pk> </home/jorge/.texliv
+e2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx1200.600pk> </home/jorge/.texli
+ve2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/jorge/.texl
+ive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx0800.600pk> </home/jorge/.tex
+live2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx0900.600pk> </home/jorge/.te
+xlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx0900.600pk> </home/jorge/.t
+exlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss1095.600pk> </home/jorge/.
+texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss0800.600pk> </home/jorge/
+.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx1000.600pk> </home/jorge
+/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi0800.600pk> </home/jorg
+e/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx1200.600pk> </home/jor
+ge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss1000.600pk> </home/jo
+rge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss1000.600pk> </home/j
+orge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx1095.600pk> </home/
+jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss1200.600pk> </home
+/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx2488.600pk></usr/
+share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/
+texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
+Output written on presentacion.pdf (21 pages, 2449962 bytes).
 Transcript written on presentacion.log.
 Latexmk: Getting log file 'presentacion.log'
 Latexmk: Examining 'presentacion.fls'

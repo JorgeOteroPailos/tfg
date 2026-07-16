@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.2.10)  14 JUL 2026 17:25
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.2.10)  16 JUL 2026 02:17
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1004,69 +1004,126 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 ]
 
+pdfTeX warning: pdflatex (file ../memoria/diagrams/modelo-datos.pdf): PDF inclu
+sion: found PDF version <2.0>, but at most version <1.5> allowed
+<../memoria/diagrams/modelo-datos.pdf, id=61, 987.13795pt x 735.54799pt>
+File: ../memoria/diagrams/modelo-datos.pdf Graphic file (type pdf)
+<use ../memoria/diagrams/modelo-datos.pdf>
+Package pdftex.def Info: ../memoria/diagrams/modelo-datos.pdf  used on input li
+ne 225.
+(pdftex.def)             Requested size: 270.8688pt x 201.833pt.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 2
+25.
+(/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
+File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
+) [5
+
+ <../memoria/diagrams/modelo-datos.pdf>]
+
 pdfTeX warning: pdflatex (file ../memoria/diagrams/arquitectura.pdf): PDF inclu
 sion: found PDF version <2.0>, but at most version <1.5> allowed
-<../memoria/diagrams/arquitectura.pdf, id=61, 829.0975pt x 276.03125pt>
+<../memoria/diagrams/arquitectura.pdf, id=98, 829.0975pt x 276.03125pt>
 File: ../memoria/diagrams/arquitectura.pdf Graphic file (type pdf)
 <use ../memoria/diagrams/arquitectura.pdf>
 Package pdftex.def Info: ../memoria/diagrams/arquitectura.pdf  used on input li
-ne 228.
+ne 245.
 (pdftex.def)             Requested size: 390.37012pt x 129.96214pt.
 
-Overfull \vbox (7.00563pt too high) detected at line 228
+Overfull \vbox (7.00563pt too high) detected at line 245
  []
 
-[5
+[6
 
- <../memoria/diagrams/arquitectura.pdf>] [6
-
-]
-<assets/openapi-logo.png, id=84, 433.1382pt x 130.8087pt>
-File: assets/openapi-logo.png Graphic file (type png)
-<use assets/openapi-logo.png>
-Package pdftex.def Info: assets/openapi-logo.png  used on input line 268.
-(pdftex.def)             Requested size: 161.24802pt x 48.69785pt.
+ <../memoria/diagrams/arquitectura.pdf>]
+<assets/arquitectura-cliente.png, id=114, 3454.9075pt x 1150.2975pt>
+File: assets/arquitectura-cliente.png Graphic file (type png)
+<use assets/arquitectura-cliente.png>
+Package pdftex.def Info: assets/arquitectura-cliente.png  used on input line 26
+3.
+(pdftex.def)             Requested size: 334.60295pt x 111.4032pt.
  [7
 
- <./assets/openapi-logo.png>]
-[8
+ <./assets/arquitectura-cliente.png (PNG copy)>]
+<assets/arquitectura-backend.png, id=122, 3454.9075pt x 1150.2975pt>
+File: assets/arquitectura-backend.png Graphic file (type png)
+<use assets/arquitectura-backend.png>
+Package pdftex.def Info: assets/arquitectura-backend.png  used on input line 26
+7.
+(pdftex.def)             Requested size: 334.60295pt x 111.4032pt.
+ [8
 
-] [9
+ <./assets/arquitectura-backend.png (PNG copy)>]
+<assets/arquitectura-bd.png, id=128, 3454.9075pt x 1150.2975pt>
+File: assets/arquitectura-bd.png Graphic file (type png)
+<use assets/arquitectura-bd.png>
+Package pdftex.def Info: assets/arquitectura-bd.png  used on input line 271.
+(pdftex.def)             Requested size: 334.60295pt x 111.4032pt.
+ [9
 
-] [10
+ <./assets/arquitectura-bd.png (PNG copy)>]
+<assets/arquitectura-almacenamento.png, id=134, 3454.9075pt x 1150.2975pt>
+File: assets/arquitectura-almacenamento.png Graphic file (type png)
+<use assets/arquitectura-almacenamento.png>
+Package pdftex.def Info: assets/arquitectura-almacenamento.png  used on input l
+ine 275.
+(pdftex.def)             Requested size: 334.60295pt x 111.4032pt.
+ [10
 
-]
-<../memoria/screenshots/main.jpeg, id=110, 1084.05pt x 2413.015pt>
-File: ../memoria/screenshots/main.jpeg Graphic file (type jpg)
-<use ../memoria/screenshots/main.jpeg>
-Package pdftex.def Info: ../memoria/screenshots/main.jpeg  used on input line 3
-95.
-(pdftex.def)             Requested size: 85.3363pt x 189.95793pt.
+ <./assets/arquitectura-almacenamento.png (PNG copy)>]
+<assets/arquitectura-ia.png, id=140, 3454.9075pt x 1150.2975pt>
+File: assets/arquitectura-ia.png Graphic file (type png)
+<use assets/arquitectura-ia.png>
+Package pdftex.def Info: assets/arquitectura-ia.png  used on input line 279.
+(pdftex.def)             Requested size: 334.60295pt x 111.4032pt.
  [11
 
- <../memoria/screenshots/main.jpeg>]
-<../memoria/screenshots/expenses.jpeg, id=116, 1084.05pt x 2413.015pt>
-File: ../memoria/screenshots/expenses.jpeg Graphic file (type jpg)
-<use ../memoria/screenshots/expenses.jpeg>
-Package pdftex.def Info: ../memoria/screenshots/expenses.jpeg  used on input li
-ne 419.
-(pdftex.def)             Requested size: 78.76942pt x 175.34634pt.
-<../memoria/screenshots/aiChat.jpeg, id=117, 1084.05pt x 2413.015pt>
-File: ../memoria/screenshots/aiChat.jpeg Graphic file (type jpg)
-<use ../memoria/screenshots/aiChat.jpeg>
-Package pdftex.def Info: ../memoria/screenshots/aiChat.jpeg  used on input line
- 419.
-(pdftex.def)             Requested size: 78.76942pt x 175.34634pt.
+ <./assets/arquitectura-ia.png (PNG copy)>]
+<assets/openapi-logo.png, id=146, 433.1382pt x 130.8087pt>
+File: assets/openapi-logo.png Graphic file (type png)
+<use assets/openapi-logo.png>
+Package pdftex.def Info: assets/openapi-logo.png  used on input line 298.
+(pdftex.def)             Requested size: 161.24802pt x 48.69785pt.
  [12
 
- <../memoria/screenshots/expenses.jpeg> <../memoria/screenshots/aiChat.jpeg>] [
-13
+ <./assets/openapi-logo.png>] [13
 
 ] [14
 
 ] [15
 
-] [16
+]
+<../memoria/screenshots/main.jpeg, id=174, 1084.05pt x 2413.015pt>
+File: ../memoria/screenshots/main.jpeg Graphic file (type jpg)
+<use ../memoria/screenshots/main.jpeg>
+Package pdftex.def Info: ../memoria/screenshots/main.jpeg  used on input line 4
+24.
+(pdftex.def)             Requested size: 85.3363pt x 189.95793pt.
+ [16
+
+ <../memoria/screenshots/main.jpeg>]
+<../memoria/screenshots/expenses.jpeg, id=181, 1084.05pt x 2413.015pt>
+File: ../memoria/screenshots/expenses.jpeg Graphic file (type jpg)
+<use ../memoria/screenshots/expenses.jpeg>
+Package pdftex.def Info: ../memoria/screenshots/expenses.jpeg  used on input li
+ne 448.
+(pdftex.def)             Requested size: 78.76942pt x 175.34634pt.
+<../memoria/screenshots/aiChat.jpeg, id=182, 1084.05pt x 2413.015pt>
+File: ../memoria/screenshots/aiChat.jpeg Graphic file (type jpg)
+<use ../memoria/screenshots/aiChat.jpeg>
+Package pdftex.def Info: ../memoria/screenshots/aiChat.jpeg  used on input line
+ 448.
+(pdftex.def)             Requested size: 78.76942pt x 175.34634pt.
+ [17
+
+ <../memoria/screenshots/expenses.jpeg> <../memoria/screenshots/aiChat.jpeg>] [
+18
+
+]
+[19
+
+] [20
+
+] [21
 
 ]
 \tf@nav=\write6
@@ -1078,8 +1135,7 @@ Package pdftex.def Info: ../memoria/screenshots/aiChat.jpeg  used on input line
 \tf@snm=\write8
 \openout8 = `presentacion.snm'.
 
-
-(./presentacion.aux)
+ (./presentacion.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -1088,40 +1144,41 @@ Package rerunfilecheck Info: File `presentacion.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 27158 strings out of 476120
- 535850 string characters out of 5793657
+ 27243 strings out of 476120
+ 538293 string characters out of 5793657
  1936975 words of memory out of 5000000
- 48600 multiletter control sequences out of 15000+600000
- 582028 words of font info for 92 fonts, out of 8000000 for 9000
+ 48671 multiletter control sequences out of 15000+600000
+ 582341 words of font info for 93 fonts, out of 8000000 for 9000
  40 hyphenation exceptions out of 8191
- 101i,14n,107p,387b,1105s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 101i,14n,107p,387b,1134s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi1095.600
 pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss1095.60
-0pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi0900.6
-00pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss0900.
-600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss0900
-.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi100
+0pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi1000.6
+00pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi0900.
+600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss0900
+.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss090
 0.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx12
-00.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx0
-800.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx
-0900.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecs
+00.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1
+000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx
+0800.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcs
 x0900.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ec
-ss1095.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/e
-css0800.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/
-ecsx1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec
-/ecsi0800.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/e
-c/ecsx1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/
-ec/tcss1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen
-/ec/ecss1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
-n/ec/ecsx1095.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknapp
-en/ec/ecss1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
-pen/ec/ecsx2488.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
-s/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symb
-ols/msam10.pfb>
-Output written on presentacion.pdf (16 pages, 1314606 bytes).
+sx0900.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/e
+css1095.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/
+ecss0800.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec
+/ecsx1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/e
+c/ecsi0800.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/
+ec/ecsx1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen
+/ec/tcss1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
+n/ec/ecss1000.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknapp
+en/ec/ecsx1095.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
+pen/ec/ecss1200.600pk> </home/jorge/.texlive2023/texmf-var/fonts/pk/ljfour/jkna
+ppen/ec/ecsx2488.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/sym
+bols/msam10.pfb>
+Output written on presentacion.pdf (21 pages, 2449962 bytes).
 PDF statistics:
- 753 PDF objects out of 1000 (max. 8388607)
- 180 compressed objects within 2 object streams
- 33 named destinations out of 1000 (max. 500000)
- 93 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 826 PDF objects out of 1000 (max. 8388607)
+ 239 compressed objects within 3 object streams
+ 43 named destinations out of 1000 (max. 500000)
+ 123 words of extra memory for PDF output out of 10000 (max. 10000000)
 

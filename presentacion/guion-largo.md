@@ -1,5 +1,5 @@
 # GUIÓN DEFENSA TFG — TELARIA
-# Tempo total obxectivo: 20:00 (16 diapositivas)
+# Tempo total obxectivo: 20:00 (17 diapositivas)
 
 ---
 
@@ -81,7 +81,31 @@ iranse vendo nas decisións técnicas que veñen a continuación.
 
 ---
 
-## Diapo 5 · ARQUITECTURA XERAL (4:30–6:10) [Fig. 3.1]
+## Diapo 5 · MODELO DE DATOS (4:30–5:15) [Fig. 3.3]
+
+Antes de entrar na arquitectura, deteñámonos un momento no modelo de datos,
+que é o que sostén todo o sistema. No diagrama de clases vense as quince
+clases do dominio e as súas relacións: o usuario, a viaxe como núcleo, e
+colgando dela os gastos, as liquidacións, os eventos, os documentos e as
+mensaxes.
+
+Quero destacar algunhas decisións de modelado. Todas as entidades principais
+empregan un UUID como clave primaria, en vez dun enteiro secuencial, para non
+expoñer identificadores predicíbeis. As relacións varios-a-varios —a pertenza
+dos usuarios ás viaxes ou os beneficiarios de cada gasto— resólvense mediante
+táboas de unión. As amizades gárdanse de forma normalizada, sempre coa parella
+de usuarios ordenada, o que garante que non se dupliquen e simplifica as
+consultas nos dous sentidos. A localización dun evento modélase como un valor
+embebido dentro do propio evento, ao non ter identidade de seu. E, por último,
+o refresh token persístese no servidor precisamente para poder invalidalo,
+como comentarei na autenticación.
+
+Todo isto se materializa nunha base de datos relacional PostgreSQL, na que
+Hibernate mapea cada entidade á súa táboa.
+
+---
+
+## Diapo 6 · ARQUITECTURA XERAL (5:15–6:55) [Fig. 3.1]
 
 Escollemos unha arquitectura cliente-servidor porque Telaria xestiona datos
 compartidos entre varios usuarios en tempo real —gastos, eventos, chat— que
@@ -106,7 +130,7 @@ por aí empezo as decisións técnicas.
 
 ---
 
-## Diapo 6 · DECISIÓNS TÉCNICAS 1/5 — ELECCIÓN DE TECNOLOXÍAS (6:10–7:05)
+## Diapo 7 · DECISIÓNS TÉCNICAS 1/5 — ELECCIÓN DE TECNOLOXÍAS (6:55–7:50)
 
 Antes de nada, vexamos a razón pola que foi escollida cada 
 tecnoloxía empregada no traballo
@@ -125,7 +149,7 @@ de linguaxe en local: preserva a privacidade, evita custos de APIs externas e pe
 
 ---
 
-## Diapo 7 · DECISIÓNS TÉCNICAS 2/5 — API-FIRST CON OPENAPI (7:05–7:55)
+## Diapo 8 · DECISIÓNS TÉCNICAS 2/5 — API-FIRST CON OPENAPI (7:50–8:40)
 
 Dende o principio o proxecto foi plantexado cun enfoque API-first, é dicir, escribindo de maneira declarativa un ficheiro de definición a partir do cal se xerarán os controladores e os DTOs. 
 
@@ -134,7 +158,7 @@ de escribir o código a man, ademáis de documentación sempre actualizada.
 
 ---
 
-## Diapo 8 · DECISIÓNS TÉCNICAS 3/5 — AUTENTICACIÓN (7:55–9:05)
+## Diapo 9 · DECISIÓNS TÉCNICAS 3/5 — AUTENTICACIÓN (8:40–9:50)
 
 Para a autenticación empregamos dous tokens de natureza distinta, e a
 distinción non é caprichosa.
@@ -152,7 +176,7 @@ estar gardada, pódese invalidar: no peche de sesión, nun cambio de contrasinal
 
 ---
 
-## Diapo 9 · DECISIÓNS TÉCNICAS 4/5 — TEMPO REAL CON SSE: CHAT E IA (9:05–10:00)
+## Diapo 10 · DECISIÓNS TÉCNICAS 4/5 — TEMPO REAL CON SSE: CHAT E IA (9:50–10:45)
 
 No diagrama vese o fluxo do chat de grupo: un membro envía a mensaxe ao
 servidor por unha petición normal, e o servidor difúndea ao instante ao resto
@@ -172,7 +196,7 @@ inmediata.
 
 ---
 
-## Diapo 10 · DECISIÓNS TÉCNICAS 5/5 — URLS PREFIRMADAS (10:00–10:55)
+## Diapo 11 · DECISIÓNS TÉCNICAS 5/5 — URLS PREFIRMADAS (10:45–11:40)
 
 Cos documentos seguimos un principio parecido: que o backend faga só o que
 lle corresponde.
@@ -187,7 +211,7 @@ escalabilidade.
 
 ---
 
-## Diapo 11 · DESEÑO UI/UX E ACCESIBILIDADE (10:55–12:00) [Fig. 3.8]
+## Diapo 12 · DESEÑO UI/UX E ACCESIBILIDADE (11:40–12:45) [Fig. 3.8]
 
 No plano visual, Telaria emprega unha paleta monocromática centrada no
 violeta —téndela abaixo á esquerda—, reservando o vermello exclusivamente
@@ -202,7 +226,7 @@ respecta a preferencia de movemento reducido do sistema operativo e amplía a
 
 ---
 
-## Diapo 12 · DEMOSTRACIÓN (12:00–15:00)
+## Diapo 13 · DEMOSTRACIÓN (12:45–15:45)
 
 *(Premer o botón e reproducir o vídeo silenciado; narrar en directo por riba)*
 
@@ -216,7 +240,7 @@ da propia viaxe.
 
 ---
 
-## Diapo 13 · PROBAS E RESULTADOS (15:00–16:45)
+## Diapo 14 · PROBAS E RESULTADOS (15:45–17:30)
 
 O proxecto conta con 677 probas automatizadas: 410 no backend con JUnit 5,
 incluíndo probas de integración contra PostgreSQL e MinIO reais mediante
@@ -238,7 +262,7 @@ demostración.
 
 ---
 
-## Diapo 14 · CONCLUSIÓNS (16:45–17:45)
+## Diapo 15 · CONCLUSIÓNS (17:30–18:30)
 
 Os obxectivos formulados ao inicio do traballo cumpríronse na súa totalidade.
 Telaria centraliza nunha única aplicación a xestión integral dunha viaxe en
@@ -254,7 +278,7 @@ asegurar a consistencia entre a base de datos e o almacén de obxectos.
 
 ---
 
-## Diapo 15 · AMPLIACIÓNS FUTURAS (17:45–18:40)
+## Diapo 16 · AMPLIACIÓNS FUTURAS (18:30–19:25)
 
 Como liñas de mellora futuras destacan: a incorporación de notificacións
 push; a preparación do sistema para un entorno de produción real,
@@ -265,7 +289,7 @@ conectividade limitada.
 
 ---
 
-## Diapo 16 · PECHE (18:40–19:10)
+## Diapo 17 · PECHE (19:25–19:55)
 
 Isto é todo pola miña parte. Moitas grazas pola vosa atención, e quedo á vosa
 disposición para calquera pregunta.
